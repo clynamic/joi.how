@@ -1,0 +1,13 @@
+.SettingsControls {
+  color: #FFF;
+  background: rgb(46, 47, 59);
+  padding: 30px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+@media screen and (max-width: 500px) {
+  .SettingsControls {
+    padding: 0;
+  }
+}

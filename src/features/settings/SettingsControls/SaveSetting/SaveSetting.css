@@ -1,0 +1,9 @@
+.SaveSetting__textarea {
+  width: 100%;
+  min-height: 150px;
+}
+
+.SaveSetting__erroricon {
+  width: 50px;
+  opacity: 0.4;
+}

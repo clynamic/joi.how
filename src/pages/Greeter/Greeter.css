@@ -1,0 +1,73 @@
+.GreeterPage {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.GreeterPage h1 {
+  font-size: 3rem;
+  margin: 0;
+}
+
+.GreeterPage abbr {
+  text-decoration: none;
+  background: rgba(70, 87, 105, 0.4);
+  padding: 5px 20px;
+  margin: 0 10px;
+}
+
+.GreeterPage p,
+.GreeterPage section {
+  background: rgb(46, 47, 59);
+  padding: 10px 15px;
+}
+
+.GreeterPage > .settings-row {
+  margin: 0;
+}
+
+.GreeterPage__logo {
+  width: 200px;
+  height: 200px;
+  display: block;
+  padding: 40px 0 30px;
+}
+
+.GreeterPage__settings {
+  margin: 20px 0;
+}
+
+.GreeterPage__actions.settings-row {
+  padding: 0 0 45px;
+  justify-content: center;
+}
+
+.GreeterPage__actions.settings-row > .GreeterPage__begin {
+  font-size: 1.5rem;
+  height: auto;
+  font-weight: bold;
+  padding: 15px 20px;
+}
+
+.GreeterPage a.no-underline {
+  text-decoration: none;
+}
+
+.GreeterPage p.callout {
+  background: linear-gradient(#6610f2, #6f42c1);
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+}
+
+.GreeterPage p.callout:hover {
+  transform: scale(1.025);
+}
+
+.GreeterPage p.callout h2 {
+  margin: 3px 0 10px 0;
+  font-size: 1.1rem;
+}
+
+.GreeterPage p.callout h2 img {
+  height: 2ex;
+}

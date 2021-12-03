@@ -1,0 +1,54 @@
+.Porn,
+.Porn__foreground,
+.Porn__background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.Porn {
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.Porn__container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 0 !important;
+}
+
+.Porn__foreground {
+  background-size: contain;
+  box-shadow: 0px 0px 20px rgba(40, 36, 44, 0.534);
+  z-index: -1;
+}
+
+.Porn__background {
+  background-size: cover;
+  filter: blur(30px);
+  transform: scale(1.2);
+  z-index: -2;
+  
+  animation-name: PornMove;
+  animation-direction: alternate;
+  animation-play-state: running;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-out;
+}
+
+@keyframes PornMove {
+  from {
+    transform: translateY(-4%) scale(1.2);
+  }
+  to {
+    transform: translateY(4%) scale(1.3);
+  }
+}

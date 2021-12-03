@@ -1,0 +1,27 @@
+.EmergencyStop button {
+  border: 0;
+  background: #a52727;
+  cursor: pointer;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+}
+
+.EmergencyStop button:hover {
+  background: #dc1c1c;
+}
+
+.EmergencyStop button:disabled {
+  background: #3a3b42;
+  cursor: not-allowed;
+}
+
+.EmergencyStop button svg {
+  width: 25px;
+  margin-left: 10px;
+}
+
+.EmergencyStop button svg * {
+  fill: #FFF;
+}

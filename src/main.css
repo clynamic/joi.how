@@ -1,0 +1,29 @@
+body {
+  font-family: 'Helvetica Neue', 'Helvetica', sans-serif;
+  margin: 0;
+
+  --expo: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.App {
+  background: #1c1b1f;
+  min-height: 100vh;
+  color: #FFF;
+}
+
+p,
+ul,
+ol,
+section {
+  font-size: 0.9rem;
+  color: #d3cedc;
+  line-height: 25px;
+}
+
+a {
+  color: inherit;
+}

@@ -1,0 +1,86 @@
+.Stats {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(92, 92, 92, 0.3)
+}
+
+.Stats__handContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.Stats__handContainer .Stats__hand {
+  width: 60px;
+  margin: 0 5px;
+}
+
+.Stats__handContainer .Stats__hand path {
+  transition: fill 500ms ease-out;
+}
+
+.Stats__handContainer .Stats__hand--active path {
+  fill: #FFF;
+}
+
+.Stats__handContainer .Stats__hand--inactive path {
+  fill: rgba(255, 255, 255, 0.3);
+  stroke-width: 5px;
+}
+
+.Stats__speedContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  width: 150px;
+  position: relative;
+}
+
+.Stats__speedContainer .Stats__speed {
+  height: 60px;
+}
+
+.Stats__speedContainer > div,
+.Stats__handContainer > div {
+  flex: 0 0 100%;
+  text-align: center;
+  color: #FFF;
+}
+
+.Stats__speedContainer .Stats__speed path, .Stats__speedContainer .Stats__speed circle {
+  transition: fill 200ms ease-out;
+}
+
+.Stats__speedContainer .Stats__speed--active path, .Stats__speedContainer .Stats__speed--active circle {
+  fill: #FFF;
+}
+
+.Stats__speedContainer .Stats__speed--inactive path, .Stats__speedContainer .Stats__speed--inactive circle {
+  fill: rgba(255, 255, 255, 0.3);
+  stroke-width: 5px;
+}
+
+@media screen and (max-width: 1100px) {
+  .Stats {
+    height: 90px;
+  }
+
+  .Stats__speedContainer,
+  .Stats__handContainer {
+    transform: scale(0.8);
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .Stats {
+    height: 80px;
+  }
+
+  .Stats__speedContainer,
+  .Stats__handContainer {
+    transform: scale(0.7);
+  }
+}
