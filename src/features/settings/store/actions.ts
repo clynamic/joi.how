@@ -11,6 +11,7 @@ export const T_SET_EVENT_LIST = 'SET_EVENT_LIST'
 export const T_SET_HYPNO_MODE = 'SET_HYPNO_MODE'
 export const T_SET_EJACULATE_LIKELIHOOD = 'SET_EJACULATE_LIKELIHOOD'
 export const T_SET_RUIN_LIKELIHOOD = 'SET_RUIN_LIKELIHOOD'
+export const T_SET_WALLTAKER_LINK = 'SET_WALLTAKER_LINK'
 
 class SettingsActionsBase {
   OpenDialog = () => ({
@@ -64,6 +65,11 @@ class SettingsActionsBase {
   SetRuinLikelihood = (newLikelihood: number) => ({
     type: T_SET_RUIN_LIKELIHOOD as typeof T_SET_RUIN_LIKELIHOOD,
     payload: newLikelihood,
+  })
+
+  SetWalltakerLink = (newWalltakerLink: number | null) => ({
+    type: T_SET_WALLTAKER_LINK as typeof T_SET_WALLTAKER_LINK,
+    payload: newWalltakerLink,
   })
 }
 

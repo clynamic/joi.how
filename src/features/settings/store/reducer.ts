@@ -10,7 +10,7 @@ import {
   T_SET_HYPNO_MODE,
   T_SET_STEEPNESS,
   T_SET_EJACULATE_LIKELIHOOD,
-  T_SET_RUIN_LIKELIHOOD,
+  T_SET_RUIN_LIKELIHOOD, T_SET_WALLTAKER_LINK,
 } from './actions'
 import { PornList, EventToken, HypnoMode } from '../../gameboard/types'
 import { events } from '../../gameboard/events/index'
@@ -29,7 +29,8 @@ export interface ISettingsState {
   cum: {
     ejaculateLikelihood: number
     ruinLikelihood: number
-  }
+  },
+  walltakerLink: number | null
 }
 
 export const SettingsDefaultState: ISettingsState = {
@@ -47,6 +48,7 @@ export const SettingsDefaultState: ISettingsState = {
     ejaculateLikelihood: 100,
     ruinLikelihood: 0,
   },
+  walltakerLink: null
 }
 
 export function SettingsReducer(state: ISettingsState = SettingsDefaultState, action: ReturnType<SettingsAction>): ISettingsState {
@@ -117,6 +119,11 @@ export function SettingsReducer(state: ISettingsState = SettingsDefaultState, ac
           ...state.cum,
           ruinLikelihood: action.payload,
         },
+      }
+    case T_SET_WALLTAKER_LINK:
+      return {
+        ...state,
+        walltakerLink: action.payload,
       }
     default:
       return state

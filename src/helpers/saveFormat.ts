@@ -28,6 +28,7 @@ export function makeSave(settings: Partial<IState['settings']>) {
   const eventList: IState['settings']['eventList'] = settings.eventList || events.map(event => event.id)
   const hypnoMode: IState['settings']['hypnoMode'] = settings.hypnoMode === undefined ? HypnoMode.JOI : settings.hypnoMode
   const cum: IState['settings']['cum'] = settings.cum === undefined ? { ejaculateLikelihood: 100, ruinLikelihood: 0 } : settings.cum
+  const walltakerLink: IState['settings']['walltakerLink'] = settings.walltakerLink ?? null
 
   let output = 'JOI1'
   output += `:PN${pace.min}`
@@ -39,6 +40,7 @@ export function makeSave(settings: Partial<IState['settings']>) {
   output += `:H${hypnoMode}`
   output += `:CE${cum.ejaculateLikelihood}`
   output += `:CR${cum.ruinLikelihood}`
+  if (walltakerLink) output += `:W${walltakerLink}`
   return btoa(output)
 }
 
@@ -56,6 +58,7 @@ export function unpackSave(base64Save: string): IState['settings'] {
       ejaculateLikelihood: 100,
       ruinLikelihood: 0,
     },
+    walltakerLink: null
   }
 
   if (save.slice(0, 5) !== 'JOI1:') throw new SaveVersionEncodingError()
@@ -109,6 +112,11 @@ export function unpackSave(base64Save: string): IState['settings'] {
   const ruinLikelihoodString = save.match(/:CR\d+/g)
   if (ruinLikelihoodString && ruinLikelihoodString[0]) {
     settings.cum.ruinLikelihood = parseInt(ruinLikelihoodString[0].replace(':CR', ''), 10)
+  }
+
+  const walltakerLinkString = save.match(/:W\d+/g)
+  if (walltakerLinkString && walltakerLinkString[0]) {
+    settings.walltakerLink = parseInt(walltakerLinkString[0].replace(':W', ''), 10)
   }
 
   return settings

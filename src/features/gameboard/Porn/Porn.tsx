@@ -8,9 +8,11 @@ import './Porn.css'
 import { PornControls } from './PornControls/PornControls'
 import { SettingsActions } from '../../settings/store/actions'
 import styled from 'styled-components'
+import {Walltaker} from "./Walltaker";
 
 interface IPornProps extends PropsForConnectedComponent {
   pornList: PornList,
+  walltakerLink: IState['settings']['walltakerLink'],
   intensity: IState['game']['intensity']
 }
 
@@ -29,6 +31,7 @@ export const Porn = connect(
   (state: IState) =>
     ({
       pornList: state.settings.pornList,
+      walltakerLink: state.settings.walltakerLink,
       intensity: state.game.intensity
     } as IPornProps),
 )(
@@ -58,6 +61,7 @@ export const Porn = connect(
       }
       return (
         <div className="Porn__container">
+          <Walltaker walltakerLink={this.props.walltakerLink} pornList={this.props.pornList} dispatch={this.props.dispatch}/>
           {this.props.pornList.length > 0 ? (
             <>
               <div className="Porn">

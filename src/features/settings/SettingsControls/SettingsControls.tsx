@@ -16,6 +16,7 @@ import { debounce } from 'lodash'
 import { CumSetting } from './CumSetting/CumSetting'
 import { VibratorSetting } from './VibratorSetting/VibratorSetting'
 import { SettingsVibratorActions } from '../store/actions.vibrator'
+import { WalltakerSetting } from './WalltakerSetting/WalltakerSetting'
 
 interface ISettingsControlsProps extends PropsForConnectedComponent {
   pace: IState['settings']['pace']
@@ -26,6 +27,7 @@ interface ISettingsControlsProps extends PropsForConnectedComponent {
   hypnoMode: IState['settings']['hypnoMode']
   cum: IState['settings']['cum']
   vibrator: IState['vibrator']
+  walltakerLink: IState['settings']['walltakerLink']
 }
 
 export const SettingsControls = connect(
@@ -39,6 +41,7 @@ export const SettingsControls = connect(
       hypnoMode: state.settings.hypnoMode,
       cum: state.settings.cum,
       vibrator: state.vibrator,
+      walltakerLink: state.settings.walltakerLink,
     } as ISettingsControlsProps),
 )(function(props: ISettingsControlsProps) {
   const saveToLocalStorage = useRef(
@@ -67,6 +70,12 @@ export const SettingsControls = connect(
       <EventsSetting eventList={props.eventList} setEventList={newList => props.dispatch(SettingsActions.SetEventList(newList))} />
 
       <PornSetting pornList={props.pornList} setPornList={newList => props.dispatch(SettingsActions.SetPornList(newList))} />
+
+      <WalltakerSetting
+        enabled={Boolean(props.walltakerLink ?? false)}
+        link={props.walltakerLink}
+        setLink={newLink => props.dispatch(SettingsActions.SetWalltakerLink(newLink))}
+      />
 
       <CumSetting
         enabled={props.eventList.some(event => event === 'cum')}
