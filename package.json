@@ -62,7 +62,6 @@
     "test": "jest --passWithNoTests",
     "eject": "react-scripts eject",
     "lint": "prettier --write 'src/**/*.{js,jsx,ts,tsx,json}'",
-    "preversion": "git checkout master && git merge develop --no-commit --no-ff",
     "postversion": "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && echo \"\n## $PACKAGE_VERSION - `date -R`\n* \" >> src/release-notes.md && echo '\n\n\n-------\nAdd release notes to src/relase-notes.md then run {npm run live}'",
     "live": "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag -d v$PACKAGE_VERSION && git commit -am \"release version $PACKAGE_VERSION\" && git tag \"v$PACKAGE_VERSION\" && git push origin master --tags && git checkout develop && git merge master"
   },
