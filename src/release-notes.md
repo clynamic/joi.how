@@ -81,3 +81,7 @@ The game keeps an internal tally of what it thinks your current "edge level" sho
 
 ## 1.5.2 - Sun, 21 Feb 2021 19:04:31 -0500
 * Added an outbound link to pawflix.net since I like it so much <3
+
+## 1.5.3 - Sat, 26 Feb 2022 16:59:40 -0500
+* Added walltaker.joi.how support
+* Updated greeter link
