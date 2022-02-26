@@ -56,7 +56,7 @@
     "commit-hooks": false
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=3006 react-scripts start",
     "build": "react-scripts build",
     "test:watch": "react-scripts test",
     "test": "jest --passWithNoTests",

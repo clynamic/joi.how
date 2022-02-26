@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react'
-import { PropsForConnectedComponent } from '../../settings/types'
-import { IState } from '../../../store'
-import axios, { AxiosResponse } from 'axios'
-import { SettingsActions } from '../../settings/store'
+import React, {useEffect, useState} from 'react'
+import {IState} from '../../../store'
+import axios, {AxiosResponse} from 'axios'
+import {SettingsActions} from '../../settings/store'
+import {GameBoardActions} from "../store";
+import {MessageType} from "../MessageArea/MessageTypes";
 
-interface IWalltakerProps extends PropsForConnectedComponent {
+interface IWalltakerProps {
   walltakerLink: IState['settings']['walltakerLink']
-  pornList: IState['settings']['pornList']
+  pornList: IState['settings']['pornList'],
+  dispatch: (action: any) => void
 }
 
 interface IWalltakerLink {
@@ -24,6 +26,8 @@ interface IWalltakerLink {
   url: string
 }
 
+const PING_EVERY = 8000;
+
 export function Walltaker(props: IWalltakerProps) {
   const [intervalId, setIntervalId] = useState<number | null>(null)
   useEffect(() => {
@@ -34,18 +38,27 @@ export function Walltaker(props: IWalltakerProps) {
           axios
             .get(`https://walltaker.joi.how/links/${props.walltakerLink}.json`, {
               responseType: 'json',
+              headers: {
+                'joihow': 'joihow/web'
+              }
             })
             .then((response: AxiosResponse<IWalltakerLink>) => {
-              props.dispatch(SettingsActions.SetPornList([...props.pornList, response.data.url]))
+              if (response.data.post_url && !props.pornList.includes(response.data.post_url)) {
+                props.dispatch(SettingsActions.SetPornList([...props.pornList, response.data.post_url]))
+                props.dispatch(GameBoardActions.ShowMessage({
+                  type: MessageType.EventDescription,
+                  text: `${response.data.set_by ?? 'anon'} added a new image.`
+                }))
+              }
             })
-        }, 10000),
+        }, PING_EVERY),
       )
     }
 
     return () => {
       if (intervalId !== null) clearInterval(intervalId)
     }
-  }, [props.walltakerLink])
+  }, [props.walltakerLink, props.pornList.join('')])
 
   return <></>
 }
