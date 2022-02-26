@@ -28,13 +28,12 @@ export function GreeterPage(props: RouteComponentProps) {
       <div className="GreeterPage__settings">
         <SettingsControls />
       </div>
-      <OutboundLink className="no-underline" target="_blank" eventLabel="Outbound.Pawflix" to="https://pawflix.net">
+      <OutboundLink className="no-underline" target="_blank" eventLabel="Outbound.Pawflix" to="https://walltaker.joi.how">
         <p className="callout">
           <h2>
-            Prefer stroking with music? <img src="https://cdn.discordapp.com/emojis/750074504528527421.gif?v=1" />
+            Want to let other people set your wallpaper? <img src="https://cdn.discordapp.com/emojis/750074504528527421.gif?v=1" />
           </h2>{' '}
-          Check out PawFlix.net for furry fap hero videos set to music, (it's a <em>whole porn-tube site</em> just for that, made by a
-          friend of joi.how!) <strong>then come back here when you'd rather be told what to do and leave it up to chance.</strong> ;)
+          Checkout walltaker! It's a app made by me and the other folks at PawCorp, our little horny-coding collective! It lets you offer up a link where people can set the wallpaper on you phone or PC to an e621 post, within your blacklist!
         </p>
       </OutboundLink>
       <ReleaseNotes />

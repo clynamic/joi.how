@@ -54,9 +54,10 @@
 }
 
 .GreeterPage p.callout {
-  background: linear-gradient(#6610f2, #6f42c1);
+  background: linear-gradient(#ffb300, #916706);
   cursor: pointer;
   transition: all 0.2s ease-out;
+  color: #583c0f;
 }
 
 .GreeterPage p.callout:hover {
