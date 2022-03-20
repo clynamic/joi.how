@@ -7,6 +7,7 @@ import { MessageBar } from './MessageBar/MessageBar'
 import { ISettingsState } from '../../settings/store'
 import './MessageArea.css'
 import { GameBoardActions } from '../store/actions'
+import { formatMessage } from '../../../helpers/parseString'
 
 interface IMessageAreaProps extends PropsForConnectedComponent {
   messages: Message[]
@@ -33,9 +34,10 @@ export const MessageArea = connect(
       return (
         <div className="MessageArea">
           <div className="MessageArea__messages" role="alert">
-            {this.props.messages.map(message => (
-              <MessageBar key={message.text} message={message} settings={this.props.settings} />
-            ))}
+            {this.props.messages.map(message => {
+              message.text = formatMessage(message.text, this.props.settings)
+              return <MessageBar key={message.text} message={message} settings={this.props.settings} />
+            })}
           </div>
           <div className="MessageArea__prompt settings-row">
             {this.props.messages
@@ -45,7 +47,7 @@ export const MessageArea = connect(
               .map(button => {
                 return (
                   <button className="settings-button" onClick={() => this.runButtonMethod(button)} key={button.display}>
-                    {button.display}
+                    {formatMessage(button.display, this.props.settings)}
                   </button>
                 )
               })}

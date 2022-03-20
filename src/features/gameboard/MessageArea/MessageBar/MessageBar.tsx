@@ -1,6 +1,5 @@
 import React from 'react'
 import { Message } from '../MessageTypes'
-import { formatMessage } from '../../../../helpers/parseString'
 import './MessageBar.css'
 import { playTone } from '../../sound'
 import { ISettingsState } from '../../../settings/store'
@@ -15,11 +14,7 @@ export class MessageBar extends React.Component<IMessageProps> {
   }
 
   render() {
-    return (
-      <div className={`MessageBar MessageBar--${this.getBarModifier(this.props.message.type)}`}>
-        {this.formatMessage(this.props.message)}
-      </div>
-    )
+    return <div className={`MessageBar MessageBar--${this.getBarModifier(this.props.message.type)}`}>{this.props.message.text}</div>
   }
 
   getBarModifier(type: Message['type']) {
@@ -30,9 +25,5 @@ export class MessageBar extends React.Component<IMessageProps> {
     //        return 'event-will-happen'
     //}
     return 'event-description'
-  }
-
-  formatMessage(msg: Message) {
-    return formatMessage(msg.text, this.props.settings)
   }
 }

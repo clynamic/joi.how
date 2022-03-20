@@ -25,7 +25,7 @@ function transform(token: string, settings: ISettingsState) {
         case PlayerGender.Neutral:
           return 'pup'
         default:
-          return token
+          return 'pup'
       }
     case 'master':
       switch (settings.hypnoMode) {
@@ -56,7 +56,7 @@ function transform(token: string, settings: ISettingsState) {
         case PlayerParts.Neuter:
           return 'mound'
         default:
-          return token
+          return 'crotch'
       }
     case 'Part':
       switch (settings.player.parts) {
