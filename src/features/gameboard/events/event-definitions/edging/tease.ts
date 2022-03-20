@@ -4,7 +4,7 @@ import { MessageType } from '../../../MessageArea/MessageTypes'
 import { playTone } from '../../../sound'
 import { wait } from '../../helpers'
 
-export const cum: GameEvent = () => {
+export const tease: GameEvent = () => {
   return (state, dispatch) => {
     let hasCock = state.settings.player.parts == PlayerParts.Cock
     dispatch(
@@ -46,7 +46,7 @@ export const cum: GameEvent = () => {
               await wait(5000)
 
               /** Ejaculating */
-              if (Math.random() * 100 < state.settings.cum.ejaculateLikelihood) {
+              if (Math.random() * 100 < state.settings.cum.ejaculateLikelihood / 4) {
                 if (Math.random() * 100 < state.settings.cum.ruinLikelihood) {
                   /** Ruining */
                   dispatch(GameBoardActions.SetGrip(EGrip.none))
@@ -85,27 +85,25 @@ export const cum: GameEvent = () => {
                 /** No Ejaculation */
                 dispatch(GameBoardActions.SetGrip(EGrip.none))
                 dispatch(GameBoardActions.PauseGame())
-                dispatch(GameBoardActions.PauseEvents())
                 dispatch(
                   GameBoardActions.ShowMessage({
                     type: MessageType.NewEvent,
                     text: `$HANDS OFF! Do not cum.`,
                   }),
                 )
-                await wait(5000)
+                dispatch(GameBoardActions.PauseGame())
+                await wait(20000)
                 dispatch(
                   GameBoardActions.ShowMessage({
-                    type: MessageType.EventDescription,
-                    text: `Good $player. Let yourself ${hasCock ? 'go soft.' : 'cool off.'}`,
+                    type: MessageType.NewEvent,
+                    text: `Start ${hasCock ? 'stroking again.' : 'pawing again.'}`,
                   }),
                 )
-                await wait(5000)
-                dispatch(
-                  GameBoardActions.ShowMessage({
-                    type: MessageType.EventDescription,
-                    text: `Leave now.`,
-                  }),
-                )
+
+                dispatch(GameBoardActions.DecIntensity(100))
+                dispatch(GameBoardActions.SetPace(state.settings.pace.min))
+                dispatch(GameBoardActions.ResumeGame())
+                await wait(15000)
               }
             },
           },

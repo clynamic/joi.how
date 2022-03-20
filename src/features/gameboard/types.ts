@@ -38,3 +38,20 @@ export enum HypnoMode {
   Pet,
   FemDomPet,
 }
+
+export enum PlayerGender {
+  Female,
+  Male,
+  Neutral,
+}
+
+export enum PlayerParts {
+  Cock,
+  Pussy,
+  Neuter,
+}
+
+export type PlayerMode = {
+  gender?: PlayerGender
+  parts?: PlayerParts
+}

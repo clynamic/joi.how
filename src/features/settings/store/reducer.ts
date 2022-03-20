@@ -10,9 +10,12 @@ import {
   T_SET_HYPNO_MODE,
   T_SET_STEEPNESS,
   T_SET_EJACULATE_LIKELIHOOD,
-  T_SET_RUIN_LIKELIHOOD, T_SET_WALLTAKER_LINK,
+  T_SET_RUIN_LIKELIHOOD,
+  T_SET_WALLTAKER_LINK,
+  T_SET_PLAYER_GENDER,
+  T_SET_PLAYER_PARTS,
 } from './actions'
-import { PornList, EventToken, HypnoMode } from '../../gameboard/types'
+import { PornList, EventToken, HypnoMode, PlayerParts, PlayerGender } from '../../gameboard/types'
 import { events } from '../../gameboard/events/index'
 
 export interface ISettingsState {
@@ -26,10 +29,14 @@ export interface ISettingsState {
   pornList: PornList
   eventList: EventToken['id'][]
   hypnoMode: HypnoMode
+  player: {
+    gender: PlayerGender
+    parts: PlayerParts
+  }
   cum: {
     ejaculateLikelihood: number
     ruinLikelihood: number
-  },
+  }
   walltakerLink: number | null
 }
 
@@ -44,11 +51,12 @@ export const SettingsDefaultState: ISettingsState = {
   pornList: [],
   eventList: events.map(event => event.id),
   hypnoMode: HypnoMode.JOI,
+  player: { gender: PlayerGender.Male, parts: PlayerParts.Cock },
   cum: {
     ejaculateLikelihood: 100,
     ruinLikelihood: 0,
   },
-  walltakerLink: null
+  walltakerLink: null,
 }
 
 export function SettingsReducer(state: ISettingsState = SettingsDefaultState, action: ReturnType<SettingsAction>): ISettingsState {
@@ -124,6 +132,22 @@ export function SettingsReducer(state: ISettingsState = SettingsDefaultState, ac
       return {
         ...state,
         walltakerLink: action.payload,
+      }
+    case T_SET_PLAYER_GENDER:
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          gender: action.payload,
+        },
+      }
+    case T_SET_PLAYER_PARTS:
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          parts: action.payload,
+        },
       }
     default:
       return state

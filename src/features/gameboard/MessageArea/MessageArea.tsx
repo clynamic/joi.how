@@ -4,18 +4,20 @@ import { Message, isPrompt, Button } from './MessageTypes'
 import { IState } from '../../../store'
 import { PropsForConnectedComponent } from '../types'
 import { MessageBar } from './MessageBar/MessageBar'
-
+import { ISettingsState } from '../../settings/store'
 import './MessageArea.css'
 import { GameBoardActions } from '../store/actions'
 
 interface IMessageAreaProps extends PropsForConnectedComponent {
   messages: Message[]
+  settings: ISettingsState
 }
 
 export const MessageArea = connect(
   (state: IState) =>
     ({
       messages: state.game.messages,
+      settings: state.settings,
     } as IMessageAreaProps),
 )(
   class extends React.Component<IMessageAreaProps> {
@@ -32,7 +34,7 @@ export const MessageArea = connect(
         <div className="MessageArea">
           <div className="MessageArea__messages" role="alert">
             {this.props.messages.map(message => (
-              <MessageBar key={message.text} message={message} />
+              <MessageBar key={message.text} message={message} settings={this.props.settings} />
             ))}
           </div>
           <div className="MessageArea__prompt settings-row">

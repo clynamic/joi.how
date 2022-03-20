@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { useSelector } from 'react-redux';
-import { HypnoMode } from '../types';
-import styled from 'styled-components';
+import { useSelector } from 'react-redux'
+import { HypnoMode } from '../types'
+import styled from 'styled-components'
 
 import './Hypno.css'
-import { IState } from '../../../store';
+import { IState } from '../../../store'
 
 interface IHypnoProps {
   mode: HypnoMode
 }
 
 const HypnoTextDiv = styled.div`
-  ${(props: { delay: number} ) => `
+  ${(props: { delay: number }) => `
     animation-duration: ${props.delay}ms !important;
   `}
 `
@@ -123,11 +123,11 @@ HYPNO_PHRASES.set(HypnoMode.FemDomPet, [
 export function Hypno(props: IHypnoProps) {
   const [phrase, setPhrase] = useState((HYPNO_PHRASES.get(props.mode) || [''])[0])
   const [animating, setAnimating] = useState(false)
-  const intensity = useSelector<IState, IState['game']['intensity']>(state => state.game.intensity);
-  
+  const intensity = useSelector<IState, IState['game']['intensity']>(state => state.game.intensity)
+
   const delay = useMemo(() => {
     // intensity ranges between 0 and 100, lowest delay time is thus 10ms
-    return 3000 - (intensity * 29)
+    return 3000 - intensity * 29
   }, [intensity])
 
   useEffect(() => {
