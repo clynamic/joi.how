@@ -1,13 +1,13 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
 import { Message } from '../MessageTypes'
 import { formatMessage } from '../../Player/Player'
 import './MessageBar.css'
 import { playTone } from '../../sound'
-import { IState } from '../../../../store'
+import { ISettingsState } from '../../../settings/store'
 
 interface IMessageProps {
   message: Message
+  settings: ISettingsState
 }
 export class MessageBar extends React.Component<IMessageProps> {
   componentDidMount() {
@@ -33,7 +33,6 @@ export class MessageBar extends React.Component<IMessageProps> {
   }
 
   formatMessage(msg: Message) {
-    let settings = useSelector<IState, IState['settings']>(state => state.settings)
-    return formatMessage(msg.text, settings)
+    return formatMessage(msg.text, this.props.settings)
   }
 }
