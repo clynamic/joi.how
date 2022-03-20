@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { HypnoMode } from '../types'
+import { formatMessage } from '../Player/Player'
 import styled from 'styled-components'
 
 import './Hypno.css'
@@ -18,7 +19,7 @@ const HypnoTextDiv = styled.div`
 
 const HYPNO_PHRASES = new Map<HypnoMode, string[]>()
 HYPNO_PHRASES.set(HypnoMode.JOI, [
-  'cock',
+  '$part',
   'stroke',
   'precum',
   'horny',
@@ -27,9 +28,9 @@ HYPNO_PHRASES.set(HypnoMode.JOI, [
   "can't stop",
   'ooze',
   'leak',
-  'stroke',
+  '$stroke',
   'hard',
-  'stroke',
+  '$stroke',
   'jack off',
   'give in',
   'obey',
@@ -37,7 +38,7 @@ HYPNO_PHRASES.set(HypnoMode.JOI, [
   'must',
   'masturbate',
   'goon',
-  'cock',
+  '$part',
   'everyday',
 ])
 HYPNO_PHRASES.set(HypnoMode.Breeding, [
@@ -60,63 +61,63 @@ HYPNO_PHRASES.set(HypnoMode.Breeding, [
   'give in',
 ])
 HYPNO_PHRASES.set(HypnoMode.Pet, [
-  'good boy',
+  'good $player',
   'hump',
   'listen',
   'stare',
   'obey',
-  'stroke for master',
-  'stroke for master',
+  '$stroke for master',
+  '$stroke for master',
   'obey',
   'master',
   'owner',
   'obey',
   'give in',
   'obey master',
-  'good boy',
-  'good boy',
-  'good boy',
+  'good $player',
+  'good $player',
+  'good $player',
   'animal',
   'only',
   'master',
   'give master',
-  'not your cock',
-  'not your cock',
-  'not your cock',
+  'not your $part',
+  'not your $part',
+  'not your $part',
   'not your cum',
-  "master's cock",
-  "master's cock",
-  "master's cock",
+  "master's $part",
+  "master's $part",
+  "master's $part",
   "master's cum",
 ])
 HYPNO_PHRASES.set(HypnoMode.FemDomPet, [
-  'good boy',
+  'good $player',
   'hump',
   'obey',
   'listen',
   'stare',
   'obey',
-  'stroke for mistress',
-  'stroke for mistress',
+  '$stroke for mistress',
+  '$stroke for mistress',
   'mistress',
   'owner',
   'obey',
   'give in',
   'obey mistress',
-  'good boy',
-  'good boy',
-  'good boy',
+  'good $player',
+  'good $player',
+  'good $player',
   'animal',
   'only',
   'mistress',
   'give mistress',
-  'not your cock',
-  'not your cock',
-  'not your cock',
+  'not your $part',
+  'not your $part',
+  'not your $part',
   'not your cum',
-  "mistress' cock",
-  "mistress' cock",
-  "mistress' cock",
+  "mistress' $part",
+  "mistress' $part",
+  "mistress' $part",
   "mistress' cum",
 ])
 
@@ -124,6 +125,7 @@ export function Hypno(props: IHypnoProps) {
   const [phrase, setPhrase] = useState((HYPNO_PHRASES.get(props.mode) || [''])[0])
   const [animating, setAnimating] = useState(false)
   const intensity = useSelector<IState, IState['game']['intensity']>(state => state.game.intensity)
+  const settings = useSelector<IState, IState['settings']>(state => state.settings)
 
   const delay = useMemo(() => {
     // intensity ranges between 0 and 100, lowest delay time is thus 10ms
@@ -155,7 +157,7 @@ export function Hypno(props: IHypnoProps) {
 
   return (
     <HypnoTextDiv delay={delay} className={animating ? 'Hypno--changed' : 'Hypno'}>
-      {props.mode !== HypnoMode.Off ? <div className="Hypno__phrase">{phrase}</div> : null}
+      {props.mode !== HypnoMode.Off ? <div className="Hypno__phrase">{formatMessage(phrase, settings)}</div> : null}
     </HypnoTextDiv>
   )
 }

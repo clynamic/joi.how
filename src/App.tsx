@@ -10,7 +10,7 @@ import reactGA from './analytics'
 interface IAppProps extends PropsForConnectedComponent {}
 
 const history = createHistory(window as any)
-history.listen((event) => {
+history.listen(event => {
   if (localStorage.getItem('allowCookies') === 'true' || localStorage.getItem('allowCookies') === null) {
     reactGA.pageview(event.location.pathname)
   }
@@ -38,4 +38,7 @@ function App(props: IAppProps) {
   )
 }
 
-export default connect(null, (dispatch) => ({ dispatch }))(App)
+export default connect(
+  null,
+  dispatch => ({ dispatch }),
+)(App)

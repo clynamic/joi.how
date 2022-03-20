@@ -1,6 +1,5 @@
-import React from 'react'
-import { ISettingsState } from '../../settings/store'
 import { PlayerGender, PlayerParts, HypnoMode } from '../types'
+import { ISettingsState } from '../../settings/store'
 
 export function formatMessage(msg: string, settings: ISettingsState) {
   return msg
@@ -12,6 +11,7 @@ export function formatMessage(msg: string, settings: ISettingsState) {
     .replace('$HANDS', transform('$HANDS', settings))
     .replace('$master', transform('$master', settings))
     .replace('$Master', transform('$Master', settings))
+    .replace('$stroke', transform('$stroke', settings))
 }
 
 function transform(token: string, settings: ISettingsState) {
@@ -44,6 +44,30 @@ function transform(token: string, settings: ISettingsState) {
         return 'paws'
       } else {
         return 'hands'
+      }
+    case '$part':
+      switch (settings.player.parts) {
+        case PlayerParts.Cock:
+          return 'cock'
+        case PlayerParts.Pussy:
+          return 'pussy'
+        case PlayerParts.Neuter:
+          return 'mound'
+      }
+    case '$Part':
+      switch (settings.player.parts) {
+        case PlayerParts.Cock:
+          return 'Cock'
+        case PlayerParts.Pussy:
+          return 'Pussy'
+        case PlayerParts.Neuter:
+          return 'Mound'
+      }
+    case '$stroke':
+      if (settings.player.parts == PlayerParts.Cock) {
+        return 'stroke'
+      } else {
+        return 'paw'
       }
     default:
       return token
