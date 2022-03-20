@@ -48,7 +48,7 @@ export function PlayerSetting(props: IPlayerSettingProps) {
         {PLAYER_PARTS_TYPES.map(modeType => (
           <button
             name="parts"
-            className={`settings-option${props.parts == modeType.parts ? '--enabled' : '--disabled'}`}
+            className={`settings-option${props.parts === modeType.parts ? '--enabled' : '--disabled'}`}
             onClick={() => props.setParts(modeType.parts)}
             role="radio"
             aria-checked={props.parts === modeType.parts}

@@ -1,22 +1,22 @@
-import { PlayerGender, PlayerParts, HypnoMode } from '../types'
-import { ISettingsState } from '../../settings/store'
+import { PlayerGender, PlayerParts, HypnoMode } from '../features/gameboard/types'
+import { ISettingsState } from '../features/settings/store'
 
 export function formatMessage(msg: string, settings: ISettingsState) {
   return msg
-    .replace('$player', transform('$player', settings))
-    .replace('$Player', transform('$Player', settings))
-    .replace('$part', transform('$part', settings))
-    .replace('$Part', transform('$Part', settings))
-    .replace('$hands', transform('$hands', settings))
-    .replace('$HANDS', transform('$HANDS', settings))
-    .replace('$master', transform('$master', settings))
-    .replace('$Master', transform('$Master', settings))
-    .replace('$stroke', transform('$stroke', settings))
+    .replace('$player', transform('player', settings))
+    .replace('$Player', transform('Player', settings))
+    .replace('$part', transform('part', settings))
+    .replace('$Part', transform('Part', settings))
+    .replace('$hands', transform('hands', settings))
+    .replace('$HANDS', transform('HANDS', settings))
+    .replace('$master', transform('master', settings))
+    .replace('$Master', transform('Master', settings))
+    .replace('$stroke', transform('stroke', settings))
 }
 
 function transform(token: string, settings: ISettingsState) {
   switch (token) {
-    case '$player':
+    case 'player':
       switch (settings.player.gender) {
         case PlayerGender.Female:
           return 'girl'
@@ -24,8 +24,10 @@ function transform(token: string, settings: ISettingsState) {
           return 'boy'
         case PlayerGender.Neutral:
           return 'pup'
+        default:
+          return token
       }
-    case '$master':
+    case 'master':
       switch (settings.hypnoMode) {
         case HypnoMode.FemDomPet:
         case HypnoMode.Pet:
@@ -33,19 +35,19 @@ function transform(token: string, settings: ISettingsState) {
         default:
           return ''
       }
-    case '$HANDS':
-      if (settings.hypnoMode == (HypnoMode.FemDomPet || HypnoMode.Pet)) {
+    case 'HANDS':
+      if (settings.hypnoMode === (HypnoMode.FemDomPet || HypnoMode.Pet)) {
         return 'PAWS'
       } else {
         return 'HANDS'
       }
-    case '$hands':
-      if (settings.hypnoMode == (HypnoMode.FemDomPet || HypnoMode.Pet)) {
+    case 'hands':
+      if (settings.hypnoMode === (HypnoMode.FemDomPet || HypnoMode.Pet)) {
         return 'paws'
       } else {
         return 'hands'
       }
-    case '$part':
+    case 'part':
       switch (settings.player.parts) {
         case PlayerParts.Cock:
           return 'cock'
@@ -53,8 +55,10 @@ function transform(token: string, settings: ISettingsState) {
           return 'pussy'
         case PlayerParts.Neuter:
           return 'mound'
+        default:
+          return token
       }
-    case '$Part':
+    case 'Part':
       switch (settings.player.parts) {
         case PlayerParts.Cock:
           return 'Cock'
@@ -62,9 +66,11 @@ function transform(token: string, settings: ISettingsState) {
           return 'Pussy'
         case PlayerParts.Neuter:
           return 'Mound'
+        default:
+          return token
       }
-    case '$stroke':
-      if (settings.player.parts == PlayerParts.Cock) {
+    case 'stroke':
+      if (settings.player.parts === PlayerParts.Cock) {
         return 'stroke'
       } else {
         return 'paw'

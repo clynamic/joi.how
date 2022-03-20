@@ -8,11 +8,14 @@ export const cleanMess: GameEvent = () => {
     switch (state.settings.player.parts) {
       case PlayerParts.Cock:
         msg = "pre you've leaked"
+        break
       case PlayerParts.Pussy:
         msg = "juices you've made"
+        break
       case PlayerParts.Neuter:
       default:
         msg = "mess you've made"
+        break
     }
     dispatch(GameBoardActions.PauseEvents())
     dispatch(GameBoardActions.PauseGame())

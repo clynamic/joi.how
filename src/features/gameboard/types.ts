@@ -50,8 +50,3 @@ export enum PlayerParts {
   Pussy,
   Neuter,
 }
-
-export type PlayerMode = {
-  gender?: PlayerGender
-  parts?: PlayerParts
-}

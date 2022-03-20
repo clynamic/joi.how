@@ -1,6 +1,6 @@
 import {IState} from '../store'
 import {events} from '../features/gameboard/events/index'
-import {HypnoMode, PlayerMode, PlayerGender, PlayerParts} from '../features/gameboard/types'
+import {HypnoMode, PlayerGender, PlayerParts} from '../features/gameboard/types'
 import {SettingsActions} from '../features/settings/store'
 import {PropsForConnectedComponent} from '../features/settings/types'
 

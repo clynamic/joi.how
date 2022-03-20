@@ -6,7 +6,7 @@ import { wait } from '../../helpers'
 
 export const cum: GameEvent = () => {
   return (state, dispatch) => {
-    let hasCock = state.settings.player.parts == PlayerParts.Cock
+    let hasCock = state.settings.player.parts === PlayerParts.Cock
     dispatch(
       GameBoardActions.ShowMessage({
         type: MessageType.Prompt,

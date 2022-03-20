@@ -1,6 +1,6 @@
 import React from 'react'
 import { Message } from '../MessageTypes'
-import { formatMessage } from '../../Player/Player'
+import { formatMessage } from '../../../../helpers/parseString'
 import './MessageBar.css'
 import { playTone } from '../../sound'
 import { ISettingsState } from '../../../settings/store'

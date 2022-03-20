@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { HypnoMode } from '../types'
-import { formatMessage } from '../Player/Player'
+import { formatMessage } from '../../../helpers/parseString'
 import styled from 'styled-components'
 
 import './Hypno.css'
