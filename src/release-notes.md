@@ -85,3 +85,7 @@ The game keeps an internal tally of what it thinks your current "edge level" sho
 ## 1.5.3 - Sat, 26 Feb 2022 16:59:40 -0500
 * Added walltaker.joi.how support
 * Updated greeter link
+
+## 1.6.0 - Fri, 15 Apr 2022 10:26:26 -0400
+* Merged #1 from InuT-Tan <3
+* New gender + genital options for text in game
