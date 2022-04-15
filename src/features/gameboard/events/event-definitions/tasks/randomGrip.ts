@@ -6,13 +6,13 @@ import { wait } from '../../helpers'
 function stringifyGrip(grip: EGrip): string {
   switch (grip) {
     case EGrip.both:
-      return 'both hands'
+      return 'both $hands'
     case EGrip.left:
-      return 'left hand'
+      return 'left $hand'
     case EGrip.right:
-      return 'right hand'
+      return 'right $hand'
     case EGrip.none:
-      return 'hands off!'
+      return '$hands off!'
   }
 }
 
