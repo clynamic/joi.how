@@ -1,6 +1,6 @@
 import { IState } from '../store'
 import { events } from '../features/gameboard/events/index'
-import { HypnoMode } from '../features/gameboard/types'
+import { HypnoMode, PlayerGender, PlayerParts } from '../features/gameboard/types'
 import { SettingsActions } from '../features/settings/store'
 import { PropsForConnectedComponent } from '../features/settings/types'
 
@@ -13,6 +13,8 @@ export function applyAllSettings(dispatch: PropsForConnectedComponent['dispatch'
   if (settings.steepness) dispatch(SettingsActions.SetSteepness(settings.steepness))
   if (settings.eventList) dispatch(SettingsActions.SetEventList(settings.eventList))
   if (settings.hypnoMode) dispatch(SettingsActions.SetHypnoMode(settings.hypnoMode))
+  if (settings.player && settings.player.gender) dispatch(SettingsActions.SetPlayerGender(settings.player.gender))
+  if (settings.player && settings.player.parts) dispatch(SettingsActions.SetPlayerParts(settings.player.parts))
   if (settings.pace && settings.pace.max) dispatch(SettingsActions.SetMaxPace(settings.pace.max))
   if (settings.pace && settings.pace.min) dispatch(SettingsActions.SetMinPace(settings.pace.min))
   if (settings.pornList) dispatch(SettingsActions.SetPornList(settings.pornList))
@@ -25,8 +27,9 @@ export function makeSave(settings: Partial<IState['settings']>) {
   const steepness: IState['settings']['steepness'] = settings.steepness || 0.05
   const duration: IState['settings']['duration'] = settings.duration || 6000
   const pornList: IState['settings']['pornList'] = settings.pornList || []
-  const eventList: IState['settings']['eventList'] = settings.eventList || events.map(event => event.id)
+  const eventList: IState['settings']['eventList'] = settings.eventList || events.map((event) => event.id)
   const hypnoMode: IState['settings']['hypnoMode'] = settings.hypnoMode === undefined ? HypnoMode.JOI : settings.hypnoMode
+  const playerMode: IState['settings']['player'] = settings.player || { gender: PlayerGender.Male, parts: PlayerParts.Cock }
   const cum: IState['settings']['cum'] = settings.cum === undefined ? { ejaculateLikelihood: 100, ruinLikelihood: 0 } : settings.cum
   const walltakerLink: IState['settings']['walltakerLink'] = settings.walltakerLink ?? null
 
@@ -38,6 +41,8 @@ export function makeSave(settings: Partial<IState['settings']>) {
   output += `:P${pornList.reduce((acc, porn) => `${acc}${acc ? ',' : ''}${encodePorn(porn)}`, '')}`
   output += `:E{${eventList.reduce((acc, eventId) => `${acc}${acc ? ',' : ''}${eventId}`, '')}}`
   output += `:H${hypnoMode}`
+  output += `:PG${playerMode.gender}`
+  output += `:PP${playerMode.parts}`
   output += `:CE${cum.ejaculateLikelihood}`
   output += `:CR${cum.ruinLikelihood}`
   if (walltakerLink) output += `:W${walltakerLink}`
@@ -52,13 +57,14 @@ export function unpackSave(base64Save: string): IState['settings'] {
     steepness: 0.05,
     duration: 6000,
     pornList: [],
-    eventList: events.map(event => event.id),
+    eventList: events.map((event) => event.id),
     hypnoMode: HypnoMode.JOI,
+    player: { gender: PlayerGender.Male, parts: PlayerParts.Cock },
     cum: {
       ejaculateLikelihood: 100,
       ruinLikelihood: 0,
     },
-    walltakerLink: null
+    walltakerLink: null,
   }
 
   if (save.slice(0, 5) !== 'JOI1:') throw new SaveVersionEncodingError()
@@ -85,23 +91,27 @@ export function unpackSave(base64Save: string): IState['settings'] {
 
   const pornListString = save.match(/:P[a-z0-9.|,@]+/g)
   if (pornListString && pornListString[0]) {
-    settings.pornList = pornListString[0]
-      .replace(/^:P/, '')
-      .split(',')
-      .map(decodePorn)
+    settings.pornList = pornListString[0].replace(/^:P/, '').split(',').map(decodePorn)
   }
 
   const eventListString = save.match(/:E\{[a-zA-Z,]*\}/g)
   if (eventListString && eventListString[0]) {
-    settings.eventList = eventListString[0]
-      .replace(/^:E\{/, '')
-      .replace(/}$/, '')
-      .split(',')
+    settings.eventList = eventListString[0].replace(/^:E\{/, '').replace(/}$/, '').split(',')
   }
 
   const hypnoModeString = save.match(/:H\d+/g)
   if (hypnoModeString && hypnoModeString[0]) {
     settings.hypnoMode = parseInt(hypnoModeString[0].replace(':H', ''), 10)
+  }
+
+  const playerGenderString = save.match(/:PM\d+/g)
+  if (playerGenderString && playerGenderString[0]) {
+    settings.player.gender = parseInt(playerGenderString[0].replace(':PG', ''), 10)
+  }
+
+  const playerPartsString = save.match(/:PM\d+/g)
+  if (playerPartsString && playerPartsString[0]) {
+    settings.player.parts = parseInt(playerPartsString[0].replace(':PP', ''), 10)
   }
 
   const ejaculateLikelihoodString = save.match(/:CE\d+/g)
@@ -155,13 +165,7 @@ function decodePorn(encoded: string) {
       .slice(0, -1)
       .reduce((output, encodedPortion) => {
         if (parseInt(encodedPortion, 36).toString(16).length === PORN_HEX_CHUNK_SIZE + 1) {
-          return output.replace(
-            encodedPortion,
-            parseInt(encodedPortion, 36)
-              .toString(16)
-              .toUpperCase()
-              .slice(1),
-          )
+          return output.replace(encodedPortion, parseInt(encodedPortion, 36).toString(16).toUpperCase().slice(1))
         } else return output
       }, encoded)
       .replace(/\|/g, '')

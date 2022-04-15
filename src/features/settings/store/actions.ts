@@ -1,4 +1,4 @@
-import { PornList, EventToken, HypnoMode } from '../../gameboard/types'
+import { PornList, EventToken, HypnoMode, PlayerParts, PlayerGender } from '../../gameboard/types'
 
 export const T_OPEN_DIALOG = 'OPEN_DIALOG'
 export const T_CLOSE_DIALOG = 'CLOSE_DIALOG'
@@ -12,6 +12,8 @@ export const T_SET_HYPNO_MODE = 'SET_HYPNO_MODE'
 export const T_SET_EJACULATE_LIKELIHOOD = 'SET_EJACULATE_LIKELIHOOD'
 export const T_SET_RUIN_LIKELIHOOD = 'SET_RUIN_LIKELIHOOD'
 export const T_SET_WALLTAKER_LINK = 'SET_WALLTAKER_LINK'
+export const T_SET_PLAYER_GENDER = 'SET_PLAYER_GENDER'
+export const T_SET_PLAYER_PARTS = 'SET_PLAYER_PARTS'
 
 class SettingsActionsBase {
   OpenDialog = () => ({
@@ -70,6 +72,16 @@ class SettingsActionsBase {
   SetWalltakerLink = (newWalltakerLink: number | null) => ({
     type: T_SET_WALLTAKER_LINK as typeof T_SET_WALLTAKER_LINK,
     payload: newWalltakerLink,
+  })
+
+  SetPlayerGender = (newGender: PlayerGender) => ({
+    type: T_SET_PLAYER_GENDER as typeof T_SET_PLAYER_GENDER,
+    payload: newGender,
+  })
+
+  SetPlayerParts = (newParts: PlayerParts) => ({
+    type: T_SET_PLAYER_PARTS as typeof T_SET_PLAYER_PARTS,
+    payload: newParts,
   })
 }
 

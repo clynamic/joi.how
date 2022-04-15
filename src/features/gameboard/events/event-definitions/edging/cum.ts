@@ -1,4 +1,4 @@
-import { GameEvent, EGrip } from '../../../types'
+import { GameEvent, EGrip, PlayerParts } from '../../../types'
 import { GameBoardActions } from '../../../store'
 import { MessageType } from '../../../MessageArea/MessageTypes'
 import { playTone } from '../../../sound'
@@ -6,18 +6,19 @@ import { wait } from '../../helpers'
 
 export const cum: GameEvent = () => {
   return (state, dispatch) => {
+    let hasCock = state.settings.player.parts === PlayerParts.Cock
     dispatch(
       GameBoardActions.ShowMessage({
         type: MessageType.Prompt,
         text: 'Are you edging?',
         buttons: [
           {
-            display: "I'm Edging",
+            display: "I'm edging $master",
             method: async () => {
               dispatch(
                 GameBoardActions.ShowMessage({
                   type: MessageType.NewEvent,
-                  text: `Stay on the edge.`,
+                  text: `Stay on the edge, $player.`,
                 }),
               )
               dispatch(GameBoardActions.SetPace(state.settings.pace.min))
@@ -53,14 +54,14 @@ export const cum: GameEvent = () => {
                   dispatch(
                     GameBoardActions.ShowMessage({
                       type: MessageType.NewEvent,
-                      text: `HANDS OFF! Ruin your orgasm.`,
+                      text: `$HANDS OFF! Ruin your orgasm.`,
                     }),
                   )
                   await wait(3000)
                   dispatch(
                     GameBoardActions.ShowMessage({
                       type: MessageType.EventDescription,
-                      text: `Clench and dribble out your load.`,
+                      text: `Clench ${hasCock ? 'and dripple out your load ' : ''}in desperation.`,
                     }),
                   )
                 } else {
@@ -88,14 +89,14 @@ export const cum: GameEvent = () => {
                 dispatch(
                   GameBoardActions.ShowMessage({
                     type: MessageType.NewEvent,
-                    text: `HANDS OFF! Do not cum.`,
+                    text: `$HANDS OFF! Do not cum.`,
                   }),
                 )
                 await wait(5000)
                 dispatch(
                   GameBoardActions.ShowMessage({
                     type: MessageType.EventDescription,
-                    text: `Good boy. Let yourself go soft.`,
+                    text: `Good $player. Let yourself ${hasCock ? 'go soft.' : 'cool off.'}`,
                   }),
                 )
                 await wait(5000)
@@ -122,7 +123,7 @@ export const cum: GameEvent = () => {
               dispatch(
                 GameBoardActions.ShowMessage({
                   type: MessageType.NewEvent,
-                  text: `Start stroking again.`,
+                  text: `Start ${hasCock ? 'stroking again.' : 'pawing again.'}`,
                 }),
               )
               dispatch(GameBoardActions.DecIntensity(100))
