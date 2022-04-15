@@ -11,9 +11,9 @@ interface IPlayerSettingProps {
 }
 
 const PLAYER_GENDER_TYPES = [
-  { gender: PlayerGender.Female, name: 'Female', description: 'Refer to you as a female.' },
-  { gender: PlayerGender.Male, name: 'Male', description: 'Refer to you as a male.' },
-  { gender: PlayerGender.Neutral, name: 'Neutral', description: 'Refer to you neutrally.' },
+  { gender: PlayerGender.Female, name: 'Female', description: 'Refer to you as a female. (she/her/girl)' },
+  { gender: PlayerGender.Male, name: 'Male', description: 'Refer to you as a male. (he/him/boy)' },
+  { gender: PlayerGender.Neutral, name: 'Neutral', description: 'Refer to you neutrally. (pup)' },
 ]
 
 const PLAYER_PARTS_TYPES = [
