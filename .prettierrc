@@ -6,6 +6,5 @@
   "singleQuote": true,
   "bracketSpacing": true,
   "jsxBracketSameLine": true,
-  "parser": "typescript",
   "printWidth": 140
 }

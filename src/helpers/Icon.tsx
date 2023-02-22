@@ -12,7 +12,7 @@ interface IIconProps {
   className?: string
 }
 
-export const Icon: React.FC<IIconProps> = props => {
+export const Icon: React.FC<IIconProps> = (props) => {
   if (props.icon === 'Left') return <LeftIcon className={props.className} />
   if (props.icon === 'Right') return <RightIcon className={props.className} />
   if (props.icon === 'Run') return <RunIcon className={props.className} />

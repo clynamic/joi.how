@@ -124,8 +124,8 @@ HYPNO_PHRASES.set(HypnoMode.FemDomPet, [
 export function Hypno(props: IHypnoProps) {
   const [phrase, setPhrase] = useState((HYPNO_PHRASES.get(props.mode) || [''])[0])
   const [animating, setAnimating] = useState(false)
-  const intensity = useSelector<IState, IState['game']['intensity']>(state => state.game.intensity)
-  const settings = useSelector<IState, IState['settings']>(state => state.settings)
+  const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
+  const settings = useSelector<IState, IState['settings']>((state) => state.settings)
 
   const delay = useMemo(() => {
     // intensity ranges between 0 and 100, lowest delay time is thus 10ms

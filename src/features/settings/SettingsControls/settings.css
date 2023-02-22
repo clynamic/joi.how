@@ -95,25 +95,25 @@ fieldset.settings-group--disabled legend {
 
 /* Form Controls */
 
-.settings-row input[type=range] {
+.settings-row input[type='range'] {
   width: 130px;
 }
 
-.settings-row input[type=text] {
+.settings-row input[type='text'] {
   height: 21px;
   border: none;
   margin-right: 10px;
   padding: 2px 5px;
 }
 
-.settings-row input[type=submit],
+.settings-row input[type='submit'],
 .settings-row button,
 .settings-row a.settings-button {
   height: 21px;
   background: #595a77;
   border: 0;
   font-size: 0.75rem;
-  color: #FFF;
+  color: #fff;
   padding: 4px 6px;
   cursor: pointer;
 }
@@ -155,19 +155,19 @@ fieldset.settings-group--disabled legend {
   color: rgba(255, 255, 255, 0.438);
 }
 
-.settings-row input[type=submit]:hover,
+.settings-row input[type='submit']:hover,
 .settings-row button:hover {
   background: #4b4c66;
 }
 
-.settings-row input[type=submit]:active,
+.settings-row input[type='submit']:active,
 .settings-row button:active {
   background: #2b2c3a;
 }
 
-.settings-row textarea{
+.settings-row textarea {
   background: #2b2c3a;
-  color: #FFF;
+  color: #fff;
   padding: 10px;
   border: none;
   resize: vertical;

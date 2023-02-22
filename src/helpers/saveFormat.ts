@@ -2,14 +2,14 @@ import { IState } from '../store'
 import { events } from '../features/gameboard/events/index'
 import { HypnoMode, PlayerGender, PlayerParts } from '../features/gameboard/types'
 import { SettingsActions } from '../features/settings/store'
-import { PropsForConnectedComponent } from '../features/settings/types'
+import { PropsForConnectedComponent } from '../store.types'
 
 export class SaveError extends Error {}
 export class SavePornEncodingError extends SaveError {}
 export class SaveVersionEncodingError extends SaveError {}
 
 export function applyAllSettings(dispatch: PropsForConnectedComponent['dispatch'], settings: Partial<IState['settings']>): void {
-  if (settings.duration) dispatch(SettingsActions.SetGameDuration(settings.duration))
+  if (settings.duration) dispatch(SettingsActions.SetDuration(settings.duration))
   if (settings.steepness) dispatch(SettingsActions.SetSteepness(settings.steepness))
   if (settings.eventList) dispatch(SettingsActions.SetEventList(settings.eventList))
   if (settings.hypnoMode) dispatch(SettingsActions.SetHypnoMode(settings.hypnoMode))

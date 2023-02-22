@@ -1,13 +1,12 @@
-import { Link, RouteComponentProps } from '@reach/router'
-import React from 'react'
 import { OutboundLink } from 'react-ga'
+import { Link } from 'react-router-dom'
 import { ReactComponent as Logo } from '../../assets/logo.svg'
 import { SettingsControls } from '../../features/settings/SettingsControls/SettingsControls'
 import { Cookies } from './Cookies'
 import './Greeter.css'
 import { ReleaseNotes } from './ReleaseNotes/ReleaseNotes'
 
-export function GreeterPage(props: RouteComponentProps) {
+export function GreeterPage() {
   return (
     <div className="GreeterPage">
       <div className="settings-row">
@@ -29,15 +28,26 @@ export function GreeterPage(props: RouteComponentProps) {
         <SettingsControls />
       </div>
       <OutboundLink className="no-underline" target="_blank" eventLabel="Outbound.Pawflix" to="https://walltaker.joi.how">
-        <p className="callout">
+        <div className="callout">
           <h2>
-            Want to let other people set your wallpaper? <img src="https://cdn.discordapp.com/emojis/750074504528527421.gif?v=1" />
+            Want to let other people set your wallpaper?{' '}
+            <img src="https://cdn.discordapp.com/emojis/750074504528527421.gif?v=1" alt="throbbing cock" />
           </h2>{' '}
-          Checkout walltaker! It's a app made by me and the other folks at PawCorp, our little horny-coding collective! It lets you offer up a link where people can set the wallpaper on you phone or PC to an e621 post, within your blacklist!
-        </p>
+          <p>
+            Checkout walltaker! It's a app made by me and the other folks at PawCorp, our little horny-coding collective! It lets you offer
+            up a link where people can set the wallpaper on you phone or PC to an e621 post, within your blacklist!
+          </p>
+        </div>
       </OutboundLink>
       <ReleaseNotes />
-      <p>This app is provided without express promise of support.</p>
+      <p>
+        This app is provided without express promise of support
+        <br />
+        Check out the source code on{' '}
+        <a href="https://github.com/PawCorp/joi.how" target={'_blank'} rel="noreferrer">
+          GitHub!
+        </a>{' '}
+      </p>
       <section>
         Some rules to keep to:
         <ul>

@@ -1,8 +1,8 @@
 {
-  "extension" : {
-    "identifier" : "panic.JavaScript",
-    "name" : "JavaScript"
+  "extension": {
+    "identifier": "panic.JavaScript",
+    "name": "JavaScript"
   },
-  "extensionTemplate" : "chromeDebug",
-  "identifier" : "D1B524E4-6B95-471E-A803-1BABCADB4353"
+  "extensionTemplate": "chromeDebug",
+  "identifier": "D1B524E4-6B95-471E-A803-1BABCADB4353"
 }

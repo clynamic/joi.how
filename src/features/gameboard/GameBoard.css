@@ -9,11 +9,14 @@
     '_ StrokeMeter J';
   background-position: center;
   background-size: cover;
-
 }
 
-.GameBoard > * { z-index: 2; }
-.GameBoard > .Porn { z-index: 1; }
+.GameBoard > * {
+  z-index: 2;
+}
+.GameBoard > .Porn {
+  z-index: 1;
+}
 
 @media screen and (max-width: 700px) {
   .GameBoard {

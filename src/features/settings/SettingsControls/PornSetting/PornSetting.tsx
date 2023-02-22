@@ -61,11 +61,13 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
       })
       .then((response: AxiosResponse<{ posts: E621Posts }>) => {
         this.props.setPornList(
-          (response.data.posts
-            .filter(post => /(jpg|png|bmp|jpeg|webp|gif)$/g.test(post.file.ext))
-            .map(post => (this.state.flags.highRes ? post.file.url : post.sample.url))
-            .filter(url => url !== null) as string[])
-            .filter(url => this.props.pornList.indexOf(url) === -1)
+          (
+            response.data.posts
+              .filter((post) => /(jpg|png|bmp|jpeg|webp|gif)$/g.test(post.file.ext))
+              .map((post) => (this.state.flags.highRes ? post.file.url : post.sample.url))
+              .filter((url) => url !== null) as string[]
+          )
+            .filter((url) => this.props.pornList.indexOf(url) === -1)
             .concat(this.props.pornList),
         )
       })
@@ -76,7 +78,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
   }
 
   clearOne(image: string) {
-    this.props.setPornList(this.props.pornList.filter(porn => porn !== image))
+    this.props.setPornList(this.props.pornList.filter((porn) => porn !== image))
   }
 
   render() {
@@ -98,7 +100,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
               <input
                 type="checkbox"
                 checked={this.state.minScore !== null}
-                onChange={e => this.setState({ minScore: !e.target.checked ? null : -10 })}
+                onChange={(e) => this.setState({ minScore: !e.target.checked ? null : -10 })}
               />
             </label>
             {this.state.minScore !== null ? (
@@ -113,7 +115,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
                     max="690"
                     step="1"
                     value={this.state.minScore === null ? 0 : this.state.minScore}
-                    onChange={e => this.setState({ minScore: parseInt(e.target.value) })}
+                    onChange={(e) => this.setState({ minScore: parseInt(e.target.value) })}
                   />
                 </label>
                 <span>
@@ -132,7 +134,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
                 max="150"
                 step="1"
                 value={this.state.count}
-                onChange={e => this.setState({ count: parseInt(e.target.value) })}
+                onChange={(e) => this.setState({ count: parseInt(e.target.value) })}
               />
             </label>
             <span>
@@ -146,7 +148,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
               <input
                 type="checkbox"
                 checked={this.state.flags.highRes}
-                onChange={e => this.setState({ flags: { highRes: e.target.checked } })}
+                onChange={(e) => this.setState({ flags: { highRes: e.target.checked } })}
               />
               <i className="emoji-icon">{this.state.flags.highRes ? '🦄' : '🐴'}</i>
             </label>
@@ -159,7 +161,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
                 <strong>{this.props.pornList.length} items</strong> stored. Click thumbnail to delete.
               </span>
               <div className="PornSetting__thumbnails">
-                {this.props.pornList.map(porn => (
+                {this.props.pornList.map((porn) => (
                   <PornThumbnail key={porn} image={porn} onDelete={this.clearOne.bind(this)} />
                 ))}
               </div>

@@ -1,4 +1,3 @@
-import React from 'react'
 import '../settings.css'
 import { useGA } from '../useGA'
 
@@ -30,7 +29,7 @@ export function DurationSetting(props: IDurationSettingProps) {
             max="20000"
             step="50"
             value={props.duration}
-            onChange={e => props.setDuration(parseDuration(e.target.value))}
+            onChange={(e) => props.setDuration(parseDuration(e.target.value))}
           />
         </label>
         <span>

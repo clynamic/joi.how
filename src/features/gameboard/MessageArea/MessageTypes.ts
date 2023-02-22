@@ -37,6 +37,6 @@ export function applyMessage(log: Message[], message: Message): Message[] {
     case MessageType.Prompt:
       return [message]
     case MessageType.EventDescription:
-      return [...log.filter(loggedMessage => loggedMessage.type !== MessageType.EventDescription), message]
+      return [...log.filter((loggedMessage) => loggedMessage.type !== MessageType.EventDescription), message]
   }
 }

@@ -2,7 +2,7 @@
   border: 0;
   background: #a52727;
   cursor: pointer;
-  color: #FFF;
+  color: #fff;
   display: flex;
   align-items: center;
   padding: 10px 15px;
@@ -23,5 +23,5 @@
 }
 
 .EmergencyStop button svg * {
-  fill: #FFF;
+  fill: #fff;
 }

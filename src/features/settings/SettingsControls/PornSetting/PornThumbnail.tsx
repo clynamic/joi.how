@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 
 interface IPornThumbnailProps {
@@ -26,10 +25,10 @@ const Thumbnail = styled.button<{ src: string; lowRes: boolean }>`
   }
 
   ::after {
-    ${props => (props.lowRes ? 'content: "🐴"' : 'content: "🦄"')}
+    ${(props) => (props.lowRes ? 'content: "🐴"' : 'content: "🦄"')}
   }
 
-  ${props =>
+  ${(props) =>
     props.src &&
     `
     background-image: url(${props.src}) !important
