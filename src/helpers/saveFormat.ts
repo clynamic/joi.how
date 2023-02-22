@@ -17,15 +17,17 @@ export function applyAllSettings(dispatch: PropsForConnectedComponent['dispatch'
   if (settings.player && settings.player.parts) dispatch(SettingsActions.SetPlayerParts(settings.player.parts))
   if (settings.pace && settings.pace.max) dispatch(SettingsActions.SetMaxPace(settings.pace.max))
   if (settings.pace && settings.pace.min) dispatch(SettingsActions.SetMinPace(settings.pace.min))
+  if (settings.credentials) dispatch(SettingsActions.SetCredentials(settings.credentials))
   if (settings.pornList) dispatch(SettingsActions.SetPornList(settings.pornList))
   if (settings.cum && settings.cum.ejaculateLikelihood) dispatch(SettingsActions.SetEjaculateLikelihood(settings.cum.ejaculateLikelihood))
   if (settings.cum && settings.cum.ruinLikelihood) dispatch(SettingsActions.SetRuinLikelihood(settings.cum.ruinLikelihood))
 }
 
-export function makeSave(settings: Partial<IState['settings']>) {
+export function makeSave(settings: Partial<IState['settings']>, includeCredentials: boolean) {
   const pace: IState['settings']['pace'] = settings.pace || { min: 0.75, max: 5 }
   const steepness: IState['settings']['steepness'] = settings.steepness || 0.05
   const duration: IState['settings']['duration'] = settings.duration || 6000
+  const credentials: IState['settings']['credentials'] = settings.credentials ?? null
   const pornList: IState['settings']['pornList'] = settings.pornList || []
   const eventList: IState['settings']['eventList'] = settings.eventList || events.map((event) => event.id)
   const hypnoMode: IState['settings']['hypnoMode'] = settings.hypnoMode === undefined ? HypnoMode.JOI : settings.hypnoMode
@@ -38,6 +40,7 @@ export function makeSave(settings: Partial<IState['settings']>) {
   output += `:PX${pace.max}`
   output += `:S${steepness * 100}`
   output += `:D${duration / 100}`
+  if (includeCredentials && credentials != null) output += `:C${btoa(JSON.stringify(credentials))}`
   output += `:P${pornList.reduce((acc, porn) => `${acc}${acc ? ',' : ''}${encodePorn(porn)}`, '')}`
   output += `:E{${eventList.reduce((acc, eventId) => `${acc}${acc ? ',' : ''}${eventId}`, '')}}`
   output += `:H${hypnoMode}`
@@ -56,6 +59,7 @@ export function unpackSave(base64Save: string): IState['settings'] {
     pace: { min: 0.75, max: 5 },
     steepness: 0.05,
     duration: 6000,
+    credentials: null,
     pornList: [],
     eventList: events.map((event) => event.id),
     hypnoMode: HypnoMode.JOI,
@@ -87,6 +91,12 @@ export function unpackSave(base64Save: string): IState['settings'] {
   const durationString = save.match(/:D[\d.]+/g)
   if (durationString && durationString[0]) {
     settings.duration = parseFloat(durationString[0].replace(':D', '')) * 100
+  }
+
+  // Matches a base64 encoded string
+  const credentials = save.match(/:C(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?/g)
+  if (credentials && credentials[0]) {
+    settings.credentials = JSON.parse(atob(credentials[0].replace(/^:C/, '')))
   }
 
   const pornListString = save.match(/:P[a-z0-9.|,@]+/g)

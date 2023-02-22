@@ -37,7 +37,7 @@ export function SaveSetting(props: ISaveSettingProps) {
         <strong>Share these codes around to let others try your settings.</strong>
         <div className="settings-innerrow">
           <em>Either copy and paste a code below and click "load", or set everything else up and hit "save" to update the code shown.</em>
-          <button onClick={() => setCurrentSave(makeSave(props.settings))}>Save</button>
+          <button onClick={() => setCurrentSave(makeSave(props.settings, /*includeCredentials*/ false))}>Save</button>
           <button onClick={() => props.setSettings(prepSave(currentSave, setError))}>Load</button>
         </div>
         <div className="settings-innerrow">
