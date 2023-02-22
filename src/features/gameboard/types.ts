@@ -15,6 +15,11 @@ export enum EGrip {
   none,
 }
 
+export type Credentials = {
+  login: string
+  api_key: string
+}
+
 export type PornList = string[]
 
 export type GameEvent<Args extends any[] = []> = (

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { PornList, EventToken, HypnoMode, PlayerParts, PlayerGender } from '../../gameboard/types'
+import { PornList, EventToken, HypnoMode, PlayerParts, PlayerGender, Credentials } from '../../gameboard/types'
 import { events } from '../../gameboard/events/index'
 
 export interface ISettingsState {
@@ -10,6 +10,7 @@ export interface ISettingsState {
   }
   steepness: number
   duration: number
+  credentials: Credentials | null
   pornList: PornList
   eventList: EventToken['id'][]
   hypnoMode: HypnoMode
@@ -34,6 +35,7 @@ const settingsSlice = createSlice({
     },
     steepness: 0.05,
     duration: 6000,
+    credentials: null,
     pornList: [],
     eventList: events.map((event) => event.id),
     hypnoMode: HypnoMode.JOI,
@@ -62,6 +64,9 @@ const settingsSlice = createSlice({
     },
     SetDuration: (state, action: PayloadAction<number>) => {
       state.duration = action.payload
+    },
+    SetCredentials: (state, action: PayloadAction<Credentials | null>) => {
+      state.credentials = action.payload
     },
     SetPornList: (state, action: PayloadAction<PornList>) => {
       state.pornList = action.payload

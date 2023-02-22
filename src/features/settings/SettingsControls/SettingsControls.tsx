@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react'
 import './SettingsControls.css'
 import { IState } from '../../../store'
-import { PornList } from '../../gameboard/types'
-import { PropsForConnectedComponent } from '../../../store.types'
+import { Credentials, PornList } from '../../gameboard/types'
 import { PaceSetting } from './PaceSetting/PaceSetting'
 import { PornSetting } from './PornSetting/PornSetting'
 import { SettingsActions, VibratorActions } from '../store'
@@ -17,10 +16,12 @@ import { VibratorSetting } from './VibratorSetting/VibratorSetting'
 import { WalltakerSetting } from './WalltakerSetting/WalltakerSetting'
 import { PlayerSetting } from './PlayerSetting/PlayerSetting'
 import { connect } from 'react-redux'
+import { PropsForConnectedComponent } from '../../../store.types'
 
 interface ISettingsControlsProps extends PropsForConnectedComponent {
   pace: IState['settings']['pace']
   steepness: IState['settings']['steepness']
+  credentials: Credentials
   pornList: PornList
   eventList: IState['settings']['eventList']
   duration: IState['settings']['duration']
@@ -36,6 +37,7 @@ export const SettingsControls = connect(
     ({
       pace: state.settings.pace,
       steepness: state.settings.steepness,
+      credentials: state.settings.credentials,
       pornList: state.settings.pornList,
       eventList: state.settings.eventList,
       duration: state.settings.duration,
@@ -48,7 +50,7 @@ export const SettingsControls = connect(
 )(function (props: ISettingsControlsProps) {
   const saveToLocalStorage = useRef(
     debounce((props: ISettingsControlsProps) => {
-      localStorage.setItem('lastSession', makeSave(props))
+      localStorage.setItem('lastSession', makeSave(props, /*includeCredentials*/ true))
     }, 1000),
   )
   useEffect(() => saveToLocalStorage.current(props))
@@ -68,7 +70,12 @@ export const SettingsControls = connect(
 
       <EventsSetting eventList={props.eventList} setEventList={(newList) => props.dispatch(SettingsActions.SetEventList(newList))} />
 
-      <PornSetting pornList={props.pornList} setPornList={(newList) => props.dispatch(SettingsActions.SetPornList(newList))} />
+      <PornSetting
+        credentials={props.credentials}
+        setCredentials={(newCredentials) => props.dispatch(SettingsActions.SetCredentials(newCredentials))}
+        pornList={props.pornList}
+        setPornList={(newList) => props.dispatch(SettingsActions.SetPornList(newList))}
+      />
 
       <WalltakerSetting
         enabled={Boolean(props.walltakerLink ?? false)}
