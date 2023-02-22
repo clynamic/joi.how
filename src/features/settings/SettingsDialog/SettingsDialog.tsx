@@ -1,11 +1,11 @@
 import React from 'react'
-import { connect } from 'react-redux'
-import { PropsForConnectedComponent } from '../types'
+import { PropsForConnectedComponent } from '../../../store.types'
 import { IState } from '../../../store'
 
 import './SettingsDialog.css'
 import { SettingsActions } from '../store'
 import { SettingsControls } from '../SettingsControls/SettingsControls'
+import { connect } from 'react-redux'
 
 interface ISettingsDialogProps extends PropsForConnectedComponent {
   shown: boolean
@@ -55,7 +55,8 @@ export const SettingsDialog = connect(
             role="dialog"
             aria-label="Settings Dialog"
             hidden={!this.props.shown}
-            tabIndex={this.props.shown ? 0 : -1}>
+            tabIndex={this.props.shown ? 0 : -1}
+          >
             <div className="SettingsDialog__content">
               <section className="settings-row">
                 <p>

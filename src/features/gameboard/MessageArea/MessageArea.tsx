@@ -2,12 +2,12 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Message, isPrompt, Button } from './MessageTypes'
 import { IState } from '../../../store'
-import { PropsForConnectedComponent } from '../types'
+import { PropsForConnectedComponent } from '../../../store.types'
 import { MessageBar } from './MessageBar/MessageBar'
 import { ISettingsState } from '../../settings/store'
 import './MessageArea.css'
-import { GameBoardActions } from '../store/actions'
 import { formatMessage } from '../../../helpers/parseString'
+import { GameBoardActions } from '../store'
 
 interface IMessageAreaProps extends PropsForConnectedComponent {
   messages: Message[]
@@ -34,8 +34,7 @@ export const MessageArea = connect(
       return (
         <div className="MessageArea">
           <div className="MessageArea__messages" role="alert">
-            {this.props.messages.map(message => {
-              message.text = formatMessage(message.text, this.props.settings)
+            {this.props.messages.map((message) => {
               return <MessageBar key={message.text} message={message} settings={this.props.settings} />
             })}
           </div>
@@ -44,7 +43,7 @@ export const MessageArea = connect(
               .filter(isPrompt)
               .slice(0, 1)
               .reduce((acc, message) => message.buttons, [] as Button[])
-              .map(button => {
+              .map((button) => {
                 return (
                   <button className="settings-button" onClick={() => this.runButtonMethod(button)} key={button.display}>
                     {formatMessage(button.display, this.props.settings)}

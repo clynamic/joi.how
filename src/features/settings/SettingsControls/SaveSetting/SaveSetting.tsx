@@ -1,10 +1,9 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import '../settings.css'
 import './SaveSetting.css'
 import { ReactComponent as Warning } from '../../../../assets/warning.svg'
 import { IState } from '../../../../store'
 import { makeSave, unpackSave, SavePornEncodingError, SaveVersionEncodingError } from '../../../../helpers/saveFormat'
-import { isNull } from 'util'
 
 interface ISaveSettingProps {
   settings: Partial<IState['settings']>
@@ -42,10 +41,10 @@ export function SaveSetting(props: ISaveSettingProps) {
           <button onClick={() => props.setSettings(prepSave(currentSave, setError))}>Load</button>
         </div>
         <div className="settings-innerrow">
-          <textarea className="SaveSetting__textarea" value={currentSave} onChange={e => setCurrentSave(e.target.value)} />
+          <textarea className="SaveSetting__textarea" value={currentSave} onChange={(e) => setCurrentSave(e.target.value)} />
         </div>
       </div>
-      {!isNull(error) ? (
+      {error !== null ? (
         <div className="settings-cover settings-row" role="alert">
           <Warning className="SaveSetting__erroricon" />
           <h3>Oh no.</h3>

@@ -36,7 +36,7 @@
   filter: blur(30px);
   transform: scale(1.2);
   z-index: -2;
-  
+
   animation-name: PornMove;
   animation-direction: alternate;
   animation-play-state: running;

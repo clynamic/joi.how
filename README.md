@@ -1,44 +1,48 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## JOI<sup>.how</sup>
 
-## Available Scripts
+<a href="https://joi.how" title="joi.how">
+    <img src="src/assets/logo.svg" alt="eggplant" width="160" />
+</a>
 
-In the project directory, you can run:
+</br></br>
 
-### `npm start`
+This is a small application I've been working on for a bit. Just a web app e621 slideshow that has a jack-off-instruction-style stroke-to-the-beat UI! If you find that sort of thing interesting, check it out [here](https://joi.how)!
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+I'm also taking feature requests! If there's anything you'd like to see added, feel free to [open an issue](/issues) or ask in the [forum thread](https://e621.net/forum_topics/23796).
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+### Features
 
-### `npm test`
+- e621 post loader, based on tags.
+- Stroke speed and control settings.
+- Events that adjust speed, or ask you to do something.
+- Duration control.
+- Orgasm control.
+- Initial support for some basic hypnosis stuff.
+- Codes you can use to share your configs!
+- Integration with various vibrators through [Intiface](https://intiface.com/) to milk you automatically!
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Usage
 
-### `npm run build`
+Head over to [joi.how](https://joi.how) and try it out!
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Build
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+The app is made with react and nodejs and fully open source.  
+To locally run it:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. install [node 16](https://nodejs.org/en/blog/release/v16.16.0/)
+2. install [yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
+3. run
 
-### `npm run eject`
+```sh
+git clone https://github.com/PawCorp/joi.how.git
+cd joi.how
+yarn
+yarn start
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Social
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- We have an [e6 forum thread](https://e621.net/forum_topics/23796). We'd love to hear your feedback.
+- Want to let other people set your wallpaper? Try our other app, [Walltalker](https://walltaker.joi.how/).
+- Hang out with us in the [Walltalker discord server](https://discord.com/invite/waaHCqUXj6).

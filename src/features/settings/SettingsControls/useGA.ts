@@ -12,19 +12,19 @@ export function useGA<P>(category: string, props: P, record: (keyof P)[]) {
           if (typeof prop === 'number') {
             reactGA.event({
               category,
-              action: `Changed ${key}`,
+              action: `Changed ${String(key)}`,
               value: prop,
             })
           } else if (typeof prop === 'object') {
             reactGA.event({
               category,
-              action: `Changed ${key} to ${prop}`,
+              action: `Changed ${String(key)} to ${prop}`,
               label: JSON.stringify(prop),
             })
           } else {
             reactGA.event({
               category,
-              action: `Changed ${key} to ${prop}`,
+              action: `Changed ${String(key)} to ${prop}`,
             })
           }
         }, 2000),
@@ -33,9 +33,13 @@ export function useGA<P>(category: string, props: P, record: (keyof P)[]) {
     ),
   )
 
-  useEffect(() => {
-    record.forEach(key => {
-      eventRefs.current[key](props[key])
-    })
-  }, record.map(key => props[key]))
+  useEffect(
+    () => {
+      record.forEach((key) => {
+        eventRefs.current[key](props[key])
+      })
+    },
+    // eslint-disable-next-line
+    record.map((key) => props[key]),
+  )
 }

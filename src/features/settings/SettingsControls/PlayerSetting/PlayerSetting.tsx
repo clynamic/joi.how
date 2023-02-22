@@ -1,4 +1,3 @@
-import React from 'react'
 import '../settings.css'
 import { PlayerGender, PlayerParts } from '../../../gameboard/types'
 import { useGA } from '../useGA'
@@ -30,14 +29,15 @@ export function PlayerSetting(props: IPlayerSettingProps) {
       <legend>Player</legend>
       <div className="settings-row" role="radiogroup" id="gender">
         <strong>Select to set player gender.</strong>
-        {PLAYER_GENDER_TYPES.map(modeType => (
+        {PLAYER_GENDER_TYPES.map((modeType) => (
           <button
             name="gender"
             className={`settings-option${props.gender === modeType.gender ? '--enabled' : '--disabled'}`}
             onClick={() => props.setGender(modeType.gender)}
             role="radio"
             aria-checked={props.gender === modeType.gender}
-            key={modeType.gender}>
+            key={modeType.gender}
+          >
             <strong>{modeType.name}</strong>
             <span>{modeType.description}</span>
           </button>
@@ -45,14 +45,15 @@ export function PlayerSetting(props: IPlayerSettingProps) {
       </div>
       <div className="settings-row" role="radiogroup" id="parts">
         <strong>Select to set player parts.</strong>
-        {PLAYER_PARTS_TYPES.map(modeType => (
+        {PLAYER_PARTS_TYPES.map((modeType) => (
           <button
             name="parts"
             className={`settings-option${props.parts === modeType.parts ? '--enabled' : '--disabled'}`}
             onClick={() => props.setParts(modeType.parts)}
             role="radio"
             aria-checked={props.parts === modeType.parts}
-            key={modeType.parts}>
+            key={modeType.parts}
+          >
             <strong>{modeType.name}</strong>
             <span>{modeType.description}</span>
           </button>

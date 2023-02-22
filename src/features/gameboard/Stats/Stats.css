@@ -2,7 +2,7 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: rgba(92, 92, 92, 0.3)
+  background: rgba(92, 92, 92, 0.3);
 }
 
 .Stats__handContainer {
@@ -22,7 +22,7 @@
 }
 
 .Stats__handContainer .Stats__hand--active path {
-  fill: #FFF;
+  fill: #fff;
 }
 
 .Stats__handContainer .Stats__hand--inactive path {
@@ -47,18 +47,21 @@
 .Stats__handContainer > div {
   flex: 0 0 100%;
   text-align: center;
-  color: #FFF;
+  color: #fff;
 }
 
-.Stats__speedContainer .Stats__speed path, .Stats__speedContainer .Stats__speed circle {
+.Stats__speedContainer .Stats__speed path,
+.Stats__speedContainer .Stats__speed circle {
   transition: fill 200ms ease-out;
 }
 
-.Stats__speedContainer .Stats__speed--active path, .Stats__speedContainer .Stats__speed--active circle {
-  fill: #FFF;
+.Stats__speedContainer .Stats__speed--active path,
+.Stats__speedContainer .Stats__speed--active circle {
+  fill: #fff;
 }
 
-.Stats__speedContainer .Stats__speed--inactive path, .Stats__speedContainer .Stats__speed--inactive circle {
+.Stats__speedContainer .Stats__speed--inactive path,
+.Stats__speedContainer .Stats__speed--inactive circle {
   fill: rgba(255, 255, 255, 0.3);
   stroke-width: 5px;
 }

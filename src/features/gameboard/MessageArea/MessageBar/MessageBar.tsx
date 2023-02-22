@@ -3,6 +3,7 @@ import { Message } from '../MessageTypes'
 import './MessageBar.css'
 import { playTone } from '../../sound'
 import { ISettingsState } from '../../../settings/store'
+import { formatMessage } from '../../../../helpers/parseString'
 
 interface IMessageProps {
   message: Message
@@ -14,7 +15,11 @@ export class MessageBar extends React.Component<IMessageProps> {
   }
 
   render() {
-    return <div className={`MessageBar MessageBar--${this.getBarModifier(this.props.message.type)}`}>{this.props.message.text}</div>
+    return (
+      <div className={`MessageBar MessageBar--${this.getBarModifier(this.props.message.type)}`}>
+        {formatMessage(this.props.message.text, this.props.settings)}
+      </div>
+    )
   }
 
   getBarModifier(type: Message['type']) {

@@ -1,12 +1,3 @@
-import { SettingsAction } from './store'
-import { ThunkDispatch } from 'redux-thunk'
-import { IState } from '../../store'
-import { SettingsVibratorAction } from './store/actions.vibrator'
-
-export interface PropsForConnectedComponent {
-  dispatch: ThunkDispatch<IState, unknown, ReturnType<SettingsAction | SettingsVibratorAction>>
-}
-
 export type E621File = {
   width: number
   height: number

@@ -1,12 +1,11 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import './SettingsControls.css'
-import { connect } from 'react-redux'
 import { IState } from '../../../store'
 import { PornList } from '../../gameboard/types'
-import { PropsForConnectedComponent } from '../types'
+import { PropsForConnectedComponent } from '../../../store.types'
 import { PaceSetting } from './PaceSetting/PaceSetting'
 import { PornSetting } from './PornSetting/PornSetting'
-import { SettingsActions } from '../store'
+import { SettingsActions, VibratorActions } from '../store'
 import { DurationSetting } from './DurationSetting/DurationSetting'
 import { EventsSetting } from './EventsSetting/EventsSetting'
 import { HypnoSetting } from './HypnoSetting/HypnoSetting'
@@ -15,9 +14,9 @@ import { applyAllSettings, makeSave } from '../../../helpers/saveFormat'
 import { debounce } from 'lodash'
 import { CumSetting } from './CumSetting/CumSetting'
 import { VibratorSetting } from './VibratorSetting/VibratorSetting'
-import { SettingsVibratorActions } from '../store/actions.vibrator'
 import { WalltakerSetting } from './WalltakerSetting/WalltakerSetting'
 import { PlayerSetting } from './PlayerSetting/PlayerSetting'
+import { connect } from 'react-redux'
 
 interface ISettingsControlsProps extends PropsForConnectedComponent {
   pace: IState['settings']['pace']
@@ -27,7 +26,7 @@ interface ISettingsControlsProps extends PropsForConnectedComponent {
   duration: IState['settings']['duration']
   hypnoMode: IState['settings']['hypnoMode']
   cum: IState['settings']['cum']
-  vibrator: IState['vibrator']
+  vibrator: IState['vibrators']
   walltakerLink: IState['settings']['walltakerLink']
   player: IState['settings']['player']
 }
@@ -42,7 +41,7 @@ export const SettingsControls = connect(
       duration: state.settings.duration,
       hypnoMode: state.settings.hypnoMode,
       cum: state.settings.cum,
-      vibrator: state.vibrator,
+      vibrator: state.vibrators,
       walltakerLink: state.settings.walltakerLink,
       player: state.settings.player,
     } as ISettingsControlsProps),
@@ -65,10 +64,7 @@ export const SettingsControls = connect(
         setSteepness={(steepness) => props.dispatch(SettingsActions.SetSteepness(steepness))}
       />
 
-      <DurationSetting
-        duration={props.duration}
-        setDuration={(newDuration) => props.dispatch(SettingsActions.SetGameDuration(newDuration))}
-      />
+      <DurationSetting duration={props.duration} setDuration={(newDuration) => props.dispatch(SettingsActions.SetDuration(newDuration))} />
 
       <EventsSetting eventList={props.eventList} setEventList={(newList) => props.dispatch(SettingsActions.SetEventList(newList))} />
 
@@ -98,12 +94,13 @@ export const SettingsControls = connect(
       />
 
       <VibratorSetting
+        connection={props.vibrator.connection}
         error={props.vibrator.error}
-        vibrator={props.vibrator.vibrator}
+        vibrators={props.vibrator.devices}
         mode={props.vibrator.mode}
-        setMode={(newMode) => props.dispatch(SettingsVibratorActions.SetMode(newMode))}
-        onConnect={() => props.dispatch(SettingsVibratorActions.TryToPair())}
-        onDisconnect={() => props.dispatch(SettingsVibratorActions.TryToUnpair())}
+        setMode={(newMode) => props.dispatch(VibratorActions.SetMode(newMode))}
+        onConnect={() => props.dispatch(VibratorActions.Connect(null))}
+        onDisconnect={() => props.dispatch(VibratorActions.Disconnect())}
       />
 
       <SaveSetting settings={props} setSettings={(settings) => applyAllSettings(props.dispatch, settings)} />

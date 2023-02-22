@@ -28,26 +28,27 @@
   right: 15px;
 }
 
-#ReleaseNotes__button[aria-expanded=false]::after {
+#ReleaseNotes__button[aria-expanded='false']::after {
   content: '▼';
 }
 
-#ReleaseNotes__button[aria-expanded=true]::after {
+#ReleaseNotes__button[aria-expanded='true']::after {
   content: '▲';
 }
 
 #ReleaseNotes__content {
-  overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: hidden;
   transition: all 0.4s var(--expo);
   background: rgb(71, 73, 90);
 }
 
-#ReleaseNotes__content[aria-hidden=false] {
+#ReleaseNotes__content[aria-hidden='false'] {
   max-height: 300px;
   padding: 17px;
 }
 
-#ReleaseNotes__content[aria-hidden=true] {
+#ReleaseNotes__content[aria-hidden='true'] {
   max-height: 0;
   padding: 0 17px;
 }

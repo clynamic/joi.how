@@ -10,7 +10,7 @@ export function Cookies() {
 
   return (
     <>
-      <p>
+      <section>
         This site uses cookies and an analytics tool (Google Analytics) to improve the web app and collect feedback. We collect the minimum
         data that's usable for our purpose.
         <strong>
@@ -22,7 +22,7 @@ export function Cookies() {
 
           <button onClick={() => setAllowed(!allowed)}>{allowed ? 'Disallow' : 'Allow'} Cookies</button>
         </div>
-      </p>
+      </section>
     </>
   )
 }

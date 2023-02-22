@@ -1,4 +1,3 @@
-import React from 'react'
 import '../settings.css'
 import { useGA } from '../useGA'
 
@@ -38,7 +37,7 @@ export function CumSetting(props: ICumSettingProps) {
               max="100"
               step="1"
               value={props.ejaculateLikelihood}
-              onChange={e => props.setEjaculateLikelihood(parseInteger(e.target.value))}
+              onChange={(e) => props.setEjaculateLikelihood(parseInteger(e.target.value))}
             />
           </label>
           <span>
@@ -62,7 +61,7 @@ export function CumSetting(props: ICumSettingProps) {
               max="100"
               step="1"
               value={props.ruinLikelihood}
-              onChange={e => props.setRuinLikelihood(parseInteger(e.target.value))}
+              onChange={(e) => props.setRuinLikelihood(parseInteger(e.target.value))}
             />
           </label>
           <span>

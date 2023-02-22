@@ -1,4 +1,3 @@
-import React from 'react'
 import '../settings.css'
 import { HypnoMode } from '../../../gameboard/types'
 import { useGA } from '../useGA'
@@ -24,13 +23,14 @@ export function HypnoSetting(props: IHypnoSettingProps) {
       <legend>Hypno</legend>
       <div className="settings-row" role="radiogroup">
         <strong>Select to enable a hypno spinner text set.</strong>
-        {HYPNO_MODE_TYPES.map(modeType => (
+        {HYPNO_MODE_TYPES.map((modeType) => (
           <button
             className={`settings-option${props.mode === modeType.mode ? '--enabled' : '--disabled'}`}
             onClick={() => props.setMode(modeType.mode)}
             role="radio"
             aria-checked={props.mode === modeType.mode}
-            key={modeType.mode}>
+            key={modeType.mode}
+          >
             <strong>{modeType.name}</strong>
             <span>{modeType.description}</span>
           </button>

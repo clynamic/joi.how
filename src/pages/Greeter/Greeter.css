@@ -53,22 +53,29 @@
   text-decoration: none;
 }
 
-.GreeterPage p.callout {
+.GreeterPage .callout {
+  padding: 10px 15px;
   background: linear-gradient(#ffb300, #916706);
   cursor: pointer;
   transition: all 0.2s ease-out;
   color: #583c0f;
 }
 
-.GreeterPage p.callout:hover {
+.GreeterPage .callout:hover {
   transform: scale(1.025);
 }
 
-.GreeterPage p.callout h2 {
+.GreeterPage .callout h2 {
   margin: 3px 0 10px 0;
   font-size: 1.1rem;
 }
 
-.GreeterPage p.callout h2 img {
+.GreeterPage .callout h2 img {
   height: 2ex;
+}
+
+.GreeterPage .callout p {
+  padding: unset;
+  background-color: unset;
+  color: #583c0f;
 }
