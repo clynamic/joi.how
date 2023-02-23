@@ -1,3 +1,4 @@
+import { type FunctionComponent } from 'react'
 import styled from 'styled-components'
 
 interface IPornThumbnailProps {
@@ -29,7 +30,7 @@ const Thumbnail = styled.button<{ src: string; lowRes: boolean }>`
   }
 
   ${(props) =>
-    props.src &&
+    props.src != null &&
     `
     background-image: url(${props.src}) !important
   `}
@@ -52,21 +53,28 @@ const ThumbnailPreview = styled.img<{ src: string }>`
   }
 
   ${(props: { src?: string }) =>
-    props.src &&
+    props.src != null &&
     `
     background-image: url(${props.src})
   `}
 `
 
-export function PornThumbnail(props: IPornThumbnailProps) {
-  const imageIsLowRes = props.image.includes('/data/sample')
-  const imageIsAnimated = props.image.includes('.gif')
-  const previewURL = props.image.replace(/\/data\/(sample\/)?/, '/data/preview/').replace(/((\.png)|(\.bmp)|(.webp)|(.gif))/, '.jpg')
+export const PornThumbnail: FunctionComponent<IPornThumbnailProps> = ({ image, onDelete }) => {
+  const imageIsLowRes = image.includes('/data/sample')
+  const imageIsAnimated = image.includes('.gif')
+  const previewURL = image.replace(/\/data\/(sample\/)?/, '/data/preview/').replace(/((\.png)|(\.bmp)|(.webp)|(.gif))/, '.jpg')
   const preload = new Image()
-  preload.src = props.image
+  preload.src = image
+
   return (
-    <Thumbnail onClick={() => props.onDelete(props.image)} src={previewURL} lowRes={imageIsLowRes}>
-      <ThumbnailPreview src={imageIsAnimated ? props.image : previewURL} />
+    <Thumbnail
+      onClick={() => {
+        onDelete(image)
+      }}
+      src={previewURL}
+      lowRes={imageIsLowRes}
+    >
+      <ThumbnailPreview src={imageIsAnimated ? image : previewURL} />
     </Thumbnail>
   )
 }

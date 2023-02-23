@@ -1,4 +1,4 @@
-import { IState } from '../store'
+import { type IState } from '../store'
 
 /**
  * Special thanks to @Fauxil for making this intensity mapper function!
@@ -19,6 +19,7 @@ export function intensityToPaceBounds(
       paceBounds.min + 0.5 * (paceBounds.max - paceBounds.min) * (Math.tanh(steepness * (intensity - maxIntensity / 2) - offset) + 1),
     ),
   )
+
   return {
     max: Math.min(mid + 1.5, paceBounds.max),
     min: Math.max(mid - 1.5, paceBounds.min),

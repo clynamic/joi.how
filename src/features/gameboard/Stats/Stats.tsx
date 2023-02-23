@@ -1,70 +1,47 @@
-import React from 'react'
+import { type FunctionComponent } from 'react'
 
-import { IState } from '../../../store'
-import { EGrip } from '../types'
 import { Icon } from '../../../helpers/Icon'
+import { type IState } from '../../../store'
+import { EGrip } from '../types'
 
+import { useSelector } from 'react-redux'
 import './Stats.css'
-import { connect } from 'react-redux'
-import { PropsForConnectedComponent } from '../../../store.types'
 
-interface IStatsProps extends PropsForConnectedComponent {
-  grip: EGrip
-  pace: number
-  paceSettings: IState['settings']['pace']
-  isPaused: IState['game']['gamePaused']
+export const Stats: FunctionComponent = () => {
+  const grip = useSelector<IState, IState['game']['grip']>((state) => state.game.grip)
+  const pace = useSelector<IState, IState['game']['pace']>((state) => state.game.pace)
+  const paceSettings = useSelector<IState, IState['settings']['pace']>((state) => state.settings.pace)
+  const isPaused = useSelector<IState, IState['game']['gamePaused']>((state) => state.game.gamePaused)
+
+  return (
+    <div className="Stats" role="complementary" aria-label="Current stats">
+      <div className="Stats__speedContainer" tabIndex={0} aria-label={getSpeedStateLabel(paceSettings, pace)}>
+        <Icon icon="Stopped" className={`Stats__speed ${getClassForSpeed('low', paceSettings, pace, isPaused)}`} />
+        <Icon icon="Walk" className={`Stats__speed ${getClassForSpeed('medium', paceSettings, pace, isPaused)}`} />
+        <Icon icon="Run" className={`Stats__speed ${getClassForSpeed('high', paceSettings, pace, isPaused)}`} />
+        <div role="presentation">
+          <strong>{isPaused ? 0 : pace}s</strong>/sec
+        </div>
+      </div>
+      <div className="Stats__handContainer" tabIndex={0} aria-label={getHandStatLabel(grip, isPaused)}>
+        <Icon icon="Left" className={`Stats__hand ${getClassForHand(EGrip.left, grip, isPaused)}`} />
+        <Icon icon="Right" className={`Stats__hand ${getClassForHand(EGrip.right, grip, isPaused)}`} />
+      </div>
+    </div>
+  )
 }
 
-export const Stats = connect(
-  (state: IState) =>
-    ({
-      grip: state.game.grip,
-      pace: state.game.pace,
-      paceSettings: state.settings.pace,
-      isPaused: state.game.gamePaused,
-    } as IStatsProps),
-)(
-  class extends React.Component<IStatsProps> {
-    render() {
-      return (
-        <div className="Stats" role="complementary" aria-label="Current stats">
-          <div className="Stats__speedContainer" tabIndex={0} aria-label={getSpeedStateLabel(this.props.paceSettings, this.props.pace)}>
-            <Icon
-              icon="Stopped"
-              className={`Stats__speed ${getClassForSpeed('low', this.props.paceSettings, this.props.pace, this.props.isPaused)}`}
-            />
-            <Icon
-              icon="Walk"
-              className={`Stats__speed ${getClassForSpeed('medium', this.props.paceSettings, this.props.pace, this.props.isPaused)}`}
-            />
-            <Icon
-              icon="Run"
-              className={`Stats__speed ${getClassForSpeed('high', this.props.paceSettings, this.props.pace, this.props.isPaused)}`}
-            />
-            <div role="presentation">
-              <strong>{this.props.isPaused ? 0 : this.props.pace}s</strong>/sec
-            </div>
-          </div>
-          <div className="Stats__handContainer" tabIndex={0} aria-label={getHandStatLabel(this.props.grip, this.props.isPaused)}>
-            <Icon icon="Left" className={`Stats__hand ${getClassForHand(EGrip.left, this.props.grip, this.props.isPaused)}`} />
-            <Icon icon="Right" className={`Stats__hand ${getClassForHand(EGrip.right, this.props.grip, this.props.isPaused)}`} />
-          </div>
-        </div>
-      )
-    }
-  },
-)
-
-function getClassForHand(side: EGrip, current: EGrip, isPaused: IStatsProps['isPaused']): string {
+function getClassForHand(side: EGrip, current: EGrip, isPaused: IState['game']['gamePaused']): string {
   const state = (side === current || current === EGrip.both) && !isPaused ? 'active' : 'inactive'
+
   return `Stats__hand--${state}`
 }
 
 function getClassForSpeed(
   range: 'low' | 'medium' | 'high',
-  paceSettings: IStatsProps['paceSettings'],
+  paceSettings: IState['settings']['pace'],
   current: number,
-  isPaused: IStatsProps['isPaused'],
+  isPaused: IState['game']['gamePaused'],
 ): string {
   if (isPaused) return 'Stats__speed--inactive'
   const ratio = (current - paceSettings.min) / (paceSettings.max - paceSettings.min)
@@ -78,7 +55,7 @@ function getClassForSpeed(
   }
 }
 
-function getHandStatLabel(grip: EGrip, isPaused: IStatsProps['isPaused']) {
+function getHandStatLabel(grip: EGrip, isPaused: IState['game']['gamePaused']): string {
   if (isPaused) return "Hand's off entirely!"
   switch (grip) {
     case EGrip.none:
@@ -92,7 +69,7 @@ function getHandStatLabel(grip: EGrip, isPaused: IStatsProps['isPaused']) {
   }
 }
 
-function getSpeedStateLabel(paceSettings: IStatsProps['paceSettings'], current: number) {
+function getSpeedStateLabel(paceSettings: IState['settings']['pace'], current: number): string | undefined {
   const ratio = (current - paceSettings.min) / (paceSettings.max - paceSettings.min)
   if (ratio < 0.33333) return `Slow pace of ${current} strokes per second`
   if (ratio >= 0.33333 && ratio < 0.66666) return `Normal pace of ${current} strokes per second`

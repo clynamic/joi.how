@@ -1,6 +1,6 @@
-import { GameEvent, EGrip } from '../../../types'
-import { GameBoardActions } from '../../../store'
 import { MessageType } from '../../../MessageArea/MessageTypes'
+import { GameBoardActions } from '../../../store'
+import { EGrip, type GameEvent } from '../../../types'
 import { wait } from '../../helpers'
 
 function stringifyGrip(grip: EGrip): string {

@@ -1,16 +1,16 @@
-import { ButtplugClientDevice } from 'buttplug'
+import { type ButtplugClientDevice } from 'buttplug'
 import { wait } from '../features/gameboard/events/helpers'
 
 export class Vibrator {
   active = false
 
-  constructor(private device: ButtplugClientDevice) {}
+  constructor(private readonly device: ButtplugClientDevice) {}
 
-  async setVibration(intensity: number) {
-    return this.device.vibrate(intensity)
+  async setVibration(intensity: number): Promise<void> {
+    await this.device.vibrate(intensity)
   }
 
-  async thump(timeout: number, intensity: number = 1) {
+  async thump(timeout: number, intensity = 1): Promise<void> {
     if (!this.active) {
       this.active = true
       await this.device.vibrate(intensity)
@@ -18,11 +18,11 @@ export class Vibrator {
       await this.device.stop()
       this.active = false
     } else {
-      return wait(timeout)
+      await wait(timeout)
     }
   }
 
-  get name() {
+  get name(): string {
     return this.device.name
   }
 }

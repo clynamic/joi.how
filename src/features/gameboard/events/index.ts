@@ -1,14 +1,14 @@
-import { IState } from '../../../store'
-import { GameEvent, EventToken } from '../types'
-import { randomGrip } from './event-definitions/tasks/randomGrip'
-import { randomPace } from './event-definitions/pace/randomPace'
-import { risingPace } from './event-definitions/pace/risingPace'
-import { doublePace } from './event-definitions/pace/doublePace'
-import { halfPace } from './event-definitions/pace/halfPace'
+import { type IState } from '../../../store'
+import { type EventToken, type GameEvent } from '../types'
 import { cum } from './event-definitions/edging/cum'
 import { edge } from './event-definitions/edging/edge'
-import { cleanMess } from './event-definitions/tasks/cleanMess'
+import { doublePace } from './event-definitions/pace/doublePace'
+import { halfPace } from './event-definitions/pace/halfPace'
 import { pause } from './event-definitions/pace/pause'
+import { randomPace } from './event-definitions/pace/randomPace'
+import { risingPace } from './event-definitions/pace/risingPace'
+import { cleanMess } from './event-definitions/tasks/cleanMess'
+import { randomGrip } from './event-definitions/tasks/randomGrip'
 
 export const events = [
   { id: 'cum', name: 'Cum', description: 'Creates an end point to the game. Enable this to adjust ruin/cum/denial options.' },
@@ -68,14 +68,14 @@ export function getNextEvent(state: IState): ReturnType<GameEvent> | null {
   return null
 }
 
-function isEnabled(eventKey: EventToken['id'], state: IState) {
-  return state.settings.eventList.indexOf(eventKey) > -1
+function isEnabled(eventKey: EventToken['id'], state: IState): boolean {
+  return state.settings.eventList.includes(eventKey)
 }
 
 function chance(numerator: number, denominator: number): boolean {
   return Math.floor(Math.random() * denominator) < numerator
 }
 
-function moreLikelyAs(initialValue: number, factor: number, stepPerFactor: number) {
+function moreLikelyAs(initialValue: number, factor: number, stepPerFactor: number): number {
   return initialValue - factor * stepPerFactor
 }

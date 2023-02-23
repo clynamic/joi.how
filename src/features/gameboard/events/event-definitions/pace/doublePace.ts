@@ -1,8 +1,8 @@
-import { GameEvent } from '../../../types'
-import { GameBoardActions } from '../../../store'
 import { MessageType } from '../../../MessageArea/MessageTypes'
-import { randomPace } from './randomPace'
+import { GameBoardActions } from '../../../store'
+import { type GameEvent } from '../../../types'
 import { wait } from '../../helpers'
+import { randomPace } from './randomPace'
 
 export const doublePace: GameEvent = () => {
   return async (state, dispatch) => {
@@ -47,6 +47,6 @@ export const doublePace: GameEvent = () => {
         text: `Done! Back to normal pace`,
       }),
     )
-    randomPace(MessageType.EventDescription)(state, dispatch) // This event resumes afterwards
+    void randomPace(MessageType.EventDescription)(state, dispatch) // This event resumes afterwards
   }
 }

@@ -1,8 +1,9 @@
+import { type FunctionComponent } from 'react'
 import { GameBoard } from '../features/gameboard'
-import { SettingsEntryPoint } from '../features/settings/SettingsEntryPoint/SettingsEntryPoint'
 import { SettingsDialog } from '../features/settings/SettingsDialog/SettingsDialog'
+import { SettingsEntryPoint } from '../features/settings/SettingsEntryPoint/SettingsEntryPoint'
 
-export function PlayPage() {
+export const PlayPage: FunctionComponent = () => {
   return (
     <>
       <SettingsDialog />

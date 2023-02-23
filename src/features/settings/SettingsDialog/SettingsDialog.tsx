@@ -1,74 +1,57 @@
-import React from 'react'
-import { PropsForConnectedComponent } from '../../../store.types'
-import { IState } from '../../../store'
+import { useEffect, type FunctionComponent } from 'react'
+import { type IState } from '../../../store'
 
-import './SettingsDialog.css'
-import { SettingsActions } from '../store'
+import { useDispatch, useSelector } from 'react-redux'
 import { SettingsControls } from '../SettingsControls/SettingsControls'
-import { connect } from 'react-redux'
+import { SettingsActions } from '../store'
+import './SettingsDialog.css'
 
-interface ISettingsDialogProps extends PropsForConnectedComponent {
-  shown: boolean
+export const SettingsDialog: FunctionComponent = () => {
+  const dialogShown = useSelector<IState, IState['settings']['dialogShown']>((state) => state.settings.dialogShown)
+  const dispatch = useDispatch()
+
+  const dismiss = (): void => {
+    void dispatch(SettingsActions.CloseDialog())
+  }
+
+  const escapePress = (event: KeyboardEvent): void => {
+    if (event.keyCode === 27) {
+      dismiss()
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('keydown', escapePress, false)
+
+    return () => {
+      document.removeEventListener('keydown', escapePress, false)
+    }
+  }, [])
+
+  return (
+    <>
+      <div
+        className={`SettingsDialog__dim SettingsDialog__dim--${dialogShown ? 'shown' : 'hidden'}`}
+        onClick={dismiss}
+        role="presentation"
+      />
+      <div
+        className={`SettingsDialog SettingsDialog--${dialogShown ? 'shown' : 'hidden'}`}
+        role="dialog"
+        aria-label="Settings Dialog"
+        hidden={!dialogShown}
+        tabIndex={dialogShown ? 0 : -1}
+      >
+        <div className="SettingsDialog__content">
+          <section className="settings-row">
+            <p>
+              Press <strong>escape</strong> to close, or click outside the dialog box. These settings affect the current game, and it
+              continues to run while you adjust these.
+            </p>
+          </section>
+          <SettingsControls />
+        </div>
+      </div>
+    </>
+  )
 }
-
-export const SettingsDialog = connect(
-  (state: IState) =>
-    ({
-      shown: state.settings.dialogShown,
-    } as ISettingsDialogProps),
-)(
-  class extends React.Component<ISettingsDialogProps> {
-    constructor(props: ISettingsDialogProps) {
-      super(props)
-      this.dismiss = this.dismiss.bind(this)
-      this.escapePress = this.escapePress.bind(this)
-    }
-
-    dismiss() {
-      this.props.dispatch(SettingsActions.CloseDialog())
-    }
-
-    escapePress(event: KeyboardEvent) {
-      if (event.keyCode === 27) {
-        this.dismiss()
-      }
-    }
-
-    componentDidMount() {
-      document.addEventListener('keydown', this.escapePress, false)
-    }
-
-    componentWillUnmount() {
-      document.removeEventListener('keydown', this.escapePress, false)
-    }
-
-    render() {
-      return (
-        <>
-          <div
-            className={`SettingsDialog__dim SettingsDialog__dim--${this.props.shown ? 'shown' : 'hidden'}`}
-            onClick={this.dismiss}
-            role="presentation"
-          />
-          <div
-            className={`SettingsDialog SettingsDialog--${this.props.shown ? 'shown' : 'hidden'}`}
-            role="dialog"
-            aria-label="Settings Dialog"
-            hidden={!this.props.shown}
-            tabIndex={this.props.shown ? 0 : -1}
-          >
-            <div className="SettingsDialog__content">
-              <section className="settings-row">
-                <p>
-                  Press <strong>escape</strong> to close, or click outside the dialog box. These settings affect the current game, and it
-                  continues to run while you adjust these.
-                </p>
-              </section>
-              <SettingsControls />
-            </div>
-          </div>
-        </>
-      )
-    }
-  },
-)

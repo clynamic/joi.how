@@ -1,18 +1,18 @@
-import { useMemo } from 'react'
+import { useMemo, type FunctionComponent } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Icon } from '../../../helpers/Icon'
 
-import './EmergencyStop.css'
-import { playTone } from '../sound'
+import { type AnyAction } from 'redux'
+import { type ThunkDispatch } from 'redux-thunk'
+import { type IState } from '../../../store'
+import { loop, wait } from '../events/helpers'
 import { MessageType } from '../MessageArea/MessageTypes'
-import { IState } from '../../../store'
-import { wait, loop } from '../events/helpers'
-import { AnyAction } from 'redux'
-import { ThunkDispatch } from 'redux-thunk'
+import { playTone } from '../sound'
 import { GameBoardActions } from '../store'
+import './EmergencyStop.css'
 
-export function EmergencyStop() {
-  const dispatch: ThunkDispatch<IState, any, AnyAction> = useDispatch()
+export const EmergencyStop: FunctionComponent = () => {
+  const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
   const isPaused = useSelector<IState, IState['game']['gamePaused']>((state) => state.game.gamePaused)
 
@@ -20,7 +20,7 @@ export function EmergencyStop() {
     return Math.ceil(Math.min(intensity * 500 + 10000, 90000) / 1000)
   }, [intensity])
 
-  async function stop() {
+  async function stop(): Promise<void> {
     dispatch(GameBoardActions.PauseEvents())
     dispatch(GameBoardActions.PauseGame())
     playTone(400)
@@ -40,19 +40,19 @@ export function EmergencyStop() {
       }),
     )
 
-    dispatch(GameBoardActions.SetPace(1))
-    dispatch(GameBoardActions.DecIntensity(30))
+    void dispatch(GameBoardActions.SetPace(1))
+    void dispatch(GameBoardActions.DecIntensity(30))
 
     await wait(5000)
 
-    await loop(timeToCalmDown, (i) => {
+    await loop(timeToCalmDown, async (i) => {
       dispatch(
         GameBoardActions.ShowMessage({
           type: MessageType.EventDescription,
           text: `${timeToCalmDown - i}...`,
         }),
       )
-      return wait(1000)
+      await wait(1000)
     })
 
     dispatch(
@@ -74,8 +74,8 @@ export function EmergencyStop() {
     await wait(100)
     playTone(400)
 
-    dispatch(GameBoardActions.SetPace(1))
-    dispatch(GameBoardActions.DecIntensity(30))
+    void dispatch(GameBoardActions.SetPace(1))
+    void dispatch(GameBoardActions.DecIntensity(30))
 
     dispatch(GameBoardActions.ResumeEvents())
     dispatch(GameBoardActions.ResumeGame())
@@ -83,7 +83,13 @@ export function EmergencyStop() {
 
   return (
     <div className="EmergencyStop">
-      <button disabled={isPaused} onClick={stop} title="Press when too close to cumming to continue">
+      <button
+        disabled={isPaused}
+        onClick={() => {
+          void stop()
+        }}
+        title="Press when too close to cumming to continue"
+      >
         Too Close
         <Icon icon="Right" />
       </button>

@@ -1,10 +1,10 @@
-export type E621File = {
+export interface E621File {
   width: number
   height: number
   url: string | null
 }
 
-export type E621Post = {
+export interface E621Post {
   id: number
   created_at: string
   updated_at: string
@@ -37,7 +37,7 @@ export type E621Post = {
   is_favorited: boolean
 }
 
-export type E621User = {
+export interface E621User {
   api_burst_limit: number
   api_regen_multiplier: number
   artist_version_count: number

@@ -1,12 +1,13 @@
-import { GameEvent, EGrip, PlayerParts } from '../../../types'
-import { GameBoardActions } from '../../../store'
 import { MessageType } from '../../../MessageArea/MessageTypes'
 import { playTone } from '../../../sound'
+import { GameBoardActions } from '../../../store/reducer'
+
+import { EGrip, PlayerParts, type GameEvent } from '../../../types'
 import { wait } from '../../helpers'
 
 export const cum: GameEvent = () => {
   return (state, dispatch) => {
-    let hasCock = state.settings.player.parts === PlayerParts.Cock
+    const hasCock = state.settings.player.parts === PlayerParts.Cock
     dispatch(
       GameBoardActions.ShowMessage({
         type: MessageType.Prompt,
@@ -119,6 +120,7 @@ export const cum: GameEvent = () => {
                 }),
               )
               dispatch(GameBoardActions.PauseGame())
+              dispatch(GameBoardActions.DecIntensity(100))
               await wait(20000)
               dispatch(
                 GameBoardActions.ShowMessage({
@@ -126,7 +128,6 @@ export const cum: GameEvent = () => {
                   text: `Start ${hasCock ? 'stroking again.' : 'pawing again.'}`,
                 }),
               )
-              dispatch(GameBoardActions.DecIntensity(100))
               dispatch(GameBoardActions.SetPace(state.settings.pace.min))
               dispatch(GameBoardActions.ResumeGame())
               await wait(15000)

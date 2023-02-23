@@ -1,13 +1,13 @@
-import React from 'react'
-import '../settings.css'
-import './PornSetting.css'
-import { Credentials, PornList } from '../../../gameboard/types'
-import { E621Post, E621User } from '../../types'
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { PornThumbnail } from './PornThumbnail'
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { debounce } from 'lodash'
+import React, { type ReactElement } from 'react'
 import reactGA from '../../../../analytics'
 import { Blacklist } from '../../../../helpers/blacklist'
+import { type Credentials, type PornList } from '../../../gameboard/types'
+import { type E621Post, type E621User } from '../../types'
+import '../settings.css'
+import './PornSetting.css'
+import { PornThumbnail } from './PornThumbnail'
 
 interface IPornSettingProps {
   credentials: Credentials | null
@@ -56,42 +56,42 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
     this.clear = this.clear.bind(this)
   }
 
-  componentDidUpdate(prevProps: IPornSettingProps) {
+  componentDidUpdate(prevProps: IPornSettingProps): void {
     if (this.props.credentials !== null && prevProps.credentials === null) {
       this.setState({ credentials: this.props.credentials })
       this.loadBlacklist()
     }
   }
 
-  updateTags(event: React.ChangeEvent<HTMLInputElement>) {
+  updateTags(event: React.ChangeEvent<HTMLInputElement>): void {
     this.setState({
       tags: event.target.value,
     })
   }
 
-  updateLogin(event: React.ChangeEvent<HTMLInputElement>) {
+  updateLogin(event: React.ChangeEvent<HTMLInputElement>): void {
     const login = event.target.value
     this.setState((prevState) => ({
       credentials: {
-        ...prevState.credentials!,
+        ...prevState.credentials,
         login,
       },
       credentialsError: null,
     }))
   }
 
-  updateApiKey(event: React.ChangeEvent<HTMLInputElement>) {
-    const api_key = event.target.value
+  updateApiKey(event: React.ChangeEvent<HTMLInputElement>): void {
+    const apiKey = event.target.value
     this.setState((prevState) => ({
       credentials: {
-        ...prevState.credentials!,
-        api_key,
+        ...prevState.credentials,
+        api_key: apiKey,
       },
       credentialsError: null,
     }))
   }
 
-  saveCredentials() {
+  saveCredentials(): void {
     // Check to see if these credentials are valid
     const config: AxiosRequestConfig = {
       params: this.state.credentials,
@@ -99,26 +99,31 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
     }
     axios
       .get(`https://e621.net/users/${this.state.credentials.login}.json`, config)
-      .then(() => this.props.setCredentials(this.state.credentials))
-      .catch(() => this.setState({ credentialsError: 'Invalid credentials' }))
+      .then(() => {
+        this.props.setCredentials(this.state.credentials)
+      })
+      .catch(() => {
+        this.setState({ credentialsError: 'Invalid credentials' })
+      })
   }
 
-  clearCredentials() {
+  clearCredentials(): void {
     this.props.setCredentials(null)
     this.setState({ addCredentials: false })
   }
 
-  loadBlacklist() {
+  loadBlacklist(): void {
     const config: AxiosRequestConfig = {
       params: this.props.credentials,
       responseType: 'json',
     }
-    axios.get(`https://e621.net/users/${this.props.credentials!.login}.json`, config).then((response: AxiosResponse<E621User>) => {
+    if (this.props.credentials == null) return
+    void axios.get(`https://e621.net/users/${this.props.credentials.login}.json`, config).then((response: AxiosResponse<E621User>) => {
       this.setState({ blacklistTagsString: response.data.blacklisted_tags })
     })
   }
 
-  downloadFromTags() {
+  downloadFromTags(): void {
     debounce(() => {
       if (localStorage.getItem('allowCookies') !== 'true' || localStorage.getItem('allowCookies') !== null) return
       reactGA.event({
@@ -133,9 +138,9 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
       config.params = this.props.credentials
     }
 
-    const blacklist = new Blacklist(this.state.blacklistTagsString || '')
+    const blacklist = new Blacklist(this.state.blacklistTagsString ?? '')
     const tags = encodeURIComponent(this.state.tags + (this.state.minScore !== null ? ` score:>=${this.state.minScore}` : ''))
-    axios
+    void axios
       .get(`https://e621.net/posts.json?tags=${tags}&limit=${this.state.count}&callback=callback`, config)
       .then((response: AxiosResponse<{ posts: E621Post[] }>) => {
         this.props.setPornList(
@@ -146,21 +151,21 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
               .map((post) => (this.state.flags.highRes ? post.file.url : post.sample.url))
               .filter((url) => url !== null) as string[]
           )
-            .filter((url) => this.props.pornList.indexOf(url) === -1)
+            .filter((url) => !this.props.pornList.includes(url))
             .concat(this.props.pornList),
         )
       })
   }
 
-  clear() {
+  clear(): void {
     this.props.setPornList([])
   }
 
-  clearOne(image: string) {
+  clearOne(image: string): void {
     this.props.setPornList(this.props.pornList.filter((porn) => porn !== image))
   }
 
-  render() {
+  render(): ReactElement {
     return (
       <fieldset className="settings-group">
         <legend>Porn</legend>
@@ -174,7 +179,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
           </div>
 
           <div className="settings-innerrow">
-            {this.props.credentials ? (
+            {this.props.credentials != null ? (
               <>
                 <label>
                   <span>Use user credentials</span>
@@ -194,7 +199,9 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
                   <input
                     type="checkbox"
                     checked={this.state.addCredentials}
-                    onChange={(e) => this.setState({ addCredentials: e.target.checked })}
+                    onChange={(e) => {
+                      this.setState({ addCredentials: e.target.checked })
+                    }}
                   />
                 </label>
                 <em>Login to use votedup:me, private sets, &amp; your blacklist.</em>
@@ -211,7 +218,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
                       <input type="text" value={this.state.credentials.api_key} onChange={this.updateApiKey} />
                     </label>
                     <em>
-                      (found in <a href="https://e621.net/users/home">your account</a> under "Manage API Access")
+                      (found in <a href="https://e621.net/users/home">your account</a> under &quot;Manage API Access&quot;)
                     </em>
                     <button onClick={this.saveCredentials}>Save credentials</button>
                     {this.state.credentialsError != null ? <span className="PornSetting__error">{this.state.credentialsError}</span> : null}
@@ -226,7 +233,9 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
               <input
                 type="checkbox"
                 checked={this.state.blacklistTagsString !== null}
-                onChange={(e) => this.setState({ blacklistTagsString: !e.target.checked ? null : '' })}
+                onChange={(e) => {
+                  this.setState({ blacklistTagsString: !e.target.checked ? null : '' })
+                }}
               />
             </label>
             {this.state.blacklistTagsString !== null ? (
@@ -238,12 +247,15 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
                   <textarea
                     className="PornSetting__textarea"
                     value={this.state.blacklistTagsString}
-                    onChange={(e) => this.setState({ blacklistTagsString: e.target.value })}></textarea>
+                    onChange={(e) => {
+                      this.setState({ blacklistTagsString: e.target.value })
+                    }}
+                  ></textarea>
                   <em>
-                    Put any tag combinations you don't want to see. Each combination should go on a separate line. &nbsp;
+                    Put any tag combinations you don&apos;t want to see. Each combination should go on a separate line. &nbsp;
                     <a href="https://e621.net/help/blacklist">View help</a>.
                   </em>
-                  {this.props.credentials ? <button onClick={this.loadBlacklist}>Reload user blacklist</button> : null}
+                  {this.props.credentials != null ? <button onClick={this.loadBlacklist}>Reload user blacklist</button> : null}
                 </label>
               </>
             ) : null}
@@ -254,7 +266,9 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
               <input
                 type="checkbox"
                 checked={this.state.minScore !== null}
-                onChange={(e) => this.setState({ minScore: !e.target.checked ? null : -10 })}
+                onChange={(e) => {
+                  this.setState({ minScore: !e.target.checked ? null : -10 })
+                }}
               />
             </label>
             {this.state.minScore !== null ? (
@@ -269,7 +283,9 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
                     max="690"
                     step="1"
                     value={this.state.minScore === null ? 0 : this.state.minScore}
-                    onChange={(e) => this.setState({ minScore: parseInt(e.target.value) })}
+                    onChange={(e) => {
+                      this.setState({ minScore: parseInt(e.target.value) })
+                    }}
                   />
                 </label>
                 <span>
@@ -288,7 +304,9 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
                 max="150"
                 step="1"
                 value={this.state.count}
-                onChange={(e) => this.setState({ count: parseInt(e.target.value) })}
+                onChange={(e) => {
+                  this.setState({ count: parseInt(e.target.value) })
+                }}
               />
             </label>
             <span>
@@ -302,7 +320,9 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
               <input
                 type="checkbox"
                 checked={this.state.flags.highRes}
-                onChange={(e) => this.setState({ flags: { highRes: e.target.checked } })}
+                onChange={(e) => {
+                  this.setState({ flags: { highRes: e.target.checked } })
+                }}
               />
               <i className="emoji-icon">{this.state.flags.highRes ? '🦄' : '🐴'}</i>
             </label>

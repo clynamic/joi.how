@@ -1,10 +1,11 @@
 {
   "$schema": "http://json.schemastore.org/prettierrc.json",
   "trailingComma": "all",
+  "arrowParens": "always",
   "tabWidth": 2,
+  "printWidth": 140,
   "semi": false,
   "singleQuote": true,
   "bracketSpacing": true,
-  "jsxBracketSameLine": true,
-  "printWidth": 140
+  "plugins": ["prettier-plugin-organize-imports"]
 }

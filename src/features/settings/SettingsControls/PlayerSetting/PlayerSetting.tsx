@@ -1,5 +1,6 @@
-import '../settings.css'
+import { type FunctionComponent } from 'react'
 import { PlayerGender, PlayerParts } from '../../../gameboard/types'
+import '../settings.css'
 import { useGA } from '../useGA'
 
 interface IPlayerSettingProps {
@@ -21,7 +22,7 @@ const PLAYER_PARTS_TYPES = [
   { parts: PlayerParts.Neuter, name: 'Neuter', description: 'You have neither.' },
 ]
 
-export function PlayerSetting(props: IPlayerSettingProps) {
+export const PlayerSetting: FunctionComponent<IPlayerSettingProps> = (props) => {
   useGA('Player', props, ['gender', 'parts'])
 
   return (
@@ -33,7 +34,9 @@ export function PlayerSetting(props: IPlayerSettingProps) {
           <button
             name="gender"
             className={`settings-option${props.gender === modeType.gender ? '--enabled' : '--disabled'}`}
-            onClick={() => props.setGender(modeType.gender)}
+            onClick={() => {
+              props.setGender(modeType.gender)
+            }}
             role="radio"
             aria-checked={props.gender === modeType.gender}
             key={modeType.gender}
@@ -49,7 +52,9 @@ export function PlayerSetting(props: IPlayerSettingProps) {
           <button
             name="parts"
             className={`settings-option${props.parts === modeType.parts ? '--enabled' : '--disabled'}`}
-            onClick={() => props.setParts(modeType.parts)}
+            onClick={() => {
+              props.setParts(modeType.parts)
+            }}
             role="radio"
             aria-checked={props.parts === modeType.parts}
             key={modeType.parts}

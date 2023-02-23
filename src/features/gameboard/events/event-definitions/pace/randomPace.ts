@@ -1,8 +1,8 @@
-import { GameEvent } from '../../../types'
-import { GameBoardActions } from '../../../store'
-import { MessageType } from '../../../MessageArea/MessageTypes'
-import { round } from '../../../../../helpers/round'
 import { intensityToPaceBounds } from '../../../../../helpers/intensity'
+import { round } from '../../../../../helpers/round'
+import { MessageType } from '../../../MessageArea/MessageTypes'
+import { GameBoardActions } from '../../../store'
+import { type GameEvent } from '../../../types'
 import { wait } from '../../helpers'
 
 export const randomPace: GameEvent<[MessageType.EventDescription | MessageType.NewEvent | undefined]> = (
@@ -13,7 +13,7 @@ export const randomPace: GameEvent<[MessageType.EventDescription | MessageType.N
     const newPace = round(Math.random() * (bounds.max - bounds.min) + bounds.min)
     dispatch(
       (() => {
-        if (messageType) {
+        if (messageType != null) {
           return GameBoardActions.ShowMessage({
             type: messageType,
             text: `Pace changed to ${newPace}!`,

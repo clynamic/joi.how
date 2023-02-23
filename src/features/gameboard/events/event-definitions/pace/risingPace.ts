@@ -1,8 +1,8 @@
-import { GameEvent } from '../../../types'
-import { GameBoardActions } from '../../../store'
-import { MessageType } from '../../../MessageArea/MessageTypes'
-import { round } from '../../../../../helpers/round'
 import { intensityToPaceBounds } from '../../../../../helpers/intensity'
+import { round } from '../../../../../helpers/round'
+import { MessageType } from '../../../MessageArea/MessageTypes'
+import { GameBoardActions } from '../../../store'
+import { type GameEvent } from '../../../types'
 import { wait } from '../../helpers'
 
 export const risingPace: GameEvent<[number]> = (acceleration: number) => {

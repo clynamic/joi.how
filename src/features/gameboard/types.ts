@@ -1,7 +1,7 @@
-import { IState } from '../../store'
-import { GameBoardAction } from './store'
+import { type IState } from '../../store'
+import { type GameBoardAction } from './store'
 
-export type ArrayElement<A> = A extends readonly (infer T)[] ? T : never
+export type ArrayElement<A> = A extends ReadonlyArray<infer T> ? T : never
 
 export enum EStroke {
   up,
@@ -15,16 +15,16 @@ export enum EGrip {
   none,
 }
 
-export type Credentials = {
+export interface Credentials {
   login: string
   api_key: string
 }
 
 export type PornList = string[]
 
-export type GameEvent<Args extends any[] = []> = (
+export type GameEvent<Args extends unknown[] = []> = (
   ...args: Args
-) => (state: IState, dispatch: (action: ReturnType<GameBoardAction>) => void) => void | Promise<any>
+) => (state: IState, dispatch: (action: ReturnType<GameBoardAction>) => void) => void | Promise<void>
 
 export interface EventToken {
   id: string

@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react'
-import { IState } from '../../../store'
-import axios, { AxiosResponse } from 'axios'
+import axios, { type AxiosResponse } from 'axios'
+import { useEffect, useState, type FunctionComponent } from 'react'
+import { type IState } from '../../../store'
 import { SettingsActions } from '../../settings/store'
-import { GameBoardActions } from '../store'
 import { MessageType } from '../MessageArea/MessageTypes'
+import { GameBoardActions } from '../store'
 
 interface IWalltakerProps {
   walltakerLink: IState['settings']['walltakerLink']
   pornList: IState['settings']['pornList']
-  dispatch: (action: any) => void
+  dispatch: (action: unknown) => void
 }
 
 interface IWalltakerLink {
@@ -28,15 +28,15 @@ interface IWalltakerLink {
 
 const PING_EVERY = 8000
 
-export function Walltaker(props: IWalltakerProps) {
+export const Walltaker: FunctionComponent<IWalltakerProps> = (props) => {
   const { walltakerLink, pornList, dispatch } = props
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
   useEffect(() => {
-    if (intervalId !== null) clearInterval(intervalId)
-    if (walltakerLink) {
+    if (intervalId != null) clearInterval(intervalId)
+    if (walltakerLink != null) {
       setIntervalId(
         setInterval(() => {
-          axios
+          void axios
             .get(`https://walltaker.joi.how/links/${walltakerLink}.json`, {
               responseType: 'json',
               headers: {
@@ -44,7 +44,7 @@ export function Walltaker(props: IWalltakerProps) {
               },
             })
             .then((response: AxiosResponse<IWalltakerLink>) => {
-              if (response.data.post_url && !pornList.includes(response.data.post_url)) {
+              if (response.data.post_url != null && !pornList.includes(response.data.post_url)) {
                 dispatch(SettingsActions.SetPornList([...pornList, response.data.post_url]))
                 dispatch(
                   GameBoardActions.ShowMessage({
@@ -59,7 +59,7 @@ export function Walltaker(props: IWalltakerProps) {
     }
 
     return () => {
-      if (intervalId !== null) clearInterval(intervalId)
+      if (intervalId != null) clearInterval(intervalId)
     }
   }, [intervalId, walltakerLink, pornList, dispatch])
 

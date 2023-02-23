@@ -1,13 +1,13 @@
 // Blacklist logic taken from e621's source, refactored, added types, and added comments
 // https://github.com/zwagoth/e621ng/blob/b4672dadeef12e7aa20401b6074bc7676bb23bbb/app/javascript/src/javascripts/blacklists.js
 
-import { E621Post } from '../features/settings/types'
+import { type E621Post } from '../features/settings/types'
 
 type InvalidCompairsons = '<<' | '<>' | '><' | '>>'
 type FixableCompairsons = '' | '=' | '=<' | '=>'
 type ValidComparisons = '<' | '<=' | '==' | '>=' | '>'
 type AllComparisons = InvalidCompairsons | FixableCompairsons | ValidComparisons
-type ScoreComparison = {
+interface ScoreComparison {
   comparison: ValidComparisons | InvalidCompairsons
   score: number
 }
@@ -54,22 +54,22 @@ function rangeComparator(comparison: ScoreComparison, target: number): boolean {
   }
 }
 
-function is_subset(array: any[], subarray: any[]) {
-  return subarray.every(value => array.includes(value))
+function isSubset(array: unknown[], subarray: unknown[]): boolean {
+  return subarray.every((value) => array.includes(value))
 }
 
-function intersect(a: any[], b: any[]) {
-  return a.filter(value => b.includes(value))
+function intersect(a: unknown[], b: unknown[]): unknown[] {
+  return a.filter((value) => b.includes(value))
 }
 
 export class Blacklist {
-  private entries: BlacklistEntry[]
+  private readonly entries: BlacklistEntry[]
 
   constructor(blacklistTagsList: string) {
     this.entries = blacklistTagsList
       .split('\n')
-      .filter(t => t.trim() !== '')
-      .map(t => Blacklist.entryParse(t))
+      .filter((t) => t.trim() !== '')
+      .map((t) => Blacklist.entryParse(t))
   }
 
   private static entryParse(blacklistTagsString: string): BlacklistEntry {
@@ -88,7 +88,7 @@ export class Blacklist {
     }
 
     // Split the string on whitespace
-    const matches = blacklistTagsString.match(/\S+/g) || []
+    const matches = blacklistTagsString.match(/\S+/g) ?? []
 
     // Loop through each tag and catgorize it
     for (const tag of matches) {
@@ -98,8 +98,9 @@ export class Blacklist {
       } else if (tag.charAt(0) === '~') {
         // If it's a prefix of ~, it's optional
         entry.optional.push(tag.slice(1))
-      } else if (tag.match(/^score:[<=>]{0,2}-?\d+/)) {
+      } else if (tag.match(/^score:[<=>]{0,2}-?\d+/) != null) {
         // If it's a score, parse the score
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const score = tag.match(/^score:([<=>]{0,2})(-?\d+)/)!
         entry.scoreComparison = {
           comparison: fixComparisonInsanity(score[1] as AllComparisons),
@@ -110,12 +111,13 @@ export class Blacklist {
         entry.require.push(tag)
       }
     }
+
     return entry
   }
 
   // Using arrow syntax to keep this function bound to this
   // Pass this function into a post[].filter()
-  public shouldKeepPost = (post: E621Post) => {
+  public shouldKeepPost = (post: E621Post): boolean => {
     // Return true unless some blacklist entry matches
     return !this.entries.some((entry: BlacklistEntry) => {
       const tags = post.tags.general.concat(
@@ -155,7 +157,7 @@ export class Blacklist {
         return false
       }
 
-      return is_subset(tags, entry.require)
+      return isSubset(tags, entry.require)
     })
   }
 }

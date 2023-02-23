@@ -1,6 +1,6 @@
-import { GameEvent } from '../../../types'
-import { GameBoardActions } from '../../../store'
 import { MessageType } from '../../../MessageArea/MessageTypes'
+import { GameBoardActions } from '../../../store'
+import { type GameEvent } from '../../../types'
 import { wait } from '../../helpers'
 
 export const edge: GameEvent = () => {

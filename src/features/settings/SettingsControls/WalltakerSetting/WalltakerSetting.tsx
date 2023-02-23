@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react'
+import { type ChangeEvent, type FunctionComponent } from 'react'
 import '../settings.css'
 import './WalltakerSetting.css'
 
@@ -8,8 +8,8 @@ interface IWalltakerSettingProps {
   setLink: (newLink: number | null) => void
 }
 
-export function WalltakerSetting(props: IWalltakerSettingProps) {
-  const setLink = (e: ChangeEvent<HTMLInputElement>) => {
+export const WalltakerSetting: FunctionComponent<IWalltakerSettingProps> = (props) => {
+  const setLink = (e: ChangeEvent<HTMLInputElement>): void => {
     const linkString = e.target.value
     const link = parseInt(linkString.replace(/\D/g, ''), 10)
     props.setLink(Number.isNaN(link) ? null : link)
