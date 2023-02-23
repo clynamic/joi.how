@@ -1,5 +1,5 @@
 import { type ButtplugClientDevice } from 'buttplug'
-import { wait } from '../features/gameboard/events/helpers'
+import { wait } from '../helpers/helpers'
 
 export class Vibrator {
   active = false

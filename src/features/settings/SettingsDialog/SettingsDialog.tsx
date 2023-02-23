@@ -1,4 +1,4 @@
-import { useEffect, type FunctionComponent } from 'react'
+import { useCallback, useEffect, type FunctionComponent } from 'react'
 import { type IState } from '../../../store'
 
 import { useDispatch, useSelector } from 'react-redux'
@@ -10,15 +10,18 @@ export const SettingsDialog: FunctionComponent = () => {
   const dialogShown = useSelector<IState, IState['settings']['dialogShown']>((state) => state.settings.dialogShown)
   const dispatch = useDispatch()
 
-  const dismiss = (): void => {
+  const dismiss = useCallback((): void => {
     void dispatch(SettingsActions.CloseDialog())
-  }
+  }, [dispatch])
 
-  const escapePress = (event: KeyboardEvent): void => {
-    if (event.keyCode === 27) {
-      dismiss()
-    }
-  }
+  const escapePress = useCallback(
+    (event: KeyboardEvent): void => {
+      if (event.keyCode === 27) {
+        dismiss()
+      }
+    },
+    [dismiss],
+  )
 
   useEffect(() => {
     document.addEventListener('keydown', escapePress, false)
@@ -26,7 +29,7 @@ export const SettingsDialog: FunctionComponent = () => {
     return () => {
       document.removeEventListener('keydown', escapePress, false)
     }
-  }, [])
+  }, [escapePress])
 
   return (
     <>

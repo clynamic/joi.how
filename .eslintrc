@@ -16,13 +16,13 @@
     },
     "warnOnUnsupportedTypeScriptVersion": true
   },
-  "plugins": ["@typescript-eslint", "react", "import"],
+  "plugins": ["@typescript-eslint", "import"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:react/recommended",
     "plugin:import/recommended",
     "plugin:import/typescript",
+    "react-app",
     "prettier"
   ],
   "rules": {

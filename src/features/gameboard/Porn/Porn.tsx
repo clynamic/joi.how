@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type FunctionComponent } from 'react'
+import React, { useCallback, useEffect, useState, type FunctionComponent } from 'react'
 import { type ArrayElement, type PornList } from '../types'
 
 import { type IState } from '../../../store'
@@ -43,17 +43,17 @@ export const Porn: FunctionComponent = () => {
     setCurrentPornKey(Math.floor(pornList.length * Math.random()))
   }
 
-  const nextPorn = (): void => {
+  const nextPorn = useCallback((): void => {
     setTimeout(() => {
       setPlaying(null)
       setCurrentPornKey(Math.floor(pornList.length * Math.random()))
       nextPorn()
     }, Math.max((100 - intensity) * 80, 400))
-  }
+  }, [intensity, pornList.length])
 
   useEffect(() => {
     nextPorn()
-  }, [])
+  }, [nextPorn])
 
   useEffect(() => {
     if (playing === null) {

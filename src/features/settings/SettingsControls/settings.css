@@ -58,6 +58,10 @@ fieldset.settings-group--disabled legend {
   margin-bottom: 10px;
 }
 
+.settings-innerrow label > * {
+  margin: 10px 0px;
+}
+
 .settings-innerrow::after {
   content: '';
   display: block;

@@ -9,3 +9,11 @@ export async function loop(times: number, callback: (i: number) => Promise<unkno
 
   return true
 }
+
+export function chance(numerator: number, denominator: number): boolean {
+  return Math.floor(Math.random() * denominator) < numerator
+}
+
+export function moreLikelyAs(initialValue: number, factor: number, stepPerFactor: number): number {
+  return initialValue - factor * stepPerFactor
+}
