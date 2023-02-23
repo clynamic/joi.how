@@ -1,3 +1,4 @@
+import { type FunctionComponent } from 'react'
 import '../settings.css'
 import { useGA } from '../useGA'
 
@@ -6,7 +7,7 @@ interface IDurationSettingProps {
   setDuration: (newDuration: number) => void
 }
 
-function parseDuration(paceString: string) {
+function parseDuration(paceString: string): number {
   try {
     return parseFloat(paceString)
   } catch (e) {
@@ -14,7 +15,7 @@ function parseDuration(paceString: string) {
   }
 }
 
-export function DurationSetting(props: IDurationSettingProps) {
+export const DurationSetting: FunctionComponent<IDurationSettingProps> = (props) => {
   useGA('Duration', props, ['duration'])
 
   return (
@@ -29,7 +30,9 @@ export function DurationSetting(props: IDurationSettingProps) {
             max="20000"
             step="50"
             value={props.duration}
-            onChange={(e) => props.setDuration(parseDuration(e.target.value))}
+            onChange={(e) => {
+              props.setDuration(parseDuration(e.target.value))
+            }}
           />
         </label>
         <span>

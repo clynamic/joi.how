@@ -1,5 +1,5 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ButtplugClient, ButtplugClientDevice, ButtplugBrowserWebsocketClientConnector } from 'buttplug'
+import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { ButtplugBrowserWebsocketClientConnector, ButtplugClient, type ButtplugClientDevice } from 'buttplug'
 import { Vibrator } from '../../../services/vibrator'
 
 const client = new ButtplugClient('JOI.how Client')
@@ -17,9 +17,9 @@ export interface ISettingsVibratorState {
 }
 
 export class FailedToConnect extends Error {
-  inner: any | undefined
+  inner: unknown | undefined
 
-  constructor(inner: any | undefined, message?: string | undefined) {
+  constructor(inner: unknown | undefined, message?: string | undefined) {
     super(message)
     this.inner = inner
   }
@@ -89,6 +89,6 @@ export const VibratorActions = {
   Disconnect,
 }
 
-export type VibratorAction = typeof VibratorActions[keyof typeof VibratorActions]
+export type VibratorAction = (typeof VibratorActions)[keyof typeof VibratorActions]
 
 export const VibratorReducer = vibratorSlice.reducer

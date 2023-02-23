@@ -1,19 +1,18 @@
-import { FunctionComponent, PropsWithChildren, useEffect } from 'react'
+import { useEffect, type FunctionComponent, type PropsWithChildren } from 'react'
+import { useDispatch } from 'react-redux'
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import reactGA from './analytics'
+import { applyAllSettings, unpackSave } from './helpers/saveFormat'
 import { GreeterPage } from './pages/Greeter/Greeter'
 import { PlayPage } from './pages/Play'
-import { applyAllSettings, unpackSave } from './helpers/saveFormat'
-import reactGA from './analytics'
-import { connect } from 'react-redux'
-import { PropsForConnectedComponent } from './store.types'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 
-interface IAppProps extends PropsForConnectedComponent {}
+export const App: FunctionComponent = () => {
+  const dispatch = useDispatch()
 
-function App(props: IAppProps) {
   useEffect(() => {
     const lastSession = localStorage.getItem('lastSession')
     try {
-      if (lastSession) applyAllSettings(props.dispatch, unpackSave(lastSession))
+      if (lastSession != null) applyAllSettings(dispatch, unpackSave(lastSession))
     } catch (e) {
       console.warn(e)
     }
@@ -42,5 +41,3 @@ const Tracker: FunctionComponent<PropsWithChildren> = ({ children }) => {
 
   return <>{children}</>
 }
-
-export default connect(null, (dispatch) => ({ dispatch }))(App)

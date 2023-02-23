@@ -1,27 +1,27 @@
-import { useEffect, useRef } from 'react'
-import './SettingsControls.css'
-import { IState } from '../../../store'
-import { Credentials, PornList } from '../../gameboard/types'
-import { PaceSetting } from './PaceSetting/PaceSetting'
-import { PornSetting } from './PornSetting/PornSetting'
+import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
+import { debounce } from 'lodash'
+import { useEffect, useRef, type FunctionComponent } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { applyAllSettings, makeSave } from '../../../helpers/saveFormat'
+import { type IState } from '../../../store'
+import { type Credentials, type PornList } from '../../gameboard/types'
 import { SettingsActions, VibratorActions } from '../store'
+import { CumSetting } from './CumSetting/CumSetting'
 import { DurationSetting } from './DurationSetting/DurationSetting'
 import { EventsSetting } from './EventsSetting/EventsSetting'
 import { HypnoSetting } from './HypnoSetting/HypnoSetting'
+import { PaceSetting } from './PaceSetting/PaceSetting'
+import { PlayerSetting } from './PlayerSetting/PlayerSetting'
+import { PornSetting } from './PornSetting/PornSetting'
 import { SaveSetting } from './SaveSetting/SaveSetting'
-import { applyAllSettings, makeSave } from '../../../helpers/saveFormat'
-import { debounce } from 'lodash'
-import { CumSetting } from './CumSetting/CumSetting'
+import './SettingsControls.css'
 import { VibratorSetting } from './VibratorSetting/VibratorSetting'
 import { WalltakerSetting } from './WalltakerSetting/WalltakerSetting'
-import { PlayerSetting } from './PlayerSetting/PlayerSetting'
-import { connect } from 'react-redux'
-import { PropsForConnectedComponent } from '../../../store.types'
 
-interface ISettingsControlsProps extends PropsForConnectedComponent {
+interface ISettingsControlsProps {
   pace: IState['settings']['pace']
   steepness: IState['settings']['steepness']
-  credentials: Credentials
+  credentials: Credentials | null
   pornList: PornList
   eventList: IState['settings']['eventList']
   duration: IState['settings']['duration']
@@ -32,85 +32,94 @@ interface ISettingsControlsProps extends PropsForConnectedComponent {
   player: IState['settings']['player']
 }
 
-export const SettingsControls = connect(
-  (state: IState) =>
-    ({
-      pace: state.settings.pace,
-      steepness: state.settings.steepness,
-      credentials: state.settings.credentials,
-      pornList: state.settings.pornList,
-      eventList: state.settings.eventList,
-      duration: state.settings.duration,
-      hypnoMode: state.settings.hypnoMode,
-      cum: state.settings.cum,
-      vibrator: state.vibrators,
-      walltakerLink: state.settings.walltakerLink,
-      player: state.settings.player,
-    } as ISettingsControlsProps),
-)(function (props: ISettingsControlsProps) {
+export const SettingsControls: FunctionComponent = () => {
+  const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
+  const settings: ISettingsControlsProps = useSelector<IState, ISettingsControlsProps>((state) => ({
+    pace: state.settings.pace,
+    steepness: state.settings.steepness,
+    credentials: state.settings.credentials,
+    pornList: state.settings.pornList,
+    eventList: state.settings.eventList,
+    duration: state.settings.duration,
+    hypnoMode: state.settings.hypnoMode,
+    cum: state.settings.cum,
+    vibrator: state.vibrators,
+    walltakerLink: state.settings.walltakerLink,
+    player: state.settings.player,
+  }))
+
   const saveToLocalStorage = useRef(
     debounce((props: ISettingsControlsProps) => {
-      localStorage.setItem('lastSession', makeSave(props, /*includeCredentials*/ true))
+      localStorage.setItem('lastSession', makeSave(props, /* includeCredentials */ true))
     }, 1000),
   )
-  useEffect(() => saveToLocalStorage.current(props))
+  useEffect(() => saveToLocalStorage.current(settings))
 
   return (
     <div className="SettingsControls" tabIndex={0} role="application" aria-label="Settings">
       <PaceSetting
-        max={props.pace.max}
-        min={props.pace.min}
-        steepness={props.steepness}
-        setMax={(pace) => props.dispatch(SettingsActions.SetMaxPace(pace))}
-        setMin={(pace) => props.dispatch(SettingsActions.SetMinPace(pace))}
-        setSteepness={(steepness) => props.dispatch(SettingsActions.SetSteepness(steepness))}
+        max={settings.pace.max}
+        min={settings.pace.min}
+        steepness={settings.steepness}
+        setMax={(pace) => dispatch(SettingsActions.SetMaxPace(pace))}
+        setMin={(pace) => dispatch(SettingsActions.SetMinPace(pace))}
+        setSteepness={(steepness) => dispatch(SettingsActions.SetSteepness(steepness))}
       />
 
-      <DurationSetting duration={props.duration} setDuration={(newDuration) => props.dispatch(SettingsActions.SetDuration(newDuration))} />
+      <DurationSetting duration={settings.duration} setDuration={(newDuration) => dispatch(SettingsActions.SetDuration(newDuration))} />
 
-      <EventsSetting eventList={props.eventList} setEventList={(newList) => props.dispatch(SettingsActions.SetEventList(newList))} />
+      <EventsSetting eventList={settings.eventList} setEventList={(newList) => dispatch(SettingsActions.SetEventList(newList))} />
 
       <PornSetting
-        credentials={props.credentials}
-        setCredentials={(newCredentials) => props.dispatch(SettingsActions.SetCredentials(newCredentials))}
-        pornList={props.pornList}
-        setPornList={(newList) => props.dispatch(SettingsActions.SetPornList(newList))}
+        credentials={settings.credentials}
+        setCredentials={(newCredentials) => dispatch(SettingsActions.SetCredentials(newCredentials))}
+        pornList={settings.pornList}
+        setPornList={(newList) => dispatch(SettingsActions.SetPornList(newList))}
       />
 
       <WalltakerSetting
-        enabled={Boolean(props.walltakerLink ?? false)}
-        link={props.walltakerLink}
-        setLink={(newLink) => props.dispatch(SettingsActions.SetWalltakerLink(newLink))}
+        enabled={Boolean(settings.walltakerLink ?? false)}
+        link={settings.walltakerLink}
+        setLink={(newLink) => dispatch(SettingsActions.SetWalltakerLink(newLink))}
       />
 
       <CumSetting
-        enabled={props.eventList.some((event) => event === 'cum')}
-        ejaculateLikelihood={props.cum.ejaculateLikelihood}
-        setEjaculateLikelihood={(newLikelihood) => props.dispatch(SettingsActions.SetEjaculateLikelihood(newLikelihood))}
-        ruinLikelihood={props.cum.ruinLikelihood}
-        setRuinLikelihood={(newLikelihood) => props.dispatch(SettingsActions.SetRuinLikelihood(newLikelihood))}
+        enabled={settings.eventList.some((event) => event === 'cum')}
+        ejaculateLikelihood={settings.cum.ejaculateLikelihood}
+        setEjaculateLikelihood={(newLikelihood) => dispatch(SettingsActions.SetEjaculateLikelihood(newLikelihood))}
+        ruinLikelihood={settings.cum.ruinLikelihood}
+        setRuinLikelihood={(newLikelihood) => dispatch(SettingsActions.SetRuinLikelihood(newLikelihood))}
       />
 
-      <HypnoSetting mode={props.hypnoMode} setMode={(newMode) => props.dispatch(SettingsActions.SetHypnoMode(newMode))} />
+      <HypnoSetting mode={settings.hypnoMode} setMode={(newMode) => dispatch(SettingsActions.SetHypnoMode(newMode))} />
 
       <PlayerSetting
-        gender={props.player.gender}
-        parts={props.player.parts}
-        setGender={(newGender) => props.dispatch(SettingsActions.SetPlayerGender(newGender))}
-        setParts={(newParts) => props.dispatch(SettingsActions.SetPlayerParts(newParts))}
+        gender={settings.player.gender}
+        parts={settings.player.parts}
+        setGender={(newGender) => dispatch(SettingsActions.SetPlayerGender(newGender))}
+        setParts={(newParts) => dispatch(SettingsActions.SetPlayerParts(newParts))}
       />
 
       <VibratorSetting
-        connection={props.vibrator.connection}
-        error={props.vibrator.error}
-        vibrators={props.vibrator.devices}
-        mode={props.vibrator.mode}
-        setMode={(newMode) => props.dispatch(VibratorActions.SetMode(newMode))}
-        onConnect={() => props.dispatch(VibratorActions.Connect(null))}
-        onDisconnect={() => props.dispatch(VibratorActions.Disconnect())}
+        connection={settings.vibrator.connection}
+        error={settings.vibrator.error}
+        vibrators={settings.vibrator.devices}
+        mode={settings.vibrator.mode}
+        setMode={(newMode) => dispatch(VibratorActions.SetMode(newMode))}
+        onConnect={() => {
+          void dispatch(VibratorActions.Connect(null))
+        }}
+        onDisconnect={() => {
+          void dispatch(VibratorActions.Disconnect())
+        }}
       />
 
-      <SaveSetting settings={props} setSettings={(settings) => applyAllSettings(props.dispatch, settings)} />
+      <SaveSetting
+        settings={settings}
+        setSettings={(settings) => {
+          applyAllSettings(dispatch, settings)
+        }}
+      />
     </div>
   )
-})
+}

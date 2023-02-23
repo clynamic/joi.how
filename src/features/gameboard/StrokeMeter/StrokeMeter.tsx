@@ -1,6 +1,6 @@
-import React from 'react'
-import './StrokeMeter.css'
+import { type FunctionComponent } from 'react'
 import { EStroke } from '../types'
+import './StrokeMeter.css'
 
 interface IStrokeMeterProps {
   pace: number
@@ -8,8 +8,8 @@ interface IStrokeMeterProps {
   cumming: boolean
 }
 
-class StrokeMeter extends React.Component<IStrokeMeterProps> {
-  getCircleStateClass(stroke: IStrokeMeterProps['stroke']): string {
+export const StrokeMeter: FunctionComponent<IStrokeMeterProps> = (props) => {
+  const getCircleStateClass = (stroke: IStrokeMeterProps['stroke']): string => {
     switch (stroke) {
       case EStroke.up:
         return 'StrokeMeter__circle--up'
@@ -18,29 +18,26 @@ class StrokeMeter extends React.Component<IStrokeMeterProps> {
     }
   }
 
-  getCirclePaceClass(pace: IStrokeMeterProps['pace']): string {
+  const getCirclePaceClass = (pace: IStrokeMeterProps['pace']): string => {
     if (pace >= 5) return 'StrokeMeter__circle--fast'
     if (pace >= 3 && pace < 5) return 'StrokeMeter__circle--medium'
     if (pace < 3 && pace > 0) return 'StrokeMeter__circle--slow'
+
     return 'StrokeMeter__circle--stop'
   }
 
-  getCircleCummingClass(cumming: IStrokeMeterProps['cumming']): string {
+  const getCircleCummingClass = (cumming: IStrokeMeterProps['cumming']): string => {
     if (cumming) return 'StrokeMeter__circle--cumming'
     else return ''
   }
 
-  render() {
-    return (
-      <div className="StrokeMeter">
-        <div
-          className={`StrokeMeter__circle ${this.getCircleStateClass(this.props.stroke)} ${this.getCirclePaceClass(
-            this.props.pace,
-          )} ${this.getCircleCummingClass(this.props.cumming)}`}
-        />
-      </div>
-    )
-  }
+  return (
+    <div className="StrokeMeter">
+      <div
+        className={`StrokeMeter__circle ${getCircleStateClass(props.stroke)} ${getCirclePaceClass(props.pace)} ${getCircleCummingClass(
+          props.cumming,
+        )}`}
+      />
+    </div>
+  )
 }
-
-export default StrokeMeter

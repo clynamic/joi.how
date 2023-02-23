@@ -1,6 +1,6 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit'
-
+import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { GameBoardReducer } from './features/gameboard'
+
 import { SettingsReducer, VibratorReducer } from './features/settings/store'
 
 const reducers = {
@@ -11,10 +11,10 @@ const reducers = {
 
 const reducer = combineReducers(reducers)
 
-export type IState = { [K in keyof typeof reducers]: ReturnType<typeof reducers[K]> }
+export type IState = { [K in keyof typeof reducers]: ReturnType<(typeof reducers)[K]> }
 
 export const store = configureStore({
-  reducer: reducer,
+  reducer,
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }),
   // devTools: true,
 })

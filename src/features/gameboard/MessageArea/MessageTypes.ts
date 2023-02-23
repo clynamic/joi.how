@@ -22,7 +22,7 @@ interface PromptMessage {
 
 export interface Button {
   display: string
-  method: () => void | Promise<any>
+  method: () => void | Promise<void>
 }
 
 export type Message = NewEventMessage | EventDescriptionMessage | PromptMessage

@@ -1,15 +1,15 @@
-import React from 'react'
-import '../settings.css'
+import { type FunctionComponent } from 'react'
 import { events } from '../../../gameboard/events/index'
-import { EventToken } from '../../../gameboard/types'
+import { type EventToken } from '../../../gameboard/types'
+import '../settings.css'
 import { useGA } from '../useGA'
 
 interface IEventsSettingProps {
-  eventList: EventToken['id'][]
-  setEventList: (newEvents: EventToken['id'][]) => void
+  eventList: Array<EventToken['id']>
+  setEventList: (newEvents: Array<EventToken['id']>) => void
 }
 
-function toggle(props: IEventsSettingProps, eventToken: EventToken) {
+function toggle(props: IEventsSettingProps, eventToken: EventToken): void {
   const currentlyEnabled = isEnabled(props, eventToken)
 
   if (currentlyEnabled) {
@@ -19,11 +19,11 @@ function toggle(props: IEventsSettingProps, eventToken: EventToken) {
   }
 }
 
-const isEnabled = (props: IEventsSettingProps, eventToken: EventToken) => {
-  return !!props.eventList.find((eventTokenId) => eventTokenId === eventToken.id)
+const isEnabled = (props: IEventsSettingProps, eventToken: EventToken): boolean => {
+  return props.eventList.find((eventTokenId) => eventTokenId === eventToken.id) != null
 }
 
-export const EventsSetting: React.FunctionComponent<IEventsSettingProps> = (props: IEventsSettingProps) => {
+export const EventsSetting: FunctionComponent<IEventsSettingProps> = (props) => {
   useGA('Events', props, ['eventList'])
 
   return (
@@ -34,7 +34,9 @@ export const EventsSetting: React.FunctionComponent<IEventsSettingProps> = (prop
         {events.map((event) => (
           <button
             className={`settings-option${isEnabled(props, event) ? '--enabled' : '--disabled'}`}
-            onClick={() => toggle(props, event)}
+            onClick={() => {
+              toggle(props, event)
+            }}
             role="switch"
             aria-checked={isEnabled(props, event)}
             key={event.id}

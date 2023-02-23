@@ -1,11 +1,11 @@
-import { EStroke, EGrip } from '../types'
-import { Message, applyMessage } from '../MessageArea/MessageTypes'
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { IState } from '../../../store'
+import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { type IState } from '../../../store'
 import { VibrationStyleMode } from '../../settings/store'
-import { randomPace } from '../events/event-definitions/pace/randomPace'
 import { getNextEvent } from '../events'
+import { randomPace } from '../events/event-definitions/pace/randomPace'
+import { applyMessage, type Message } from '../MessageArea/MessageTypes'
 import { playTone } from '../sound'
+import { EGrip, EStroke } from '../types'
 
 export interface IGameBoardState {
   pace: number
@@ -21,22 +21,24 @@ export interface IGameBoardState {
 }
 
 const StartGame = createAsyncThunk('gameBoard/startGame', async (_, { getState, dispatch }) => {
-  const gameloop = (callback: () => void | Promise<void>, ms: (state: IState) => number | undefined) => {
+  const gameloop = (callback: () => void | Promise<void>, ms: (state: IState) => number | undefined): void => {
     const state = getState() as IState
-    const timer = setTimeout(async () => {
-      if (window.location.pathname !== '/play') return
-      if (!state.game.gamePaused) {
-        await callback()
-      }
-      dispatch(gameBoardSlice.actions.SetTimers(state.game.timers.filter((e) => e !== timer)))
-      if (!state.game.gamePaused) {
-        gameloop(callback, ms)
-      }
-    }, ms(state) || 0)
+    const timer = setTimeout((): void => {
+      void (async () => {
+        if (window.location.pathname !== '/play') return
+        if (!state.game.gamePaused) {
+          await callback()
+        }
+        dispatch(gameBoardSlice.actions.SetTimers(state.game.timers.filter((e) => e !== timer)))
+        if (!state.game.gamePaused) {
+          gameloop(callback, ms)
+        }
+      })()
+    }, ms(state) ?? 0)
     dispatch(gameBoardSlice.actions.SetTimers(state.game.timers.concat([timer])))
   }
 
-  randomPace(undefined)(getState() as IState, dispatch)
+  void randomPace(undefined)(getState() as IState, dispatch)
   gameloop(
     () => {
       const state = getState() as IState
@@ -46,9 +48,16 @@ const StartGame = createAsyncThunk('gameBoard/startGame', async (_, { getState, 
         playTone(625)
         if (state.vibrators.devices.length > 0 && state.vibrators.mode === VibrationStyleMode.THUMP) {
           if (state.game.pace > 3.25) {
-            state.vibrators.devices.forEach((e) => e.setVibration(state.game.intensity / 100))
-          } else
-            state.vibrators.devices.forEach((e) => e.thump(((1 / state.game.pace) * 1000) / 2, Math.max(0.25, state.game.intensity / 100)))
+            state.vibrators.devices.forEach((e) => {
+              void e.setVibration(state.game.intensity / 100)
+            })
+          } else {
+            state.vibrators.devices.forEach((e) => {
+              void (() => {
+                void e.thump(((1 / state.game.pace) * 1000) / 2, Math.max(0.25, state.game.intensity / 100))
+              })()
+            })
+          }
         }
       }
     },
@@ -58,7 +67,7 @@ const StartGame = createAsyncThunk('gameBoard/startGame', async (_, { getState, 
     async () => {
       const state = getState() as IState
       const next = getNextEvent(state)
-      if (next) {
+      if (next != null) {
         await next(state, dispatch)
       }
     },
@@ -74,7 +83,9 @@ const StartGame = createAsyncThunk('gameBoard/startGame', async (_, { getState, 
 
 const StopGame = createAsyncThunk('gameBoard/stopGame', async (_, { getState, dispatch }) => {
   const state = getState() as IState
-  state.game.timers.forEach((timer) => clearTimeout(timer))
+  state.game.timers.forEach((timer) => {
+    clearTimeout(timer)
+  })
   dispatch(gameBoardSlice.actions.SetTimers([]))
 })
 
@@ -104,11 +115,13 @@ const SetVibration = createAsyncThunk('gameBoard/setVibration', async (percentag
   const state = getState() as IState
   if (state.vibrators.mode === VibrationStyleMode.CONSTANT) {
     if (state.vibrators.devices.length > 0) {
-      state.vibrators.devices.forEach((e) =>
-        e.setVibration(percentage).catch((_) => {
-          dispatch(gameBoardSlice.actions.SetVibration(state.game.vibration))
-        }),
-      )
+      state.vibrators.devices.forEach((e) => {
+        void (async () => {
+          await e.setVibration(percentage).catch(() => {
+            dispatch(gameBoardSlice.actions.SetVibration(state.game.vibration))
+          })
+        })()
+      })
     }
     dispatch(gameBoardSlice.actions.SetVibration(percentage))
   }
@@ -179,6 +192,6 @@ export const GameBoardActions = {
   StopGame,
 }
 
-export type GameBoardAction = typeof GameBoardActions[keyof typeof GameBoardActions]
+export type GameBoardAction = (typeof GameBoardActions)[keyof typeof GameBoardActions]
 
 export const GameBoardReducer = gameBoardSlice.reducer

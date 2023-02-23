@@ -1,7 +1,7 @@
-import { PropsWithChildren } from 'react'
-import '../settings.css'
+import { type FunctionComponent, type PropsWithChildren } from 'react'
+import { type Vibrator } from '../../../../services/vibrator'
 import { VibrationStyleMode } from '../../store'
-import { Vibrator } from '../../../../services/vibrator'
+import '../settings.css'
 
 interface IVibratorSettingProps {
   connection: string | null
@@ -18,7 +18,7 @@ const VIBRATION_STYLE_MODES = [
   { mode: VibrationStyleMode.THUMP, name: 'Thump', description: 'Vibration thumps with the stroke pace.' },
 ]
 
-const Wrapper = (props: PropsWithChildren<{}>) => (
+const Wrapper: FunctionComponent<PropsWithChildren> = (props) => (
   <fieldset className="settings-group">
     <legend>Vibrator</legend>
     <div className="settings-row">
@@ -35,8 +35,8 @@ const Wrapper = (props: PropsWithChildren<{}>) => (
   </fieldset>
 )
 
-export function VibratorSetting(props: IVibratorSettingProps) {
-  if (props.connection) {
+export const VibratorSetting: FunctionComponent<IVibratorSettingProps> = (props) => {
+  if (props.connection != null) {
     return (
       <Wrapper>
         <div className="settings-innerrow">
@@ -59,7 +59,9 @@ export function VibratorSetting(props: IVibratorSettingProps) {
           {VIBRATION_STYLE_MODES.map((modeType) => (
             <button
               className={`settings-option${props.mode === modeType.mode ? '--enabled' : '--disabled'}`}
-              onClick={() => props.setMode(modeType.mode)}
+              onClick={() => {
+                props.setMode(modeType.mode)
+              }}
               role="radio"
               aria-checked={props.mode === modeType.mode}
               key={modeType.mode}

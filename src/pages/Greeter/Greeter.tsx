@@ -1,3 +1,4 @@
+import { type FunctionComponent } from 'react'
 import { OutboundLink } from 'react-ga'
 import { Link } from 'react-router-dom'
 import { ReactComponent as Logo } from '../../assets/logo.svg'
@@ -6,7 +7,7 @@ import { Cookies } from './Cookies'
 import './Greeter.css'
 import { ReleaseNotes } from './ReleaseNotes/ReleaseNotes'
 
-export function GreeterPage() {
+export const GreeterPage: FunctionComponent = () => {
   return (
     <div className="GreeterPage">
       <div className="settings-row">
@@ -16,8 +17,8 @@ export function GreeterPage() {
         </h1>
       </div>
       <p>
-        Select your settings, and this app will guide ya' thru a jack-off session. You can adjust most of the aspects of the game, as well
-        as select some porn to help with "motivation". It's all pulled from <a href="https://e621.net">E621.net</a>.{' '}
+        Select your settings, and this app will guide ya&apos; thru a jack-off session. You can adjust most of the aspects of the game, as
+        well as select some porn to help with &quot;motivation&quot;. It&apos;s all pulled from <a href="https://e621.net">E621.net</a>.{' '}
         <strong>You are responsible for what you choose to look at.</strong>
       </p>
       <p>
@@ -34,7 +35,7 @@ export function GreeterPage() {
             <img src="https://cdn.discordapp.com/emojis/750074504528527421.gif?v=1" alt="throbbing cock" />
           </h2>{' '}
           <p>
-            Checkout walltaker! It's a app made by me and the other folks at PawCorp, our little horny-coding collective! It lets you offer
+            Checkout walltaker! It&apos;s a app made by me and the other folks at PawCorp, our little horny-coding collective! It lets you
             up a link where people can set the wallpaper on you phone or PC to an e621 post, within your blacklist!
           </p>
         </div>

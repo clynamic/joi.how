@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState, type FunctionComponent } from 'react'
 import { useSelector } from 'react-redux'
-import { HypnoMode } from '../types'
-import { formatMessage } from '../../../helpers/parseString'
 import styled from 'styled-components'
+import { formatMessage } from '../../../helpers/parseString'
+import { HypnoMode } from '../types'
 
+import { type IState } from '../../../store'
 import './Hypno.css'
-import { IState } from '../../../store'
 
 interface IHypnoProps {
   mode: HypnoMode
@@ -121,8 +121,8 @@ HYPNO_PHRASES.set(HypnoMode.FemDomPet, [
   "mistress' cum",
 ])
 
-export function Hypno(props: IHypnoProps) {
-  const [phrase, setPhrase] = useState((HYPNO_PHRASES.get(props.mode) || [''])[0])
+export const Hypno: FunctionComponent<IHypnoProps> = (props) => {
+  const [phrase, setPhrase] = useState((HYPNO_PHRASES.get(props.mode) ?? [''])[0])
   const [animating, setAnimating] = useState(false)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
   const settings = useSelector<IState, IState['settings']>((state) => state.settings)
@@ -135,7 +135,7 @@ export function Hypno(props: IHypnoProps) {
   useEffect(() => {
     const phraseTimer = setTimeout(() => {
       const phrases = HYPNO_PHRASES.get(props.mode)
-      if (phrases) {
+      if (phrases != null) {
         let newPhrase = phrase
         while (newPhrase === phrase) {
           newPhrase = phrases[Math.ceil(Math.random() * (phrases.length - 1))]

@@ -1,29 +1,30 @@
-import React, { useEffect } from 'react'
+import { useEffect, type FunctionComponent } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import StrokeMeter from './StrokeMeter/StrokeMeter'
-import { IState } from '../../store'
-import { GameBoardActions } from './store'
-import { MessageArea } from './MessageArea/MessageArea'
+import { type IState } from '../../store'
 import { EmergencyStop } from './EmergencyStop/EmergencyStop'
-import { Stats } from './Stats/Stats'
+import { MessageArea } from './MessageArea/MessageArea'
 import { Porn } from './Porn/Porn'
+import { Stats } from './Stats/Stats'
+import { GameBoardActions } from './store'
+import { StrokeMeter } from './StrokeMeter/StrokeMeter'
 
+import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
 import './GameBoard.css'
 import { Hypno } from './Hypno/Hypno'
-import { ThunkDispatch, AnyAction } from '@reduxjs/toolkit'
 
-export const GameBoard: React.FC<{}> = () => {
+export const GameBoard: FunctionComponent = () => {
   const state = useSelector((state: IState) => state)
-  const dispatch: ThunkDispatch<IState, any, AnyAction> = useDispatch()
+  const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
 
   useEffect(() => {
     if (state.game.gamePaused) {
-      dispatch(GameBoardActions.StopGame())
+      void dispatch(GameBoardActions.StopGame())
     } else {
-      dispatch(GameBoardActions.StartGame())
+      void dispatch(GameBoardActions.StartGame())
     }
+
     return () => {
-      dispatch(GameBoardActions.StopGame())
+      void dispatch(GameBoardActions.StopGame())
     }
   }, [dispatch, state.game.gamePaused])
 

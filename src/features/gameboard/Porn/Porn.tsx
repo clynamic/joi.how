@@ -1,26 +1,15 @@
-import React from 'react'
-import { PornList, ArrayElement } from '../types'
+import React, { useEffect, useState, type FunctionComponent } from 'react'
+import { type ArrayElement, type PornList } from '../types'
 
-import { IState } from '../../../store'
+import { type IState } from '../../../store'
 
+import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
+import { useDispatch, useSelector } from 'react-redux'
+import styled from 'styled-components'
+import { SettingsActions } from '../../settings/store'
 import './Porn.css'
 import { PornControls } from './PornControls/PornControls'
-import styled from 'styled-components'
 import { Walltaker } from './Walltaker'
-import { connect } from 'react-redux'
-import { SettingsActions } from '../../settings/store'
-import { PropsForConnectedComponent } from '../../../store.types'
-
-interface IPornProps extends PropsForConnectedComponent {
-  pornList: PornList
-  walltakerLink: IState['settings']['walltakerLink']
-  intensity: IState['game']['intensity']
-}
-
-interface IPornState {
-  currentPornKey: number
-  playing: number | null
-}
 
 const PornBackgroundDiv = styled.div`
   ${(props: { duration: number }) => `
@@ -28,91 +17,74 @@ const PornBackgroundDiv = styled.div`
   `}
 `
 
-export const Porn = connect(
-  (state: IState) =>
-    ({
-      pornList: state.settings.pornList,
-      walltakerLink: state.settings.walltakerLink,
-      intensity: state.game.intensity,
-    } as IPornProps),
-)(
-  class extends React.Component<IPornProps, IPornState> {
-    constructor(props: IPornProps) {
-      super(props)
+export const Porn: FunctionComponent = () => {
+  const pornList = useSelector<IState, IState['settings']['pornList']>((state) => state.settings.pornList)
+  const walltakerLink = useSelector<IState, IState['settings']['walltakerLink']>((state) => state.settings.walltakerLink)
+  const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
+  const [currentPornKey, setCurrentPornKey] = useState(0)
+  const [playing, setPlaying] = useState<number | null>(null)
+  const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
 
-      this.state = {
-        currentPornKey: 0,
-        playing: null,
-      }
+  const openSource = (porn: ArrayElement<PornList>): void => {
+    const md5Match = /\w*(?=\.(jpg|gif|webm|png|swf|bmp))/.exec(porn)
+    if (md5Match?.[0] != null) {
+      window.open(`https://e621.net/post/index/1/md5:${md5Match[0]}`)
     }
+  }
 
-    componentDidMount() {
-      this.nextPorn()
+  const makePornStyle = (porn: PornList[keyof PornList]): React.CSSProperties => {
+    return {
+      backgroundImage: `url(${String(porn)})`,
     }
+  }
 
-    render() {
-      let duration
-      if (this.state.playing === null) {
-        duration = Math.max((100 - this.props.intensity) * 80, 800)
-        this.setState({
-          playing: duration,
-        })
-      } else {
-        duration = this.state.playing
-      }
-      return (
-        <div className="Porn__container">
-          <Walltaker walltakerLink={this.props.walltakerLink} pornList={this.props.pornList} dispatch={this.props.dispatch} />
-          {this.props.pornList.length > 0 ? (
-            <>
-              <div className="Porn">
-                <div className="Porn__foreground" style={this.makePornStyle(this.props.pornList[this.state.currentPornKey])} />
-                <PornBackgroundDiv
-                  duration={duration}
-                  className="Porn__background"
-                  style={this.makePornStyle(this.props.pornList[this.state.currentPornKey])}
-                ></PornBackgroundDiv>
-              </div>
-              <PornControls
-                onSkip={() => this.skipPorn(this.state.currentPornKey)}
-                onOpen={() => this.openSource(this.props.pornList[this.state.currentPornKey])}
-              />
-            </>
-          ) : null}
-        </div>
-      )
-    }
+  const skipPorn = (pornToSkip: number): void => {
+    dispatch(SettingsActions.SetPornList(pornList.filter((porn) => porn !== pornList[pornToSkip])))
+    setCurrentPornKey(Math.floor(pornList.length * Math.random()))
+  }
 
-    openSource(porn: ArrayElement<PornList>) {
-      const md5Match = /\w*(?=\.(jpg|gif|webm|png|swf|bmp))/.exec(porn)
-      if (md5Match && md5Match[0]) {
-        window.open(`https://e621.net/post/index/1/md5:${md5Match[0]}`)
-      }
-    }
+  const nextPorn = (): void => {
+    setTimeout(() => {
+      setPlaying(null)
+      setCurrentPornKey(Math.floor(pornList.length * Math.random()))
+      nextPorn()
+    }, Math.max((100 - intensity) * 80, 400))
+  }
 
-    makePornStyle(porn: PornList[keyof PornList]) {
-      return {
-        backgroundImage: `url(${porn})`,
-      }
-    }
+  useEffect(() => {
+    nextPorn()
+  }, [])
 
-    skipPorn(pornToSkip: number) {
-      this.props.dispatch(SettingsActions.SetPornList(this.props.pornList.filter((porn) => porn !== this.props.pornList[pornToSkip])))
-      this.setState({
-        currentPornKey: Math.floor(this.props.pornList.length * Math.random()),
-      })
+  useEffect(() => {
+    if (playing === null) {
+      const duration = Math.max((100 - intensity) * 80, 800)
+      setPlaying(duration)
     }
+  }, [playing, intensity])
 
-    nextPorn() {
-      setTimeout(() => {
-        this.setState({
-          playing: null,
-        })
-        this.setState({
-          currentPornKey: Math.floor(this.props.pornList.length * Math.random()),
-        })
-        this.nextPorn()
-      }, Math.max((100 - this.props.intensity) * 80, 400))
-    }
-  },
-)
+  return (
+    <div className="Porn__container">
+      <Walltaker walltakerLink={walltakerLink} pornList={pornList} dispatch={dispatch} />
+      {pornList.length > 0 ? (
+        <>
+          <div className="Porn">
+            <div className="Porn__foreground" style={makePornStyle(pornList[currentPornKey])} />
+            <PornBackgroundDiv
+              duration={playing ?? 0}
+              className="Porn__background"
+              style={makePornStyle(pornList[currentPornKey])}
+            ></PornBackgroundDiv>
+          </div>
+          <PornControls
+            onSkip={() => {
+              skipPorn(currentPornKey)
+            }}
+            onOpen={() => {
+              openSource(pornList[currentPornKey])
+            }}
+          />
+        </>
+      ) : null}
+    </div>
+  )
+}

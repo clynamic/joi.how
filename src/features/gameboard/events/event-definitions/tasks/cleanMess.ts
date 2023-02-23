@@ -1,6 +1,6 @@
-import { GameEvent, PlayerParts } from '../../../types'
-import { GameBoardActions } from '../../../store'
 import { MessageType } from '../../../MessageArea/MessageTypes'
+import { GameBoardActions } from '../../../store'
+import { PlayerParts, type GameEvent } from '../../../types'
 
 export const cleanMess: GameEvent = () => {
   return async (state, dispatch) => {

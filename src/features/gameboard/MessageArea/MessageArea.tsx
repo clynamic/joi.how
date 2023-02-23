@@ -1,58 +1,64 @@
-import React from 'react'
-import { connect } from 'react-redux'
-import { Message, isPrompt, Button } from './MessageTypes'
-import { IState } from '../../../store'
-import { PropsForConnectedComponent } from '../../../store.types'
-import { MessageBar } from './MessageBar/MessageBar'
-import { ISettingsState } from '../../settings/store'
-import './MessageArea.css'
+import { type FunctionComponent } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { formatMessage } from '../../../helpers/parseString'
+import { type IState } from '../../../store'
 import { GameBoardActions } from '../store'
+import './MessageArea.css'
+import { MessageBar } from './MessageBar/MessageBar'
+import { MessageType, type Button, type Message } from './MessageTypes'
 
-interface IMessageAreaProps extends PropsForConnectedComponent {
-  messages: Message[]
-  settings: ISettingsState
+export const MessageArea: FunctionComponent = () => {
+  const messages = useSelector<IState, IState['game']['messages']>((state) => state.game.messages)
+  const settings = useSelector<IState, IState['settings']>((state) => state.settings)
+  const dispatch = useDispatch()
+
+  const runButtonMethod = (button: Button): void => {
+    const returnValue = button.method()
+    if (returnValue != null) {
+      dispatch(GameBoardActions.PauseEvents())
+      void returnValue.then(() => {
+        void dispatch(GameBoardActions.ResumeEvents())
+      })
+    }
+  }
+
+  const promptButtons = messages
+    .filter(isPrompt)
+    .slice(0, 1)
+    .reduce<Button[]>((_, message) => {
+      if ('buttons' in message) {
+        return message.buttons
+      } else {
+        return []
+      }
+    }, [])
+
+  return (
+    <div className="MessageArea">
+      <div className="MessageArea__messages" role="alert">
+        {messages.map((message) => {
+          return <MessageBar key={message.text} message={message} settings={settings} />
+        })}
+      </div>
+      <div className="MessageArea__prompt settings-row">
+        {promptButtons.map((button) => {
+          return (
+            <button
+              className="settings-button"
+              onClick={() => {
+                runButtonMethod(button)
+              }}
+              key={button.display}
+            >
+              {formatMessage(button.display, settings)}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
-export const MessageArea = connect(
-  (state: IState) =>
-    ({
-      messages: state.game.messages,
-      settings: state.settings,
-    } as IMessageAreaProps),
-)(
-  class extends React.Component<IMessageAreaProps> {
-    runButtonMethod(button: Button) {
-      const returnValue = button.method()
-      if (returnValue) {
-        this.props.dispatch(GameBoardActions.PauseEvents())
-        returnValue.then(() => this.props.dispatch(GameBoardActions.ResumeEvents()))
-      }
-    }
-
-    render() {
-      return (
-        <div className="MessageArea">
-          <div className="MessageArea__messages" role="alert">
-            {this.props.messages.map((message) => {
-              return <MessageBar key={message.text} message={message} settings={this.props.settings} />
-            })}
-          </div>
-          <div className="MessageArea__prompt settings-row">
-            {this.props.messages
-              .filter(isPrompt)
-              .slice(0, 1)
-              .reduce((acc, message) => message.buttons, [] as Button[])
-              .map((button) => {
-                return (
-                  <button className="settings-button" onClick={() => this.runButtonMethod(button)} key={button.display}>
-                    {formatMessage(button.display, this.props.settings)}
-                  </button>
-                )
-              })}
-          </div>
-        </div>
-      )
-    }
-  },
-)
+const isPrompt = (message: Message): boolean => {
+  return message.type === MessageType.Prompt
+}
