@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { events } from '../../gameboard/events'
+
 import { HypnoMode, PlayerGender, PlayerParts, type Credentials, type EventToken, type PornList } from '../../gameboard/types'
 
 export interface ISettingsState {

@@ -42,7 +42,7 @@ export const GreeterPage: FunctionComponent = () => {
       </OutboundLink>
       <ReleaseNotes />
       <p>
-        This app is provided without express promise of support
+        This app is provided without express promise of support.
         <br />
         Check out the source code on{' '}
         <a href="https://github.com/PawCorp/joi.how" target={'_blank'} rel="noreferrer">

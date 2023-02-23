@@ -1,34 +1,35 @@
+import { createAsyncThunk } from '@reduxjs/toolkit'
+import { wait } from '../../../../../helpers/helpers'
 import { intensityToPaceBounds } from '../../../../../helpers/intensity'
 import { round } from '../../../../../helpers/round'
+import type { IState } from '../../../../../store'
 import { MessageType } from '../../../MessageArea/MessageTypes'
-import { GameBoardActions } from '../../../store'
-import { type GameEvent } from '../../../types'
-import { wait } from '../../helpers'
+import { gameBoardSlice } from '../../reducer'
 
-export const randomPace: GameEvent<[MessageType.EventDescription | MessageType.NewEvent | undefined]> = (
-  messageType?: MessageType.EventDescription | MessageType.NewEvent,
-) => {
-  return async (state, dispatch) => {
+export const RandomPace = createAsyncThunk(
+  'gameBoard/event-randomPace',
+  async (messageType: MessageType.EventDescription | MessageType.NewEvent | undefined | null, { getState, dispatch }) => {
+    const state = getState() as IState
     const bounds = intensityToPaceBounds(state.game.intensity, state.settings.steepness, state.settings.pace)
     const newPace = round(Math.random() * (bounds.max - bounds.min) + bounds.min)
     dispatch(
       (() => {
         if (messageType != null) {
-          return GameBoardActions.ShowMessage({
+          return gameBoardSlice.actions.ShowMessage({
             type: messageType,
             text: `Pace changed to ${newPace}!`,
           })
         } else {
-          return GameBoardActions.ShowMessage({
+          return gameBoardSlice.actions.ShowMessage({
             type: MessageType.NewEvent,
             text: `Pace changed to ${newPace}!`,
           })
         }
       })(),
     )
-    dispatch(GameBoardActions.SetPace(newPace))
-    dispatch(GameBoardActions.SetVibration(newPace / state.settings.pace.max))
+    dispatch(gameBoardSlice.actions.SetPace(newPace))
+    dispatch(gameBoardSlice.actions.SetVibration(newPace / state.settings.pace.max))
 
     await wait(9000)
-  }
-}
+  },
+)

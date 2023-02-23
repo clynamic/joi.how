@@ -1,5 +1,6 @@
 import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
-import { events } from '../features/gameboard/events/index'
+import { events } from '../features/gameboard'
+
 import { HypnoMode, PlayerGender, PlayerParts } from '../features/gameboard/types'
 import { SettingsActions } from '../features/settings/store'
 import { type IState } from '../store'

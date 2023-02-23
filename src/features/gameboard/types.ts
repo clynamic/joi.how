@@ -1,6 +1,3 @@
-import { type IState } from '../../store'
-import { type GameBoardAction } from './store'
-
 export type ArrayElement<A> = A extends ReadonlyArray<infer T> ? T : never
 
 export enum EStroke {
@@ -21,10 +18,6 @@ export interface Credentials {
 }
 
 export type PornList = string[]
-
-export type GameEvent<Args extends unknown[] = []> = (
-  ...args: Args
-) => (state: IState, dispatch: (action: ReturnType<GameBoardAction>) => void) => void | Promise<void>
 
 export interface EventToken {
   id: string

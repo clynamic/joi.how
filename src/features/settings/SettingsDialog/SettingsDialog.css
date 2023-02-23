@@ -9,6 +9,7 @@
   overflow: scroll;
   transition: all 600ms var(--expo);
 }
+
 .SettingsDialog section {
   background: rgb(46, 47, 59);
   padding: 10px 40px;

@@ -37,12 +37,9 @@ export function useGA<P>(category: string, props: P, record: Array<keyof P>): vo
     ),
   )
 
-  useEffect(
-    () => {
-      record.forEach((key) => {
-        eventRefs.current[key]?.(props[key])
-      })
-    },
-    record.map((key) => props[key]),
-  )
+  useEffect(() => {
+    record.forEach((key) => {
+      eventRefs.current[key]?.(props[key])
+    })
+  }, [props, record])
 }

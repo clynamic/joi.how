@@ -1,5 +1,5 @@
 import { type FunctionComponent } from 'react'
-import { events } from '../../../gameboard/events/index'
+import { events } from '../../../gameboard'
 import { type EventToken } from '../../../gameboard/types'
 import '../settings.css'
 import { useGA } from '../useGA'
