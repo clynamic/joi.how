@@ -4,10 +4,6 @@ import type { IState } from '../../../store'
 import type { EventToken } from '../types'
 import { CleanMess, Cum, DoublePace, Edge, HalfPace, Pause, RandomGrip, RandomPace, RisingPace } from './events'
 
-const flags = {
-  hasEdged: false,
-}
-
 function isEnabled(eventKey: EventToken['id'], state: IState): boolean {
   return state.settings.eventList.includes(eventKey)
 }
@@ -18,8 +14,7 @@ export function getNextEvent(state: IState): AsyncThunkAction<unknown, unknown, 
       return Cum()
     }
 
-    if (state.game.intensity >= 90 && !flags.hasEdged && isEnabled('edge', state)) {
-      flags.hasEdged = true
+    if (state.game.intensity >= 90 && !state.game.hasEdged && isEnabled('edge', state)) {
       return Edge()
     }
 
