@@ -2,7 +2,7 @@ import { useEffect, type FunctionComponent, type PropsWithChildren } from 'react
 import { useDispatch } from 'react-redux'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import reactGA from './analytics'
-import { applyAllSettings, unpackSave } from './helpers/saveFormat'
+import { loadSettings } from './helpers/saveFormat'
 import { GreeterPage } from './pages/Greeter/Greeter'
 import { PlayPage } from './pages/Play'
 
@@ -10,9 +10,8 @@ export const App: FunctionComponent = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    const lastSession = localStorage.getItem('lastSession')
     try {
-      if (lastSession != null) applyAllSettings(dispatch, unpackSave(lastSession))
+      loadSettings(dispatch)
     } catch (e) {
       console.warn(e)
     }

@@ -28,7 +28,7 @@ const StartGame = createAsyncThunk('gameBoard/startGame', async (_, { getState, 
   gameloop(
     () => {
       const state = getState() as IState
-      dispatch(GameBoardActions.SetImage(Math.floor(state.settings.pornList.length * Math.random())))
+      dispatch(GameBoardActions.SetImage(Math.floor(state.settings.porn.length * Math.random())))
     },
     (state) => Math.max((100 - state.game.intensity) * 80, 400),
   )

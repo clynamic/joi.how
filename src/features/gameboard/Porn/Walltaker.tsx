@@ -6,8 +6,8 @@ import { MessageType } from '../MessageArea/MessageTypes'
 import { GameBoardActions } from '../store'
 
 interface IWalltakerProps {
-  walltakerLink: IState['settings']['walltakerLink']
-  pornList: IState['settings']['pornList']
+  walltakerLink: IState['settings']['walltaker']
+  pornList: IState['settings']['porn']
   dispatch: (action: unknown) => void
 }
 

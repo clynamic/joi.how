@@ -13,8 +13,8 @@ export enum EGrip {
 }
 
 export interface Credentials {
-  login: string
-  api_key: string
+  username: string
+  password: string
 }
 
 export type PornList = string[]

@@ -4,15 +4,15 @@ import './WalltakerSetting.css'
 
 interface IWalltakerSettingProps {
   enabled: boolean
-  link: number | null
-  setLink: (newLink: number | null) => void
+  link?: number
+  setLink: (newLink?: number) => void
 }
 
 export const WalltakerSetting: FunctionComponent<IWalltakerSettingProps> = (props) => {
   const setLink = (e: ChangeEvent<HTMLInputElement>): void => {
     const linkString = e.target.value
     const link = parseInt(linkString.replace(/\D/g, ''), 10)
-    props.setLink(Number.isNaN(link) ? null : link)
+    props.setLink(Number.isNaN(link) ? undefined : link)
   }
 
   return (

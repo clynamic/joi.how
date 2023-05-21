@@ -44,5 +44,5 @@ yarn start
 ### Social
 
 - We have an [e6 forum thread](https://e621.net/forum_topics/23796). We'd love to hear your feedback.
-- Want to let other people set your wallpaper? Try our other app, [Walltalker](https://walltaker.joi.how/).
-- Hang out with us in the [Walltalker discord server](https://discord.com/invite/waaHCqUXj6).
+- Want to let other people set your wallpaper? Try our other app, [Walltaker](https://walltaker.joi.how/).
+- Hang out with us in the [Walltaker discord server](https://discord.com/invite/waaHCqUXj6).

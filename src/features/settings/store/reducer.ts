@@ -11,10 +11,10 @@ export interface ISettingsState {
   }
   steepness: number
   duration: number
-  credentials: Credentials | null
-  pornList: PornList
-  eventList: Array<EventToken['id']>
-  hypnoMode: HypnoMode
+  credentials?: Credentials
+  porn: PornList
+  events: Array<EventToken['id']>
+  hypno: HypnoMode
   player: {
     gender: PlayerGender
     parts: PlayerParts
@@ -23,7 +23,7 @@ export interface ISettingsState {
     ejaculateLikelihood: number
     ruinLikelihood: number
   }
-  walltakerLink: number | null
+  walltaker?: number
 }
 
 const settingsSlice = createSlice({
@@ -36,16 +36,16 @@ const settingsSlice = createSlice({
     },
     steepness: 0.05,
     duration: 6000,
-    credentials: null,
-    pornList: [],
-    eventList: events.map((event) => event.id),
-    hypnoMode: HypnoMode.JOI,
+    credentials: undefined,
+    porn: [],
+    events: events.map((event) => event.id),
+    hypno: HypnoMode.JOI,
     player: { gender: PlayerGender.Male, parts: PlayerParts.Cock },
     cum: {
       ejaculateLikelihood: 100,
       ruinLikelihood: 0,
     },
-    walltakerLink: null,
+    walltaker: undefined,
   } as ISettingsState,
   reducers: {
     OpenDialog: (state) => {
@@ -66,18 +66,17 @@ const settingsSlice = createSlice({
     SetDuration: (state, action: PayloadAction<number>) => {
       state.duration = action.payload
     },
-    SetCredentials: (state, action: PayloadAction<Credentials | null>) => {
+    SetCredentials: (state, action: PayloadAction<Credentials | undefined>) => {
       state.credentials = action.payload
     },
     SetPornList: (state, action: PayloadAction<PornList>) => {
-      state.pornList = action.payload
-      console.log(action.payload)
+      state.porn = action.payload
     },
     SetEventList: (state, action: PayloadAction<Array<EventToken['id']>>) => {
-      state.eventList = action.payload
+      state.events = action.payload
     },
     SetHypnoMode: (state, action: PayloadAction<HypnoMode>) => {
-      state.hypnoMode = action.payload
+      state.hypno = action.payload
     },
     SetEjaculateLikelihood: (state, action: PayloadAction<number>) => {
       state.cum.ejaculateLikelihood = action.payload
@@ -85,8 +84,8 @@ const settingsSlice = createSlice({
     SetRuinLikelihood: (state, action: PayloadAction<number>) => {
       state.cum.ruinLikelihood = action.payload
     },
-    SetWalltakerLink: (state, action: PayloadAction<number | null>) => {
-      state.walltakerLink = action.payload
+    SetWalltakerLink: (state, action: PayloadAction<number | undefined>) => {
+      state.walltaker = action.payload
     },
     SetPlayerGender: (state, action: PayloadAction<PlayerGender>) => {
       state.player.gender = action.payload
