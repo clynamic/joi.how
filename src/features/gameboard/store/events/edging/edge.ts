@@ -5,6 +5,7 @@ import { MessageType } from '../../../MessageArea/MessageTypes'
 import { gameBoardSlice } from '../../reducer'
 
 export const Edge = createAsyncThunk('gameBoard/event-edge', async (_, { getState, dispatch }) => {
+  dispatch(gameBoardSlice.actions.Edge())
   dispatch(
     gameBoardSlice.actions.ShowMessage({
       type: MessageType.NewEvent,

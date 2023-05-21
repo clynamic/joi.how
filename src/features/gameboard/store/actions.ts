@@ -28,6 +28,13 @@ const StartGame = createAsyncThunk('gameBoard/startGame', async (_, { getState, 
   gameloop(
     () => {
       const state = getState() as IState
+      dispatch(GameBoardActions.SetImage(Math.floor(state.settings.pornList.length * Math.random())))
+    },
+    (state) => Math.max((100 - state.game.intensity) * 80, 400),
+  )
+  gameloop(
+    () => {
+      const state = getState() as IState
       dispatch(GameBoardActions.Pulse())
       if (state.game.stroke === EStroke.down) playTone(425)
       if (state.game.stroke === EStroke.up) {

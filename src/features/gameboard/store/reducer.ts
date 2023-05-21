@@ -13,6 +13,8 @@ export interface IGameBoardState {
   gamePaused: boolean
   vibration: number
   cumming: boolean
+  hasEdged: boolean
+  currentImage: number
 }
 
 export const gameBoardSlice = createSlice({
@@ -28,6 +30,8 @@ export const gameBoardSlice = createSlice({
     gamePaused: false,
     cumming: false,
     vibration: 0,
+    hasEdged: false,
+    currentImage: 0,
   } as IGameBoardState,
   reducers: {
     SetPace: (state, action: PayloadAction<number>) => {
@@ -65,6 +69,12 @@ export const gameBoardSlice = createSlice({
     },
     SetVibration: (state, action: PayloadAction<number>) => {
       state.vibration = action.payload
+    },
+    SetImage: (state, action: PayloadAction<number>) => {
+      state.currentImage = action.payload
+    },
+    Edge: (state) => {
+      state.hasEdged = true
     },
     Cum: (state) => {
       state.cumming = true
