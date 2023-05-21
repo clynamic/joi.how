@@ -1,19 +1,20 @@
 import { useState, type FunctionComponent } from 'react'
 import { ReactComponent as Warning } from '../../../../assets/warning.svg'
-import { makeSave, SavePornEncodingError, SaveVersionEncodingError, unpackSave } from '../../../../helpers/saveFormat'
+import type { DecodedSettings } from '../../../../helpers/saveFormat'
+import { decodeSettings, encodeSettings, SavePornEncodingError, SaveVersionEncodingError } from '../../../../helpers/saveFormat'
 import { type IState } from '../../../../store'
 import '../settings.css'
 import './SaveSetting.css'
 
 interface ISaveSettingProps {
-  settings: Partial<IState['settings']>
-  setSettings: (newSettings: Partial<IState['settings']>) => void
+  settings: IState['settings']
+  setSettings: (settings: DecodedSettings) => void
 }
 
-function prepSave(currentSave: string, setError: (msg: string | null) => void): Partial<IState['settings']> {
-  let result = {}
+function loadSave(currentSave: string, setError: (msg: string | null) => void): DecodedSettings {
+  let result: DecodedSettings = {}
   try {
-    result = unpackSave(currentSave)
+    result = decodeSettings(currentSave)
   } catch (e) {
     if (e instanceof SavePornEncodingError) setError('The porn encoding is off somehow. This is a weird error. Hmm.')
     else if (e instanceof SaveVersionEncodingError)
@@ -43,14 +44,14 @@ export const SaveSetting: FunctionComponent<ISaveSettingProps> = (props) => {
           </em>
           <button
             onClick={() => {
-              setCurrentSave(makeSave(props.settings, /* includeCredentials */ false))
+              setCurrentSave(encodeSettings(props.settings))
             }}
           >
             Save
           </button>
           <button
             onClick={() => {
-              props.setSettings(prepSave(currentSave, setError))
+              props.setSettings(loadSave(currentSave, setError))
             }}
           >
             Load

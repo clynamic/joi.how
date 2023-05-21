@@ -10,10 +10,10 @@ import './PornSetting.css'
 import { PornThumbnail } from './PornThumbnail'
 
 interface IPornSettingProps {
-  credentials: Credentials | null
-  setCredentials: (newCredentials: Credentials | null) => void
-  pornList: PornList
-  setPornList: (newPornList: PornList) => void
+  credentials?: Credentials
+  setCredentials: (newCredentials?: Credentials) => void
+  porn: PornList
+  setPorn: (newPornList: PornList) => void
 }
 
 interface IPornSettingState {
@@ -40,7 +40,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
       flags: {
         highRes: false,
       },
-      credentials: { login: '', api_key: '' },
+      credentials: { username: '', password: '' },
       addCredentials: false,
       credentialsError: null,
       blacklistTagsString: null,
@@ -57,7 +57,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
   }
 
   componentDidUpdate(prevProps: IPornSettingProps): void {
-    if (this.props.credentials !== null && prevProps.credentials === null) {
+    if (this.props.credentials != null && prevProps.credentials == null) {
       this.setState({ credentials: this.props.credentials })
       this.loadBlacklist()
     }
@@ -74,7 +74,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
     this.setState((prevState) => ({
       credentials: {
         ...prevState.credentials,
-        login,
+        username: login,
       },
       credentialsError: null,
     }))
@@ -85,7 +85,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
     this.setState((prevState) => ({
       credentials: {
         ...prevState.credentials,
-        api_key: apiKey,
+        password: apiKey,
       },
       credentialsError: null,
     }))
@@ -98,7 +98,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
       responseType: 'json',
     }
     axios
-      .get(`https://e621.net/users/${this.state.credentials.login}.json`, config)
+      .get(`https://e621.net/users/${this.state.credentials.username}.json`, config)
       .then(() => {
         this.props.setCredentials(this.state.credentials)
       })
@@ -108,7 +108,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
   }
 
   clearCredentials(): void {
-    this.props.setCredentials(null)
+    this.props.setCredentials(undefined)
     this.setState({ addCredentials: false })
   }
 
@@ -118,7 +118,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
       responseType: 'json',
     }
     if (this.props.credentials == null) return
-    void axios.get(`https://e621.net/users/${this.props.credentials.login}.json`, config).then((response: AxiosResponse<E621User>) => {
+    void axios.get(`https://e621.net/users/${this.props.credentials.username}.json`, config).then((response: AxiosResponse<E621User>) => {
       this.setState({ blacklistTagsString: response.data.blacklisted_tags })
     })
   }
@@ -143,7 +143,7 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
     void axios
       .get(`https://e621.net/posts.json?tags=${tags}&limit=${this.state.count}&callback=callback`, config)
       .then((response: AxiosResponse<{ posts: E621Post[] }>) => {
-        this.props.setPornList(
+        this.props.setPorn(
           (
             response.data.posts
               .filter((post) => /(jpg|png|bmp|jpeg|webp|gif)$/g.test(post.file.ext))
@@ -151,18 +151,18 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
               .map((post) => (this.state.flags.highRes ? post.file.url : post.sample.url))
               .filter((url) => url !== null) as string[]
           )
-            .filter((url) => !this.props.pornList.includes(url))
-            .concat(this.props.pornList),
+            .filter((url) => !this.props.porn.includes(url))
+            .concat(this.props.porn),
         )
       })
   }
 
   clear(): void {
-    this.props.setPornList([])
+    this.props.setPorn([])
   }
 
   clearOne(image: string): void {
-    this.props.setPornList(this.props.pornList.filter((porn) => porn !== image))
+    this.props.setPorn(this.props.porn.filter((porn) => porn !== image))
   }
 
   render(): ReactElement {
@@ -209,13 +209,13 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
                   <>
                     <label>
                       <span>Username</span>
-                      <input type="text" value={this.state.credentials.login} onChange={this.updateLogin} />
+                      <input type="text" value={this.state.credentials.username} onChange={this.updateLogin} />
                     </label>
                     <br />
                     <br />
                     <label>
                       <span>Api Key</span>
-                      <input type="text" value={this.state.credentials.api_key} onChange={this.updateApiKey} />
+                      <input type="text" value={this.state.credentials.password} onChange={this.updateApiKey} />
                     </label>
                     <em>
                       (found in <a href="https://e621.net/users/home">your account</a> under &quot;Manage API Access&quot;)
@@ -328,14 +328,14 @@ export class PornSetting extends React.Component<IPornSettingProps, IPornSetting
             </label>
           </div>
 
-          {this.props.pornList.length > 0 ? (
+          {this.props.porn.length > 0 ? (
             <div className="settings-innerrow PornSetting__count-row">
               <button onClick={this.clear}>Clear All</button>
               <span>
-                <strong>{this.props.pornList.length} items</strong> stored. Click thumbnail to delete.
+                <strong>{this.props.porn.length} items</strong> stored. Click thumbnail to delete.
               </span>
               <div className="PornSetting__thumbnails">
-                {this.props.pornList.map((porn) => (
+                {this.props.porn.map((porn) => (
                   <PornThumbnail key={porn} image={porn} onDelete={this.clearOne.bind(this)} />
                 ))}
               </div>

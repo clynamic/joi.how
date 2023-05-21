@@ -5,7 +5,7 @@ import type { EventToken } from '../types'
 import { CleanMess, Cum, DoublePace, Edge, HalfPace, Pause, RandomGrip, RandomPace, RisingPace } from './events'
 
 function isEnabled(eventKey: EventToken['id'], state: IState): boolean {
-  return state.settings.eventList.includes(eventKey)
+  return state.settings.events.includes(eventKey)
 }
 
 export function getNextEvent(state: IState): AsyncThunkAction<unknown, unknown, Record<string, never>> | null {

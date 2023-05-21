@@ -19,8 +19,8 @@ const PornBackgroundDiv = styled.div`
 `
 
 export const Porn: FunctionComponent = () => {
-  const pornList = useSelector<IState, IState['settings']['pornList']>((state) => state.settings.pornList)
-  const walltakerLink = useSelector<IState, IState['settings']['walltakerLink']>((state) => state.settings.walltakerLink)
+  const pornList = useSelector<IState, IState['settings']['porn']>((state) => state.settings.porn)
+  const walltakerLink = useSelector<IState, IState['settings']['walltaker']>((state) => state.settings.walltaker)
   const currentImage = useSelector<IState, IState['game']['currentImage']>((state) => state.game.currentImage)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()

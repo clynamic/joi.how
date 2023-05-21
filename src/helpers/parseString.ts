@@ -28,7 +28,7 @@ function transform(token: string, settings: ISettingsState): string {
           return 'pup'
       }
     case 'master':
-      switch (settings.hypnoMode) {
+      switch (settings.hypno) {
         case HypnoMode.FemDomPet:
         case HypnoMode.Pet:
           return 'master'
@@ -36,13 +36,13 @@ function transform(token: string, settings: ISettingsState): string {
           return ''
       }
     case 'HANDS':
-      if (settings.hypnoMode === HypnoMode.FemDomPet || settings.hypnoMode === HypnoMode.Pet) {
+      if (settings.hypno === HypnoMode.FemDomPet || settings.hypno === HypnoMode.Pet) {
         return 'PAWS'
       } else {
         return 'HANDS'
       }
     case 'hands':
-      if (settings.hypnoMode === HypnoMode.FemDomPet || settings.hypnoMode === HypnoMode.Pet) {
+      if (settings.hypno === HypnoMode.FemDomPet || settings.hypno === HypnoMode.Pet) {
         return 'paws'
       } else {
         return 'hands'

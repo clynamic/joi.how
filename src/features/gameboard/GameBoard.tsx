@@ -32,7 +32,7 @@ export const GameBoard: FunctionComponent = () => {
     <div className="GameBoard">
       <Stats />
       <StrokeMeter stroke={state.game.stroke} pace={state.game.pace} cumming={state.game.cumming} />
-      <Hypno mode={state.settings.hypnoMode} />
+      <Hypno mode={state.settings.hypno} />
       <MessageArea />
       <EmergencyStop />
       <Porn />
