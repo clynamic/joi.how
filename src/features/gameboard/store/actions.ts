@@ -39,16 +39,16 @@ const StartGame = createAsyncThunk('gameBoard/startGame', async (_, { getState, 
       if (state.game.stroke === EStroke.down) playTone(425)
       if (state.game.stroke === EStroke.up) {
         playTone(625)
-        if (state.vibrators.devices.length > 0 && state.vibrators.mode === VibrationStyleMode.THUMP) {
-          if (state.game.pace > 3.25) {
-            state.vibrators.devices.forEach((e) => {
-              void e.setVibration(state.game.intensity / 100)
-            })
-          } else {
+        if (state.vibrators.devices.length > 0) {
+          if (state.vibrators.mode === VibrationStyleMode.THUMP && state.game.pace <= 3) {
             state.vibrators.devices.forEach((e) => {
               void (() => {
                 void e.thump(((1 / state.game.pace) * 1000) / 2, Math.max(0.25, state.game.intensity / 100))
               })()
+            })
+          } else {
+            state.vibrators.devices.forEach((e) => {
+              void e.setVibration(state.game.intensity / 100)
             })
           }
         }
@@ -104,26 +104,9 @@ const SetPace = createAsyncThunk('gameBoard/setPaceAndIntensity', async (newPace
   }
 })
 
-const SetVibration = createAsyncThunk('gameBoard/setVibration', async (percentage: number, { getState, dispatch }) => {
-  const state = getState() as IState
-  if (state.vibrators.mode === VibrationStyleMode.CONSTANT) {
-    if (state.vibrators.devices.length > 0) {
-      state.vibrators.devices.forEach((e) => {
-        void (async () => {
-          await e.setVibration(percentage).catch(() => {
-            dispatch(gameBoardSlice.actions.SetVibration(state.game.vibration))
-          })
-        })()
-      })
-    }
-    dispatch(gameBoardSlice.actions.SetVibration(percentage))
-  }
-})
-
 export const GameBoardActions = {
   ...gameBoardSlice.actions,
   SetPace,
-  SetVibration,
   StartGame,
   StopGame,
 }

@@ -41,7 +41,7 @@ export function makeSave(settings: Partial<IState['settings']>, includeCredentia
   output += `:PX${pace.max}`
   output += `:S${steepness * 100}`
   output += `:D${duration / 100}`
-  if (includeCredentials && credentials != null) output += `:C${btoa(JSON.stringify(credentials))}`
+  if (includeCredentials && credentials != null) output += `:CD${window.btoa(JSON.stringify(credentials))}`
   output += `:P${pornList.reduce((acc, porn) => `${acc}${acc != null ? ',' : ''}${encodePorn(porn)}`, '')}`
   output += `:E{${eventList.reduce((acc, eventId) => `${acc}${acc != null ? ',' : ''}${eventId}`, '')}}`
   output += `:H${hypnoMode}`
@@ -51,11 +51,11 @@ export function makeSave(settings: Partial<IState['settings']>, includeCredentia
   output += `:CR${cum.ruinLikelihood}`
   if (walltakerLink != null) output += `:W${walltakerLink}`
 
-  return btoa(output)
+  return window.btoa(output)
 }
 
 export function unpackSave(base64Save: string): IState['settings'] {
-  const save = atob(base64Save)
+  const save = window.atob(base64Save)
   const settings: IState['settings'] = {
     dialogShown: false,
     pace: { min: 0.75, max: 5 },
@@ -95,10 +95,9 @@ export function unpackSave(base64Save: string): IState['settings'] {
     settings.duration = parseFloat(durationString[0].replace(':D', '')) * 100
   }
 
-  // Matches a base64 encoded string
-  const credentials = save.match(/:C(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?/g)
+  const credentials = save.match(/:CD(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?/g)
   if (credentials?.[0] != null) {
-    settings.credentials = JSON.parse(atob(credentials[0].replace(/^:C/, '')))
+    settings.credentials = JSON.parse(window.atob(credentials[0].replace(/^:CD/, '')))
   }
 
   const pornListString = save.match(/:P[a-z0-9.|,@]+/g)
@@ -116,12 +115,12 @@ export function unpackSave(base64Save: string): IState['settings'] {
     settings.hypnoMode = parseInt(hypnoModeString[0].replace(':H', ''), 10)
   }
 
-  const playerGenderString = save.match(/:PM\d+/g)
+  const playerGenderString = save.match(/:PG\d+/g)
   if (playerGenderString?.[0] != null) {
     settings.player.gender = parseInt(playerGenderString[0].replace(':PG', ''), 10)
   }
 
-  const playerPartsString = save.match(/:PM\d+/g)
+  const playerPartsString = save.match(/:PP\d+/g)
   if (playerPartsString?.[0] != null) {
     settings.player.parts = parseInt(playerPartsString[0].replace(':PP', ''), 10)
   }
@@ -171,6 +170,7 @@ function encodePorn(porn: string): string {
 }
 
 function decodePorn(encoded: string): string {
+  console.log(encoded)
   const encodedPortions = encoded.match(/[a-z0-9]+/g)
   if (encodedPortions != null) {
     const hex = encodedPortions

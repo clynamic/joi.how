@@ -64,6 +64,7 @@ const vibratorSlice = createSlice({
     },
     Disconnected(state) {
       state.connection = null
+      state.devices = []
     },
     SetMode(state, action: PayloadAction<VibrationStyleMode>) {
       state.mode = action.payload

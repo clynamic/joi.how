@@ -71,6 +71,7 @@ const settingsSlice = createSlice({
     },
     SetPornList: (state, action: PayloadAction<PornList>) => {
       state.pornList = action.payload
+      console.log(action.payload)
     },
     SetEventList: (state, action: PayloadAction<Array<EventToken['id']>>) => {
       state.eventList = action.payload
