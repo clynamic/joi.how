@@ -22,7 +22,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
   const [username, setUsername] = useState<string | undefined>()
   const [password, setPassword] = useState<string | undefined>()
   const [credentialsError, setCredentialsError] = useState<string | undefined>()
-  const [tags, setTags] = useState<string | undefined>()
+  const [tags, setTags] = useState<string>('')
   const [count, setCount] = useState(30)
   const [minScore, setMinScore] = useState<number | undefined>()
   const [highRes, setHighRes] = useState(false)
@@ -251,7 +251,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
               <br />
               <label>
                 <span>Blacklisted tags</span>
-                <textarea className="PornSetting__textarea" value={blacklist} onChange={updateBlacklist}></textarea>
+                <textarea className="PornSetting__textarea" value={blacklist ?? ''} onChange={updateBlacklist}></textarea>
                 <em>
                   Put any tag combinations you don&apos;t want to see. Each combination should go on a separate line. &nbsp;
                   <a href="https://e621.net/help/blacklist">View help</a>.

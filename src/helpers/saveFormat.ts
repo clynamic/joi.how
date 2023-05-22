@@ -10,8 +10,8 @@ interface EncodedSettings {
   steepness: IState['settings']['steepness']
   duration: IState['settings']['duration']
   credentials?: string
-  porn: string
-  events: string
+  porn: string[]
+  events: string[]
   hypno: IState['settings']['hypno']
   gender: IState['settings']['player']['gender']
   parts: IState['settings']['player']['parts']
@@ -51,8 +51,8 @@ export function encodeSettings(settings: IState['settings'], options?: { include
     steepness,
     duration,
     credentials: options?.includeCredentials ? encodeCredentials(credentials) : undefined,
-    porn: JSON.stringify(porn.map(shrinkUrl)),
-    events: JSON.stringify(events),
+    porn: porn.map(shrinkUrl),
+    events: events,
     hypno,
     gender: player.gender,
     parts: player.parts,
@@ -89,8 +89,8 @@ export function decodeSettings(url: string): DecodedSettings {
     steepness,
     duration,
     credentials: decodeCredentials(credentials),
-    porn: porn != null ? JSON.parse(porn).map(expandUrl) : undefined,
-    events: events != null ? JSON.parse(events) : undefined,
+    porn: porn?.map(expandUrl),
+    events,
     hypno: hypno,
     player: {
       gender,
@@ -178,8 +178,11 @@ function objectToURLParams(obj: Record<string, any>): string {
 
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const value = obj[key]
+      let value = obj[key]
       if (value !== undefined) {
+        if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
+          value = JSON.stringify(value)
+        }
         params.append(key, value)
       }
     }
@@ -197,8 +200,11 @@ function urlParamsToObject(urlParams: string): Record<string, unknown> {
   let current = iterator.next()
   while (!current.done) {
     const [key, value] = current.value
-    obj[key] = value
-
+    try {
+      obj[key] = JSON.parse(value)
+    } catch (error) {
+      obj[key] = value
+    }
     current = iterator.next()
   }
 

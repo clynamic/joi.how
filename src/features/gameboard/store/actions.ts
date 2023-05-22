@@ -7,7 +7,7 @@ import { GameEventActions, getNextEvent } from './actions.events'
 import { gameBoardSlice } from './reducer'
 
 const StartGame = createAsyncThunk('gameBoard/startGame', async (_, { getState, dispatch }) => {
-  const gameloop = (callback: () => void | Promise<void>, ms: (state: IState) => number | undefined): void => {
+  const gameloop = (callback: () => void | Promise<void>, ms: (state: IState) => number): void => {
     const state = getState() as IState
     const timer = setTimeout((): void => {
       void (async () => {
@@ -20,7 +20,7 @@ const StartGame = createAsyncThunk('gameBoard/startGame', async (_, { getState, 
           gameloop(callback, ms)
         }
       })()
-    }, ms(state) ?? 0)
+    }, ms(state))
     dispatch(gameBoardSlice.actions.SetTimers(state.game.timers.concat([timer])))
   }
 

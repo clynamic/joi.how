@@ -47,7 +47,7 @@ export const Porn: FunctionComponent = () => {
   )
 
   const pulseDuration = useMemo(() => {
-    return Math.max((100 - intensity) * 80, 400)
+    return Math.max((100 - intensity) * 80, 800)
   }, [intensity])
 
   return (
