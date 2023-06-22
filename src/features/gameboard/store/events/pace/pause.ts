@@ -14,7 +14,7 @@ export const Pause = createAsyncThunk('gameBoard/event-pause', async (_, { getSt
       text: `Stop stroking!`,
     }),
   )
-  dispatch(gameBoardSlice.actions.PauseGame())
+  dispatch(gameBoardSlice.actions.StopGame())
 
   await wait(duration)
 
@@ -25,5 +25,5 @@ export const Pause = createAsyncThunk('gameBoard/event-pause', async (_, { getSt
       text: `Start stroking again.`,
     }),
   )
-  dispatch(gameBoardSlice.actions.ResumeGame())
+  dispatch(gameBoardSlice.actions.StartGame())
 })

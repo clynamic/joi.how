@@ -15,9 +15,9 @@ export const MessageArea: FunctionComponent = () => {
   const runButtonMethod = (button: Button): void => {
     const returnValue = button.method()
     if (returnValue != null) {
-      dispatch(GameBoardActions.PauseEvents())
+      dispatch(GameBoardActions.StopEvents())
       void returnValue.then(() => {
-        void dispatch(GameBoardActions.ResumeEvents())
+        void dispatch(GameBoardActions.StartEvents())
       })
     }
   }

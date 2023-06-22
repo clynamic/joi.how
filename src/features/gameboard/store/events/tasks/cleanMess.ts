@@ -19,8 +19,8 @@ export const CleanMess = createAsyncThunk('gameBoard/event-cleanMess', async (_,
       msg = "mess you've made"
       break
   }
-  dispatch(gameBoardSlice.actions.PauseEvents())
-  dispatch(gameBoardSlice.actions.PauseGame())
+  dispatch(gameBoardSlice.actions.StopEvents())
+  dispatch(gameBoardSlice.actions.StopGame())
   dispatch(
     gameBoardSlice.actions.ShowMessage({
       type: MessageType.Prompt,
@@ -29,8 +29,8 @@ export const CleanMess = createAsyncThunk('gameBoard/event-cleanMess', async (_,
         {
           display: `I'm done $master`,
           method: () => {
-            dispatch(gameBoardSlice.actions.ResumeEvents())
-            dispatch(gameBoardSlice.actions.ResumeGame())
+            dispatch(gameBoardSlice.actions.StartEvents())
+            dispatch(gameBoardSlice.actions.StartGame())
             dispatch(
               gameBoardSlice.actions.ShowMessage({
                 type: MessageType.NewEvent,

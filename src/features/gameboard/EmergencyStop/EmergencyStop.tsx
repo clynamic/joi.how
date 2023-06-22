@@ -21,8 +21,7 @@ export const EmergencyStop: FunctionComponent = () => {
   }, [intensity])
 
   async function stop(): Promise<void> {
-    dispatch(GameBoardActions.PauseEvents())
-    dispatch(GameBoardActions.PauseGame())
+    dispatch(GameBoardActions.StopGame())
     playTone(400)
     await wait(100)
     playTone(300)
@@ -58,6 +57,7 @@ export const EmergencyStop: FunctionComponent = () => {
     dispatch(
       GameBoardActions.ShowMessage({
         type: MessageType.NewEvent,
+        // TODO: this message doesnt change for different parts
         text: 'Get your hand back on your shaft.',
       }),
     )
@@ -74,11 +74,7 @@ export const EmergencyStop: FunctionComponent = () => {
     await wait(100)
     playTone(400)
 
-    void dispatch(GameBoardActions.SetPace(1))
-    void dispatch(GameBoardActions.DecIntensity(30))
-
-    dispatch(GameBoardActions.ResumeEvents())
-    dispatch(GameBoardActions.ResumeGame())
+    dispatch(GameBoardActions.StartGame())
   }
 
   return (

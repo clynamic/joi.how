@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState, type FunctionComponent } from 'react'
+import { useMemo, useRef, useState, type FunctionComponent } from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { formatMessage } from '../../../helpers/parseString'
 import { HypnoMode } from '../types'
 
 import { type IState } from '../../../store'
+import { useGameLoop } from '../store/hooks'
 import './Hypno.css'
 
 interface IHypnoProps {
@@ -126,14 +127,15 @@ export const Hypno: FunctionComponent<IHypnoProps> = (props) => {
   const [animating, setAnimating] = useState(false)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
   const settings = useSelector<IState, IState['settings']>((state) => state.settings)
+  const cycling = useRef(false)
 
   const delay = useMemo(() => {
-    // intensity ranges between 0 and 100, lowest delay time is thus 10ms
+    // intensity ranges between 0 and 100, lowest delay time is thus 100ms
     return 3000 - intensity * 29
   }, [intensity])
 
-  useEffect(() => {
-    const phraseTimer = setTimeout(() => {
+  useGameLoop(() => {
+    if (cycling.current) {
       const phrases = HYPNO_PHRASES.get(props.mode)
       if (phrases != null) {
         let newPhrase = phrase
@@ -141,19 +143,11 @@ export const Hypno: FunctionComponent<IHypnoProps> = (props) => {
           newPhrase = phrases[Math.ceil(Math.random() * (phrases.length - 1))]
         }
         setPhrase(newPhrase)
-        setAnimating(true)
       }
-    }, delay)
-
-    const animationTimer = setTimeout(() => {
-      setAnimating(false)
-    }, delay / 2)
-
-    return () => {
-      clearTimeout(phraseTimer)
-      clearTimeout(animationTimer)
     }
-  }, [phrase, props.mode, delay])
+    cycling.current = !cycling.current
+    setAnimating(!animating)
+  }, delay / 2)
 
   return (
     <HypnoTextDiv delay={delay} className={animating ? 'Hypno--changed' : 'Hypno'}>

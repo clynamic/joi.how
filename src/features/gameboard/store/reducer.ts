@@ -26,8 +26,8 @@ export const gameBoardSlice = createSlice({
     messages: [],
     timers: [],
     stroke: EStroke.down,
+    gamePaused: true,
     eventsPaused: false,
-    gamePaused: false,
     cumming: false,
     vibration: 0,
     hasEdged: false,
@@ -52,20 +52,28 @@ export const gameBoardSlice = createSlice({
     Pulse: (state) => {
       state.stroke = state.stroke === EStroke.down ? EStroke.up : EStroke.down
     },
-    PauseEvents: (state) => {
+    StopEvents: (state) => {
       state.eventsPaused = true
     },
-    ResumeEvents: (state) => {
+    StartEvents: (state) => {
       state.eventsPaused = false
     },
-    PauseGame: (state) => {
+    StopGame: (state) => {
       state.gamePaused = true
     },
-    ResumeGame: (state) => {
+    StartGame: (state) => {
       state.gamePaused = false
     },
-    SetTimers: (state, action: PayloadAction<NodeJS.Timeout[]>) => {
-      state.timers = action.payload
+    AddTimer: (state, action: PayloadAction<NodeJS.Timeout>) => {
+      state.timers = state.timers.concat([action.payload])
+    },
+    RemoveTimer: (state, action: PayloadAction<NodeJS.Timeout>) => {
+      clearTimeout(action.payload)
+      state.timers = state.timers.filter((e) => e !== action.payload)
+    },
+    ClearTimers: (state) => {
+      state.timers.forEach((timer) => clearTimeout(timer))
+      state.timers = []
     },
     SetVibration: (state, action: PayloadAction<number>) => {
       state.vibration = action.payload
