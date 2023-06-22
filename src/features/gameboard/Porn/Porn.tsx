@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { SettingsActions } from '../../settings/store'
 import { GameBoardActions } from '../store'
+import { useGameLoop } from '../store/hooks'
 import './Porn.css'
 import { PornControls } from './PornControls/PornControls'
 import { Walltaker } from './Walltaker'
@@ -49,6 +50,10 @@ export const Porn: FunctionComponent = () => {
   const pulseDuration = useMemo(() => {
     return Math.max((100 - intensity) * 80, 800)
   }, [intensity])
+
+  useGameLoop(() => {
+    dispatch(GameBoardActions.SetImage(Math.floor(pornList.length * Math.random())))
+  }, Math.max((100 - intensity) * 80, 400))
 
   return (
     <div className="Porn__container">

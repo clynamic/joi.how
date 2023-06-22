@@ -4,7 +4,7 @@ import { MessageType } from '../../../MessageArea/MessageTypes'
 import { playTone } from '../../../sound'
 
 import { wait } from '../../../../../helpers/helpers'
-import { EGrip, PlayerParts } from '../../../types'
+import { PlayerParts } from '../../../types'
 import { gameBoardSlice } from '../../reducer'
 
 export const Cum = createAsyncThunk('gameBoard/event-cum', async (_, { getState, dispatch }) => {
@@ -52,8 +52,7 @@ export const Cum = createAsyncThunk('gameBoard/event-cum', async (_, { getState,
             if (Math.random() * 100 < state.settings.cum.ejaculateLikelihood) {
               if (Math.random() * 100 < state.settings.cum.ruinLikelihood) {
                 /** Ruining */
-                dispatch(gameBoardSlice.actions.SetGrip(EGrip.none))
-                dispatch(gameBoardSlice.actions.PauseGame())
+                dispatch(gameBoardSlice.actions.StopGame())
                 dispatch(
                   gameBoardSlice.actions.ShowMessage({
                     type: MessageType.NewEvent,
@@ -69,7 +68,7 @@ export const Cum = createAsyncThunk('gameBoard/event-cum', async (_, { getState,
                 )
               } else {
                 /** Orgasming */
-                dispatch(gameBoardSlice.actions.PauseGame())
+                dispatch(gameBoardSlice.actions.StopGame())
                 dispatch(
                   gameBoardSlice.actions.ShowMessage({
                     type: MessageType.NewEvent,
@@ -86,9 +85,7 @@ export const Cum = createAsyncThunk('gameBoard/event-cum', async (_, { getState,
               }, 400)
             } else {
               /** No Ejaculation */
-              dispatch(gameBoardSlice.actions.SetGrip(EGrip.none))
-              dispatch(gameBoardSlice.actions.PauseGame())
-              dispatch(gameBoardSlice.actions.PauseEvents())
+              dispatch(gameBoardSlice.actions.StopGame())
               dispatch(
                 gameBoardSlice.actions.ShowMessage({
                   type: MessageType.NewEvent,
@@ -121,7 +118,7 @@ export const Cum = createAsyncThunk('gameBoard/event-cum', async (_, { getState,
                 text: `You're pathetic. Stop for a moment.`,
               }),
             )
-            dispatch(gameBoardSlice.actions.PauseGame())
+            dispatch(gameBoardSlice.actions.StopGame())
             dispatch(gameBoardSlice.actions.DecIntensity(100))
             await wait(20000)
             dispatch(
@@ -131,7 +128,7 @@ export const Cum = createAsyncThunk('gameBoard/event-cum', async (_, { getState,
               }),
             )
             dispatch(gameBoardSlice.actions.SetPace(state.settings.pace.min))
-            dispatch(gameBoardSlice.actions.ResumeGame())
+            dispatch(gameBoardSlice.actions.StartGame())
             await wait(15000)
           },
         },
