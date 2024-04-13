@@ -34,8 +34,6 @@ export const GameBoard: FunctionComponent = () => {
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
 
   useEffect(() => {
-    console.log(warmpupDuration);
-
     const warmupTimeout = setTimeout(() => {
       void dispatch(GameBoardActions.StartGame())
     }, warmpupDuration * 100);

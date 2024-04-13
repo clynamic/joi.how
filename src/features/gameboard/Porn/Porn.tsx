@@ -1,4 +1,4 @@
-import { useCallback, useMemo, type FunctionComponent } from 'react'
+import { useCallback, useMemo, useRef, type FunctionComponent } from 'react'
 import { PornQuality, PornType, type ArrayElement, type PornList } from '../types'
 
 import { type IState } from '../../../store'
@@ -26,13 +26,13 @@ export const Porn: FunctionComponent = () => {
   const currentImage = useSelector<IState, IState['game']['currentImage']>((state) => state.game.currentImage)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const openSource = useCallback((porn: ArrayElement<PornList>): void => {
       window.open(porn.source)
   }, [])
 
   const pornItem = useMemo(() => {
-    console.log(pornList);
     return pornList[currentImage]
   }, [currentImage, pornList])
 
@@ -69,7 +69,11 @@ export const Porn: FunctionComponent = () => {
         <>
           <div className="Porn">
             <div className="Porn__foreground" style={pornItem.type === PornType.VIDEO ? undefined : pornImage}>
-              {pornItem.type === PornType.VIDEO && <video src={pornQuality === PornQuality.HIGH ? pornItem.highResUrl : pornItem.mainUrl} autoPlay={true} loop={true} />}
+              {pornItem.type === PornType.VIDEO && <video ref={videoRef} src={pornQuality === PornQuality.HIGH ? pornItem.highResUrl : pornItem.mainUrl} autoPlay={true} loop={true} onLoadedMetadata={(metadata) => {
+                if (videoRef?.current) {
+                  videoRef.current.currentTime = Math.floor(Math.random() * metadata.currentTarget.duration);
+                }
+              }} />}
             </div>
 
             <PornBackgroundDiv duration={pulseDuration} className="Porn__background" style={pornImage} />

@@ -11,7 +11,7 @@
 - enforces yarn instead of npm and a fixed version of node 16 (clragon)
 - updates the readme with information from the forum thread (clragon)
 
-- adds support for videos from E621 (anthrofox22)
+- adds support for videos from E621 with random start times (anthrofox22)
 - adds a warmup duration before starting the game (anthrofox22)
 - fix score filtering not working (anthrofox22)
 - use npm instead of Yarn and use node 20 (may revert this once I understand why Yarn was broken) (anthrofox22)
