@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { events } from '../../gameboard/events'
 
-import { HypnoMode, PlayerGender, PlayerParts, type Credentials, type EventToken, type PornList } from '../../gameboard/types'
+import { HypnoMode, PlayerGender, PlayerParts, PornQuality, type Credentials, type EventToken, type PornList } from '../../gameboard/types'
 
 export interface ISettingsState {
   dialogShown: boolean
@@ -13,6 +13,7 @@ export interface ISettingsState {
   duration: number
   credentials?: Credentials
   porn: PornList
+  pornQuality: PornQuality
   events: Array<EventToken['id']>
   hypno: HypnoMode
   player: {
@@ -38,6 +39,7 @@ const settingsSlice = createSlice({
     duration: 6000,
     credentials: undefined,
     porn: [],
+    pornQuality: PornQuality.LOW,
     events: events.map((event) => event.id),
     hypno: HypnoMode.JOI,
     player: { gender: PlayerGender.Male, parts: PlayerParts.Cock },
@@ -71,6 +73,9 @@ const settingsSlice = createSlice({
     },
     SetPornList: (state, action: PayloadAction<PornList>) => {
       state.porn = action.payload
+    },
+    SetPornQuality: (state, action: PayloadAction<PornQuality>) => {
+      state.pornQuality = action.payload
     },
     SetEventList: (state, action: PayloadAction<Array<EventToken['id']>>) => {
       state.events = action.payload

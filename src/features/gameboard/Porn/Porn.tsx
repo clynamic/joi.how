@@ -1,5 +1,5 @@
 import { useCallback, useMemo, type FunctionComponent } from 'react'
-import { type ArrayElement, type PornList } from '../types'
+import { PornQuality, PornType, type ArrayElement, type PornList } from '../types'
 
 import { type IState } from '../../../store'
 
@@ -21,27 +21,33 @@ const PornBackgroundDiv = styled.div`
 
 export const Porn: FunctionComponent = () => {
   const pornList = useSelector<IState, IState['settings']['porn']>((state) => state.settings.porn)
+  const pornQuality = useSelector<IState, IState['settings']['pornQuality']>((state) => state.settings.pornQuality)
   const walltakerLink = useSelector<IState, IState['settings']['walltaker']>((state) => state.settings.walltaker)
   const currentImage = useSelector<IState, IState['game']['currentImage']>((state) => state.game.currentImage)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
 
   const openSource = useCallback((porn: ArrayElement<PornList>): void => {
-    const md5Match = /\w*(?=\.(jpg|gif|webm|png|swf|bmp))/.exec(porn)
-    if (md5Match?.[0] != null) {
-      window.open(`https://e621.net/post/index/1/md5:${md5Match[0]}`)
-    }
+      window.open(porn.source)
   }, [])
 
-  const pornImage = useMemo(() => {
-    return {
-      backgroundImage: `url(${pornList[currentImage]})`,
-    }
+  const pornItem = useMemo(() => {
+    return pornList[currentImage]
   }, [currentImage, pornList])
+
+  const pornImage = useMemo(() => {
+    if (!pornItem) {
+      return {};
+    }
+
+    return {
+      backgroundImage: `url(${pornItem.type === PornType.VIDEO ? pornItem.previewUrl : (pornQuality === PornQuality.HIGH ? pornItem.highResUrl : pornItem.mainUrl)})`,
+    }
+  }, [pornItem, currentImage])
 
   const skipPorn = useCallback(
     (pornToSkip: number) => {
-      dispatch(SettingsActions.SetPornList(pornList.filter((porn) => porn !== pornList[pornToSkip])))
+      dispatch(SettingsActions.SetPornList(pornList.filter(({service, uniqueId}) => service !== pornList[pornToSkip].service || (service === pornList[pornToSkip].service && uniqueId !== pornList[pornToSkip].uniqueId))))
       dispatch(GameBoardActions.SetImage(Math.floor(pornList.length * Math.random())))
     },
     [dispatch, pornList],
@@ -61,8 +67,11 @@ export const Porn: FunctionComponent = () => {
       {pornList.length > 0 ? (
         <>
           <div className="Porn">
-            <div className="Porn__foreground" style={pornImage} />
-            <PornBackgroundDiv duration={pulseDuration} className="Porn__background" style={pornImage}></PornBackgroundDiv>
+            <div className="Porn__foreground" style={pornItem.type === PornType.VIDEO ? undefined : pornImage}>
+              {pornItem.type === PornType.VIDEO && <video src={pornQuality === PornQuality.HIGH ? pornItem.highResUrl : pornItem.mainUrl} autoPlay={true} loop={true} />}
+            </div>
+
+            <PornBackgroundDiv duration={pulseDuration} className="Porn__background" style={pornImage} />
           </div>
           <PornControls
             onSkip={() => {

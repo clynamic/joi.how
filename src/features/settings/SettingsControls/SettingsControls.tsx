@@ -16,6 +16,7 @@ import { SaveSetting } from './SaveSetting/SaveSetting'
 import './SettingsControls.css'
 import { VibratorSetting } from './VibratorSetting/VibratorSetting'
 import { WalltakerSetting } from './WalltakerSetting/WalltakerSetting'
+import { type PornQuality } from '../../gameboard/types'
 
 export const SettingsControls: FunctionComponent = () => {
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
@@ -42,6 +43,8 @@ export const SettingsControls: FunctionComponent = () => {
       <PornSetting
         credentials={settings.credentials}
         setCredentials={(newCredentials) => dispatch(SettingsActions.SetCredentials(newCredentials))}
+        pornQuality={settings.pornQuality}
+        setPornQuality={(quality: PornQuality) => dispatch(SettingsActions.SetPornQuality(quality))}
         porn={settings.porn}
         setPorn={(newList) => dispatch(SettingsActions.SetPornList(newList))}
       />

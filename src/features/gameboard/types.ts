@@ -17,7 +17,34 @@ export interface Credentials {
   password: string
 }
 
-export type PornList = string[]
+export enum PornType {
+    IMAGE,
+    VIDEO,
+    GIF
+}
+
+export enum PornService {
+    E621,
+    WALLTAKER
+}
+
+export enum PornQuality {
+    HIGH,
+    LOW
+}
+
+export interface PornItem {
+    previewUrl: string;
+    hoverPreviewUrl: string;
+    mainUrl: string;
+    highResUrl: string;
+    type: PornType;
+    source: string;
+    service: PornService;
+    uniqueId: string;
+}
+
+export type PornList = PornItem[]
 
 export interface EventToken {
   id: string
