@@ -11,7 +11,7 @@ export interface E621FileWithTypeAndMultipleUrls extends E621File {
 }
 
 export enum E621SortOrder {
-  Id = 'order:id',
+  Id = 'order:id_desc',
   Random = 'order:random',
   VideoDurationLongest = 'order:duration',
   VideoDurationShortest = 'order:duration_asc',
