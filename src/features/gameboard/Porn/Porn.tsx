@@ -20,7 +20,7 @@ const PornBackgroundDiv = styled.div`
 `
 
 export const Porn: FunctionComponent = () => {
-  const pornList = useSelector<IState, IState['settings']['porn']>((state) => state.settings.porn)
+  const pornList = useSelector<IState, IState['settings']['porn']>((state) => state.game.cumming && state.settings.pornToCumTo.length ? state.settings.pornToCumTo : state.settings.porn)
   const pornQuality = useSelector<IState, IState['settings']['pornQuality']>((state) => state.settings.pornQuality)
   const walltakerLink = useSelector<IState, IState['settings']['walltaker']>((state) => state.settings.walltaker)
   const currentImage = useSelector<IState, IState['game']['currentImage']>((state) => state.game.currentImage)
@@ -32,6 +32,7 @@ export const Porn: FunctionComponent = () => {
   }, [])
 
   const pornItem = useMemo(() => {
+    console.log(pornList);
     return pornList[currentImage]
   }, [currentImage, pornList])
 
@@ -43,7 +44,7 @@ export const Porn: FunctionComponent = () => {
     return {
       backgroundImage: `url(${pornItem.type === PornType.VIDEO ? pornItem.previewUrl : (pornQuality === PornQuality.HIGH ? pornItem.highResUrl : pornItem.mainUrl)})`,
     }
-  }, [pornItem, currentImage])
+  }, [pornItem, pornQuality])
 
   const skipPorn = useCallback(
     (pornToSkip: number) => {
@@ -64,7 +65,7 @@ export const Porn: FunctionComponent = () => {
   return (
     <div className="Porn__container">
       <Walltaker walltakerLink={walltakerLink} pornList={pornList} dispatch={dispatch} />
-      {pornList.length > 0 ? (
+      {pornList.length > 0 && !!pornItem ? (
         <>
           <div className="Porn">
             <div className="Porn__foreground" style={pornItem.type === PornType.VIDEO ? undefined : pornImage}>

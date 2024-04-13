@@ -14,6 +14,7 @@ export interface ISettingsState {
   duration: number
   credentials?: Credentials
   porn: PornList
+  pornToCumTo: PornList
   pornQuality: PornQuality
   events: Array<EventToken['id']>
   hypno: HypnoMode
@@ -41,6 +42,7 @@ const settingsSlice = createSlice({
     duration: 6000,
     credentials: undefined,
     porn: [],
+    pornToCumTo: [],
     pornQuality: PornQuality.LOW,
     events: events.map((event) => event.id),
     hypno: HypnoMode.JOI,
@@ -78,6 +80,9 @@ const settingsSlice = createSlice({
     },
     SetPornList: (state, action: PayloadAction<PornList>) => {
       state.porn = action.payload
+    },
+    SetPornToCumToList: (state, action: PayloadAction<PornList>) => {
+      state.pornToCumTo = action.payload
     },
     SetPornQuality: (state, action: PayloadAction<PornQuality>) => {
       state.pornQuality = action.payload

@@ -47,6 +47,8 @@ export const SettingsControls: FunctionComponent = () => {
         setPornQuality={(quality: PornQuality) => dispatch(SettingsActions.SetPornQuality(quality))}
         porn={settings.porn}
         setPorn={(newList) => dispatch(SettingsActions.SetPornList(newList))}
+        pornToCumTo={settings.pornToCumTo}
+        setPornToCumTo={(newList) => dispatch(SettingsActions.SetPornToCumToList(newList))}
       />
 
       <WalltakerSetting

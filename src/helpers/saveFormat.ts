@@ -12,6 +12,7 @@ interface EncodedSettings {
   duration: IState['settings']['duration']
   credentials?: string
   porn: IState['settings']['porn']
+  pornToCumTo: IState['settings']['pornToCumTo']
   events: IState['settings']['events']
   hypno: IState['settings']['hypno']
   gender: IState['settings']['player']['gender']
@@ -26,7 +27,7 @@ type RecursivePartial<T> = {
 }
 
 export type DecodedSettings = Partial<
-  Pick<IState['settings'], 'warmpupDuration' | 'duration' | 'steepness' | 'events' | 'hypno' | 'credentials' | 'porn' | 'walltaker'>
+  Pick<IState['settings'], 'warmpupDuration' | 'duration' | 'steepness' | 'events' | 'hypno' | 'credentials' | 'porn' | 'pornToCumTo' | 'walltaker'>
 > &
   RecursivePartial<Pick<IState['settings'], 'player' | 'pace' | 'cum'>>
 
@@ -41,6 +42,7 @@ export function encodeSettings(settings: IState['settings'], options?: { include
   const duration: IState['settings']['duration'] = settings.duration
   const credentials: IState['settings']['credentials'] = settings.credentials
   const porn: IState['settings']['porn'] = settings.porn
+  const pornToCumTo: IState['settings']['pornToCumTo'] = settings.pornToCumTo
   const events: IState['settings']['events'] = settings.events
   const hypno: IState['settings']['hypno'] = settings.hypno
   const player: IState['settings']['player'] = settings.player
@@ -55,6 +57,7 @@ export function encodeSettings(settings: IState['settings'], options?: { include
     duration,
     credentials: options?.includeCredentials ? encodeCredentials(credentials) : undefined,
     porn,
+    pornToCumTo,
     events,
     hypno,
     gender: player.gender,
@@ -76,6 +79,7 @@ export function decodeSettings(url: string): DecodedSettings {
     duration,
     credentials,
     porn,
+    pornToCumTo,
     events,
     hypno,
     gender,
@@ -95,6 +99,7 @@ export function decodeSettings(url: string): DecodedSettings {
     duration,
     credentials: decodeCredentials(credentials),
     porn,
+    pornToCumTo,
     events,
     hypno: hypno,
     player: {
@@ -133,6 +138,7 @@ export function applyAllSettings(settings: DecodedSettings, dispatch: ThunkDispa
   if (settings.pace?.min != null) dispatch(SettingsActions.SetMinPace(settings.pace.min))
   if (settings.credentials != null) dispatch(SettingsActions.SetCredentials(settings.credentials))
   if (settings.porn != null) dispatch(SettingsActions.SetPornList(settings.porn))
+  if (settings.pornToCumTo != null) dispatch(SettingsActions.SetPornToCumToList(settings.pornToCumTo))
   if (settings.cum?.ejaculateLikelihood != null) dispatch(SettingsActions.SetEjaculateLikelihood(settings.cum.ejaculateLikelihood))
   if (settings.cum?.ruinLikelihood != null) dispatch(SettingsActions.SetRuinLikelihood(settings.cum.ruinLikelihood))
 }

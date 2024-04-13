@@ -17,6 +17,8 @@ interface IPornSettingProps {
   setPornQuality: (newQuality: PornQuality) => void
   porn: PornList
   setPorn: (newPornList: PornList) => void
+  pornToCumTo: PornList
+  setPornToCumTo: (newPornList: PornList) => void
 }
 
 export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
@@ -30,7 +32,6 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
   const [sortOrder, setSortOrder] = useState<E621SortOrder>(E621SortOrder.Id)
   const [blacklist, setBlacklist] = useState<string | undefined>()
   const {setPornQuality} = props;
-
 
   const loadBlacklist = useCallback(() => {
     if (username == null || password == null) return
@@ -151,7 +152,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
     [setBlacklist],
   )
 
-  const downloadFromTags = useCallback(() => {
+  const downloadFromTags = useCallback((cumTo: boolean) => {
     debounce(() => {
       if (localStorage.getItem('allowCookies') !== 'true' || localStorage.getItem('allowCookies') !== null) return
       reactGA.event({
@@ -171,36 +172,50 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
     void axios
       .get(`https://e621.net/posts.json?tags=${encodedTags}&limit=${count}`, config)
       .then((response: AxiosResponse<{ posts: E621Post[] }>) => {
-        props.setPorn(
-          (
-            response.data.posts
-              .filter((post) => /(jpg|png|bmp|jpeg|webp|gif|webm)$/g.test(post.file.ext))
-              .filter(_blacklist.shouldKeepPost)
-              .map((post) => ({
-                previewUrl: post.preview.url,
-                hoverPreviewUrl: post.file.ext === 'webm' ? post.sample?.alternates?.['480p']?.urls?.[0] ?? post.sample?.alternates?.['480p']?.urls?.[1] ?? post.file.url : post.sample.url,
-                mainUrl: post.file.ext === 'webm' ? post.sample?.alternates?.['480p']?.urls?.[0] ?? post.sample?.alternates?.['480p']?.urls?.[1] ?? post.file.url : post.sample.url,
-                highResUrl: post.file.url,
-                type: post.file.ext === 'webm' ? PornType.VIDEO : post.file.ext === 'gif' ? PornType.GIF : PornType.IMAGE,
-                source: `https://e621.net/post/index/1/md5:${post.file.md5}`,
-                service: PornService.E621,
-                uniqueId: String(post.id)
-              }))
-              .filter(({mainUrl}) => mainUrl !== null) as PornList
-          )
-            .filter(({service, uniqueId}) => !props.porn.find((item) => item.service === service && item.uniqueId === uniqueId))
-            .concat(props.porn),
+        const pornList = cumTo ? props.pornToCumTo : props.porn
+        const pornItems = (
+          response.data.posts
+            .filter((post) => /(jpg|png|bmp|jpeg|webp|gif|webm)$/g.test(post.file.ext))
+            .filter(_blacklist.shouldKeepPost)
+            .map((post) => ({
+              previewUrl: post.preview.url,
+              hoverPreviewUrl: post.file.ext === 'webm' ? post.sample?.alternates?.['480p']?.urls?.[0] ?? post.sample?.alternates?.['480p']?.urls?.[1] ?? post.file.url : post.sample.url,
+              mainUrl: post.file.ext === 'webm' ? post.sample?.alternates?.['480p']?.urls?.[0] ?? post.sample?.alternates?.['480p']?.urls?.[1] ?? post.file.url : post.sample.url,
+              highResUrl: post.file.url,
+              type: post.file.ext === 'webm' ? PornType.VIDEO : post.file.ext === 'gif' ? PornType.GIF : PornType.IMAGE,
+              source: `https://e621.net/post/index/1/md5:${post.file.md5}`,
+              service: PornService.E621,
+              uniqueId: String(post.id)
+            }))
+            .filter(({mainUrl}) => mainUrl !== null) as PornList
         )
+          .filter(({service, uniqueId}) => !pornList.find((item) => item.service === service && item.uniqueId === uniqueId));
+
+          const newPornList = [...pornList, ...pornItems];
+
+          if (cumTo) {
+            props.setPornToCumTo(newPornList)
+          } else {
+            props.setPorn(newPornList)
+          }
       })
   }, [blacklist, count, minScore, sortOrder, props, tags])
 
-  const clear = useCallback(() => {
-    props.setPorn([])
+  const clear = useCallback((cumTo: boolean) => {
+    if (cumTo) {
+      props.setPornToCumTo([])
+    } else {
+      props.setPorn([])
+    }
   }, [props])
 
   const clearOne = useCallback(
-    (porn: PornItem) => {
-      props.setPorn(props.porn.filter(({service, uniqueId}) => porn.service !== service || (porn.service === service && porn.uniqueId !== uniqueId)))
+    (porn: PornItem, cumTo: boolean) => {
+      if (cumTo) {
+        props.setPornToCumTo(props.pornToCumTo.filter(({service, uniqueId}) => porn.service !== service || (porn.service === service && porn.uniqueId !== uniqueId)))
+      } else {
+        props.setPorn(props.porn.filter(({service, uniqueId}) => porn.service !== service || (porn.service === service && porn.uniqueId !== uniqueId)))
+      }
     },
     [props],
   )
@@ -214,7 +229,8 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
             <span>Import tags</span>
             <input type="text" value={tags} onChange={updateTags} />
           </label>
-          <button onClick={downloadFromTags}>Import from e621</button>
+          <button onClick={() => downloadFromTags(false)}>Import from e621</button>
+          <button onClick={() => downloadFromTags(true)}>Import from e621 (For Cumming)</button>
         </div>
 
         <div className="settings-innerrow">
@@ -338,13 +354,27 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
 
         {props.porn.length > 0 && (
           <div className="settings-innerrow PornSetting__count-row">
-            <button onClick={clear}>Clear All</button>
+            <button onClick={() => clear(false)}>Clear All</button>
             <span>
               <strong>{props.porn.length} items</strong> stored. Click thumbnail to delete.
             </span>
             <div className="PornSetting__thumbnails">
               {props.porn.map((porn) => (
-                <PornThumbnail key={`${porn.service}-${porn.uniqueId}`} porn={porn} onDelete={clearOne} />
+                <PornThumbnail key={`${porn.service}-${porn.uniqueId}`} porn={porn} onDelete={(porn) => clearOne(porn, false)} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {props.pornToCumTo.length > 0 && (
+          <div className="settings-innerrow PornSetting__count-row">
+            <button onClick={() => clear(true)}>Clear All</button>
+            <span>
+              <strong>{props.pornToCumTo.length} items</strong> stored (for cumming only). Click thumbnail to delete.
+            </span>
+            <div className="PornSetting__thumbnails">
+              {props.pornToCumTo.map((porn) => (
+                <PornThumbnail key={`${porn.service}-${porn.uniqueId}`} porn={porn} onDelete={(porn) => clearOne(porn, true)} />
               ))}
             </div>
           </div>

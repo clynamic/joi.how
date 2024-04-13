@@ -77,6 +77,10 @@ export const Cum = createAsyncThunk('gameBoard/event-cum', async (_, { getState,
                 )
               }
               dispatch(gameBoardSlice.actions.Cum())
+              const cummingPornInterval = setInterval(() => {
+                dispatch(gameBoardSlice.actions.SetImage(Math.floor(state.settings.pornToCumTo.length * Math.random())))
+              }, 5000)
+              dispatch(gameBoardSlice.actions.AddTimer(cummingPornInterval))
               let cumSounds = 0
               const clearCumSound = setInterval(() => {
                 playTone(225 - cumSounds * 6)

@@ -16,6 +16,7 @@
 - fix score filtering not working (anthrofox22)
 - use npm instead of Yarn and use node 20 (may revert this once I understand why Yarn was broken) (anthrofox22)
 - adds a dropdown for specifying sort order when fetching from E621
+- add separate list of porn specifically for cumming to
 
 ## 1.6.0 - Fri, 15 Apr 2022 10:26:26 -0400
 

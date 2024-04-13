@@ -2,6 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 import { gameBoardSlice } from './reducer'
 
 const StartGame = createAsyncThunk('gameBoard/startGame', async (_, { dispatch }) => {
+  dispatch(gameBoardSlice.actions.ClearTimers())
   dispatch(gameBoardSlice.actions.StartGame())
 })
 
