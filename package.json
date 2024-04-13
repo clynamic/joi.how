@@ -1,7 +1,8 @@
 {
   "name": "joihow",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
+  "homepage": "https://anthrofox22.github.io/joi.how",
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
     "@reduxjs/toolkit": "^1.9.2",
@@ -70,7 +71,7 @@
     "lint": "eslint .",
     "prettier": "prettier --write .",
     "postversion": "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && echo \"\n## $PACKAGE_VERSION - `date -R`\n* \" >> src/release-notes.md && echo '\n\n\n-------\nAdd release notes to src/relase-notes.md then run {npm run live}'",
-    "live": "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag -d v$PACKAGE_VERSION && git commit -am \"release version $PACKAGE_VERSION\" && git tag \"v$PACKAGE_VERSION\" && git push origin master --tags && git checkout develop && git merge master"
+    "live": "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag -d v$PACKAGE_VERSION && git commit -am \"release version $PACKAGE_VERSION\" && git tag \"v$PACKAGE_VERSION\" && git push origin main --tags && git checkout develop && git merge main"
   },
   "eslintConfig": {
     "extends": "react-app"

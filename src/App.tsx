@@ -19,7 +19,7 @@ export const App: FunctionComponent = () => {
 
   return (
     <div className="App">
-      <BrowserRouter>
+      <BrowserRouter basename='/joi.how/'>
         <Tracker />
         <Routes>
           <Route path="/" element={<GreeterPage />} />

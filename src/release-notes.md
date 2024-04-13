@@ -1,4 +1,4 @@
-## Unreleased
+## 1.7.0
 
 - adds login and blacklist (clragon)
 - changes game loop to fully stop when stopped (including events and images) (clragon)
@@ -15,8 +15,9 @@
 - adds a warmup duration before starting the game (anthrofox22)
 - fix score filtering not working (anthrofox22)
 - use npm instead of Yarn and use node 20 (may revert this once I understand why Yarn was broken) (anthrofox22)
-- adds a dropdown for specifying sort order when fetching from E621
-- add separate list of porn specifically for cumming to
+- adds a dropdown for specifying sort order when fetching from E621 (anthrofox22)
+- add separate list of porn specifically for cumming to (anthrofox22)
+- deploy to GitHub pages (anthrofox22)
 
 ## 1.6.0 - Fri, 15 Apr 2022 10:26:26 -0400
 
