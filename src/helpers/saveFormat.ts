@@ -8,6 +8,7 @@ interface EncodedSettings {
   paceMin: IState['settings']['pace']['min']
   paceMax: IState['settings']['pace']['max']
   steepness: IState['settings']['steepness']
+  warmpupDuration: IState['settings']['warmpupDuration']
   duration: IState['settings']['duration']
   credentials?: string
   porn: IState['settings']['porn']
@@ -25,7 +26,7 @@ type RecursivePartial<T> = {
 }
 
 export type DecodedSettings = Partial<
-  Pick<IState['settings'], 'duration' | 'steepness' | 'events' | 'hypno' | 'credentials' | 'porn' | 'walltaker'>
+  Pick<IState['settings'], 'warmpupDuration' | 'duration' | 'steepness' | 'events' | 'hypno' | 'credentials' | 'porn' | 'walltaker'>
 > &
   RecursivePartial<Pick<IState['settings'], 'player' | 'pace' | 'cum'>>
 
@@ -36,6 +37,7 @@ export class SaveVersionEncodingError extends SaveError {}
 export function encodeSettings(settings: IState['settings'], options?: { includeCredentials?: boolean }): string {
   const pace: IState['settings']['pace'] = settings.pace
   const steepness: IState['settings']['steepness'] = settings.steepness
+  const warmpupDuration: IState['settings']['warmpupDuration'] = settings.warmpupDuration
   const duration: IState['settings']['duration'] = settings.duration
   const credentials: IState['settings']['credentials'] = settings.credentials
   const porn: IState['settings']['porn'] = settings.porn
@@ -49,6 +51,7 @@ export function encodeSettings(settings: IState['settings'], options?: { include
     paceMin: pace.min,
     paceMax: pace.max,
     steepness,
+    warmpupDuration,
     duration,
     credentials: options?.includeCredentials ? encodeCredentials(credentials) : undefined,
     porn,
@@ -69,6 +72,7 @@ export function decodeSettings(url: string): DecodedSettings {
     paceMin,
     paceMax,
     steepness,
+    warmpupDuration,
     duration,
     credentials,
     porn,
@@ -87,6 +91,7 @@ export function decodeSettings(url: string): DecodedSettings {
       max: paceMax,
     },
     steepness,
+    warmpupDuration,
     duration,
     credentials: decodeCredentials(credentials),
     porn,
@@ -117,6 +122,7 @@ export const loadSettings = (dispatch: ThunkDispatch<IState, unknown, AnyAction>
 }
 
 export function applyAllSettings(settings: DecodedSettings, dispatch: ThunkDispatch<IState, unknown, AnyAction>): void {
+  if (settings.warmpupDuration != null) dispatch(SettingsActions.SetWarmupDuration(settings.warmpupDuration))
   if (settings.duration != null) dispatch(SettingsActions.SetDuration(settings.duration))
   if (settings.steepness != null) dispatch(SettingsActions.SetSteepness(settings.steepness))
   if (settings.events != null) dispatch(SettingsActions.SetEventList(settings.events))
