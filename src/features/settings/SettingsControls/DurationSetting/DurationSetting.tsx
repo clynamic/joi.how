@@ -5,6 +5,8 @@ import { useGA } from '../useGA'
 interface IDurationSettingProps {
   duration: number
   setDuration: (newDuration: number) => void
+  warmpupDuration: number
+  setWarmupDuration: (newDuration: number) => void
 }
 
 function parseDuration(paceString: string): number {
@@ -22,13 +24,32 @@ export const DurationSetting: FunctionComponent<IDurationSettingProps> = (props)
     <fieldset className="settings-group">
       <legend>Duration</legend>
       <div className="settings-row">
+        <em>Warmup period allows you to view porn, without the game starting.</em>
+        <label>
+          <span>Warmup Duration</span>
+          <input
+            type="range"
+            min="600"
+            max="6000"
+            step="600"
+            value={props.warmpupDuration}
+            onChange={(e) => {
+              props.setWarmupDuration(parseDuration(e.target.value))
+            }}
+          />
+        </label>
+        <span>
+          <strong>{Math.ceil(props.warmpupDuration / 10 / 60)}min</strong>
+        </span>
+      </div>
+      <div className="settings-row">
         <label>
           <span>Session Duration</span>
           <input
             type="range"
-            min="1300"
-            max="20000"
-            step="50"
+            min="1800"
+            max="18000"
+            step="600"
             value={props.duration}
             onChange={(e) => {
               props.setDuration(parseDuration(e.target.value))

@@ -16,27 +16,63 @@ import { playTone } from './sound'
 import { getNextEvent } from './store/actions.events'
 import { useGameLoop } from './store/hooks'
 import { EStroke } from './types'
+import { MessageType } from './MessageArea/MessageTypes'
 
 export const GameBoard: FunctionComponent = () => {
   const state = useSelector((state: IState) => state)
 
+  const pornListLength = useSelector<IState, number>((state) => state.settings.porn.length)
   const stroke = useSelector<IState, IState['game']['stroke']>((state) => state.game.stroke)
   const pace = useSelector<IState, IState['game']['pace']>((state) => state.game.pace)
   const cumming = useSelector<IState, IState['game']['cumming']>((state) => state.game.cumming)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
   const vibrators = useSelector<IState, IState['vibrators']>((state) => state.vibrators)
   const hypno = useSelector<IState, IState['settings']['hypno']>((state) => state.settings.hypno)
+  const warmpupDuration = useSelector<IState, IState['settings']['warmpupDuration']>((state) => state.settings.warmpupDuration)
   const duration = useSelector<IState, IState['settings']['duration']>((state) => state.settings.duration)
 
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
 
   useEffect(() => {
-    void dispatch(GameBoardActions.StartGame())
+    console.log(warmpupDuration);
+
+    const warmupTimeout = setTimeout(() => {
+      void dispatch(GameBoardActions.StartGame())
+    }, warmpupDuration * 100);
+
+    const pornIntervalTimer = setInterval(() => {
+      dispatch(GameBoardActions.SetImage(Math.floor(pornListLength * Math.random())))
+    }, 5000);
+
+    dispatch(
+      GameBoardActions.ShowMessage({
+        type: MessageType.Prompt,
+        text: `Look at all this porn, get yourself ready!`,
+        buttons: [
+          {
+            display: `I'm ready $master`,
+            method: () => {
+              clearTimeout(warmupTimeout);
+              clearInterval(pornIntervalTimer);
+              dispatch(GameBoardActions.StartGame())
+              dispatch(
+                GameBoardActions.ShowMessage({
+                  type: MessageType.NewEvent,
+                  text: 'Now follow what I say $player.',
+                }),
+              )
+            },
+          },
+        ],
+      }),
+    )
 
     return () => {
       void dispatch(GameBoardActions.StopGame())
+      clearTimeout(warmupTimeout);
+      clearInterval(pornIntervalTimer);
     }
-  }, [dispatch])
+  }, [dispatch, pornListLength, warmpupDuration])
 
   useGameLoop(() => {
     dispatch(GameBoardActions.Pulse())
