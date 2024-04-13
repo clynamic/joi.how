@@ -10,6 +10,17 @@ export interface E621FileWithTypeAndMultipleUrls extends E621File {
   urls: Array<string | null>
 }
 
+export enum E621SortOrder {
+  Id = 'order:id',
+  Random = 'order:random',
+  VideoDurationLongest = 'order:duration',
+  VideoDurationShortest = 'order:duration_asc',
+  MostFavourites = 'order:favcount',
+  MostComments = 'order:comment_count',
+  HighestScore = 'order:score',
+  LowestScore = 'order:score_desc',
+}
+
 export interface E621Post {
   id: number
   created_at: string
