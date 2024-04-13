@@ -1,3 +1,21 @@
+## Unreleased
+
+- adds login and blacklist (clragon)
+- changes game loop to fully stop when stopped (including events and images) (clragon)
+- changes settings format to be save (clragon)
+- upgrades to react router from reach router (clragon)
+- upgrades to use redux toolkit (clragon)
+- upgrades all packages to the latest version (clragon)
+- applies sane prettier to all files (clragon)
+- applies sane eslint rules to all files (clragon)
+- enforces yarn instead of npm and a fixed version of node 16 (clragon)
+- updates the readme with information from the forum thread (clragon)
+
+- adds support for videos from E621 (anthrofox22)
+- adds a warmup duration before starting the game (anthrofox22)
+- fix score filtering not working (anthrofox22)
+- use npm instead of Yarn and use node 20 (may revert this once I understand why Yarn was broken) (anthrofox22)
+
 ## 1.6.0 - Fri, 15 Apr 2022 10:26:26 -0400
 
 - Merged #1 from InuT-Tan <3

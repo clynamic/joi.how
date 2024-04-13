@@ -30,6 +30,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
   const [blacklist, setBlacklist] = useState<string | undefined>()
   const {setPornQuality} = props;
 
+
   const loadBlacklist = useCallback(() => {
     if (username == null || password == null) return
     const config: AxiosRequestConfig = {
@@ -158,7 +159,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
     }
 
     const _blacklist = new Blacklist(blacklist ?? '')
-    const encodedTags = encodeURIComponent(tags + (minScore !== null ? ` score:>=${minScore}` : ''))
+    const encodedTags = encodeURIComponent(tags + (minScore ? ` score:>=${minScore}` : ''))
     void axios
       .get(`https://e621.net/posts.json?tags=${encodedTags}&limit=${count}`, config)
       .then((response: AxiosResponse<{ posts: E621Post[] }>) => {
@@ -275,15 +276,15 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
         <div className="settings-innerrow">
           <label>
             <span>Score filtering</span>
-            <input type="checkbox" checked={minScore !== null} onChange={updateMinScoreEnabled} />
+            <input type="checkbox" checked={minScore !== undefined} onChange={updateMinScoreEnabled} />
           </label>
-          {minScore != null && (
+          {minScore !== undefined && (
             <>
               <br />
               <br />
               <label>
                 <span>Minimum score</span>
-                <input type="range" min="-10" max="690" step="1" value={minScore === null ? 0 : minScore} onChange={updateMinScore} />
+                <input type="range" min="-10" max="1000" step="10" value={minScore} onChange={updateMinScore} />
               </label>
               <span>
                 ≥<strong> {minScore}</strong>
