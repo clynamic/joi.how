@@ -8,7 +8,7 @@ interface EncodedSettings {
   paceMin: IState['settings']['pace']['min']
   paceMax: IState['settings']['pace']['max']
   steepness: IState['settings']['steepness']
-  warmpupDuration: IState['settings']['warmpupDuration']
+  warmpupDuration: IState['settings']['warmupDuration']
   duration: IState['settings']['duration']
   credentials?: string
   porn: string[]
@@ -37,7 +37,7 @@ export class SaveVersionEncodingError extends SaveError {}
 export function encodeSettings(settings: IState['settings'], options?: { includeCredentials?: boolean }): string {
   const pace: IState['settings']['pace'] = settings.pace
   const steepness: IState['settings']['steepness'] = settings.steepness
-  const warmpupDuration: IState['settings']['warmpupDuration'] = settings.warmpupDuration
+  const warmpupDuration: IState['settings']['warmupDuration'] = settings.warmupDuration
   const duration: IState['settings']['duration'] = settings.duration
   const credentials: IState['settings']['credentials'] = settings.credentials
   const porn: IState['settings']['porn'] = settings.porn
@@ -91,7 +91,7 @@ export function decodeSettings(url: string): DecodedSettings {
       max: paceMax,
     },
     steepness,
-    warmpupDuration,
+    warmupDuration: warmpupDuration,
     duration,
     credentials: decodeCredentials(credentials),
     porn: porn?.map(expandUrl),
@@ -122,7 +122,7 @@ export const loadSettings = (dispatch: ThunkDispatch<IState, unknown, AnyAction>
 }
 
 export function applyAllSettings(settings: DecodedSettings, dispatch: ThunkDispatch<IState, unknown, AnyAction>): void {
-  if (settings.warmpupDuration != null) dispatch(SettingsActions.SetWarmupDuration(settings.warmpupDuration))
+  if (settings.warmupDuration != null) dispatch(SettingsActions.SetWarmupDuration(settings.warmupDuration))
   if (settings.duration != null) dispatch(SettingsActions.SetDuration(settings.duration))
   if (settings.steepness != null) dispatch(SettingsActions.SetSteepness(settings.steepness))
   if (settings.events != null) dispatch(SettingsActions.SetEventList(settings.events))

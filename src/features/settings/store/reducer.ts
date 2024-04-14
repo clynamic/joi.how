@@ -10,7 +10,7 @@ export interface ISettingsState {
     max: number
   }
   steepness: number
-  warmpupDuration: number
+  warmupDuration: number
   duration: number
   credentials?: Credentials
   porn: PornList
@@ -36,7 +36,7 @@ const settingsSlice = createSlice({
       max: 5,
     },
     steepness: 0.05,
-    warmpupDuration: 600,
+    warmupDuration: 600,
     duration: 6000,
     credentials: undefined,
     porn: [],
@@ -66,7 +66,7 @@ const settingsSlice = createSlice({
       state.steepness = action.payload
     },
     SetWarmupDuration: (state, action: PayloadAction<number>) => {
-      state.warmpupDuration = action.payload
+      state.warmupDuration = action.payload
     },
     SetDuration: (state, action: PayloadAction<number>) => {
       state.duration = action.payload

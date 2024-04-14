@@ -5,7 +5,7 @@ import { useGA } from '../useGA'
 interface IDurationSettingProps {
   duration: number
   setDuration: (newDuration: number) => void
-  warmpupDuration: number
+  warmupDuration: number
   setWarmupDuration: (newDuration: number) => void
 }
 
@@ -32,14 +32,14 @@ export const DurationSetting: FunctionComponent<IDurationSettingProps> = (props)
             min="0"
             max="6000"
             step="600"
-            value={props.warmpupDuration}
+            value={props.warmupDuration}
             onChange={(e) => {
               props.setWarmupDuration(parseDuration(e.target.value))
             }}
           />
         </label>
         <span>
-          <strong>{Math.ceil(props.warmpupDuration / 10 / 60)}min</strong>
+          <strong>{Math.ceil(props.warmupDuration / 10 / 60)}min</strong>
         </span>
       </div>
       <div className="settings-row">
