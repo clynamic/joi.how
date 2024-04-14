@@ -10,11 +10,21 @@ This is a small application I've been working on for a bit. Just a web app e621 
 
 I'm also taking feature requests! If there's anything you'd like to see added, feel free to [open an issue](/issues) or ask in the [forum thread](https://e621.net/forum_topics/23796).
 
+### About this fork
+
+This is a fork of a fork. Originally forked by clragon as a [Pull Request](https://github.com/PawCorp/joi.how/pull/6) on the original repository to add features, I forked their repository to create more features that I was interested in.
+
+To access a deployed verson of this fork please visit <https://anthrofox22.github.io/joi.how/>.
+
 ### Features
 
 - e621 post loader, based on tags.
+- RedGifs post loader, based on search term.
+- Support for images, gifs and videos.
+- Differnt content shown during normal play and during orgasm period.
 - Stroke speed and control settings.
 - Events that adjust speed, or ask you to do something.
+- Warmup duration control.
 - Duration control.
 - Orgasm control.
 - Initial support for some basic hypnosis stuff.
@@ -30,15 +40,14 @@ Head over to [joi.how](https://joi.how) and try it out!
 The app is made with react and nodejs and fully open source.
 To locally run it:
 
-1. install [node 16](https://nodejs.org/en/blog/release/v16.16.0/)
-2. install [yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
-3. run
+1. install [node 20](https://nodejs.org/)
+2. run
 
 ```sh
 git clone https://github.com/PawCorp/joi.how.git
 cd joi.how
-yarn
-yarn start
+npm install
+npm start
 ```
 
 ### Social

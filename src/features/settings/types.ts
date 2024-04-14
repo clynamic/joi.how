@@ -122,3 +122,116 @@ export interface E621User {
   upload_limit: number
   wiki_page_version_count: number
 }
+
+export enum RedGifsSortOrder {
+  BEST = 'best',
+  LATEST = 'latest',
+  OLDEST = 'oldest',
+  TRENDING = 'trending',
+  TOP7 = 'top7',
+  TOP28 = 'top28',
+}
+
+export enum RedGifsSexuality {
+  ANY = 'any',
+  GAY = 'gay',
+  STRAIGHT = 'straight',
+  TRANS = 'trans',
+  LESBIAN = 'lesbian',
+  BISEXUAL = 'bisexual',
+}
+
+export interface RedGifsSearchResponse {
+  page: number;
+  pages: number;
+  total: number;
+  gifs: RedGifsGIF[];
+  users: RedGifsUser[];
+  niches: RedGifsNich[];
+  tags: string[];
+}
+
+export interface RedGifsGIF {
+  avgColor: string;
+  createDate: number;
+  description: null | string;
+  duration: number | null;
+  gallery: null;
+  hasAudio: boolean;
+  height: number;
+  hideHome: boolean;
+  hideTrending: boolean;
+  hls: boolean;
+  id: string;
+  likes: number;
+  niches: string[];
+  published: boolean;
+  tags: string[];
+  type: number;
+  urls: {
+    sd: string;
+    hd: string;
+    poster: string;
+    thumbnail: string;
+    vthumbnail: string;
+  };
+  userName: string;
+  verified: boolean;
+  views: number;
+  width: number;
+  sexuality: Array<RedGifsSexuality>;
+}
+
+export interface RedGifsNich {
+  cover: null | string;
+  description: string;
+  gifs: number;
+  id: string;
+  name: string;
+  owner: string;
+  subscribers: number;
+  thumbnail: string;
+}
+
+export interface RedGifsUser {
+  creationtime: number;
+  description: null | string;
+  followers: number;
+  following: number;
+  gifs: number;
+  name: null | string;
+  profileImageUrl: null | string;
+  profileUrl: string;
+  publishedCollections: number;
+  publishedGifs: number;
+  status: "active";
+  subscription: number;
+  url: string;
+  username: string;
+  verified: boolean;
+  views: number;
+  poster: string;
+  preview: string;
+  thumbnail: string;
+  likes: number;
+  socialUrl1?: null | string;
+  socialUrl2?: string;
+  socialUrl3?: null | string;
+  socialUrl4?: null | string;
+  socialUrl5?: null | string;
+  socialUrl6?: string;
+  socialUrl7?: null;
+  socialUrl8?: null;
+  socialUrl9?: null | string;
+  socialUrl10?: null;
+  socialUrl11?: null;
+  socialUrl12?: null;
+  socialUrl13?: null;
+  socialUrl14?: null;
+  socialUrl15?: null;
+  socialUrl16?: null;
+  links?: Array<{
+    domain: string;
+    url: string;
+  }>;
+}

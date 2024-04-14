@@ -17,7 +17,8 @@
 - use npm instead of Yarn and use node 20 (may revert this once I understand why Yarn was broken) (anthrofox22)
 - adds a dropdown for specifying sort order when fetching from E621 (anthrofox22)
 - add separate list of porn specifically for cumming to (anthrofox22)
-- deploy to GitHub pages (anthrofox22)
+- deploy to GitHub pages (https://anthrofox22.github.io/joi.how/) (anthrofox22)
+- add support for loading videos from RedGifs based on a search term and sexuality preferences (anthrofox22)
 
 ## 1.6.0 - Fri, 15 Apr 2022 10:26:26 -0400
 
