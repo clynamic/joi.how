@@ -1,8 +1,9 @@
-import axios, { type AxiosResponse } from 'axios'
 import { useEffect, useState, type FunctionComponent } from 'react'
-import { type IState } from '../../../store'
-import { SettingsActions } from '../../settings/store'
 import { MessageType } from '../MessageArea/MessageTypes'
+import { SettingsActions } from '../../settings/store'
+import axios, { type AxiosResponse } from 'axios'
+import { PornService, PornType } from '../types'
+import { type IState } from '../../../store'
 import { GameBoardActions } from '../store'
 
 interface IWalltakerProps {
@@ -44,8 +45,25 @@ export const Walltaker: FunctionComponent<IWalltakerProps> = (props) => {
               },
             })
             .then((response: AxiosResponse<IWalltakerLink>) => {
-              if (response.data.post_url != null && !pornList.includes(response.data.post_url)) {
-                dispatch(SettingsActions.SetPornList([...pornList, response.data.post_url]))
+              if (
+                response.data.post_url != null &&
+                !pornList.some(({ mainUrl, highResUrl }) => [mainUrl, highResUrl].includes(response.data.post_url))
+              ) {
+                dispatch(
+                  SettingsActions.SetPornList([
+                    ...pornList,
+                    {
+                      previewUrl: response.data.post_thumbnail_url,
+                      hoverPreviewUrl: response.data.post_thumbnail_url,
+                      mainUrl: response.data.post_url,
+                      highResUrl: response.data.post_url,
+                      service: PornService.WALLTAKER,
+                      type: PornType.IMAGE,
+                      uniqueId: String(response.data.id),
+                      source: `https://e621.net/post/index/1/md5:${response.data.post_thumbnail_url.split('/').pop()?.split('.')?.[0]}`,
+                    },
+                  ]),
+                )
                 dispatch(
                   GameBoardActions.ShowMessage({
                     type: MessageType.EventDescription,

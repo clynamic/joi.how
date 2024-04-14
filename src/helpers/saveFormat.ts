@@ -1,8 +1,8 @@
 import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
-import { debounce } from 'lodash'
 import type { Credentials } from '../features/gameboard/types'
 import { SettingsActions } from '../features/settings/store'
 import { type IState } from '../store'
+import { debounce } from 'lodash'
 
 interface EncodedSettings {
   paceMin: IState['settings']['pace']['min']
@@ -11,8 +11,8 @@ interface EncodedSettings {
   warmpupDuration: IState['settings']['warmupDuration']
   duration: IState['settings']['duration']
   credentials?: string
-  porn: string[]
-  events: string[]
+  porn: IState['settings']['porn']
+  events: IState['settings']['events']
   hypno: IState['settings']['hypno']
   gender: IState['settings']['player']['gender']
   parts: IState['settings']['player']['parts']
@@ -54,8 +54,8 @@ export function encodeSettings(settings: IState['settings'], options?: { include
     warmpupDuration,
     duration,
     credentials: options?.includeCredentials ? encodeCredentials(credentials) : undefined,
-    porn: porn.map(shrinkUrl),
-    events: events,
+    porn,
+    events,
     hypno,
     gender: player.gender,
     parts: player.parts,
@@ -94,7 +94,7 @@ export function decodeSettings(url: string): DecodedSettings {
     warmupDuration: warmpupDuration,
     duration,
     credentials: decodeCredentials(credentials),
-    porn: porn?.map(expandUrl),
+    porn,
     events,
     hypno: hypno,
     player: {
@@ -135,31 +135,6 @@ export function applyAllSettings(settings: DecodedSettings, dispatch: ThunkDispa
   if (settings.porn != null) dispatch(SettingsActions.SetPornList(settings.porn))
   if (settings.cum?.ejaculateLikelihood != null) dispatch(SettingsActions.SetEjaculateLikelihood(settings.cum.ejaculateLikelihood))
   if (settings.cum?.ruinLikelihood != null) dispatch(SettingsActions.SetRuinLikelihood(settings.cum.ruinLikelihood))
-}
-
-function shrinkUrl(url: string): string {
-  const regex = /https:\/\/static1\.e621\.net\/data\/(sample\/)?(?:[0-9a-f]{2}\/){2}([0-9a-f]{32}\.[a-z]+)/
-  const match = url.match(regex)
-  if (match) {
-    const containsSample = !!match[1]
-    const hash: string = match[2]
-    return (containsSample ? 'sample/' : '') + hash
-  } else {
-    return ''
-  }
-}
-
-function expandUrl(url: string): string {
-  const baseUrl = 'https://static1.e621.net/data/'
-  const regex = /(sample\/)?([0-9a-f]{32}\.[a-z]+)/
-  const match = url.match(regex)
-  if (match) {
-    const containsSample = !!match[1]
-    const hash: string = match[2]
-    return baseUrl + (containsSample ? 'sample/' : '') + hash.slice(0, 2) + '/' + hash.slice(2, 4) + '/' + hash
-  } else {
-    return ''
-  }
 }
 
 function encodeCredentials(credentials?: Credentials): string | undefined {

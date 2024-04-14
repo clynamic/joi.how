@@ -3,6 +3,7 @@ import { useEffect, type FunctionComponent } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { applyAllSettings, saveSettings } from '../../../helpers/saveFormat'
 import { type IState } from '../../../store'
+import { type PornQuality } from '../../gameboard/types'
 import type { ISettingsState, ISettingsVibratorState } from '../store'
 import { SettingsActions, VibratorActions } from '../store'
 import { CumSetting } from './CumSetting/CumSetting'
@@ -47,6 +48,8 @@ export const SettingsControls: FunctionComponent = () => {
       <PornSetting
         credentials={settings.credentials}
         setCredentials={(newCredentials) => dispatch(SettingsActions.SetCredentials(newCredentials))}
+        pornQuality={settings.pornQuality}
+        setPornQuality={(quality: PornQuality) => dispatch(SettingsActions.SetPornQuality(quality))}
         porn={settings.porn}
         setPorn={(newList) => dispatch(SettingsActions.SetPornList(newList))}
       />

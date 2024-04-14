@@ -1,10 +1,10 @@
-import { useState, type FunctionComponent } from 'react'
+import { SavePornEncodingError, SaveVersionEncodingError, decodeSettings, encodeSettings } from '../../../../helpers/saveFormat'
 import { ReactComponent as Warning } from '../../../../assets/warning.svg'
 import type { DecodedSettings } from '../../../../helpers/saveFormat'
-import { decodeSettings, encodeSettings, SavePornEncodingError, SaveVersionEncodingError } from '../../../../helpers/saveFormat'
+import { useState, type FunctionComponent } from 'react'
 import { type IState } from '../../../../store'
-import '../settings.css'
 import './SaveSetting.css'
+import '../settings.css'
 
 interface ISaveSettingProps {
   settings: IState['settings']
