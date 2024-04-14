@@ -15,6 +15,7 @@ export interface IGameBoardState {
   cumming: boolean
   hasEdged: boolean
   currentImage: number
+  inWarmup: boolean
 }
 
 export const gameBoardSlice = createSlice({
@@ -32,6 +33,7 @@ export const gameBoardSlice = createSlice({
     vibration: 0,
     hasEdged: false,
     currentImage: 0,
+    inWarmup: false
   } as IGameBoardState,
   reducers: {
     SetPace: (state, action: PayloadAction<number>) => {
@@ -63,6 +65,10 @@ export const gameBoardSlice = createSlice({
     },
     StartGame: (state) => {
       state.gamePaused = false
+      state.inWarmup = false
+    },
+    StartWarmup: (state) => {
+      state.inWarmup = true
     },
     AddTimer: (state, action: PayloadAction<NodeJS.Timeout>) => {
       state.timers = state.timers.concat([action.payload])

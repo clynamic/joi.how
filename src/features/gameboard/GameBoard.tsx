@@ -26,6 +26,7 @@ export const GameBoard: FunctionComponent = () => {
   const pace = useSelector<IState, IState['game']['pace']>((state) => state.game.pace)
   const cumming = useSelector<IState, IState['game']['cumming']>((state) => state.game.cumming)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
+  const inWarmup = useSelector<IState, IState['game']['inWarmup']>((state) => state.game.inWarmup)
   const vibrators = useSelector<IState, IState['vibrators']>((state) => state.vibrators)
   const hypno = useSelector<IState, IState['settings']['hypno']>((state) => state.settings.hypno)
   const warmpupDuration = useSelector<IState, IState['settings']['warmpupDuration']>((state) => state.settings.warmpupDuration)
@@ -34,6 +35,8 @@ export const GameBoard: FunctionComponent = () => {
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
 
   useEffect(() => {
+    void dispatch(GameBoardActions.StartWarmup())
+
     const warmupTimeout = setTimeout(() => {
       void dispatch(GameBoardActions.StartGame())
     }, warmpupDuration * 100);
@@ -104,11 +107,11 @@ export const GameBoard: FunctionComponent = () => {
 
   return (
     <div className="GameBoard">
-      <Stats />
-      <StrokeMeter stroke={stroke} pace={pace} cumming={cumming} />
-      <Hypno mode={hypno} />
+      {!inWarmup && <Stats />}
+      {!inWarmup && <StrokeMeter stroke={stroke} pace={pace} cumming={cumming} />}
+      {!inWarmup && <Hypno mode={hypno} />}
       <MessageArea />
-      <EmergencyStop />
+      {!inWarmup && <EmergencyStop />}
       <Porn />
     </div>
   )
