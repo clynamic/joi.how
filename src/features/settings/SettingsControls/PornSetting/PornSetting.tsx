@@ -1,6 +1,6 @@
 import { PornQuality, PornService, PornType, type Credentials, type PornItem, type PornList } from '../../../gameboard/types'
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
-import { type E621Post, type E621User } from '../../types'
+import { type E621Post, type E621User, E621SortOrder } from '../../types'
 import { Blacklist } from '../../../../helpers/blacklist'
 import { useCallback, useEffect, useState } from 'react'
 import { PornThumbnail } from './PornThumbnail'
@@ -27,6 +27,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
   const [tags, setTags] = useState<string>('')
   const [count, setCount] = useState(30)
   const [minScore, setMinScore] = useState<number | undefined>()
+  const [sortOrder, setSortOrder] = useState<E621SortOrder | undefined>(undefined)
   const [blacklist, setBlacklist] = useState<string | undefined>()
   const { setPornQuality } = props
 
@@ -107,6 +108,14 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
     [setCount],
   )
 
+  const updateSortOrder = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      console.log(event.target.value)
+      setSortOrder(event.target.value as E621SortOrder)
+    },
+    [setSortOrder],
+  )
+
   const updateMinScoreEnabled = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setMinScore(event.target.checked ? 0 : undefined)
@@ -158,7 +167,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
     }
 
     const _blacklist = new Blacklist(blacklist ?? '')
-    const encodedTags = encodeURIComponent(tags + (minScore ? ` score:>=${minScore}` : ''))
+    const encodedTags = encodeURIComponent(`${tags} ${sortOrder ?? ''} ${minScore ? ` score:>=${minScore}` : ''}`)
     void axios
       .get(`https://e621.net/posts.json?tags=${encodedTags}&limit=${count}`, config)
       .then((response: AxiosResponse<{ posts: E621Post[] }>) => {
@@ -189,7 +198,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
             .concat(props.porn),
         )
       })
-  }, [blacklist, count, minScore, props, tags])
+  }, [blacklist, count, minScore, sortOrder, props, tags])
 
   const clear = useCallback(() => {
     props.setPorn([])
@@ -280,6 +289,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
             </>
           )}
         </div>
+
         <div className="settings-innerrow">
           <label>
             <span>Score filtering</span>
@@ -298,6 +308,23 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
               </span>
             </>
           )}
+        </div>
+
+        <div className="settings-innerrow">
+          <label>
+            <span>Sort order</span>
+            <select value={sortOrder} onChange={updateSortOrder}>
+              <option value={''}>Default</option>
+              <option value={E621SortOrder.Id}>Id</option>
+              <option value={E621SortOrder.HighestScore}>Highest Score</option>
+              <option value={E621SortOrder.LowestScore}>Lowest Score</option>
+              <option value={E621SortOrder.MostComments}>Most Comments</option>
+              <option value={E621SortOrder.MostFavourites}>Most Favourites</option>
+              <option value={E621SortOrder.VideoDurationLongest}>Video Duration Longest</option>
+              <option value={E621SortOrder.VideoDurationShortest}>Video Duration Shortest</option>
+              <option value={E621SortOrder.Random}>Random</option>
+            </select>
+          </label>
         </div>
 
         <div className="settings-innerrow">
