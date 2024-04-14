@@ -20,6 +20,7 @@
 - deploy to GitHub pages (https://anthrofox22.github.io/joi.how/) (anthrofox22)
 - add support for loading videos from RedGifs based on a search term and sexuality preferences (anthrofox22)
 - add support for loading files from local sources (anthrofox22)
+- add support for loading files from [Stash](https://github.com/stashapp/stash) (anthrofox22)
 
 ## 1.6.0 - Fri, 15 Apr 2022 10:26:26 -0400
 

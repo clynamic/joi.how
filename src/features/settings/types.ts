@@ -235,3 +235,30 @@ export interface RedGifsUser {
     url: string;
   }>;
 }
+
+export enum StashSortOrder {
+  DATE_ASC = 'date_ASC',
+  DATE_DESC = 'date_DESC',
+  DURATION_ASC = 'duration_ASC',
+  DURATION_DESC = 'duration_DESC',
+  RANDOM = 'random_ASC',
+}
+
+export interface StashFindScenesResponse {
+  data: {
+    findScenes: {
+      scenes: Array<{
+        id: number
+        paths: {
+          screenshot: string
+          preview: string
+          webp: string
+          stream: string
+        }
+        files: {
+          duration: number
+        }
+      }>
+    }
+  }
+}

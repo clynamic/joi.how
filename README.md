@@ -20,6 +20,8 @@ To access a deployed verson of this fork please visit <https://anthrofox22.githu
 
 - e621 post loader, based on tags.
 - RedGifs post loader, based on search term.
+- [Stash](https://github.com/stashapp/stash) video loader, based on search term.
+- Local images and video loading.
 - Support for images, gifs and videos.
 - Differnt content shown during normal play and during orgasm period.
 - Stroke speed and control settings.

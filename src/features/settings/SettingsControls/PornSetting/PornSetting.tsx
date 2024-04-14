@@ -7,6 +7,7 @@ import { PornThumbnail } from './PornThumbnail'
 import { E621PornSetting } from './E621PornSetting'
 import { RedGifsPornSetting } from './RedGifsPornSetting'
 import { LocalFilesPornSetting } from './LocalFilesPornSetting'
+import { StashPornSetting } from './StashPornSetting'
 
 export interface IPornSettingProps {
   credentials?: Credentials
@@ -66,6 +67,10 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
             <button className={`PornSetting__service_tab ${selectedTab === 3 ? 'PornSetting__service_tab--selected' : ""}`} onClick={() => setSelectedTab(3)}>
               <strong>Local Files</strong>
             </button>
+
+            <button className={`PornSetting__service_tab ${selectedTab === 4 ? 'PornSetting__service_tab--selected' : ""}`} onClick={() => setSelectedTab(4)}>
+              <strong>Stash</strong>
+            </button>
           </div>
 
           <div className="PornSetting__service_tab_content">
@@ -79,6 +84,10 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
 
             {selectedTab === 3 && (
               <LocalFilesPornSetting {...props} />
+            )}
+
+            {selectedTab === 4 && (
+              <StashPornSetting {...props} />
             )}
           </div>
         </div>

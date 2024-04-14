@@ -86,6 +86,10 @@ const settingsSlice = createSlice({
       if (action.payload.service === PornService.REDGIFS) {
         state.credentials[PornService.REDGIFS] = action.payload.credentials as Credentials[PornService.REDGIFS]
       }
+
+      if (action.payload.service === PornService.STASH) {
+        state.credentials[PornService.STASH] = action.payload.credentials as Credentials[PornService.STASH]
+      }
     },
     SetPornList: (state, action: PayloadAction<PornList>) => {
       state.porn = action.payload

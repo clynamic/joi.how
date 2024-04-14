@@ -16,7 +16,8 @@ export enum PornService {
     E621,
     WALLTAKER,
     REDGIFS,
-    LOCAL
+    LOCAL,
+    STASH
 }
 
 export interface Credentials {
@@ -24,6 +25,7 @@ export interface Credentials {
   [PornService.WALLTAKER]?: undefined,
   [PornService.REDGIFS]?: RedGifsCredentials | undefined
   [PornService.LOCAL]?: undefined,
+  [PornService.STASH]?: StashCredentials | undefined
 }
 
 interface E621Credentials {
@@ -33,6 +35,11 @@ interface E621Credentials {
 
 interface RedGifsCredentials {
   authToken: string
+}
+
+interface StashCredentials {
+  instanceUrl: string
+  apiKey: string
 }
 
 export enum PornType {
