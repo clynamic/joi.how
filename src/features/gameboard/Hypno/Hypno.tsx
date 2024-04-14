@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState, type FunctionComponent } from 'react'
-import { useSelector } from 'react-redux'
-import styled from 'styled-components'
 import { formatMessage } from '../../../helpers/parseString'
+import { useSelector } from 'react-redux'
+import { styled } from 'styled-components'
 import { HypnoMode } from '../types'
 
 import { type IState } from '../../../store'
@@ -12,9 +12,9 @@ interface IHypnoProps {
   mode: HypnoMode
 }
 
-const HypnoTextDiv = styled.div`
-  ${(props: { delay: number }) => `
-    animation-duration: ${props.delay}ms !important;
+const HypnoTextDiv = styled.div<{ delay: number }>`
+  ${({ delay }) => `
+    animation-duration: ${delay}ms !important;
   `}
 `
 

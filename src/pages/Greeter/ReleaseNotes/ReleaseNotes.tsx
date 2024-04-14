@@ -1,7 +1,7 @@
-import { marked } from 'marked'
-import raw from 'raw.macro'
 import { useState, type FunctionComponent } from 'react'
+import { marked } from 'marked'
 import './ReleaseNotes.css'
+import raw from 'raw.macro'
 
 const releaseNotes = raw('../../../release-notes.md')
 
@@ -26,7 +26,7 @@ export const ReleaseNotes: FunctionComponent = () => {
         aria-hidden={!open}
         aria-labelledby="ReleaseNotes__button"
         tabIndex={open ? 0 : -1}
-        dangerouslySetInnerHTML={{ __html: marked.parse(releaseNotes) }}
+        dangerouslySetInnerHTML={{ __html: marked.parse(releaseNotes) as string }}
       />
     </div>
   )
