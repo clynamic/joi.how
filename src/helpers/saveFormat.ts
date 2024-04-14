@@ -26,7 +26,7 @@ type RecursivePartial<T> = {
 }
 
 export type DecodedSettings = Partial<
-  Pick<IState['settings'], 'warmpupDuration' | 'duration' | 'steepness' | 'events' | 'hypno' | 'credentials' | 'porn' | 'walltaker'>
+  Pick<IState['settings'], 'warmupDuration' | 'duration' | 'steepness' | 'events' | 'hypno' | 'credentials' | 'porn' | 'walltaker'>
 > &
   RecursivePartial<Pick<IState['settings'], 'player' | 'pace' | 'cum'>>
 
