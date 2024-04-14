@@ -1,6 +1,6 @@
 import { PornType, type PornItem } from '../../../gameboard/types'
 import { useState, type FunctionComponent } from 'react'
-import styled from 'styled-components'
+import { styled } from 'styled-components'
 
 interface IPornThumbnailProps {
   porn: PornItem

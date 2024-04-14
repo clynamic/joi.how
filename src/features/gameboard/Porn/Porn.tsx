@@ -6,14 +6,14 @@ import { SettingsActions } from '../../settings/store'
 import { useDispatch, useSelector } from 'react-redux'
 import { useGameLoop } from '../store/hooks'
 import { GameBoardActions } from '../store'
+import { styled } from 'styled-components'
 import { IState } from '../../../store'
 import { Walltaker } from './Walltaker'
-import styled from 'styled-components'
 import './Porn.css'
 
-const PornBackgroundDiv = styled.div`
-  ${(props: { duration: number }) => `
-    animation-duration: ${props.duration}ms !important;
+const PornBackgroundDiv = styled.div<{ duration: number }>`
+  ${({ duration }) => `
+    animation-duration: ${duration}ms !important;
   `}
 `
 
