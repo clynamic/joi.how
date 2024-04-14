@@ -35,7 +35,7 @@ export const RedGifsPornSetting: FunctionComponent<IRedGifsPornSettingProps> = (
       responseType: 'json',
     }
     axios
-      .get(`https://api.redgifs.com/v2/auth/temporary`, config)
+      .get(`https://cors-proxy.fringe.zone/api.redgifs.com/v2/auth/temporary`, config)
       .then((response: AxiosResponse<{ token: string }>) => {
         setAuthToken(response.data.token);
         props.setCredentials(PornService.REDGIFS, { authToken: response.data.token });
