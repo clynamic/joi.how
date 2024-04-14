@@ -2,6 +2,47 @@
   "name": "joihow",
   "version": "1.6.0",
   "private": true,
+  "scripts": {
+    "build": "react-scripts build",
+    "eject": "react-scripts eject",
+    "lint": "eslint .",
+    "live": "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag -d v$PACKAGE_VERSION && git commit -am \"release version $PACKAGE_VERSION\" && git tag \"v$PACKAGE_VERSION\" && git push origin master --tags && git checkout develop && git merge master",
+    "prettier": "prettier --write .",
+    "start": "cross-env PORT=3006 react-scripts start",
+    "test": "jest --passWithNoTests",
+    "test:watch": "react-scripts test",
+    "postversion": "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && echo \"\n## $PACKAGE_VERSION - `date -R`\n* \" >> src/release-notes.md && echo '\n\n\n-------\nAdd release notes to src/relase-notes.md then run {npm run live}'"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "config": {
+    "commit-hooks": false,
+    "git-tag-version": false
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
     "@reduxjs/toolkit": "^1.9.2",
@@ -47,47 +88,6 @@
     "prettier-plugin-organize-imports": "^3.0.0",
     "typescript": "^5.4.5",
     "wasm-loader": "^1.3.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx,json}": [
-      "prettier --write",
-      "git add"
-    ]
-  },
-  "config": {
-    "git-tag-version": false,
-    "commit-hooks": false
-  },
-  "scripts": {
-    "start": "cross-env PORT=3006 react-scripts start",
-    "build": "react-scripts build",
-    "test:watch": "react-scripts test",
-    "test": "jest --passWithNoTests",
-    "eject": "react-scripts eject",
-    "lint": "eslint .",
-    "prettier": "prettier --write .",
-    "postversion": "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && echo \"\n## $PACKAGE_VERSION - `date -R`\n* \" >> src/release-notes.md && echo '\n\n\n-------\nAdd release notes to src/relase-notes.md then run {npm run live}'",
-    "live": "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag -d v$PACKAGE_VERSION && git commit -am \"release version $PACKAGE_VERSION\" && git tag \"v$PACKAGE_VERSION\" && git push origin master --tags && git checkout develop && git merge master"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   },
   "engines": {
     "node": "^16.0.0",
