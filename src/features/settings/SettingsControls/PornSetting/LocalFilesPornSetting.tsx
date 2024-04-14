@@ -71,7 +71,7 @@ export const LocalFilesPornSetting: FunctionComponent<ILocalFilesPornSettingProp
       props.setPorn(newPornList);
     }
     setIsLoading(false);
-  }, [files, props]);
+  }, [files, isLoading, props]);
 
   return (
     <div className="settings-row">
