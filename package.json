@@ -2,7 +2,6 @@
   "name": "joihow",
   "version": "1.7.0",
   "private": true,
-  "homepage": "https://anthrofox22.github.io/joi.how",
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
     "@reduxjs/toolkit": "^1.9.2",

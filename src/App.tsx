@@ -19,7 +19,7 @@ export const App: FunctionComponent = () => {
 
   return (
     <div className="App">
-      <BrowserRouter basename={process.env.NODE_ENV ? '/' : '/joi.how/'}>
+      <BrowserRouter basename={process.env.PUBLIC_URL}>
         <Tracker />
         <Routes>
           <Route path="/" element={<GreeterPage />} />
