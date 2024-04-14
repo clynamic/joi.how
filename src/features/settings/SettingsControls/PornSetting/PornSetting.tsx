@@ -1,18 +1,20 @@
+import { PornQuality, PornService, PornType, type Credentials, type PornItem, type PornList } from '../../../gameboard/types'
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
-import { debounce } from 'lodash'
-import type { FunctionComponent } from 'react'
-import { useCallback, useEffect, useState } from 'react'
-import reactGA from '../../../../analytics'
-import { Blacklist } from '../../../../helpers/blacklist'
-import { type Credentials, type PornList } from '../../../gameboard/types'
 import { type E621Post, type E621User } from '../../types'
-import '../settings.css'
-import './PornSetting.css'
+import { Blacklist } from '../../../../helpers/blacklist'
+import { useCallback, useEffect, useState } from 'react'
 import { PornThumbnail } from './PornThumbnail'
+import type { FunctionComponent } from 'react'
+import reactGA from '../../../../analytics'
+import { debounce } from 'lodash'
+import './PornSetting.css'
+import '../settings.css'
 
 interface IPornSettingProps {
   credentials?: Credentials
   setCredentials: (newCredentials?: Credentials) => void
+  pornQuality: PornQuality
+  setPornQuality: (newQuality: PornQuality) => void
   porn: PornList
   setPorn: (newPornList: PornList) => void
 }
@@ -25,8 +27,8 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
   const [tags, setTags] = useState<string>('')
   const [count, setCount] = useState(30)
   const [minScore, setMinScore] = useState<number | undefined>()
-  const [highRes, setHighRes] = useState(false)
   const [blacklist, setBlacklist] = useState<string | undefined>()
+  const { setPornQuality } = props
 
   const loadBlacklist = useCallback(() => {
     if (username == null || password == null) return
@@ -121,9 +123,9 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
 
   const updateHighRes = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setHighRes(event.target.checked)
+      setPornQuality(event.target.checked ? PornQuality.HIGH : PornQuality.LOW)
     },
-    [setHighRes],
+    [setPornQuality],
   )
 
   const updateBlacklistEnabled = useCallback(
@@ -158,29 +160,46 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
     const _blacklist = new Blacklist(blacklist ?? '')
     const encodedTags = encodeURIComponent(tags + (minScore ? ` score:>=${minScore}` : ''))
     void axios
-      .get(`https://e621.net/posts.json?tags=${encodedTags}&limit=${count}&callback=callback`, config)
+      .get(`https://e621.net/posts.json?tags=${encodedTags}&limit=${count}`, config)
       .then((response: AxiosResponse<{ posts: E621Post[] }>) => {
         props.setPorn(
           (
             response.data.posts
-              .filter((post) => /(jpg|png|bmp|jpeg|webp|gif)$/g.test(post.file.ext))
+              .filter((post) => /(jpg|png|bmp|jpeg|webp|gif|webm)$/g.test(post.file.ext))
               .filter(_blacklist.shouldKeepPost)
-              .map((post) => (highRes ? post.file.url : post.sample.url))
-              .filter((url) => url !== null) as string[]
+              .map((post) => ({
+                previewUrl: post.preview.url,
+                hoverPreviewUrl:
+                  post.file.ext === 'webm'
+                    ? post.sample?.alternates?.['480p']?.urls?.[0] ?? post.sample?.alternates?.['480p']?.urls?.[1] ?? post.file.url
+                    : post.sample.url,
+                mainUrl:
+                  post.file.ext === 'webm'
+                    ? post.sample?.alternates?.['480p']?.urls?.[0] ?? post.sample?.alternates?.['480p']?.urls?.[1] ?? post.file.url
+                    : post.sample.url,
+                highResUrl: post.file.url,
+                type: post.file.ext === 'webm' ? PornType.VIDEO : post.file.ext === 'gif' ? PornType.GIF : PornType.IMAGE,
+                source: `https://e621.net/post/index/1/md5:${post.file.md5}`,
+                service: PornService.E621,
+                uniqueId: String(post.id),
+              }))
+              .filter(({ mainUrl }) => mainUrl !== null) as PornList
           )
-            .filter((url) => !props.porn.includes(url))
+            .filter(({ service, uniqueId }) => !props.porn.find((item) => item.service === service && item.uniqueId === uniqueId))
             .concat(props.porn),
         )
       })
-  }, [blacklist, count, highRes, minScore, props, tags])
+  }, [blacklist, count, minScore, props, tags])
 
   const clear = useCallback(() => {
     props.setPorn([])
   }, [props])
 
   const clearOne = useCallback(
-    (image: string) => {
-      props.setPorn(props.porn.filter((porn) => porn !== image))
+    (porn: PornItem) => {
+      props.setPorn(
+        props.porn.filter(({ service, uniqueId }) => porn.service !== service || (porn.service === service && porn.uniqueId !== uniqueId)),
+      )
     },
     [props],
   )
@@ -294,8 +313,8 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
         <div className="settings-innerrow">
           <label>
             <span>Fetch in high-res</span>
-            <input type="checkbox" checked={highRes} onChange={updateHighRes} />
-            <i className="emoji-icon">{highRes ? '🦄' : '🐴'}</i>
+            <input type="checkbox" checked={props.pornQuality === PornQuality.HIGH} onChange={updateHighRes} />
+            <i className="emoji-icon">{props.pornQuality === PornQuality.HIGH ? '🦄' : '🐴'}</i>
           </label>
         </div>
 
@@ -307,7 +326,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
             </span>
             <div className="PornSetting__thumbnails">
               {props.porn.map((porn) => (
-                <PornThumbnail key={porn} image={porn} onDelete={clearOne} />
+                <PornThumbnail key={`${porn.service}-${porn.uniqueId}`} porn={porn} onDelete={clearOne} />
               ))}
             </div>
           </div>

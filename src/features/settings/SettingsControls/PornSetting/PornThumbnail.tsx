@@ -1,12 +1,13 @@
-import { type FunctionComponent } from 'react'
+import { PornType, type PornItem } from '../../../gameboard/types'
+import { useState, type FunctionComponent } from 'react'
 import styled from 'styled-components'
 
 interface IPornThumbnailProps {
-  image: string
-  onDelete: (image: string) => void
+  porn: PornItem
+  onDelete: (porn: PornItem) => void
 }
 
-const Thumbnail = styled.button<{ src: string; lowRes: boolean }>`
+const Thumbnail = styled.button<{ src: string }>`
   position: relative;
   width: 30px !important;
   height: 30px !important;
@@ -25,10 +26,6 @@ const Thumbnail = styled.button<{ src: string; lowRes: boolean }>`
     z-index: 999;
   }
 
-  ::after {
-    ${(props) => (props.lowRes ? 'content: "🐴"' : 'content: "🦄"')}
-  }
-
   ${(props) =>
     props.src != null &&
     `
@@ -36,7 +33,7 @@ const Thumbnail = styled.button<{ src: string; lowRes: boolean }>`
   `}
 `
 
-const ThumbnailPreview = styled.img<{ src: string }>`
+const ThumbnailPreview = styled.img<{ src?: string }>`
   width: 100px;
   position: absolute;
   z-index: 999;
@@ -52,29 +49,42 @@ const ThumbnailPreview = styled.img<{ src: string }>`
     display: block;
   }
 
-  ${(props: { src?: string }) =>
-    props.src != null &&
-    `
-    background-image: url(${props.src})
-  `}
+  ${(props: { src?: string }) => !!props.src && `background-image: url(${props.src})`}
 `
 
-export const PornThumbnail: FunctionComponent<IPornThumbnailProps> = ({ image, onDelete }) => {
-  const imageIsLowRes = image.includes('/data/sample')
-  const imageIsAnimated = image.includes('.gif')
-  const previewURL = image.replace(/\/data\/(sample\/)?/, '/data/preview/').replace(/((\.png)|(\.bmp)|(.webp)|(.gif))/, '.jpg')
-  const preload = new Image()
-  preload.src = image
+const VideoPreview = styled.video`
+  width: 100px;
+  position: absolute;
+  z-index: 999;
+  top: 90%;
+  left: 90%;
+  display: none;
+  box-shadow: 0 0 10px rgba(40, 50, 60, 0.75);
+  border: 1px solid #fff;
+  user-select: none;
 
+  ${Thumbnail}:hover &,
+  ${Thumbnail}:focus & {
+    display: block;
+  }
+`
+
+export const PornThumbnail: FunctionComponent<IPornThumbnailProps> = ({ porn, onDelete }) => {
+  const preload = new Image()
+  preload.src = porn.previewUrl
+
+  const [isPreviewShowing, setIsPreviewShowing] = useState(false)
   return (
     <Thumbnail
       onClick={() => {
-        onDelete(image)
+        onDelete(porn)
       }}
-      src={previewURL}
-      lowRes={imageIsLowRes}
+      src={porn.previewUrl}
+      onMouseEnter={() => setIsPreviewShowing(true)}
+      onMouseLeave={() => setIsPreviewShowing(false)}
     >
-      <ThumbnailPreview src={imageIsAnimated ? image : previewURL} />
+      {porn.type === PornType.VIDEO && isPreviewShowing && <VideoPreview src={porn.hoverPreviewUrl} autoPlay={true} loop={true} />}
+      {porn.type !== PornType.VIDEO && <ThumbnailPreview src={porn.hoverPreviewUrl} />}
     </Thumbnail>
   )
 }

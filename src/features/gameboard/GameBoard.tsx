@@ -1,22 +1,22 @@
-import { useEffect, type FunctionComponent } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { type IState } from '../../store'
 import { EmergencyStop } from './EmergencyStop/EmergencyStop'
+import { useEffect, type FunctionComponent } from 'react'
 import { MessageArea } from './MessageArea/MessageArea'
-import { Porn } from './Porn/Porn'
-import { Stats } from './Stats/Stats'
-import { GameBoardActions } from './store'
 import { StrokeMeter } from './StrokeMeter/StrokeMeter'
+import { useDispatch, useSelector } from 'react-redux'
+import { GameBoardActions } from './store'
+import { type IState } from '../../store'
+import { Stats } from './Stats/Stats'
+import { Porn } from './Porn/Porn'
 
 import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
-import { VibrationStyleMode } from '../settings/store'
-import './GameBoard.css'
-import { Hypno } from './Hypno/Hypno'
 import { MessageType } from './MessageArea/MessageTypes'
-import { playTone } from './sound'
+import { VibrationStyleMode } from '../settings/store'
 import { getNextEvent } from './store/actions.events'
 import { useGameLoop } from './store/hooks'
+import { Hypno } from './Hypno/Hypno'
+import { playTone } from './sound'
 import { EStroke } from './types'
+import './GameBoard.css'
 
 export const GameBoard: FunctionComponent = () => {
   const state = useSelector((state: IState) => state)
@@ -77,24 +77,27 @@ export const GameBoard: FunctionComponent = () => {
     }
   }, [dispatch, pornListLength, warmupDuration])
 
-  useGameLoop(() => {
-    dispatch(GameBoardActions.Pulse())
-    if (stroke === EStroke.down) playTone(425)
-    if (stroke === EStroke.up) {
-      playTone(625)
-      if (vibrators.devices.length > 0) {
-        if (vibrators.mode === VibrationStyleMode.THUMP && pace <= 3) {
-          vibrators.devices.forEach((e) => {
-            void e.thump(((1 / pace) * 1000) / 2, Math.max(0.25, intensity / 100))
-          })
-        } else {
-          vibrators.devices.forEach((e) => {
-            void e.setVibration(intensity / 100)
-          })
+  useGameLoop(
+    () => {
+      dispatch(GameBoardActions.Pulse())
+      if (stroke === EStroke.down) playTone(425)
+      if (stroke === EStroke.up) {
+        playTone(625)
+        if (vibrators.devices.length > 0) {
+          if (vibrators.mode === VibrationStyleMode.THUMP && pace <= 3) {
+            vibrators.devices.forEach((e) => {
+              void e.thump(((1 / pace) * 1000) / 2, Math.max(0.25, intensity / 100))
+            })
+          } else {
+            vibrators.devices.forEach((e) => {
+              void e.setVibration(intensity / 100)
+            })
+          }
         }
       }
-    }
-  }, (1 / pace) * 1000)
+    },
+    (1 / pace) * 1000,
+  )
 
   useGameLoop(async () => {
     const next = getNextEvent(state)
