@@ -243,7 +243,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
         <div className="settings-innerrow">
           <label>
             <span>Use blacklist</span>
-            <input type="checkbox" checked={blacklist != undefined} onChange={updateBlacklistEnabled} />
+            <input type="checkbox" checked={blacklist !== undefined} onChange={updateBlacklistEnabled} />
           </label>
           {blacklist !== undefined && (
             <>
