@@ -1,3 +1,21 @@
+## Unreleased
+
+### Added
+
+- login for e6
+- blacklisting tags, with e6 sync
+
+### Changed
+
+- readme now includes forum thread information
+- game loop now fully stops (including events and images)
+- settings format now secured against all characters
+- now using react router instead of reach router
+- yarn instead of npm
+- upgraded to node 16
+
+### Added
+
 ## 1.6.0 - 2022-04-15
 
 ### Added
