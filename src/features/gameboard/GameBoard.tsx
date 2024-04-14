@@ -1,4 +1,4 @@
-import { useEffect, type FunctionComponent } from 'react'
+import { useEffect, useRef, type FunctionComponent } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { type IState } from '../../store'
 import { EmergencyStop } from './EmergencyStop/EmergencyStop'
@@ -20,6 +20,7 @@ import { MessageType } from './MessageArea/MessageTypes'
 
 export const GameBoard: FunctionComponent = () => {
   const state = useSelector((state: IState) => state)
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null)
 
   const pornListLength = useSelector<IState, number>((state) => state.settings.porn.length)
   const stroke = useSelector<IState, IState['game']['stroke']>((state) => state.game.stroke)
@@ -35,6 +36,15 @@ export const GameBoard: FunctionComponent = () => {
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
 
   useEffect(() => {
+    const requestWakeLock = async () => {
+      try {
+        wakeLockRef.current = await navigator.wakeLock.request('screen');
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    requestWakeLock();
+
     void dispatch(GameBoardActions.StartWarmup())
 
     const warmupTimeout = setTimeout(() => {
@@ -72,6 +82,15 @@ export const GameBoard: FunctionComponent = () => {
       void dispatch(GameBoardActions.StopGame())
       clearTimeout(warmupTimeout);
       clearInterval(pornIntervalTimer);
+
+      if (wakeLockRef.current) {
+        try {
+          wakeLockRef.current.release();
+          wakeLockRef.current = null;
+        } catch (err) {
+          console.error(err);
+        }
+      }
     }
   }, [dispatch, pornListLength, warmpupDuration])
 
