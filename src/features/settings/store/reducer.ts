@@ -36,7 +36,7 @@ const settingsSlice = createSlice({
       max: 5,
     },
     steepness: 0.05,
-    warmpupDuration: 1800,
+    warmpupDuration: 600,
     duration: 6000,
     credentials: undefined,
     porn: [],

@@ -12,11 +12,11 @@ import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
 import { VibrationStyleMode } from '../settings/store'
 import './GameBoard.css'
 import { Hypno } from './Hypno/Hypno'
+import { MessageType } from './MessageArea/MessageTypes'
 import { playTone } from './sound'
 import { getNextEvent } from './store/actions.events'
 import { useGameLoop } from './store/hooks'
 import { EStroke } from './types'
-import { MessageType } from './MessageArea/MessageTypes'
 
 export const GameBoard: FunctionComponent = () => {
   const state = useSelector((state: IState) => state)
@@ -34,15 +34,18 @@ export const GameBoard: FunctionComponent = () => {
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
 
   useEffect(() => {
-    console.log(warmpupDuration);
+    if (warmpupDuration === 0) {
+      void dispatch(GameBoardActions.StartGame())
+      return
+    }
 
     const warmupTimeout = setTimeout(() => {
       void dispatch(GameBoardActions.StartGame())
-    }, warmpupDuration * 100);
+    }, warmpupDuration * 100)
 
     const pornIntervalTimer = setInterval(() => {
       dispatch(GameBoardActions.SetImage(Math.floor(pornListLength * Math.random())))
-    }, 5000);
+    }, 5000)
 
     dispatch(
       GameBoardActions.ShowMessage({
@@ -52,8 +55,8 @@ export const GameBoard: FunctionComponent = () => {
           {
             display: `I'm ready $master`,
             method: () => {
-              clearTimeout(warmupTimeout);
-              clearInterval(pornIntervalTimer);
+              clearTimeout(warmupTimeout)
+              clearInterval(pornIntervalTimer)
               dispatch(GameBoardActions.StartGame())
               dispatch(
                 GameBoardActions.ShowMessage({
@@ -69,8 +72,8 @@ export const GameBoard: FunctionComponent = () => {
 
     return () => {
       void dispatch(GameBoardActions.StopGame())
-      clearTimeout(warmupTimeout);
-      clearInterval(pornIntervalTimer);
+      clearTimeout(warmupTimeout)
+      clearInterval(pornIntervalTimer)
     }
   }, [dispatch, pornListLength, warmpupDuration])
 
