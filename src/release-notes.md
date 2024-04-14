@@ -4,6 +4,7 @@
 
 - login for e6
 - blacklisting tags, with e6 sync
+- optional warm up duration
 
 ### Fixed
 

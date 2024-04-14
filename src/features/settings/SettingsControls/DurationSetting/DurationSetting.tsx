@@ -29,7 +29,7 @@ export const DurationSetting: FunctionComponent<IDurationSettingProps> = (props)
           <span>Warmup Duration</span>
           <input
             type="range"
-            min="600"
+            min="0"
             max="6000"
             step="600"
             value={props.warmpupDuration}
@@ -43,6 +43,7 @@ export const DurationSetting: FunctionComponent<IDurationSettingProps> = (props)
         </span>
       </div>
       <div className="settings-row">
+        <em>Session duration is a rough estimate. The game will not forcefully end.</em>
         <label>
           <span>Session Duration</span>
           <input
