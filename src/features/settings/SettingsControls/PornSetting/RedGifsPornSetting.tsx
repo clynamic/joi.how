@@ -97,7 +97,7 @@ export const RedGifsPornSetting: FunctionComponent<IRedGifsPornSettingProps> = (
       responseType: 'json',
     }
     void axios
-      .get(`https://api.redgifs.com/v2/gifs/search?order=${sortOrder}&count=${count}&page=1&type=g&search_text=${search}`, config)
+      .get(`https://cors-proxy.fringe.zone/api.redgifs.com/v2/gifs/search?order=${sortOrder}&count=${count}&page=1&type=g&search_text=${search}`, config)
       .then((response: AxiosResponse<RedGifsSearchResponse>) => {
         const pornList = cumTo ? props.pornToCumTo : props.porn
         const pornItems = (

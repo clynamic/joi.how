@@ -6,6 +6,7 @@ import './PornSetting.css'
 import { PornThumbnail } from './PornThumbnail'
 import { E621PornSetting } from './E621PornSetting'
 import { RedGifsPornSetting } from './RedGifsPornSetting'
+import { LocalFilesPornSetting } from './LocalFilesPornSetting'
 
 export interface IPornSettingProps {
   credentials?: Credentials
@@ -54,12 +55,16 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
       <div className="settings-row">
         <div className="PornSetting__services">
           <div className="PornSetting__service_tabs">
-            <button className={`PornSetting__service_tab ${selectedTab === 1 && 'PornSetting__service_tab--selected'}`} onClick={() => setSelectedTab(1)}>
+            <button className={`PornSetting__service_tab ${selectedTab === 1 ? 'PornSetting__service_tab--selected' : ""}`} onClick={() => setSelectedTab(1)}>
               <strong>E621</strong>
             </button>
 
-            <button className={`PornSetting__service_tab ${selectedTab === 2 && 'PornSetting__service_tab--selected'}`} onClick={() => setSelectedTab(2)}>
+            <button className={`PornSetting__service_tab ${selectedTab === 2 ? 'PornSetting__service_tab--selected' : ""}`} onClick={() => setSelectedTab(2)}>
               <strong>RedGIFs</strong>
+            </button>
+
+            <button className={`PornSetting__service_tab ${selectedTab === 3 ? 'PornSetting__service_tab--selected' : ""}`} onClick={() => setSelectedTab(3)}>
+              <strong>Local Files</strong>
             </button>
           </div>
 
@@ -70,6 +75,10 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
 
             {selectedTab === 2 && (
               <RedGifsPornSetting {...props} />
+            )}
+
+            {selectedTab === 3 && (
+              <LocalFilesPornSetting {...props} />
             )}
           </div>
         </div>

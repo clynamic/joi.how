@@ -1,6 +1,6 @@
 import { useState, type FunctionComponent } from 'react'
 import styled from 'styled-components'
-import { type PornItem, PornType } from '../../../gameboard/types'
+import { type PornItem, PornType, PornService } from '../../../gameboard/types'
 
 interface IPornThumbnailProps {
   porn: PornItem
@@ -85,6 +85,7 @@ export const PornThumbnail: FunctionComponent<IPornThumbnailProps> = ({ porn, on
       onMouseEnter={() => setIsPreviewShowing(true)}
       onMouseLeave={() => setIsPreviewShowing(false)}
     >
+      {porn.service === PornService.LOCAL && <i title={porn.uniqueId}>📁</i>}
       {porn.type === PornType.VIDEO && isPreviewShowing && <VideoPreview src={porn.hoverPreviewUrl} autoPlay={true} loop={true} />}
       {porn.type !== PornType.VIDEO && <ThumbnailPreview src={porn.hoverPreviewUrl} />}
     </Thumbnail>

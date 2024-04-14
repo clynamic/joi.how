@@ -15,13 +15,15 @@ export enum EGrip {
 export enum PornService {
     E621,
     WALLTAKER,
-    REDGIFS
+    REDGIFS,
+    LOCAL
 }
 
 export interface Credentials {
   [PornService.E621]?: E621Credentials | undefined,
   [PornService.WALLTAKER]?: undefined,
   [PornService.REDGIFS]?: RedGifsCredentials | undefined
+  [PornService.LOCAL]?: undefined,
 }
 
 interface E621Credentials {
@@ -45,14 +47,14 @@ export enum PornQuality {
 }
 
 export interface PornItem {
-    previewUrl: string;
-    hoverPreviewUrl: string;
-    mainUrl: string;
-    highResUrl: string;
-    type: PornType;
-    source: string;
-    service: PornService;
-    uniqueId: string;
+  previewUrl: string;
+  hoverPreviewUrl: string;
+  mainUrl: string;
+  highResUrl: string;
+  type: PornType;
+  source: string;
+  service: PornService;
+  uniqueId: string;
 }
 
 export type PornList = PornItem[]

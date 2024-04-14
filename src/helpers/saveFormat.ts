@@ -1,6 +1,6 @@
 import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
 import { debounce } from 'lodash'
-import type { Credentials } from '../features/gameboard/types'
+import { PornService, type Credentials } from '../features/gameboard/types'
 import { SettingsActions } from '../features/settings/store'
 import { type IState } from '../store'
 
@@ -41,8 +41,8 @@ export function encodeSettings(settings: IState['settings'], options?: { include
   const warmpupDuration: IState['settings']['warmpupDuration'] = settings.warmpupDuration
   const duration: IState['settings']['duration'] = settings.duration
   const credentials: IState['settings']['credentials'] = settings.credentials
-  const porn: IState['settings']['porn'] = settings.porn
-  const pornToCumTo: IState['settings']['pornToCumTo'] = settings.pornToCumTo
+  const porn: IState['settings']['porn'] = settings.porn.filter(({service}) => service !== PornService.LOCAL)
+  const pornToCumTo: IState['settings']['pornToCumTo'] = settings.pornToCumTo.filter(({service}) => service !== PornService.LOCAL)
   const events: IState['settings']['events'] = settings.events
   const hypno: IState['settings']['hypno'] = settings.hypno
   const player: IState['settings']['player'] = settings.player

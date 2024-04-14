@@ -29,7 +29,9 @@ export const Porn: FunctionComponent = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const openSource = useCallback((porn: ArrayElement<PornList>): void => {
+    if (porn.source) {
       window.open(porn.source)
+    }
   }, [])
 
   const pornItem = useMemo(() => {
