@@ -107,7 +107,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
 
   const updateMinScoreEnabled = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setMinScore(!event.target.checked ? undefined : -10)
+      setMinScore(event.target.checked ? 0 : undefined)
     },
     [setMinScore],
   )
@@ -128,7 +128,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
 
   const updateBlacklistEnabled = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setBlacklist(!event.target.checked ? undefined : '')
+      setBlacklist(event.target.checked ? '' : undefined)
     },
     [setBlacklist],
   )
@@ -156,7 +156,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
     }
 
     const _blacklist = new Blacklist(blacklist ?? '')
-    const encodedTags = encodeURIComponent(tags + (minScore !== null ? ` score:>=${minScore}` : ''))
+    const encodedTags = encodeURIComponent(tags + (minScore ? ` score:>=${minScore}` : ''))
     void axios
       .get(`https://e621.net/posts.json?tags=${encodedTags}&limit=${count}&callback=callback`, config)
       .then((response: AxiosResponse<{ posts: E621Post[] }>) => {
@@ -198,7 +198,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
         </div>
 
         <div className="settings-innerrow">
-          {props.credentials != null ? (
+          {props.credentials !== undefined ? (
             <>
               <label>
                 <span>Use user credentials</span>
@@ -243,9 +243,9 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
         <div className="settings-innerrow">
           <label>
             <span>Use blacklist</span>
-            <input type="checkbox" checked={blacklist != null} onChange={updateBlacklistEnabled} />
+            <input type="checkbox" checked={blacklist != undefined} onChange={updateBlacklistEnabled} />
           </label>
-          {blacklist != null && (
+          {blacklist !== undefined && (
             <>
               <br />
               <br />
@@ -256,7 +256,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
                   Put any tag combinations you don&apos;t want to see. Each combination should go on a separate line. &nbsp;
                   <a href="https://e621.net/help/blacklist">View help</a>.
                 </em>
-                {props.credentials != null ? <button onClick={loadBlacklist}>Reload user blacklist</button> : null}
+                {props.credentials !== undefined ? <button onClick={loadBlacklist}>Reload user blacklist</button> : null}
               </label>
             </>
           )}
@@ -264,15 +264,15 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
         <div className="settings-innerrow">
           <label>
             <span>Score filtering</span>
-            <input type="checkbox" checked={minScore !== null} onChange={updateMinScoreEnabled} />
+            <input type="checkbox" checked={minScore !== undefined} onChange={updateMinScoreEnabled} />
           </label>
-          {minScore != null && (
+          {minScore !== undefined && (
             <>
               <br />
               <br />
               <label>
                 <span>Minimum score</span>
-                <input type="range" min="-10" max="690" step="1" value={minScore === null ? 0 : minScore} onChange={updateMinScore} />
+                <input type="range" min="-10" max="1000" step="10" value={minScore ?? 0} onChange={updateMinScore} />
               </label>
               <span>
                 ≥<strong> {minScore}</strong>
