@@ -28,20 +28,20 @@ export const GameBoard: FunctionComponent = () => {
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
   const vibrators = useSelector<IState, IState['vibrators']>((state) => state.vibrators)
   const hypno = useSelector<IState, IState['settings']['hypno']>((state) => state.settings.hypno)
-  const warmpupDuration = useSelector<IState, IState['settings']['warmpupDuration']>((state) => state.settings.warmpupDuration)
+  const warmupDuration = useSelector<IState, IState['settings']['warmupDuration']>((state) => state.settings.warmupDuration)
   const duration = useSelector<IState, IState['settings']['duration']>((state) => state.settings.duration)
 
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
 
   useEffect(() => {
-    if (warmpupDuration === 0) {
+    if (warmupDuration === 0) {
       void dispatch(GameBoardActions.StartGame())
       return
     }
 
     const warmupTimeout = setTimeout(() => {
       void dispatch(GameBoardActions.StartGame())
-    }, warmpupDuration * 100)
+    }, warmupDuration * 100)
 
     const pornIntervalTimer = setInterval(() => {
       dispatch(GameBoardActions.SetImage(Math.floor(pornListLength * Math.random())))
@@ -75,7 +75,7 @@ export const GameBoard: FunctionComponent = () => {
       clearTimeout(warmupTimeout)
       clearInterval(pornIntervalTimer)
     }
-  }, [dispatch, pornListLength, warmpupDuration])
+  }, [dispatch, pornListLength, warmupDuration])
 
   useGameLoop(() => {
     dispatch(GameBoardActions.Pulse())

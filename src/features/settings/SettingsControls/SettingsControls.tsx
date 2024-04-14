@@ -35,7 +35,12 @@ export const SettingsControls: FunctionComponent = () => {
         setSteepness={(steepness) => dispatch(SettingsActions.SetSteepness(steepness))}
       />
 
-      <DurationSetting warmpupDuration={settings.warmpupDuration} setWarmupDuration={(newDuration) => dispatch(SettingsActions.SetWarmupDuration(newDuration))} duration={settings.duration} setDuration={(newDuration) => dispatch(SettingsActions.SetDuration(newDuration))} />
+      <DurationSetting
+        warmupDuration={settings.warmupDuration}
+        setWarmupDuration={(newDuration) => dispatch(SettingsActions.SetWarmupDuration(newDuration))}
+        duration={settings.duration}
+        setDuration={(newDuration) => dispatch(SettingsActions.SetDuration(newDuration))}
+      />
 
       <EventsSetting eventList={settings.events} setEventList={(newList) => dispatch(SettingsActions.SetEventList(newList))} />
 
