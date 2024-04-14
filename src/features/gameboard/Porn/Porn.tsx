@@ -1,14 +1,12 @@
 import { PornQuality, PornType, type ArrayElement, type PornList } from '../types'
-import { useCallback, useMemo, type FunctionComponent } from 'react'
-
-import { type IState } from '../../../store'
-
+import { useCallback, useMemo, useRef, type FunctionComponent } from 'react'
 import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
 import { PornControls } from './PornControls/PornControls'
 import { SettingsActions } from '../../settings/store'
 import { useDispatch, useSelector } from 'react-redux'
 import { useGameLoop } from '../store/hooks'
 import { GameBoardActions } from '../store'
+import { IState } from '../../../store'
 import { Walltaker } from './Walltaker'
 import styled from 'styled-components'
 import './Porn.css'
@@ -26,6 +24,7 @@ export const Porn: FunctionComponent = () => {
   const currentImage = useSelector<IState, IState['game']['currentImage']>((state) => state.game.currentImage)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const openSource = useCallback((porn: ArrayElement<PornList>): void => {
     window.open(porn.source)
@@ -82,7 +81,17 @@ export const Porn: FunctionComponent = () => {
           <div className="Porn">
             <div className="Porn__foreground" style={pornItem.type === PornType.VIDEO ? undefined : pornImage}>
               {pornItem.type === PornType.VIDEO && (
-                <video src={pornQuality === PornQuality.HIGH ? pornItem.highResUrl : pornItem.mainUrl} autoPlay={true} loop={true} />
+                <video
+                  ref={videoRef}
+                  src={pornQuality === PornQuality.HIGH ? pornItem.highResUrl : pornItem.mainUrl}
+                  autoPlay={true}
+                  loop={true}
+                  onLoadedMetadata={(metadata) => {
+                    if (videoRef?.current) {
+                      videoRef.current.currentTime = Math.floor(Math.random() * metadata.currentTarget.duration)
+                    }
+                  }}
+                />
               )}
             </div>
 
