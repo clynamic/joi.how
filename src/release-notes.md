@@ -5,6 +5,10 @@
 - login for e6
 - blacklisting tags, with e6 sync
 
+### Fixed
+
+- min score filtering
+
 ### Changed
 
 - readme now includes forum thread information
