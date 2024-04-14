@@ -2081,13 +2081,6 @@
   resolved "https://registry.npmjs.org/@types/range-parser/-/range-parser-1.2.4.tgz"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
-"@types/reach__router@^1.3.5":
-  version "1.3.11"
-  resolved "https://registry.npmjs.org/@types/reach__router/-/reach__router-1.3.11.tgz"
-  integrity sha512-j23ChnIEiW8aAP4KT8OVyTXOFr+Ri65BDnwzmfHFO9WHypXYevHFjeil1Cj7YH3emfCE924BwAmgW4hOv7Wg3g==
-  dependencies:
-    "@types/react" "*"
-
 "@types/react-dom@^18.0.9":
   version "18.0.9"
   resolved "https://registry.npmjs.org/@types/react-dom/-/react-dom-18.0.9.tgz"
