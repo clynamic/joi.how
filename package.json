@@ -42,6 +42,7 @@
   "dependencies": {
     "@msgpack/msgpack": "^3.0.0-beta2",
     "@reduxjs/toolkit": "^2.2.3",
+    "@types/dom-screen-wake-lock": "^1.0.3",
     "axios": "^1.6.8",
     "axios-jsonp": "^1.0.2",
     "buttplug": "^3.2.2",
