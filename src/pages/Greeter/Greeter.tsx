@@ -39,7 +39,7 @@ export const GreeterPage: FunctionComponent = () => {
         This app is provided without express promise of support.
         <br />
         Check out the source code on{' '}
-        <a href="https://github.com/PawCorp/joi.how" target={'_blank'} rel="noreferrer">
+        <a href="https://github.com/clynamic/joi.how" target={'_blank'} rel="noreferrer">
           GitHub!
         </a>{' '}
       </p>
