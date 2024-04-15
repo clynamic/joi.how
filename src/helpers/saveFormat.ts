@@ -131,7 +131,7 @@ export function applyAllSettings(settings: DecodedSettings, dispatch: ThunkDispa
   if (settings.player?.parts != null) dispatch(SettingsActions.SetPlayerParts(settings.player.parts))
   if (settings.pace?.max != null) dispatch(SettingsActions.SetMaxPace(settings.pace.max))
   if (settings.pace?.min != null) dispatch(SettingsActions.SetMinPace(settings.pace.min))
-  if (settings.credentials != null) dispatch(SettingsActions.SetCredentials(settings.credentials))
+  if (settings.credentials != null) dispatch(SettingsActions.SetAllCredentials(settings.credentials))
   if (settings.porn != null) dispatch(SettingsActions.SetPornList(settings.porn))
   if (settings.cum?.ejaculateLikelihood != null) dispatch(SettingsActions.SetEjaculateLikelihood(settings.cum.ejaculateLikelihood))
   if (settings.cum?.ruinLikelihood != null) dispatch(SettingsActions.SetRuinLikelihood(settings.cum.ruinLikelihood))
@@ -139,18 +139,13 @@ export function applyAllSettings(settings: DecodedSettings, dispatch: ThunkDispa
 
 function encodeCredentials(credentials?: Credentials): string | undefined {
   if (credentials == null) return undefined
-  return window.btoa(`${credentials.username}:${credentials.password}`)
+  return window.btoa(JSON.stringify(credentials));
 }
 
 function decodeCredentials(credentials?: string): Credentials | undefined {
   if (credentials == null) return undefined
   const decoded = window.atob(credentials)
-  const [username, password] = decoded.split(':')
-
-  return {
-    username,
-    password,
-  }
+  return JSON.parse(decoded);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

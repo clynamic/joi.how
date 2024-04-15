@@ -1,7 +1,16 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { events } from '../../gameboard/events'
 
-import { HypnoMode, PlayerGender, PlayerParts, PornQuality, type Credentials, type EventToken, type PornList } from '../../gameboard/types'
+import {
+  HypnoMode,
+  PlayerGender,
+  PlayerParts,
+  PornQuality,
+  PornService,
+  type Credentials,
+  type EventToken,
+  type PornList,
+} from '../../gameboard/types'
 
 export interface ISettingsState {
   dialogShown: boolean
@@ -12,7 +21,7 @@ export interface ISettingsState {
   steepness: number
   warmupDuration: number
   duration: number
-  credentials?: Credentials
+  credentials: Credentials
   porn: PornList
   pornQuality: PornQuality
   events: Array<EventToken['id']>
@@ -39,7 +48,7 @@ const settingsSlice = createSlice({
     steepness: 0.05,
     warmupDuration: 600,
     duration: 6000,
-    credentials: undefined,
+    credentials: {},
     porn: [],
     pornQuality: PornQuality.LOW,
     events: events.map((event) => event.id),
@@ -73,8 +82,13 @@ const settingsSlice = createSlice({
     SetDuration: (state, action: PayloadAction<number>) => {
       state.duration = action.payload
     },
-    SetCredentials: (state, action: PayloadAction<Credentials | undefined>) => {
+    SetAllCredentials: (state, action: PayloadAction<Credentials>) => {
       state.credentials = action.payload
+    },
+    SetCredentials: (state, action: PayloadAction<{ service: PornService; credentials: Credentials[PornService] | undefined }>) => {
+      if (action.payload.service === PornService.E621) {
+        state.credentials[PornService.E621] = action.payload.credentials as Credentials[PornService.E621]
+      }
     },
     SetPornList: (state, action: PayloadAction<PornList>) => {
       state.porn = action.payload

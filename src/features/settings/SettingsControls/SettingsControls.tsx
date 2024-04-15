@@ -1,22 +1,22 @@
-import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
-import { useEffect, type FunctionComponent } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { Credentials, PornService, PornQuality } from '../../gameboard/types'
 import { applyAllSettings, saveSettings } from '../../../helpers/saveFormat'
-import { type IState } from '../../../store'
-import { type PornQuality } from '../../gameboard/types'
+import { WalltakerSetting } from './WalltakerSetting/WalltakerSetting'
 import type { ISettingsState, ISettingsVibratorState } from '../store'
-import { SettingsActions, VibratorActions } from '../store'
-import { CumSetting } from './CumSetting/CumSetting'
+import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
 import { DurationSetting } from './DurationSetting/DurationSetting'
+import { VibratorSetting } from './VibratorSetting/VibratorSetting'
 import { EventsSetting } from './EventsSetting/EventsSetting'
-import { HypnoSetting } from './HypnoSetting/HypnoSetting'
-import { PaceSetting } from './PaceSetting/PaceSetting'
 import { PlayerSetting } from './PlayerSetting/PlayerSetting'
+import { SettingsActions, VibratorActions } from '../store'
+import { HypnoSetting } from './HypnoSetting/HypnoSetting'
+import { useEffect, type FunctionComponent } from 'react'
+import { PaceSetting } from './PaceSetting/PaceSetting'
 import { PornSetting } from './PornSetting/PornSetting'
 import { SaveSetting } from './SaveSetting/SaveSetting'
+import { useDispatch, useSelector } from 'react-redux'
+import { CumSetting } from './CumSetting/CumSetting'
+import { type IState } from '../../../store'
 import './SettingsControls.css'
-import { VibratorSetting } from './VibratorSetting/VibratorSetting'
-import { WalltakerSetting } from './WalltakerSetting/WalltakerSetting'
 
 export const SettingsControls: FunctionComponent = () => {
   const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
@@ -47,7 +47,9 @@ export const SettingsControls: FunctionComponent = () => {
 
       <PornSetting
         credentials={settings.credentials}
-        setCredentials={(newCredentials) => dispatch(SettingsActions.SetCredentials(newCredentials))}
+        setCredentials={(service: PornService, credentials: Credentials[PornService]) =>
+          dispatch(SettingsActions.SetCredentials({ service, credentials }))
+        }
         pornQuality={settings.pornQuality}
         setPornQuality={(quality: PornQuality) => dispatch(SettingsActions.SetPornQuality(quality))}
         porn={settings.porn}
