@@ -18,7 +18,7 @@ export const E621PornSetting: FunctionComponent<IE621PornSettingProps> = (props)
   const [tags, setTags] = useState<string>('')
   const [count, setCount] = useState(30)
   const [minScore, setMinScore] = useState<number | undefined>()
-  const [sortOrder, setSortOrder] = useState<E621SortOrder>(E621SortOrder.Id)
+  const [sortOrder, setSortOrder] = useState<E621SortOrder | undefined>(undefined)
   const [blacklist, setBlacklist] = useState<string | undefined>()
 
   const loadBlacklist = useCallback(() => {
