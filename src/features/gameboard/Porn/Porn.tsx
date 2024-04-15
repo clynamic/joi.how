@@ -71,6 +71,7 @@ export const Porn: FunctionComponent = () => {
       dispatch(GameBoardActions.SetImage(Math.floor(pornList.length * Math.random())))
     },
     Math.max((100 - intensity) * 80, 400),
+    () => false, // images never pause
   )
 
   return (
