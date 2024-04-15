@@ -12,7 +12,17 @@ export enum EGrip {
   none,
 }
 
+export enum PornService {
+  E621,
+  WALLTAKER,
+}
+
 export interface Credentials {
+  [PornService.E621]?: E621Credentials | undefined
+  [PornService.WALLTAKER]?: undefined
+}
+
+interface E621Credentials {
   username: string
   password: string
 }
@@ -21,11 +31,6 @@ export enum PornType {
   IMAGE,
   VIDEO,
   GIF,
-}
-
-export enum PornService {
-  E621,
-  WALLTAKER,
 }
 
 export enum PornQuality {
