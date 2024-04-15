@@ -6,6 +6,7 @@
 - blacklisting tags, with e6 sync
 - optional warm up duration
 - add support for loading files from local sources
+- add ability to fullscreen while playing
 
 ### Fixed
 
