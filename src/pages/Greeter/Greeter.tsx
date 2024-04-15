@@ -27,10 +27,7 @@ export const GreeterPage: FunctionComponent = () => {
       </div>
       <Link className="no-underline" target="_blank" to="https://walltaker.joi.how">
         <div className="callout">
-          <h2>
-            Want to let other people set your wallpaper?{' '}
-            <img src="https://cdn.discordapp.com/emojis/750074504528527421.gif?v=1" alt="throbbing cock" />
-          </h2>{' '}
+          <h2>Want to let other people set your wallpaper?</h2>
           <p>
             Checkout walltaker! It&apos;s a app made by me and the other folks at PawCorp, our little horny-coding collective! It lets you
             up a link where people can set the wallpaper on you phone or PC to an e621 post, within your blacklist!
