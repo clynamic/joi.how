@@ -3,8 +3,6 @@ import { ReactComponent as Logo } from '../../assets/logo.svg'
 import { ReleaseNotes } from './ReleaseNotes/ReleaseNotes'
 import { type FunctionComponent } from 'react'
 import { Link } from 'react-router-dom'
-import { OutboundLink } from 'react-ga'
-import { Cookies } from './Cookies'
 import './Greeter.css'
 
 export const GreeterPage: FunctionComponent = () => {
@@ -24,11 +22,10 @@ export const GreeterPage: FunctionComponent = () => {
       <p>
         <em>This app is meant for adults only, and should not be used by anyone under the age of 18.</em>
       </p>
-      <Cookies />
       <div className="GreeterPage__settings">
         <SettingsControls />
       </div>
-      <OutboundLink className="no-underline" target="_blank" eventLabel="Outbound.Pawflix" to="https://walltaker.joi.how">
+      <Link className="no-underline" target="_blank" to="https://walltaker.joi.how">
         <div className="callout">
           <h2>
             Want to let other people set your wallpaper?{' '}
@@ -39,7 +36,7 @@ export const GreeterPage: FunctionComponent = () => {
             up a link where people can set the wallpaper on you phone or PC to an e621 post, within your blacklist!
           </p>
         </div>
-      </OutboundLink>
+      </Link>
       <ReleaseNotes />
       <p>
         This app is provided without express promise of support.

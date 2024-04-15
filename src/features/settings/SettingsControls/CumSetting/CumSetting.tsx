@@ -1,6 +1,5 @@
 import { type FunctionComponent } from 'react'
 import '../settings.css'
-import { useGA } from '../useGA'
 
 interface ICumSettingProps {
   enabled: boolean
@@ -15,8 +14,6 @@ function parseInteger(value: string): number {
 }
 
 export const CumSetting: FunctionComponent<ICumSettingProps> = (props) => {
-  useGA('Cum', props, ['ejaculateLikelihood', 'ruinLikelihood', 'enabled'])
-
   return (
     <fieldset className={props.enabled ? 'settings-group' : 'settings-group--disabled'}>
       <legend>Cum</legend>

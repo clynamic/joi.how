@@ -5,8 +5,6 @@ import { Blacklist } from '../../../../helpers/blacklist'
 import { useCallback, useEffect, useState } from 'react'
 import { type IPornSettingProps } from './PornSetting'
 import type { FunctionComponent } from 'react'
-import reactGA from '../../../../analytics'
-import { debounce } from 'lodash'
 import './PornSetting.css'
 import '../settings.css'
 
@@ -136,15 +134,6 @@ export const E621PornSetting: FunctionComponent<IE621PornSettingProps> = (props)
   )
 
   const downloadFromE621Tags = useCallback(() => {
-    debounce(() => {
-      if (localStorage.getItem('allowCookies') !== 'true' || localStorage.getItem('allowCookies') !== null) return
-      reactGA.event({
-        category: 'Tags',
-        action: `Changed tags`,
-        label: tags,
-      })
-    }, 2000)()
-
     const config: AxiosRequestConfig = { responseType: 'json' }
     if (props.credentials?.[PornService.E621] != null) {
       config.params = { login: props.credentials[PornService.E621].username, api_key: props.credentials[PornService.E621].password }

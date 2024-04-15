@@ -1,7 +1,6 @@
-import { type FunctionComponent } from 'react'
 import { HypnoMode } from '../../../gameboard/types'
+import { type FunctionComponent } from 'react'
 import '../settings.css'
-import { useGA } from '../useGA'
 
 interface IHypnoSettingProps {
   mode: HypnoMode
@@ -17,8 +16,6 @@ const HYPNO_MODE_TYPES = [
 ]
 
 export const HypnoSetting: FunctionComponent<IHypnoSettingProps> = (props) => {
-  useGA('Hypno', props, ['mode'])
-
   return (
     <fieldset className="settings-group">
       <legend>Hypno</legend>
