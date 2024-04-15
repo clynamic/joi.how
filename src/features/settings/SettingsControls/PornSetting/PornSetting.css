@@ -37,11 +37,7 @@
 }
 
 .PornSetting__service_tab--selected {
-  display: flex;
-  justify-content: center;
-  flex-grow: 1;
-  cursor: pointer;
-  border: 1px solid white;
+  background-color: rgba(89, 90, 119, 0.4)!important;
 }
 
 .PornSetting__service_tab_content {

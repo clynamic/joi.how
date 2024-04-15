@@ -1,6 +1,6 @@
 import { PornQuality, PornType, type ArrayElement, type PornList } from '../types'
 import { useCallback, useMemo, useRef, type FunctionComponent } from 'react'
-import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
+import { type Action, type ThunkDispatch } from '@reduxjs/toolkit'
 import { PornControls } from './PornControls/PornControls'
 import { SettingsActions } from '../../settings/store'
 import { useDispatch, useSelector } from 'react-redux'
@@ -23,7 +23,7 @@ export const Porn: FunctionComponent = () => {
   const walltakerLink = useSelector<IState, IState['settings']['walltaker']>((state) => state.settings.walltaker)
   const currentImage = useSelector<IState, IState['game']['currentImage']>((state) => state.game.currentImage)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
-  const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
+  const dispatch: ThunkDispatch<IState, unknown, Action> = useDispatch()
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const openSource = useCallback((porn: ArrayElement<PornList>): void => {
@@ -101,9 +101,13 @@ export const Porn: FunctionComponent = () => {
             onSkip={() => {
               skipPorn(currentImage)
             }}
-            onOpen={() => {
-              openSource(pornList[currentImage])
-            }}
+            onOpen={
+              pornList[currentImage]
+                ? () => {
+                    openSource(pornList[currentImage])
+                  }
+                : undefined
+            }
           />
         </>
       ) : null}

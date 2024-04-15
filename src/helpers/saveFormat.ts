@@ -1,5 +1,5 @@
-import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
-import type { Credentials } from '../features/gameboard/types'
+import { PornService, type Credentials } from '../features/gameboard/types'
+import { type Action, type ThunkDispatch } from '@reduxjs/toolkit'
 import { SettingsActions } from '../features/settings/store'
 import { type IState } from '../store'
 import { debounce } from 'lodash'
@@ -40,7 +40,7 @@ export function encodeSettings(settings: IState['settings'], options?: { include
   const warmpupDuration: IState['settings']['warmupDuration'] = settings.warmupDuration
   const duration: IState['settings']['duration'] = settings.duration
   const credentials: IState['settings']['credentials'] = settings.credentials
-  const porn: IState['settings']['porn'] = settings.porn
+  const porn: IState['settings']['porn'] = settings.porn.filter(({ service }) => service !== PornService.LOCAL)
   const events: IState['settings']['events'] = settings.events
   const hypno: IState['settings']['hypno'] = settings.hypno
   const player: IState['settings']['player'] = settings.player
@@ -113,7 +113,7 @@ export const saveSettings = debounce((settings: IState['settings']) => {
   localStorage.setItem('lastSession', window.btoa(encodeSettings(settings, { includeCredentials: true })))
 }, 1000)
 
-export const loadSettings = (dispatch: ThunkDispatch<IState, unknown, AnyAction>): void => {
+export const loadSettings = (dispatch: ThunkDispatch<IState, unknown, Action>): void => {
   const encodedSettings = localStorage.getItem('lastSession')
   if (encodedSettings) {
     const decodedSettings = window.atob(encodedSettings)
@@ -121,7 +121,7 @@ export const loadSettings = (dispatch: ThunkDispatch<IState, unknown, AnyAction>
   }
 }
 
-export function applyAllSettings(settings: DecodedSettings, dispatch: ThunkDispatch<IState, unknown, AnyAction>): void {
+export function applyAllSettings(settings: DecodedSettings, dispatch: ThunkDispatch<IState, unknown, Action>): void {
   if (settings.warmupDuration != null) dispatch(SettingsActions.SetWarmupDuration(settings.warmupDuration))
   if (settings.duration != null) dispatch(SettingsActions.SetDuration(settings.duration))
   if (settings.steepness != null) dispatch(SettingsActions.SetSteepness(settings.steepness))
@@ -139,13 +139,13 @@ export function applyAllSettings(settings: DecodedSettings, dispatch: ThunkDispa
 
 function encodeCredentials(credentials?: Credentials): string | undefined {
   if (credentials == null) return undefined
-  return window.btoa(JSON.stringify(credentials));
+  return window.btoa(JSON.stringify(credentials))
 }
 
 function decodeCredentials(credentials?: string): Credentials | undefined {
   if (credentials == null) return undefined
   const decoded = window.atob(credentials)
-  return JSON.parse(decoded);
+  return JSON.parse(decoded)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

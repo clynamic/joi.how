@@ -1,10 +1,10 @@
-import { type PornItem, type Credentials, type PornList, PornQuality, type PornService } from '../../../gameboard/types'
+import { type PornItem, type Credentials, type PornList, PornQuality, PornService } from '../../../gameboard/types'
+import { LocalFilesPornSetting } from './LocalFilesPornSetting'
 import { E621PornSetting } from './E621PornSetting'
 import { PornThumbnail } from './PornThumbnail'
 import type { FunctionComponent } from 'react'
 import { useCallback, useState } from 'react'
 import './PornSetting.css'
-import '../settings.css'
 
 export interface IPornSettingProps {
   credentials?: Credentials
@@ -16,7 +16,7 @@ export interface IPornSettingProps {
 }
 
 export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
-  const [selectedTab, setSelectedTab] = useState(1)
+  const [selectedTab, setSelectedTab] = useState(PornService.E621)
   const { setPornQuality } = props
 
   const updateHighRes = useCallback(
@@ -46,14 +46,24 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
         <div className="PornSetting__services">
           <div className="PornSetting__service_tabs">
             <button
-              className={`PornSetting__service_tab ${selectedTab === 1 && 'PornSetting__service_tab--selected'}`}
-              onClick={() => setSelectedTab(1)}
+              className={`PornSetting__service_tab ${selectedTab === PornService.E621 ? 'PornSetting__service_tab--selected' : ''}`}
+              onClick={() => setSelectedTab(PornService.E621)}
             >
               <strong>E621</strong>
             </button>
+
+            <button
+              className={`PornSetting__service_tab ${selectedTab === PornService.LOCAL ? 'PornSetting__service_tab--selected' : ''}`}
+              onClick={() => setSelectedTab(PornService.LOCAL)}
+            >
+              <strong>Local Files</strong>
+            </button>
           </div>
 
-          <div className="PornSetting__service_tab_content">{selectedTab === 1 && <E621PornSetting {...props} />}</div>
+          <div className="PornSetting__service_tab_content">
+            {selectedTab === PornService.E621 && <E621PornSetting {...props} />}
+            {selectedTab === PornService.LOCAL && <LocalFilesPornSetting {...props} />}
+          </div>
         </div>
 
         <div className="settings-innerrow">
