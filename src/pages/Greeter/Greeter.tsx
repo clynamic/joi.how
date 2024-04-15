@@ -15,12 +15,12 @@ export const GreeterPage: FunctionComponent = () => {
         </h1>
       </div>
       <p>
+        <em>This app is meant for adults only, and should not be used by anyone under the age of 18.</em>
+      </p>
+      <p>
         Select your settings, and this app will guide ya&apos; thru a jack-off session. You can adjust most of the aspects of the game, as
         well as select some porn to help with &quot;motivation&quot;. It&apos;s all pulled from <a href="https://e621.net">E621.net</a> or
         from your own local collection. <strong>You are responsible for what you choose to look at.</strong>
-      </p>
-      <p>
-        <em>This app is meant for adults only, and should not be used by anyone under the age of 18.</em>
       </p>
       <div className="GreeterPage__settings">
         <SettingsControls />
