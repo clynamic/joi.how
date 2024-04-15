@@ -5,6 +5,7 @@
 - login for e6
 - blacklisting tags, with e6 sync
 - optional warm up duration
+- add support for loading files from local sources
 
 ### Fixed
 

@@ -15,7 +15,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "noFallthroughCasesInSwitch": true,
-    "removeComments": true
+    "removeComments": true,
+    "types": [ "@types/wicg-file-system-access"]
   },
   "include": ["src"]
 }

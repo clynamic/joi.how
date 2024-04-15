@@ -1,11 +1,11 @@
-import { type FunctionComponent } from 'react'
-import { OutboundLink } from 'react-ga'
-import { Link } from 'react-router-dom'
-import { ReactComponent as Logo } from '../../assets/logo.svg'
 import { SettingsControls } from '../../features/settings/SettingsControls/SettingsControls'
+import { ReactComponent as Logo } from '../../assets/logo.svg'
+import { ReleaseNotes } from './ReleaseNotes/ReleaseNotes'
+import { type FunctionComponent } from 'react'
+import { Link } from 'react-router-dom'
+import { OutboundLink } from 'react-ga'
 import { Cookies } from './Cookies'
 import './Greeter.css'
-import { ReleaseNotes } from './ReleaseNotes/ReleaseNotes'
 
 export const GreeterPage: FunctionComponent = () => {
   return (
@@ -18,8 +18,8 @@ export const GreeterPage: FunctionComponent = () => {
       </div>
       <p>
         Select your settings, and this app will guide ya&apos; thru a jack-off session. You can adjust most of the aspects of the game, as
-        well as select some porn to help with &quot;motivation&quot;. It&apos;s all pulled from <a href="https://e621.net">E621.net</a>.{' '}
-        <strong>You are responsible for what you choose to look at.</strong>
+        well as select some porn to help with &quot;motivation&quot;. It&apos;s all pulled from <a href="https://e621.net">E621.net</a> or
+        from your own local collection. <strong>You are responsible for what you choose to look at.</strong>
       </p>
       <p>
         <em>This app is meant for adults only, and should not be used by anyone under the age of 18.</em>

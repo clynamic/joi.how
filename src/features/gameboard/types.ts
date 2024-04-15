@@ -15,11 +15,13 @@ export enum EGrip {
 export enum PornService {
   E621,
   WALLTAKER,
+  LOCAL,
 }
 
 export interface Credentials {
   [PornService.E621]?: E621Credentials | undefined
   [PornService.WALLTAKER]?: undefined
+  [PornService.LOCAL]?: undefined
 }
 
 interface E621Credentials {

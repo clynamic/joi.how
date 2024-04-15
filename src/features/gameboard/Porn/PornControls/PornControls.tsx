@@ -4,7 +4,7 @@ import './PornControls.css'
 
 interface IPornControlsProps {
   onSkip: () => void
-  onOpen: () => void
+  onOpen?: () => void
 }
 
 export const PornControls: FunctionComponent<IPornControlsProps> = ({ onSkip, onOpen }) => {
@@ -13,9 +13,11 @@ export const PornControls: FunctionComponent<IPornControlsProps> = ({ onSkip, on
       <button className="settings-button" onClick={onSkip} tabIndex={0}>
         Skip Image
       </button>
-      <button className="settings-button" onClick={onOpen} tabIndex={0}>
-        Open Source
-      </button>
+      {onOpen && (
+        <button className="settings-button" onClick={onOpen} tabIndex={0}>
+          Open Source
+        </button>
+      )}
     </div>
   )
 }
