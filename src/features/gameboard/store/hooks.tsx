@@ -12,6 +12,7 @@ export const useGameLoop = (callback: () => void | Promise<void>, ms: (() => num
   const stateRef = useRef(state)
   const callbackRef = useRef(callback)
   const msRef = useRef(ms)
+  const pauseRef = useRef(pause)
 
   useEffect(() => {
     stateRef.current = state
@@ -20,12 +21,13 @@ export const useGameLoop = (callback: () => void | Promise<void>, ms: (() => num
   useEffect(() => {
     callbackRef.current = callback
     msRef.current = ms
-  }, [callback, ms])
+    pauseRef.current = pause
+  }, [callback, ms, pause])
 
   const gameloop = useCallback(() => {
     const timer = setTimeout(
       async () => {
-        const isPaused = pause?.(stateRef.current.game.gamePaused) ?? stateRef.current.game.gamePaused
+        const isPaused = pauseRef.current?.(stateRef.current.game.gamePaused) ?? stateRef.current.game.gamePaused
         if (!isPaused) {
           await callbackRef.current()
         }

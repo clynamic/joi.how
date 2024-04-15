@@ -1,7 +1,7 @@
 import { EmergencyStop } from './EmergencyStop/EmergencyStop'
-import { Action, type ThunkDispatch } from '@reduxjs/toolkit'
-import { useEffect, type FunctionComponent } from 'react'
+import { FunctionComponent, useRef, useEffect } from 'react'
 import { MessageType } from './MessageArea/MessageTypes'
+import { ThunkDispatch, Action } from '@reduxjs/toolkit'
 import { MessageArea } from './MessageArea/MessageArea'
 import { StrokeMeter } from './StrokeMeter/StrokeMeter'
 import { VibrationStyleMode } from '../settings/store'
@@ -19,19 +19,40 @@ import './GameBoard.css'
 
 export const GameBoard: FunctionComponent = () => {
   const state = useSelector((state: IState) => state)
-
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null)
   const pornListLength = useSelector<IState, number>((state) => state.settings.porn.length)
   const stroke = useSelector<IState, IState['game']['stroke']>((state) => state.game.stroke)
   const pace = useSelector<IState, IState['game']['pace']>((state) => state.game.pace)
   const cumming = useSelector<IState, IState['game']['cumming']>((state) => state.game.cumming)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
-  const inWarmup = useSelector<IState, IState['game']['inWarmup']>((state) => state.game.inWarmup)
   const vibrators = useSelector<IState, IState['vibrators']>((state) => state.vibrators)
   const hypno = useSelector<IState, IState['settings']['hypno']>((state) => state.settings.hypno)
   const warmupDuration = useSelector<IState, IState['settings']['warmupDuration']>((state) => state.settings.warmupDuration)
   const duration = useSelector<IState, IState['settings']['duration']>((state) => state.settings.duration)
 
   const dispatch: ThunkDispatch<IState, unknown, Action> = useDispatch()
+
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      try {
+        wakeLockRef.current = await navigator.wakeLock.request('screen')
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    requestWakeLock()
+
+    return () => {
+      if (wakeLockRef.current) {
+        try {
+          wakeLockRef.current.release()
+          wakeLockRef.current = null
+        } catch (err) {
+          console.error(err)
+        }
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (warmupDuration === 0) {
@@ -68,8 +89,8 @@ export const GameBoard: FunctionComponent = () => {
     )
 
     return () => {
-      void dispatch(GameBoardActions.StopGame())
       clearTimeout(warmupTimeout)
+      void dispatch(GameBoardActions.StopGame())
     }
   }, [dispatch, pornListLength, warmupDuration])
 

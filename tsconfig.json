@@ -16,7 +16,7 @@
     "jsx": "react-jsx",
     "noFallthroughCasesInSwitch": true,
     "removeComments": true,
-    "types": [ "@types/wicg-file-system-access"]
+    "types": [ "@types/wicg-file-system-access", "dom-screen-wake-lock" ]
   },
   "include": ["src"]
 }
