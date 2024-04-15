@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import type { IState } from '../../../store'
 import { gameBoardSlice } from './reducer'
 
-export const useGameLoop = (callback: () => void | Promise<void>, ms: (() => number) | number) => {
+export const useGameLoop = (callback: () => void | Promise<void>, ms: (() => number) | number, pause?: (paused: boolean) => boolean) => {
   const dispatch = useDispatch()
   const state = useSelector<IState, IState>((state) => state)
   const gamePaused = useSelector<IState, IState['game']['gamePaused']>((state) => state.game.gamePaused)
+  const isPaused = useMemo(() => pause?.(gamePaused) ?? gamePaused, [gamePaused, pause])
 
   const stateRef = useRef(state)
   const callbackRef = useRef(callback)
@@ -24,11 +25,12 @@ export const useGameLoop = (callback: () => void | Promise<void>, ms: (() => num
   const gameloop = useCallback(() => {
     const timer = setTimeout(
       async () => {
-        if (!stateRef.current.game.gamePaused) {
+        const isPaused = pause?.(stateRef.current.game.gamePaused) ?? stateRef.current.game.gamePaused
+        if (!isPaused) {
           await callbackRef.current()
         }
         dispatch(gameBoardSlice.actions.RemoveTimer(timer))
-        if (!stateRef.current.game.gamePaused) {
+        if (!isPaused) {
           gameloop()
         }
       },
@@ -39,12 +41,12 @@ export const useGameLoop = (callback: () => void | Promise<void>, ms: (() => num
   }, [dispatch])
 
   useEffect(() => {
-    if (!gamePaused) {
+    if (!isPaused) {
       const timer = gameloop()
 
       return () => {
         dispatch(gameBoardSlice.actions.RemoveTimer(timer))
       }
     }
-  }, [dispatch, gameloop, gamePaused])
+  }, [dispatch, gameloop, isPaused])
 }

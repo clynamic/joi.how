@@ -1,19 +1,18 @@
 import { EmergencyStop } from './EmergencyStop/EmergencyStop'
+import { Action, type ThunkDispatch } from '@reduxjs/toolkit'
 import { useEffect, type FunctionComponent } from 'react'
+import { MessageType } from './MessageArea/MessageTypes'
 import { MessageArea } from './MessageArea/MessageArea'
 import { StrokeMeter } from './StrokeMeter/StrokeMeter'
+import { VibrationStyleMode } from '../settings/store'
 import { useDispatch, useSelector } from 'react-redux'
+import { getNextEvent } from './store/actions.events'
+import { useGameLoop } from './store/hooks'
 import { GameBoardActions } from './store'
 import { type IState } from '../../store'
 import { Stats } from './Stats/Stats'
-import { Porn } from './Porn/Porn'
-
-import { type AnyAction, type ThunkDispatch } from '@reduxjs/toolkit'
-import { MessageType } from './MessageArea/MessageTypes'
-import { VibrationStyleMode } from '../settings/store'
-import { getNextEvent } from './store/actions.events'
-import { useGameLoop } from './store/hooks'
 import { Hypno } from './Hypno/Hypno'
+import { Porn } from './Porn/Porn'
 import { playTone } from './sound'
 import { EStroke } from './types'
 import './GameBoard.css'
@@ -26,12 +25,13 @@ export const GameBoard: FunctionComponent = () => {
   const pace = useSelector<IState, IState['game']['pace']>((state) => state.game.pace)
   const cumming = useSelector<IState, IState['game']['cumming']>((state) => state.game.cumming)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
+  const inWarmup = useSelector<IState, IState['game']['inWarmup']>((state) => state.game.inWarmup)
   const vibrators = useSelector<IState, IState['vibrators']>((state) => state.vibrators)
   const hypno = useSelector<IState, IState['settings']['hypno']>((state) => state.settings.hypno)
   const warmupDuration = useSelector<IState, IState['settings']['warmupDuration']>((state) => state.settings.warmupDuration)
   const duration = useSelector<IState, IState['settings']['duration']>((state) => state.settings.duration)
 
-  const dispatch: ThunkDispatch<IState, unknown, AnyAction> = useDispatch()
+  const dispatch: ThunkDispatch<IState, unknown, Action> = useDispatch()
 
   useEffect(() => {
     if (warmupDuration === 0) {
@@ -39,13 +39,11 @@ export const GameBoard: FunctionComponent = () => {
       return
     }
 
+    void dispatch(GameBoardActions.StartWarmup())
+
     const warmupTimeout = setTimeout(() => {
       void dispatch(GameBoardActions.StartGame())
     }, warmupDuration * 100)
-
-    const pornIntervalTimer = setInterval(() => {
-      dispatch(GameBoardActions.SetImage(Math.floor(pornListLength * Math.random())))
-    }, 5000)
 
     dispatch(
       GameBoardActions.ShowMessage({
@@ -56,7 +54,6 @@ export const GameBoard: FunctionComponent = () => {
             display: `I'm ready $master`,
             method: () => {
               clearTimeout(warmupTimeout)
-              clearInterval(pornIntervalTimer)
               dispatch(GameBoardActions.StartGame())
               dispatch(
                 GameBoardActions.ShowMessage({
@@ -73,7 +70,6 @@ export const GameBoard: FunctionComponent = () => {
     return () => {
       void dispatch(GameBoardActions.StopGame())
       clearTimeout(warmupTimeout)
-      clearInterval(pornIntervalTimer)
     }
   }, [dispatch, pornListLength, warmupDuration])
 
