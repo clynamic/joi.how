@@ -1,7 +1,6 @@
-import { type FunctionComponent } from 'react'
 import { PlayerGender, PlayerParts } from '../../../gameboard/types'
+import { type FunctionComponent } from 'react'
 import '../settings.css'
-import { useGA } from '../useGA'
 
 interface IPlayerSettingProps {
   gender: PlayerGender
@@ -23,8 +22,6 @@ const PLAYER_PARTS_TYPES = [
 ]
 
 export const PlayerSetting: FunctionComponent<IPlayerSettingProps> = (props) => {
-  useGA('Player', props, ['gender', 'parts'])
-
   return (
     <fieldset className="settings-group">
       <legend>Player</legend>

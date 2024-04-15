@@ -1,8 +1,7 @@
-import { type FunctionComponent } from 'react'
-import { Sparklines, SparklinesLine } from 'react-sparklines'
 import { intensityToPaceBounds } from '../../../../helpers/intensity'
+import { Sparklines, SparklinesLine } from 'react-sparklines'
+import { type FunctionComponent } from 'react'
 import '../settings.css'
-import { useGA } from '../useGA'
 
 interface IPaceSettingProps {
   max: number
@@ -36,8 +35,6 @@ function getSparklineSetForSteepness(steepness: IPaceSettingProps['steepness']):
 }
 
 export const PaceSetting: FunctionComponent<IPaceSettingProps> = (props) => {
-  useGA('Pace', props, ['max', 'min', 'steepness'])
-
   return (
     <fieldset className="settings-group">
       <legend>Stroke Pace</legend>

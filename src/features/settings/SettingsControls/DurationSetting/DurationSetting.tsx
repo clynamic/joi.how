@@ -1,6 +1,5 @@
 import { type FunctionComponent } from 'react'
 import '../settings.css'
-import { useGA } from '../useGA'
 
 interface IDurationSettingProps {
   duration: number
@@ -18,8 +17,6 @@ function parseDuration(paceString: string): number {
 }
 
 export const DurationSetting: FunctionComponent<IDurationSettingProps> = (props) => {
-  useGA('Duration', props, ['duration'])
-
   return (
     <fieldset className="settings-group">
       <legend>Duration</legend>

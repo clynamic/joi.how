@@ -1,8 +1,7 @@
+import { type EventToken } from '../../../gameboard/types'
 import { type FunctionComponent } from 'react'
 import { events } from '../../../gameboard'
-import { type EventToken } from '../../../gameboard/types'
 import '../settings.css'
-import { useGA } from '../useGA'
 
 interface IEventsSettingProps {
   eventList: Array<EventToken['id']>
@@ -24,8 +23,6 @@ const isEnabled = (props: IEventsSettingProps, eventToken: EventToken): boolean 
 }
 
 export const EventsSetting: FunctionComponent<IEventsSettingProps> = (props) => {
-  useGA('Events', props, ['eventList'])
-
   return (
     <fieldset className="settings-group">
       <legend>Events</legend>
