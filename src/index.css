@@ -1,0 +1,31 @@
+:root {
+  --foreground: #fff;
+  --background: #1c1b1f;
+
+  --section-background: #2e2f3b;
+  --focus-color: #595a7766;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+
+  font-family: 'Helvetica Neue', 'Helvetica', sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0;
+}
