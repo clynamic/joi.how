@@ -14,6 +14,7 @@ interface EncodedSettings {
   porn: IState['settings']['porn']
   pornQuality: IState['settings']['pornQuality']
   startVideosAtRandomTime: IState['settings']['startVideosAtRandomTime']
+  videosMuted: IState['settings']['videosMuted']
   events: IState['settings']['events']
   hypno: IState['settings']['hypno']
   gender: IState['settings']['player']['gender']
@@ -39,6 +40,7 @@ export type DecodedSettings = Partial<
     | 'porn'
     | 'pornQuality'
     | 'startVideosAtRandomTime'
+    | 'videosMuted'
     | 'walltaker'
   >
 > &
@@ -57,6 +59,7 @@ export function encodeSettings(settings: IState['settings'], options?: { include
   const porn: IState['settings']['porn'] = settings.porn.filter(({ service }) => service !== PornService.LOCAL)
   const pornQuality: IState['settings']['pornQuality'] = settings.pornQuality
   const startVideosAtRandomTime: IState['settings']['startVideosAtRandomTime'] = settings.startVideosAtRandomTime
+  const videosMuted: IState['settings']['videosMuted'] = settings.videosMuted
   const events: IState['settings']['events'] = settings.events
   const hypno: IState['settings']['hypno'] = settings.hypno
   const player: IState['settings']['player'] = settings.player
@@ -73,6 +76,7 @@ export function encodeSettings(settings: IState['settings'], options?: { include
     porn,
     pornQuality,
     startVideosAtRandomTime,
+    videosMuted,
     events,
     hypno,
     gender: player.gender,
@@ -96,6 +100,7 @@ export function decodeSettings(url: string): DecodedSettings {
     porn,
     pornQuality,
     startVideosAtRandomTime,
+    videosMuted,
     events,
     hypno,
     gender,
@@ -117,6 +122,7 @@ export function decodeSettings(url: string): DecodedSettings {
     porn,
     pornQuality,
     startVideosAtRandomTime,
+    videosMuted,
     events,
     hypno: hypno,
     player: {
@@ -157,6 +163,7 @@ export function applyAllSettings(settings: DecodedSettings, dispatch: ThunkDispa
   if (settings.porn != null) dispatch(SettingsActions.SetPornList(settings.porn))
   if (settings.pornQuality != null) dispatch(SettingsActions.SetPornQuality(settings.pornQuality))
   if (settings.startVideosAtRandomTime != null) dispatch(SettingsActions.SetStartVideosAtRandomTime(settings.startVideosAtRandomTime))
+  if (settings.videosMuted != null) dispatch(SettingsActions.SetVideosMuted(settings.videosMuted))
   if (settings.cum?.ejaculateLikelihood != null) dispatch(SettingsActions.SetEjaculateLikelihood(settings.cum.ejaculateLikelihood))
   if (settings.cum?.ruinLikelihood != null) dispatch(SettingsActions.SetRuinLikelihood(settings.cum.ruinLikelihood))
 }
