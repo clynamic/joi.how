@@ -20,6 +20,9 @@ const PornBackgroundDiv = styled.div<{ duration: number }>`
 export const Porn: FunctionComponent = () => {
   const pornList = useSelector<IState, IState['settings']['porn']>((state) => state.settings.porn)
   const pornQuality = useSelector<IState, IState['settings']['pornQuality']>((state) => state.settings.pornQuality)
+  const startVideosAtRandomTime = useSelector<IState, IState['settings']['startVideosAtRandomTime']>(
+    (state) => state.settings.startVideosAtRandomTime,
+  )
   const walltakerLink = useSelector<IState, IState['settings']['walltaker']>((state) => state.settings.walltaker)
   const currentImage = useSelector<IState, IState['game']['currentImage']>((state) => state.game.currentImage)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
@@ -88,7 +91,7 @@ export const Porn: FunctionComponent = () => {
                   autoPlay={true}
                   loop={true}
                   onLoadedMetadata={(metadata) => {
-                    if (videoRef?.current) {
+                    if (startVideosAtRandomTime && videoRef?.current) {
                       videoRef.current.currentTime = Math.floor(Math.random() * metadata.currentTarget.duration)
                     }
                   }}
