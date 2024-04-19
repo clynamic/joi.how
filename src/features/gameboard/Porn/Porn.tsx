@@ -23,6 +23,7 @@ export const Porn: FunctionComponent = () => {
   const startVideosAtRandomTime = useSelector<IState, IState['settings']['startVideosAtRandomTime']>(
     (state) => state.settings.startVideosAtRandomTime,
   )
+  const videosMuted = useSelector<IState, IState['settings']['videosMuted']>((state) => state.settings.videosMuted)
   const walltakerLink = useSelector<IState, IState['settings']['walltaker']>((state) => state.settings.walltaker)
   const currentImage = useSelector<IState, IState['game']['currentImage']>((state) => state.game.currentImage)
   const intensity = useSelector<IState, IState['game']['intensity']>((state) => state.game.intensity)
@@ -90,6 +91,7 @@ export const Porn: FunctionComponent = () => {
                   src={pornQuality === PornQuality.HIGH ? pornItem.highResUrl : pornItem.mainUrl}
                   autoPlay={true}
                   loop={true}
+                  muted={videosMuted}
                   onLoadedMetadata={(metadata) => {
                     if (startVideosAtRandomTime && videoRef?.current) {
                       videoRef.current.currentTime = Math.floor(Math.random() * metadata.currentTarget.duration)

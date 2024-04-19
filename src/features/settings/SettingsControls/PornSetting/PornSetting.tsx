@@ -13,13 +13,15 @@ export interface IPornSettingProps {
   setPornQuality: (newQuality: PornQuality) => void
   startVideosAtRandomTime: boolean
   setStartVideosAtRandomTime: (randomStart: boolean) => void
+  videosMuted: boolean
+  setVideosMuted: (videosMuted: boolean) => void
   porn: PornList
   setPorn: (newPornList: PornList) => void
 }
 
 export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
   const [selectedTab, setSelectedTab] = useState(PornService.E621)
-  const { setPornQuality, setStartVideosAtRandomTime } = props
+  const { setPornQuality, setStartVideosAtRandomTime, setVideosMuted } = props
 
   const updateHighRes = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,6 +35,13 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
       setStartVideosAtRandomTime(event.target.checked)
     },
     [setStartVideosAtRandomTime],
+  )
+
+  const updateVideosMuted = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setVideosMuted(event.target.checked)
+    },
+    [setVideosMuted],
   )
 
   const clear = useCallback(() => {
@@ -88,6 +97,11 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
             <span>Start videos at random time</span>
             <input type="checkbox" checked={props.startVideosAtRandomTime} onChange={updateStartVideosAtRandomTime} />
           </label>
+          <br />
+          <label>
+            <span>Mute Videos</span>
+            <input type="checkbox" checked={props.videosMuted} onChange={updateVideosMuted} />
+          </label>
         </div>
 
         {props.porn.length > 0 && (
@@ -98,7 +112,7 @@ export const PornSetting: FunctionComponent<IPornSettingProps> = (props) => {
             </span>
             <div className="PornSetting__thumbnails">
               {props.porn.map((porn) => (
-                <PornThumbnail key={`${porn.service}-${porn.uniqueId}`} porn={porn} onDelete={clearOne} />
+                <PornThumbnail key={`${porn.service}-${porn.uniqueId}`} porn={porn} videosMuted={props.videosMuted} onDelete={clearOne} />
               ))}
             </div>
           </div>
