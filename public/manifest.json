@@ -1,0 +1,15 @@
+{
+  "short_name": "JOI.how",
+  "name": "JOI.How",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#92678d",
+  "background_color": "#1c1a1f"
+}
