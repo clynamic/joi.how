@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 
-export const SettingsDivider = styled.div`
+export const Divider = styled.div`
   grid-column: 1 / -1;
+  width: 100%;
 
   &::after {
     display: block;
