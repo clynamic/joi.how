@@ -6,7 +6,7 @@ const StyledWallTalkerAd = styled(ContentSection)`
   background: linear-gradient(#ffb300, #916706);
   color: #583c0f;
 
-  padding-right: 36px;
+  padding-right: 46px;
   padding-bottom: 16px;
   position: relative;
 
