@@ -17,6 +17,7 @@ const StyledHomePage = styled.div`
   align-items: center;
 
   margin: 0 0;
+  padding: 16px;
 
   & > * {
     max-width: 960px;
