@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { ContentSection } from '../home/components';
-import { DurationSetting, PaceSettings, SettingsTile } from './components';
+import { DurationSettings, PaceSettings, SettingsTile } from './components';
 
 const StyledSettingsSection = styled(ContentSection)`
   display: grid;
@@ -11,7 +11,7 @@ export const SettingsSection = () => {
   return (
     <StyledSettingsSection>
       <PaceSettings />
-      <DurationSetting />
+      <DurationSettings />
       <SettingsTile label='Events'>
         lorem ipsum dolor sit amet consectetur adipisicing elit
       </SettingsTile>
