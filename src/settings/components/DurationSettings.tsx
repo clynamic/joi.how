@@ -4,7 +4,7 @@ import { SettingsDescription } from './SettingsDescription';
 import { SettingsLabel } from './SettingsLabel';
 import { Measure, Slider } from '../../common';
 
-export const DurationSetting = () => {
+export const DurationSettings = () => {
   const [duration, setDuration] = useState(9000);
   const [warmupDuration, setWarmupDuration] = useState(0);
 
