@@ -11,6 +11,9 @@ const StyledSettingsTile = styled.fieldset<{ $grid?: boolean }>`
   grid-template-columns: auto 1fr auto;
 
   background: rgba(122, 123, 163, 0.123);
+  color: #b9bad6;
+
+  font-size: 0.8rem;
 
   border: unset;
   border-left: 2px solid #595a77; // TODO: use css variable
