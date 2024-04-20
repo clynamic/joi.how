@@ -1,7 +1,11 @@
 import Logo from '../../assets/logo.svg';
 import styled from 'styled-components';
+import { ContentSection } from './ContentSection';
 
-const StyledTitle = styled.h1`
+const StyledTitle = styled(ContentSection)`
+  background: transparent;
+  color: var(--text-color);
+
   display: flex;
   flex-direction: row;
   align-items: center;

@@ -4,12 +4,7 @@ import { motion } from 'framer-motion';
 import { marked } from 'marked';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-
-const StyledReleaseNotes = styled.div`
-  padding: 10px 45px;
-  margin: 20px 0;
-  background: var(--section-background);
-`;
+import { ContentSection } from './ContentSection';
 
 const StyledExpandButton = styled.button`
   display: flex;
@@ -17,9 +12,11 @@ const StyledExpandButton = styled.button`
 
   width: 100%;
 
-  border: unset;
+  border-radius: var(--border-radius);
   background: transparent;
-  color: var(--foreground);
+  color: var(--text-color);
+
+  transition: var(--hover-transition);
 
   cursor: pointer;
 
@@ -37,6 +34,7 @@ const StyledExpandButton = styled.button`
 const StyledReleaseNotesBody = styled.div`
   padding: 20px;
   background: #47495a;
+  border-radius: var(--border-radius);
 `;
 
 export const ReleaseNotes = () => {
@@ -52,7 +50,7 @@ export const ReleaseNotes = () => {
   const toggleOpen = () => setOpen(!open);
 
   return (
-    <StyledReleaseNotes>
+    <ContentSection>
       <StyledExpandButton onClick={toggleOpen} aria-expanded={open}>
         <h2>Release Notes</h2>
         <motion.h2
@@ -83,6 +81,6 @@ export const ReleaseNotes = () => {
           )}
         </StyledReleaseNotesBody>
       </motion.div>
-    </StyledReleaseNotes>
+    </ContentSection>
   );
 };
