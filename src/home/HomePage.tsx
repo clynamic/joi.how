@@ -1,7 +1,14 @@
 import styled from 'styled-components';
-import { HomeTitle, WallTalkerAd } from './components';
-import { ReleaseNotes } from './components/ReleaseNotes';
-import { AgeWarning } from './components/AgeWarning';
+import {
+  HomeTitle,
+  WallTalkerAd,
+  ReleaseNotes,
+  AgeWarning,
+  Introduction,
+  Instructions,
+  VersionDisplay,
+  StartButton,
+} from './components';
 
 const StyledHomePage = styled.div`
   display: flex;
@@ -21,8 +28,12 @@ export const HomePage = () => {
     <StyledHomePage>
       <HomeTitle />
       <AgeWarning />
+      <Introduction />
       <WallTalkerAd />
       <ReleaseNotes />
+      <VersionDisplay />
+      <Instructions />
+      <StartButton />
     </StyledHomePage>
   );
 };
