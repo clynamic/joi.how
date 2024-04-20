@@ -9,6 +9,7 @@ import {
   VersionDisplay,
   StartButton,
 } from './components';
+import { SettingsSection } from '../settings';
 
 const StyledHomePage = styled.div`
   display: flex;
@@ -29,6 +30,7 @@ export const HomePage = () => {
       <HomeTitle />
       <AgeWarning />
       <Introduction />
+      <SettingsSection />
       <WallTalkerAd />
       <ReleaseNotes />
       <VersionDisplay />

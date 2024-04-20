@@ -1,1 +1,1 @@
-export * from './SettingsRow';
+export * from './SettingsTile';
