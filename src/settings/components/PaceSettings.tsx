@@ -26,7 +26,7 @@ export const PaceSettings = () => {
   return (
     <SettingsTile grid label='Pace'>
       <SettingsDescription>
-        Pace settings are mesured in strokes per second.
+        Pace settings are mesured in beats per second.
       </SettingsDescription>
       <SettingsLabel>Minimum</SettingsLabel>
       <Slider
