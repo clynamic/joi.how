@@ -16,7 +16,7 @@ export const Measure: React.FC<MeasureProps> = ({ value, max, unit }) => {
   return (
     <StyledMeasure>
       <strong>
-        {Math.ceil(value).toString().padStart(max, '\u00A0')} {unit}
+        {value.toString().padStart(max, '\u00A0')} {unit}
       </strong>
     </StyledMeasure>
   );
