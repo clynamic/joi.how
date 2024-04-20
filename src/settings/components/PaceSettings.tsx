@@ -1,12 +1,10 @@
 import { SettingsDescription } from './SettingsDescription';
 import { SettingsLabel } from './SettingsLabel';
-import { Slider } from './Slider';
 import { useMemo, useState } from 'react';
 import { SettingsTile } from './SettingsTile';
-import { Measure } from './Measure';
-import { SettingsDivider } from './SettingsDivider';
 import { Sparklines, SparklinesLine } from 'react-sparklines';
 import { intensityToPaceBounds } from '../../utils';
+import { Measure, Divider, Slider } from '../../common';
 
 export const PaceSettings = () => {
   const [minPace, setMinPace] = useState(0.25);
@@ -48,7 +46,7 @@ export const PaceSettings = () => {
         onChange={setMaxPace}
       />
       <Measure value={maxPace} max={4} unit='b/s' />
-      <SettingsDivider />
+      <Divider />
       <SettingsDescription>
         How should the pace change over the course of the game?
       </SettingsDescription>

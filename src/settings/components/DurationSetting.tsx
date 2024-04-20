@@ -1,9 +1,8 @@
 import { SettingsTile } from './SettingsTile';
 import { useState } from 'react';
-import { Slider } from './Slider';
-import { Measure } from './Measure';
 import { SettingsDescription } from './SettingsDescription';
 import { SettingsLabel } from './SettingsLabel';
+import { Measure, Slider } from '../../common';
 
 export const DurationSetting = () => {
   const [duration, setDuration] = useState(9000);
@@ -20,7 +19,7 @@ export const DurationSetting = () => {
         max='6000'
         step='600'
         value={warmupDuration}
-        onChange={e => setWarmupDuration(parseFloat(e.target.value))}
+        onChange={setWarmupDuration}
       />
       <Measure value={Math.ceil(warmupDuration / 10 / 60)} max={2} unit='min' />
       <SettingsDescription>
@@ -32,7 +31,7 @@ export const DurationSetting = () => {
         max='18000'
         step='600'
         value={duration}
-        onChange={e => setDuration(parseFloat(e.target.value))}
+        onChange={setDuration}
       />
       <Measure value={Math.ceil(duration / 10 / 60)} max={2} unit='min' />
     </SettingsTile>
