@@ -6,14 +6,14 @@ export interface SettingsTileProps extends PropsWithChildren {
   grid?: boolean;
 }
 
-const StyledSettingsTile = styled.fieldset<{ grid?: boolean }>`
-  display: ${props => (props.grid ? 'grid' : 'block')};
+const StyledSettingsTile = styled.fieldset<{ $grid?: boolean }>`
+  display: ${({ $grid }) => ($grid ? 'grid' : 'block')};
   grid-template-columns: auto 1fr auto;
 
   background: rgba(122, 123, 163, 0.123);
 
   border: unset;
-  border-left: 2px solid #595a77;
+  border-left: 2px solid #595a77; // TODO: use css variable
 
   margin: 15px;
   padding: 5px 15px;
@@ -24,7 +24,7 @@ const StyledSettingsTile = styled.fieldset<{ grid?: boolean }>`
 const StyledSettingsLabel = styled.legend`
   width: fit-content;
   padding: 4px 8px;
-  background: #595a77;
+  background: #595a77; // TODO: use css variable
   color: var(--text-color);
   line-height: 100%;
   font-size: 1rem;
@@ -36,7 +36,7 @@ export const SettingsTile: React.FC<SettingsTileProps> = ({
   grid,
 }) => {
   return (
-    <StyledSettingsTile grid={grid}>
+    <StyledSettingsTile $grid={grid}>
       <StyledSettingsLabel>{label}</StyledSettingsLabel>
       {children}
     </StyledSettingsTile>

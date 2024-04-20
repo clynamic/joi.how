@@ -16,11 +16,11 @@ const StyledHomePage = styled.div`
   flex-direction: column;
   align-items: center;
 
-  margin: 0 0;
+  margin: 0;
   padding: 16px;
 
   & > * {
-    max-width: 960px;
+    max-width: 920px;
     width: 100%;
   }
 `;

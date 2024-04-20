@@ -33,8 +33,25 @@ const StyledSlider = styled.input.attrs({ type: 'range' })`
   }
 `;
 
-type SliderProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'>;
+type SliderProps = Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type' | 'value' | 'onChange'
+> & {
+  onChange: (value: number) => void;
+  value: number;
+};
 
-export const Slider: React.FC<SliderProps> = props => {
-  return <StyledSlider type='range' {...props} />;
+export const Slider: React.FC<SliderProps> = ({
+  value,
+  onChange,
+  ...props
+}) => {
+  return (
+    <StyledSlider
+      type='range'
+      value={value}
+      onChange={e => onChange(parseFloat(e.target.value))}
+      {...props}
+    />
+  );
 };
