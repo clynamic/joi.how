@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { ContentSection } from './ContentSection';
+import { ContentSection } from '../../common';
 
 const StyledStartButton = styled.button`
   background: var(--focus-color);

@@ -1,6 +1,6 @@
 import Logo from '../../assets/logo.svg';
 import styled from 'styled-components';
-import { ContentSection } from './ContentSection';
+import { ContentSection } from '../../common';
 
 const StyledTitle = styled(ContentSection)`
   background: transparent;

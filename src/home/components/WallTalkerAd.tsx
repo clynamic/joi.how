@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { ContentSection } from './ContentSection';
+import { ContentSection } from '../../common';
 
 const StyledWallTalkerAd = styled(ContentSection)`
   background: linear-gradient(#ffb300, #916706);
