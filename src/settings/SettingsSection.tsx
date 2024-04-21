@@ -6,6 +6,7 @@ import {
   EventSettings,
   HypnoSettings,
   PaceSettings,
+  PlayerSettings,
   WalltalkerSettings,
 } from './components';
 import { SettingsTile } from '../common';
@@ -27,9 +28,7 @@ export const SettingsSection = () => {
       <WalltalkerSettings />
       <ClimaxSettings />
       <HypnoSettings />
-      <SettingsTile label='Player'>
-        lorem ipsum dolor sit amet consectetur adipisicing elit
-      </SettingsTile>
+      <PlayerSettings />
       <SettingsTile label='Integration'>
         lorem ipsum dolor sit amet consectetur adipisicing elit
       </SettingsTile>

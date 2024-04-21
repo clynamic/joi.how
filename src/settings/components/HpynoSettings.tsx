@@ -13,7 +13,7 @@ export const HypnoSettings = () => {
   const [hypno, setHypno] = useState<GameHynpo>(GameHynpo.joi);
 
   return (
-    <SettingsTile label={'Hypno'}>
+    <SettingsTile label={'Hypno'} role='radiogroup'>
       <SettingsTitle>Select a hypno text set</SettingsTitle>
       {Object.keys(GameHynpo).map(key => {
         const current = GameHynpo[key as keyof typeof GameHynpo];
@@ -22,6 +22,7 @@ export const HypnoSettings = () => {
             key={current}
             enabled={hypno === current}
             onClick={() => setHypno(current)}
+            role='radio'
           >
             <Trailing
               trailing={
