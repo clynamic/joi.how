@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { ToggleTile, Trailing } from '../../common';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSquare, faSquareCheck } from '@fortawesome/free-regular-svg-icons';
+import { SettingsTitle } from './SettingsTitle';
 
 export const EventSettings = () => {
   const [events, setEvents] = useState<GameEvent[]>(Object.values(GameEvent));
@@ -20,8 +21,10 @@ export const EventSettings = () => {
   );
 
   return (
-    <SettingsTile grid label={'Events'}>
-      <p>Click to enable/disable occurance of each event.</p>
+    <SettingsTile label={'Events'}>
+      <SettingsTitle>
+        Click to enable/disable occurance of each event.
+      </SettingsTitle>
       {Object.keys(GameEvent).map(key => {
         const event = GameEvent[key as keyof typeof GameEvent];
         return (
