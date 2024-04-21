@@ -1,8 +1,11 @@
-import { SettingsTile } from './SettingsTile';
 import { useState } from 'react';
-import { SettingsDescription } from './SettingsDescription';
-import { SettingsLabel } from './SettingsLabel';
-import { Measure, Slider } from '../../common';
+import {
+  Measure,
+  SettingsDescription,
+  SettingsLabel,
+  SettingsTile,
+  Slider,
+} from '../../common';
 
 export const DurationSettings = () => {
   const [duration, setDuration] = useState(9000);
