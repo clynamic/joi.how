@@ -23,8 +23,7 @@ export const GameEventLabels: Record<GameEvent, string> = {
 };
 
 export const GameEventDescriptions: Record<GameEvent, string> = {
-  climax:
-    'Creates an end point to the game. Enable this to adjust ruin/cum/denial options.',
+  climax: 'Creates an end point to the game.',
   edge: "Slows down when intensity is almost at it's highest.",
   pause: 'Paw at twice the current pace for a few seconds.',
   halfPace: 'Paw at half the current pace for a few seconds.',
