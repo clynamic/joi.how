@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Divider,
   SettingsTile,
@@ -16,10 +15,11 @@ import {
 } from '../../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleDot, faCircle } from '@fortawesome/free-regular-svg-icons';
+import { useSetting } from '../SettingsProvider';
 
 export const PlayerSettings = () => {
-  const [gender, setGender] = useState<PlayerGender>(PlayerGender.man);
-  const [body, setBody] = useState<PlayerBody>(PlayerBody.penis);
+  const [gender, setGender] = useSetting('gender');
+  const [body, setBody] = useSetting('body');
 
   return (
     <SettingsTile label={'Player'}>
