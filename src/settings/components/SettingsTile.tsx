@@ -8,7 +8,8 @@ export interface SettingsTileProps
 }
 
 const StyledSettingsTile = styled.fieldset<{ $grid?: boolean }>`
-  display: ${({ $grid }) => ($grid ? 'grid' : 'block')};
+  display: ${({ $grid }) => ($grid ? 'grid' : 'flex')};
+  flex-direction: column;
   grid-template-columns: auto 1fr auto;
 
   background: rgba(122, 123, 163, 0.123);
