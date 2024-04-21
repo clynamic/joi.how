@@ -1,7 +1,8 @@
 import { PropsWithChildren } from 'react';
 import styled from 'styled-components';
 
-export interface SettingsTileProps extends PropsWithChildren {
+export interface SettingsTileProps
+  extends PropsWithChildren<React.HTMLAttributes<HTMLFieldSetElement>> {
   label: React.ReactNode;
   grid?: boolean;
 }
@@ -37,9 +38,10 @@ export const SettingsTile: React.FC<SettingsTileProps> = ({
   label,
   children,
   grid,
+  ...props
 }) => {
   return (
-    <StyledSettingsTile $grid={grid}>
+    <StyledSettingsTile $grid={grid} {...props}>
       <StyledSettingsLabel>{label}</StyledSettingsLabel>
       {children}
     </StyledSettingsTile>
