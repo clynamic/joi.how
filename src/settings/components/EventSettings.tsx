@@ -1,5 +1,5 @@
 import { GameEvent, GameEventDescriptions, GameEventLabels } from '../../types';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import {
   SettingsTile,
   SettingsTitle,
@@ -8,9 +8,10 @@ import {
 } from '../../common';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSquare, faSquareCheck } from '@fortawesome/free-regular-svg-icons';
+import { useSetting } from '../SettingsProvider';
 
 export const EventSettings = () => {
-  const [events, setEvents] = useState<GameEvent[]>(Object.values(GameEvent));
+  const [events, setEvents] = useSetting('events');
 
   const toggleEvent = useCallback(
     (event: GameEvent) => {
@@ -20,7 +21,7 @@ export const EventSettings = () => {
         setEvents([...events, event]);
       }
     },
-    [events]
+    [events, setEvents]
   );
 
   return (

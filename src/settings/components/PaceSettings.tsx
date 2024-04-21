@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Sparklines, SparklinesLine } from 'react-sparklines';
 import { intensityToPaceBounds } from '../../utils';
 import {
@@ -9,11 +9,12 @@ import {
   SettingsLabel,
   SettingsTile,
 } from '../../common';
+import { useSetting } from '../SettingsProvider';
 
 export const PaceSettings = () => {
-  const [minPace, setMinPace] = useState(0.25);
-  const [maxPace, setMaxPace] = useState(5);
-  const [steepness, setSteepness] = useState(0.05);
+  const [minPace, setMinPace] = useSetting('minPace');
+  const [maxPace, setMaxPace] = useSetting('maxPace');
+  const [steepness, setSteepness] = useSetting('steepness');
 
   const sparklines = useMemo(() => {
     return Array.from(new Array(20))

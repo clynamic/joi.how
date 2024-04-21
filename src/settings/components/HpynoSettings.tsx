@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   SettingsTile,
   SettingsTitle,
@@ -8,9 +7,10 @@ import {
 import { GameHynpo, GameHypnoDescriptions, GameHypnoLabels } from '../../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faCircleDot } from '@fortawesome/free-regular-svg-icons';
+import { useSetting } from '../SettingsProvider';
 
 export const HypnoSettings = () => {
-  const [hypno, setHypno] = useState<GameHynpo>(GameHynpo.joi);
+  const [hypno, setHypno] = useSetting('hypno');
 
   return (
     <SettingsTile label={'Hypno'} role='radiogroup'>

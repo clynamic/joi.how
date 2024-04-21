@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Measure,
   SettingsDescription,
@@ -6,10 +5,11 @@ import {
   SettingsTile,
   Slider,
 } from '../../common';
+import { useSetting } from '../SettingsProvider';
 
 export const DurationSettings = () => {
-  const [duration, setDuration] = useState(9000);
-  const [warmupDuration, setWarmupDuration] = useState(0);
+  const [warmupDuration, setWarmupDuration] = useSetting('warmupDuration');
+  const [gameDuration, setGameDuration] = useSetting('gameDuration');
 
   return (
     <SettingsTile grid label='Duration'>
@@ -33,10 +33,10 @@ export const DurationSettings = () => {
         min='1800'
         max='18000'
         step='600'
-        value={duration}
-        onChange={setDuration}
+        value={gameDuration}
+        onChange={setGameDuration}
       />
-      <Measure value={Math.ceil(duration / 10 / 60)} max={2} unit='min' />
+      <Measure value={Math.ceil(gameDuration / 10 / 60)} max={2} unit='min' />
     </SettingsTile>
   );
 };
