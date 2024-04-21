@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { SettingsTile } from './SettingsTile';
+import { SettingsTile } from '../../common';
 import { faPersonDigging } from '@fortawesome/free-solid-svg-icons';
 
 export const WalltalkerSettings = () => {

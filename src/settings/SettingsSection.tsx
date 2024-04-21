@@ -5,9 +5,9 @@ import {
   DurationSettings,
   EventSettings,
   PaceSettings,
-  SettingsTile,
   WalltalkerSettings,
 } from './components';
+import { SettingsTile } from '../common';
 
 const StyledSettingsSection = styled(ContentSection)`
   display: grid;

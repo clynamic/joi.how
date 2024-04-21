@@ -1,10 +1,13 @@
-import { SettingsTile } from './SettingsTile';
 import { GameEvent, GameEventDescriptions, GameEventLabels } from '../../types';
 import { useCallback, useState } from 'react';
-import { ToggleTile, Trailing } from '../../common';
+import {
+  SettingsTile,
+  SettingsTitle,
+  ToggleTile,
+  Trailing,
+} from '../../common';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSquare, faSquareCheck } from '@fortawesome/free-regular-svg-icons';
-import { SettingsTitle } from './SettingsTitle';
 
 export const EventSettings = () => {
   const [events, setEvents] = useState<GameEvent[]>(Object.values(GameEvent));

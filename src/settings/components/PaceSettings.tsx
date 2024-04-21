@@ -1,10 +1,14 @@
-import { SettingsDescription } from './SettingsDescription';
-import { SettingsLabel } from './SettingsLabel';
 import { useMemo, useState } from 'react';
-import { SettingsTile } from './SettingsTile';
 import { Sparklines, SparklinesLine } from 'react-sparklines';
 import { intensityToPaceBounds } from '../../utils';
-import { Measure, Divider, Slider } from '../../common';
+import {
+  Measure,
+  Divider,
+  Slider,
+  SettingsDescription,
+  SettingsLabel,
+  SettingsTile,
+} from '../../common';
 
 export const PaceSettings = () => {
   const [minPace, setMinPace] = useState(0.25);
