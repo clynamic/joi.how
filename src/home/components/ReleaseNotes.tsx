@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { marked } from 'marked';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { ContentSection } from './ContentSection';
+import { ContentSection } from '../../common';
 
 const StyledExpandButton = styled.button`
   display: flex;
