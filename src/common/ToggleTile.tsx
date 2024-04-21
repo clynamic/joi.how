@@ -56,6 +56,7 @@ export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
   children,
   enabled,
   onClick,
+  ...props
 }) => {
   return (
     <StyledToggleTile
@@ -63,6 +64,7 @@ export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
       role='switch'
       aria-checked={enabled}
       onClick={onClick}
+      {...props}
     >
       {children}
     </StyledToggleTile>
