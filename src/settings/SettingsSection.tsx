@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { ContentSection } from '../home/components';
 import {
+  ClimaxSettings,
   DurationSettings,
   EventSettings,
   PaceSettings,
@@ -23,9 +24,7 @@ export const SettingsSection = () => {
         lorem ipsum dolor sit amet consectetur adipisicing elit
       </SettingsTile>
       <WalltalkerSettings />
-      <SettingsTile label='Climax'>
-        lorem ipsum dolor sit amet consectetur adipisicing elit
-      </SettingsTile>
+      <ClimaxSettings />
       <SettingsTile label='Hypno'>
         lorem ipsum dolor sit amet consectetur adipisicing elit
       </SettingsTile>
