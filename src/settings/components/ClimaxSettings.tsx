@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Divider, Measure, Slider } from '../../common';
-import { SettingsDescription } from './SettingsDescription';
-import { SettingsTile } from './SettingsTile';
-import { SettingsLabel } from './SettingsLabel';
-import { SettingsTitle } from './SettingsTitle';
+import {
+  Divider,
+  Measure,
+  SettingsLabel,
+  SettingsTile,
+  SettingsTitle,
+  Slider,
+} from '../../common';
+import { SettingsDescription } from '../../common/SettingsDescription';
 
 export const ClimaxSettings = () => {
   const [climaxChange, setClimaxChange] = useState(100);
