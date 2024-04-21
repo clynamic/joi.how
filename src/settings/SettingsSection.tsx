@@ -5,6 +5,7 @@ import {
   EventSettings,
   PaceSettings,
   SettingsTile,
+  WalltalkerSettings,
 } from './components';
 
 const StyledSettingsSection = styled(ContentSection)`
@@ -21,9 +22,7 @@ export const SettingsSection = () => {
       <SettingsTile label='Images'>
         lorem ipsum dolor sit amet consectetur adipisicing elit
       </SettingsTile>
-      <SettingsTile label='Walltalker'>
-        lorem ipsum dolor sit amet consectetur adipisicing elit
-      </SettingsTile>
+      <WalltalkerSettings />
       <SettingsTile label='Climax'>
         lorem ipsum dolor sit amet consectetur adipisicing elit
       </SettingsTile>
