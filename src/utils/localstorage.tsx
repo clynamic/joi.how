@@ -1,12 +1,9 @@
+import { useState, useEffect, PropsWithChildren, useCallback } from 'react';
 import {
   createContext,
+  useContextSelector,
   useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  PropsWithChildren,
-} from 'react';
+} from 'use-context-selector';
 
 interface LocalStorageProviderOptions<T> {
   key: string;
@@ -14,8 +11,8 @@ interface LocalStorageProviderOptions<T> {
 }
 
 interface LocalStorageContextType<T> {
-  getDataItem: <K extends keyof T>(itemKey: K) => T[K];
-  setDataItem: <K extends keyof T>(itemKey: K, value: T[K]) => void;
+  data: T;
+  setData: React.Dispatch<React.SetStateAction<T>>;
 }
 
 function useLocalStorage<T>(
@@ -25,7 +22,10 @@ function useLocalStorage<T>(
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = window.localStorage.getItem(key);
-      return item ? (JSON.parse(item) as T) : initialValue;
+      return {
+        ...initialValue,
+        ...(item ? JSON.parse(item) : {}),
+      };
     } catch (error) {
       console.error('Failed to read from localStorage:', error);
       return initialValue;
@@ -38,7 +38,7 @@ function useLocalStorage<T>(
     } catch (error) {
       console.error('Failed to save to localStorage:', error);
     }
-  }, [key, storedValue]);
+  }, [storedValue, key]);
 
   return [storedValue, setStoredValue];
 }
@@ -56,27 +56,7 @@ export function createLocalStorageProvider<T>(
       options.defaultData
     );
 
-    const setDataItem = useCallback(
-      <K extends keyof T>(itemKey: K, value: T[K]): void => {
-        setData(prev => ({ ...prev, [itemKey]: value }));
-      },
-      [setData]
-    );
-
-    const getDataItem = useCallback(
-      <K extends keyof T>(itemKey: K): T[K] => {
-        return data[itemKey];
-      },
-      [data]
-    );
-
-    const contextValue = useMemo(
-      () => ({
-        getDataItem,
-        setDataItem,
-      }),
-      [getDataItem, setDataItem]
-    );
+    const contextValue = { data, setData };
 
     return (
       <LocalStorageContext.Provider value={contextValue}>
@@ -85,23 +65,48 @@ export function createLocalStorageProvider<T>(
     );
   };
 
-  const useLocalStorageHook = <K extends keyof T>(
-    itemKey: K
-  ): [T[K], (value: T[K]) => void] => {
+  const useProvider = (): [T, React.Dispatch<React.SetStateAction<T>>] => {
     const context = useContext(LocalStorageContext);
     if (!context) {
-      throw new Error('useLocalStorageHook must be used within its Provider');
+      throw new Error('useProvider must be used within its Provider');
     }
 
-    const { getDataItem, setDataItem } = context;
-    const item = useMemo(() => getDataItem(itemKey), [getDataItem, itemKey]);
-    const updateItem = useCallback(
-      (value: T[K]) => setDataItem(itemKey, value),
-      [setDataItem, itemKey]
-    );
-
-    return [item, updateItem];
+    return [context.data, context.setData];
   };
 
-  return { Provider, useLocalStorageHook };
+  /**
+   * Uses useContextSelector to select a specific key from the provider.
+   * This allows us to re-render only when the selected key changes.
+   * @param key
+   * @returns
+   */
+  function useProviderSelector<K extends keyof T>(
+    key: K
+  ): [T[K], (value: T[K]) => void] {
+    const selected = useContextSelector(LocalStorageContext, context => {
+      if (!context) {
+        throw new Error('useProvider must be used within its Provider');
+      }
+
+      return context.data[key];
+    });
+    const setData = useContextSelector(LocalStorageContext, context => {
+      if (!context) {
+        throw new Error('useProvider must be used within its Provider');
+      }
+
+      return context.setData;
+    });
+
+    const setSelected = useCallback(
+      (value: T[K]) => {
+        setData(prev => ({ ...prev, [key]: value }));
+      },
+      [setData, key]
+    );
+
+    return [selected, setSelected];
+  }
+
+  return { Provider, useProvider, useProviderSelector };
 }
