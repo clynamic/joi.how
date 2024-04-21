@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ContentSection } from './ContentSection';
+import { ContentSection } from '../../common';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';

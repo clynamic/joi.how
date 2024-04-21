@@ -1,4 +1,4 @@
-import { ContentSection } from './ContentSection';
+import { ContentSection } from '../../common';
 
 export const Introduction = () => {
   return (

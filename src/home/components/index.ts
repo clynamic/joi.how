@@ -1,6 +1,6 @@
 export * from './AgeWarning';
 export * from './AppTitle';
-export * from './ContentSection';
+export * from '../../common';
 export * from './Instructions';
 export * from './Introduction';
 export * from './ReleaseNotes';
