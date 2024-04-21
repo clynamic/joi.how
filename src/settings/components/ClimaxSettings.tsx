@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   Divider,
   Measure,
@@ -8,10 +8,11 @@ import {
   Slider,
 } from '../../common';
 import { SettingsDescription } from '../../common/SettingsDescription';
+import { useSetting } from '../SettingsProvider';
 
 export const ClimaxSettings = () => {
-  const [climaxChange, setClimaxChange] = useState(100);
-  const [ruinChange, setRuinChange] = useState(0);
+  const [climaxChange, setClimaxChange] = useSetting('climaxChange');
+  const [ruinChange, setRuinChange] = useSetting('ruinChange');
 
   const climaxText = useMemo(() => {
     if (climaxChange == 100) {
