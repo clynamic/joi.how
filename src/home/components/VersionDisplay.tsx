@@ -14,7 +14,7 @@ const StyledVersionDisplay = styled(ContentSection)`
 export const VersionDisplay = () => {
   return (
     <StyledVersionDisplay>
-      <p>Version v{version}</p>
+      <p>Version {version}</p>
       <Link to={'https://github.com/clynamic/joi.how'}>
         <Tooltip content='View on GitHub'>
           <h2>
