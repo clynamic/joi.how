@@ -22,10 +22,16 @@ function useLocalStorage<T>(
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = window.localStorage.getItem(key);
-      return {
-        ...initialValue,
-        ...(item ? JSON.parse(item) : {}),
-      };
+      const parsed = item ? JSON.parse(item) : null;
+      if (typeof initialValue === 'object' && !Array.isArray(initialValue)) {
+        // this allows us to default on missing keys
+        return {
+          ...initialValue,
+          ...(parsed ?? {}),
+        };
+      } else {
+        return parsed ?? initialValue;
+      }
     } catch (error) {
       console.error('Failed to read from localStorage:', error);
       return initialValue;
