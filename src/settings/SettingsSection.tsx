@@ -7,9 +7,12 @@ import {
   HypnoSettings,
   PaceSettings,
   PlayerSettings,
+  ServiceSettings,
+  ImageSettings,
   WalltalkerSettings,
+  VibratorSettings,
+  SharingSettings,
 } from './components';
-import { SettingsTile } from '../common';
 
 const StyledSettingsSection = styled(ContentSection)`
   display: grid;
@@ -21,20 +24,15 @@ export const SettingsSection = () => {
     <StyledSettingsSection>
       <PaceSettings />
       <DurationSettings />
-      <EventSettings />
-      <SettingsTile label='Images'>
-        lorem ipsum dolor sit amet consectetur adipisicing elit
-      </SettingsTile>
-      <WalltalkerSettings />
-      <ClimaxSettings />
-      <HypnoSettings />
       <PlayerSettings />
-      <SettingsTile label='Integration'>
-        lorem ipsum dolor sit amet consectetur adipisicing elit
-      </SettingsTile>
-      <SettingsTile label='Save/Load'>
-        lorem ipsum dolor sit amet consectetur adipisicing elit
-      </SettingsTile>
+      <EventSettings />
+      <HypnoSettings />
+      <ClimaxSettings />
+      <WalltalkerSettings />
+      <ServiceSettings />
+      <ImageSettings />
+      <VibratorSettings />
+      <SharingSettings />
     </StyledSettingsSection>
   );
 };

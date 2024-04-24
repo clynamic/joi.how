@@ -24,7 +24,11 @@ export const DurationSettings = () => {
         value={warmupDuration}
         onChange={setWarmupDuration}
       />
-      <Measure value={Math.ceil(warmupDuration / 10 / 60)} max={2} unit='min' />
+      <Measure
+        value={Math.ceil(warmupDuration / 10 / 60)}
+        chars={2}
+        unit='min'
+      />
       <SettingsDescription>
         Session duration is a rough estimate. The game will not forcefully end.
       </SettingsDescription>
@@ -36,7 +40,7 @@ export const DurationSettings = () => {
         value={gameDuration}
         onChange={setGameDuration}
       />
-      <Measure value={Math.ceil(gameDuration / 10 / 60)} max={2} unit='min' />
+      <Measure value={Math.ceil(gameDuration / 10 / 60)} chars={2} unit='min' />
     </SettingsTile>
   );
 };

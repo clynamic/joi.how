@@ -47,7 +47,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
   return (
     <StyledTooltip>
       {children}
-      <span className='tooltiptext'>{content}</span>
+      {content && <span className='tooltiptext'>{content}</span>}
     </StyledTooltip>
   );
 };
