@@ -9,10 +9,13 @@ const StyledTitle = styled(ContentSection)`
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   width: 100%;
 
   & h1 {
     font-size: 3rem;
+    margin-bottom: 32px;
   }
 
   & img {
