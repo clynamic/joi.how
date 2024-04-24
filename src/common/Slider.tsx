@@ -37,8 +37,8 @@ type SliderProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   'type' | 'value' | 'onChange'
 > & {
-  onChange: (value: number) => void;
   value: number;
+  onChange: (value: number) => void;
 };
 
 export const Slider: React.FC<SliderProps> = ({

@@ -41,7 +41,7 @@ export const PaceSettings = () => {
         value={minPace}
         onChange={setMinPace}
       />
-      <Measure value={minPace} max={4} unit='b/s' />
+      <Measure value={minPace} chars={4} unit='b/s' />
       <SettingsLabel>Maximum</SettingsLabel>
       <Slider
         min={0.25}
@@ -50,7 +50,7 @@ export const PaceSettings = () => {
         value={maxPace}
         onChange={setMaxPace}
       />
-      <Measure value={maxPace} max={4} unit='b/s' />
+      <Measure value={maxPace} chars={4} unit='b/s' />
       <Divider />
       <SettingsDescription>
         How should the pace change over the course of the game?
