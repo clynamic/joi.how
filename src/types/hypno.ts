@@ -1,4 +1,4 @@
-export enum GameHynpo {
+export enum GameHypnoType {
   off = 'off',
   joi = 'joi',
   breeding = 'breeding',
@@ -6,7 +6,7 @@ export enum GameHynpo {
   femdom = 'femdom',
 }
 
-export const GameHypnoLabels: Record<GameHynpo, string> = {
+export const GameHypnoLabels: Record<GameHypnoType, string> = {
   off: 'Off',
   joi: 'JOI',
   breeding: 'Breeding',
@@ -14,7 +14,7 @@ export const GameHypnoLabels: Record<GameHynpo, string> = {
   femdom: 'Femdom Pet',
 };
 
-export const GameHypnoDescriptions: Record<GameHynpo, string> = {
+export const GameHypnoDescriptions: Record<GameHypnoType, string> = {
   off: 'Turn off the hypnosis all-together.',
   joi: 'Focus on masturbation encouragement.',
   breeding: 'Focus on breeding and primal urge.',

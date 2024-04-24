@@ -1,7 +1,7 @@
 import { PlayerBody } from './body';
 import { GameEvent } from './event';
 import { PlayerGender } from './gender';
-import { GameHynpo } from './hypno';
+import { GameHypnoType } from './hypno';
 
 export interface Settings {
   gameDuration: number;
@@ -12,7 +12,7 @@ export interface Settings {
   maxPace: number;
   steepness: number;
   events: GameEvent[];
-  hypno: GameHynpo;
+  hypno: GameHypnoType;
   gender: PlayerGender;
   body: PlayerBody;
 }
@@ -26,7 +26,7 @@ export const defaultSettings: Settings = {
   maxPace: 5,
   steepness: 0.05,
   events: Object.values(GameEvent),
-  hypno: GameHynpo.joi,
+  hypno: GameHypnoType.joi,
   gender: PlayerGender.man,
   body: PlayerBody.penis,
 };
