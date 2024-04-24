@@ -13,7 +13,7 @@ export enum Stroke {
 }
 
 export enum GamePhase {
-  // warmup = 'warmup',
+  warmup = 'warmup',
   active = 'active',
   climax = 'climax',
 }
@@ -32,7 +32,7 @@ export const initialGameState: GameState = {
   intensity: 0,
   currentImage: 0,
   paws: Paws.none,
-  stroke: Stroke.up,
+  stroke: Stroke.down,
   phase: GamePhase.active,
 };
 
