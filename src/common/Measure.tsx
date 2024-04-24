@@ -2,21 +2,21 @@ import styled from 'styled-components';
 
 export interface MeasureProps {
   value: number;
-  max: number;
+  chars: number;
   unit?: string;
 }
 
 const StyledMeasure = styled.span`
   white-space: nowrap;
   text-align: end;
-  font-family: 'Helvetica Neue', monospace;
+  font-family: 'Courier New', Courier, monospace;
 `;
 
-export const Measure: React.FC<MeasureProps> = ({ value, max, unit }) => {
+export const Measure: React.FC<MeasureProps> = ({ value, chars, unit }) => {
   return (
     <StyledMeasure>
       <strong>
-        {value.toString().padStart(max, '\u00A0')} {unit}
+        {value.toString().padStart(chars, '\u00A0')} {unit ?? ''}
       </strong>
     </StyledMeasure>
   );

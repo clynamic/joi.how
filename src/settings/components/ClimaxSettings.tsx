@@ -49,13 +49,13 @@ export const ClimaxSettings = () => {
         max={100}
         onChange={setClimaxChange}
       />
-      <Measure value={climaxChange} max={3} unit='%' />
+      <Measure value={climaxChange} chars={3} unit='%' />
       <Divider />
       <SettingsTitle>Given an orgasm occurs...</SettingsTitle>
       <SettingsDescription>{ruinText}</SettingsDescription>
       <SettingsLabel>Ruin</SettingsLabel>
       <Slider value={ruinChange} min={0} max={100} onChange={setRuinChange} />
-      <Measure value={ruinChange} max={3} unit='%' />
+      <Measure value={ruinChange} chars={3} unit='%' />
     </SettingsTile>
   );
 };

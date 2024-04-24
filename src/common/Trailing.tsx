@@ -16,6 +16,8 @@ const StyledTrailing = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  gap: 8px;
+  grid-column: 1 / -1;
 `;
 
 export const Trailing = ({ children, trailing }: TrailingProps) => {
