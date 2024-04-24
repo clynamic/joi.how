@@ -4,7 +4,11 @@ import {
   ToggleTile,
   Trailing,
 } from '../../common';
-import { GameHynpo, GameHypnoDescriptions, GameHypnoLabels } from '../../types';
+import {
+  GameHypnoType,
+  GameHypnoDescriptions,
+  GameHypnoLabels,
+} from '../../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faCircleDot } from '@fortawesome/free-regular-svg-icons';
 import { useSetting } from '../SettingsProvider';
@@ -15,8 +19,8 @@ export const HypnoSettings = () => {
   return (
     <SettingsTile label={'Hypno'} role='radiogroup'>
       <SettingsTitle>Select a hypno text set</SettingsTitle>
-      {Object.keys(GameHynpo).map(key => {
-        const current = GameHynpo[key as keyof typeof GameHynpo];
+      {Object.keys(GameHypnoType).map(key => {
+        const current = GameHypnoType[key as keyof typeof GameHypnoType];
         return (
           <ToggleTile
             key={current}

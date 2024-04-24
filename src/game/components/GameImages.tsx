@@ -12,12 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 const StyledGameImages = styled.div`
-  position: relative;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
+  position: absolute;
   overflow: hidden;
 
   height: 100%;
@@ -30,7 +25,9 @@ const StyledForegroundImage = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1;
+  z-index: -1;
+  pointer-events: none;
+  user-select: none;
 
   & > img {
     width: 100%;
@@ -45,7 +42,9 @@ const StyledBackgroundImage = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 0;
+  z-index: -2;
+  pointer-events: none;
+  user-select: none;
 
   display: flex;
   justify-items: center;
@@ -71,7 +70,6 @@ const StyledImageActions = styled.div`
   position: absolute;
   bottom: 0;
   right: 0;
-  z-index: 2;
 
   display: flex;
 
@@ -123,20 +121,20 @@ export const GameImages = () => {
               );
           }
         })()}
-        <StyledImageActions>
-          <IconButton
-            onClick={() => {
-              // TODO: implement skip
-            }}
-          >
-            <FontAwesomeIcon icon={faForward} />
-          </IconButton>
-          <VerticalDivider />
-          <IconButton onClick={() => window.open(image.source, '_blank')}>
-            <FontAwesomeIcon icon={faUpRightFromSquare} />
-          </IconButton>
-        </StyledImageActions>
       </StyledForegroundImage>
+      <StyledImageActions>
+        <IconButton
+          onClick={() => {
+            // TODO: implement skip
+          }}
+        >
+          <FontAwesomeIcon icon={faForward} />
+        </IconButton>
+        <VerticalDivider />
+        <IconButton onClick={() => window.open(image.source, '_blank')}>
+          <FontAwesomeIcon icon={faUpRightFromSquare} />
+        </IconButton>
+      </StyledImageActions>
     </StyledGameImages>
   );
 };

@@ -1,10 +1,26 @@
-import { GameImages } from './components/GameImages';
+import styled from 'styled-components';
+import { GameHypno, GameImages, GameMeter } from './components';
 import { GameProvider } from './GameProvider';
+
+const StyledGamePage = styled.div`
+  position: relative;
+
+  height: 100%;
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 export const GamePage = () => {
   return (
-    <GameProvider>
-      <GameImages />
-    </GameProvider>
+    <StyledGamePage>
+      <GameProvider>
+        <GameImages />
+        <GameMeter />
+        <GameHypno />
+      </GameProvider>
+    </StyledGamePage>
   );
 };
