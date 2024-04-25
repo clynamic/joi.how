@@ -3,6 +3,7 @@ import { ImageItem } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import { faImage } from '@fortawesome/free-solid-svg-icons';
+import { Image, ImageSize } from './Image';
 
 interface ImageThumbnailTileProps {
   item: ImageItem;
@@ -15,14 +16,6 @@ const StyledImageThumbnailTile = styled.div`
   aspect-ratio: 1;
 
   cursor: pointer;
-
-  user-select: none;
-
-  & > img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
 
   &:hover,
   &:focus > img {
@@ -40,10 +33,7 @@ const ImageThumbnailTile: React.FC<ImageThumbnailTileProps> = ({ item }) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <img
-        src={item.thumbnail}
-        alt={`Image from ${item.service} with id ${item.id}`}
-      />
+      <Image item={item} size={ImageSize.thumbnail} />
       <ImageMiniView item={item} shown={hovered} />
     </StyledImageThumbnailTile>
   );
@@ -82,10 +72,7 @@ const StyledImageMiniView = styled.div<StyledImageMiniViewProps>`
 const ImageMiniView: React.FC<ImageMiniViewProps> = ({ item, shown }) => {
   return (
     <StyledImageMiniView $shown={shown}>
-      <img
-        src={item.thumbnail}
-        alt={`Image from ${item.service} with id ${item.id}`}
-      />
+      <Image item={item} size={ImageSize.thumbnail} />
     </StyledImageMiniView>
   );
 };
