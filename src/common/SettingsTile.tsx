@@ -11,6 +11,7 @@ const StyledSettingsTile = styled.fieldset<{ $grid?: boolean }>`
   display: ${({ $grid }) => ($grid ? 'grid' : 'flex')};
   flex-direction: column;
   grid-template-columns: auto 1fr auto;
+  grid-auto-rows: min-content;
 
   background: rgba(122, 123, 163, 0.123);
   color: #b9bad6;
