@@ -2,6 +2,7 @@ export * from './ContentSection';
 export * from './Divider';
 export * from './Dropdown';
 export * from './IconButton';
+export * from './Image';
 export * from './ImageGrid';
 export * from './Measure';
 export * from './SettingsDescription';

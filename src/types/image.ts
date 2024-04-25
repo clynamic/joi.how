@@ -1,8 +1,8 @@
 export enum ImageType {
-  image,
-  video,
-  gif,
-  flash,
+  image = 'image',
+  video = 'video',
+  gif = 'gif',
+  flash = 'flash',
 }
 
 export interface ImageItem {

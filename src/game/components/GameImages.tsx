@@ -3,8 +3,7 @@ import { useImages } from '../../images';
 import { useGameValue } from '../GameProvider';
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
-import { ImageType } from '../../types';
-import { IconButton, VerticalDivider } from '../../common';
+import { IconButton, Image, ImageSize, VerticalDivider } from '../../common';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faForward,
@@ -101,26 +100,11 @@ export const GameImages = () => {
             repeat: Infinity,
           }}
         >
-          <img src={image.preview} />
+          <Image item={image} size={ImageSize.preview} playable={false} />
         </motion.div>
       </StyledBackgroundImage>
       <StyledForegroundImage>
-        {(() => {
-          switch (image.type) {
-            case ImageType.image:
-              return <img src={image.preview} alt={`Image ${currentImage}`} />;
-            case ImageType.video:
-              return (
-                <video
-                  src={image.preview}
-                  autoPlay
-                  loop
-                  muted // TODO: should be a setting
-                  playsInline
-                />
-              );
-          }
-        })()}
+        <Image item={image} size={ImageSize.full} />
       </StyledForegroundImage>
       <StyledImageActions>
         <IconButton
