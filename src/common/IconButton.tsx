@@ -16,6 +16,8 @@ export const StyledIconButton = styled.button`
   height: 32px;
   width: 32px;
 
+  transition: background 0.2s;
+
   &:hover {
     background: var(--focus-color);
   }
