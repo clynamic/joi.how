@@ -7,6 +7,7 @@ import { version } from '../../../package.json';
 const StyledVersionDisplay = styled(ContentSection)`
   display: flex;
   justify-content: space-between;
+  align-items: center;
 `;
 
 export const VersionDisplay = () => {
