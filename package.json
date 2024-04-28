@@ -24,7 +24,8 @@
     "react-sparklines": "^1.7.0",
     "scheduler": "^0.23.0",
     "styled-components": "^6.1.8",
-    "use-context-selector": "^1.4.4"
+    "use-context-selector": "^1.4.4",
+    "wasgen": "^0.18.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
