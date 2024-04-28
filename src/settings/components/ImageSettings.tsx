@@ -4,7 +4,7 @@ import {
   SettingsTile,
   Space,
 } from '../../common';
-import { useImages } from '../../images';
+import { useImages } from '../../settings';
 
 export const ImageSettings = () => {
   const [images] = useImages();

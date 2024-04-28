@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useImages } from '../../images';
+import { useImages } from '../../settings';
 import { useGameValue } from '../GameProvider';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo } from 'react';
