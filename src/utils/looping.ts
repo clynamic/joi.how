@@ -11,10 +11,10 @@ export type LoopingOptions = [
    */
   delay: number | (() => number),
   /**
-   * Whether the loop is paused.
+   * Whether the loop is enabled or not.
    * This applies immediately and will stop the current loop.
    */
-  pause?: boolean,
+  enabled?: boolean,
 ];
 
 const getDelay = (delay: number | (() => number)) => {
@@ -29,21 +29,25 @@ export const useLooping = (...options: LoopingOptions) => {
     optionsRef.current = options;
   }, [options]);
 
-  const [, , paused] = options;
+  const [, , enabled = true] = options;
 
   useEffect(() => {
-    if (paused) return;
+    if (!enabled) return;
 
     const loop = async () => {
-      const [callback, delay, paused] = optionsRef.current;
-      if (paused) return;
+      const [callback, delay, enabled = true] = optionsRef.current;
+      if (!enabled) return;
 
       await callback();
       const nextDelay = getDelay(delay);
+      if (nextDelay <= 0) return;
       setTimer(setTimeout(loop, nextDelay));
     };
 
-    setTimer(setTimeout(loop, getDelay(optionsRef.current[1])));
+    const delay = getDelay(optionsRef.current[1]);
+    if (delay <= 0) return;
+
+    setTimer(setTimeout(loop, delay));
 
     return () => {
       setTimer(timer => {
@@ -51,5 +55,5 @@ export const useLooping = (...options: LoopingOptions) => {
         return null;
       });
     };
-  }, [paused]);
+  }, [enabled]);
 };
