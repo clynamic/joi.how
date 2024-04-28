@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useImages } from '../../images';
 import { useGameValue } from '../GameProvider';
 import { motion } from 'framer-motion';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { IconButton, Image, ImageSize, VerticalDivider } from '../../common';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -89,6 +89,8 @@ export const GameImages = () => {
 
   useLooping(switchImage, switchDuration);
 
+  useEffect(() => switchImage(), [switchImage]);
+
   const skipImage = useCallback(() => {
     // TODO: also remove from list
     // TODO: also reset timer?
@@ -119,7 +121,7 @@ export const GameImages = () => {
         <IconButton onClick={skipImage}>
           <FontAwesomeIcon icon={faForward} />
         </IconButton>
-        <VerticalDivider />
+        <VerticalDivider color='rgba(255, 255, 255, 0.3)' />
         <IconButton onClick={openSource}>
           <FontAwesomeIcon icon={faUpRightFromSquare} />
         </IconButton>

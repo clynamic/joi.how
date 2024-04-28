@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Sparklines, SparklinesLine } from 'react-sparklines';
-import { intensityToPaceBounds } from '../../utils';
+import { intensityToPace } from '../../utils';
 import {
   Measure,
   Divider,
@@ -19,13 +19,7 @@ export const PaceSettings = () => {
   const sparklines = useMemo(() => {
     return Array.from(new Array(20))
       .map((_, index, array) => (index / array.length) * 100)
-      .map(intensity =>
-        intensityToPaceBounds(intensity, steepness, {
-          min: 0,
-          max: 10,
-        })
-      )
-      .map(range => range.max - 1.5);
+      .map(intensity => intensityToPace(intensity, steepness));
   }, [steepness]);
 
   return (

@@ -7,6 +7,13 @@ export enum Paws {
   none = 'none',
 }
 
+export const PawLabels: Record<Paws, string> = {
+  [Paws.left]: 'Left',
+  [Paws.right]: 'Right',
+  [Paws.both]: 'Both',
+  [Paws.none]: 'Off',
+};
+
 export enum Stroke {
   up = 'up',
   down = 'down',
