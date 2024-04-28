@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Stroke, useGameValue } from '../GameProvider';
+import { GamePhase, Stroke, useGameValue } from '../GameProvider';
 import { useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLooping } from '../../utils';
@@ -45,32 +45,34 @@ export const GameMeter = () => {
   useLooping(
     updateStroke,
     switchDuration,
-    ['active', 'climax'].includes(phase) && pace > 0
+    [GamePhase.active, GamePhase.climax].includes(phase) && pace > 0
   );
 
   const size = useMemo(() => {
     switch (phase) {
-      case 'warmup':
-        return 0; // no meter during warmup
-      case 'active':
-        switch (stroke) {
-          case 'up':
-            return 1;
-          case 'down':
-            return 0.6;
-        }
+      case GamePhase.pause:
+      case GamePhase.warmup: // no meter during warmup
         return 0;
-      case 'climax':
+      case GamePhase.active:
+        return (() => {
+          switch (stroke) {
+            case Stroke.up:
+              return 1;
+            case Stroke.down:
+              return 0.6;
+          }
+        })();
+      case GamePhase.climax:
         return 0.2;
     }
-    return 0;
   }, [phase, stroke]);
 
   const duration = useMemo(() => {
     switch (phase) {
-      case 'warmup':
+      case GamePhase.pause:
+      case GamePhase.warmup:
         return 0;
-      case 'active':
+      case GamePhase.active:
         if (pace >= 5) {
           return 100;
         }
@@ -78,14 +80,13 @@ export const GameMeter = () => {
           return 250;
         }
         return 550;
-      case 'climax':
+      case GamePhase.climax:
         return 0;
     }
-    return 0;
   }, [phase, pace]);
 
   const color = useMemo(() => {
-    if (phase === 'climax') {
+    if (phase === GamePhase.climax) {
       return MeterColor.red;
     }
     switch (stroke) {
@@ -109,8 +110,7 @@ export const GameMeter = () => {
           }[color],
         }}
         transition={{
-          duration:
-            (switchDuration < duration ? switchDuration : duration) * 0.001,
+          duration: Math.min(switchDuration, duration) * 0.001,
           ease: [0.23, 1, 0.32, 1],
         }}
       />

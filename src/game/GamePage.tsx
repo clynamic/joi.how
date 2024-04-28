@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { GameHypno, GameImages, GameMeter } from './components';
+import { GameHypno, GameImages, GameMeter, GameIntensity } from './components';
 import { GameProvider } from './GameProvider';
 
 const StyledGamePage = styled.div`
@@ -17,6 +17,7 @@ export const GamePage = () => {
   return (
     <StyledGamePage>
       <GameProvider>
+        <GameIntensity />
         <GameImages />
         <GameMeter />
         <GameHypno />
