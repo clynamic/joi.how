@@ -1563,6 +1563,11 @@ p-locate@^5.0.0:
   dependencies:
     p-limit "^3.0.2"
 
+param-enveloper@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/param-enveloper/-/param-enveloper-0.3.0.tgz#cf8456ca2a91aeb4fa991132e51ec17d861707d4"
+  integrity sha512-m6bijy1QhP5xctlcD4BVM+QCKeu3LaHdnP5fYj56J91s28jtF2Y7c+YExVBFxAyb/LO0sfCK95Ugt69E0ea/5w==
+
 parent-module@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/parent-module/-/parent-module-1.0.1.tgz#691d2709e78c79fae3a156622452d00762caaaa2"
@@ -1924,6 +1929,13 @@ vite@^5.2.0:
     rollup "^4.13.0"
   optionalDependencies:
     fsevents "~2.3.3"
+
+wasgen@^0.18.4:
+  version "0.18.4"
+  resolved "https://registry.yarnpkg.com/wasgen/-/wasgen-0.18.4.tgz#a3b989b8dcf20fd10c404ae284494e73645bab38"
+  integrity sha512-vWY5PgKWVK1an4xY5QOyp9B/OFfvm2EfkoDgIFNOrNMxEcNW3YrwtOZ0Sp1LM/CrvIh+4KKibHFjH0PhdUO6YQ==
+  dependencies:
+    param-enveloper "^0.3.0"
 
 which@^2.0.1:
   version "2.0.2"
