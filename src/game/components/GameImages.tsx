@@ -36,7 +36,7 @@ const StyledForegroundImage = styled.div`
   }
 `;
 
-const StyledBackgroundImage = styled.div`
+const StyledBackgroundImage = motion(styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -52,19 +52,13 @@ const StyledBackgroundImage = styled.div`
 
   filter: blur(30px);
 
-  & > div {
+  & > img {
     width: 100%;
     height: 100%;
-
+    object-fit: cover;
     transform-origin: center;
-
-    & > img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
   }
-`;
+`);
 
 const StyledImageActions = styled.div`
   position: absolute;
@@ -107,18 +101,16 @@ export const GameImages = () => {
 
   return (
     <StyledGameImages>
-      <StyledBackgroundImage>
-        <motion.div
-          animate={{
-            scale: [1.2, 1.4, 1.2],
-          }}
-          transition={{
-            duration: switchDuration * 0.001,
-            repeat: Infinity,
-          }}
-        >
-          <Image item={image} size={ImageSize.preview} playable={false} />
-        </motion.div>
+      <StyledBackgroundImage
+        animate={{
+          scale: [1.2, 1.4, 1.2],
+        }}
+        transition={{
+          duration: switchDuration * 0.001,
+          repeat: Infinity,
+        }}
+      >
+        <Image item={image} size={ImageSize.preview} playable={false} />
       </StyledBackgroundImage>
       <StyledForegroundImage>
         <Image item={image} size={ImageSize.full} />
