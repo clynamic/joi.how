@@ -2,13 +2,14 @@ import styled from 'styled-components';
 import { useImages } from '../../images';
 import { useGameValue } from '../GameProvider';
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { IconButton, Image, ImageSize, VerticalDivider } from '../../common';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faForward,
   faUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons';
+import { useLooping } from '../../utils';
 
 const StyledGameImages = styled.div`
   position: absolute;
@@ -79,14 +80,30 @@ const StyledImageActions = styled.div`
 
 export const GameImages = () => {
   const [images] = useImages();
-  const [currentImage] = useGameValue('currentImage');
+  const [currentImage, setCurrentImage] = useGameValue('currentImage');
   const [intensity] = useGameValue('intensity');
 
-  const pulseDuration = useMemo(() => {
-    return Math.max((100 - intensity) * 80, 800) / 1000;
+  const image = useMemo(() => images[currentImage], [images, currentImage]);
+
+  const switchDuration = useMemo(() => {
+    return Math.max((100 - intensity) * 80, 400);
   }, [intensity]);
 
-  const image = useMemo(() => images[currentImage], [images, currentImage]);
+  const switchImage = useCallback(() => {
+    setCurrentImage(Math.floor(Math.random() * images.length));
+  }, [images.length, setCurrentImage]);
+
+  useLooping(switchImage, switchDuration);
+
+  const skipImage = useCallback(() => {
+    // TODO: also remove from list
+    // TODO: also reset timer?
+    setCurrentImage(Math.floor(Math.random() * images.length));
+  }, [images.length, setCurrentImage]);
+
+  const openSource = useCallback(() => {
+    window.open(image.source, '_blank');
+  }, [image.source]);
 
   return (
     <StyledGameImages>
@@ -96,7 +113,7 @@ export const GameImages = () => {
             scale: [1.2, 1.4, 1.2],
           }}
           transition={{
-            duration: pulseDuration,
+            duration: switchDuration * 0.001,
             repeat: Infinity,
           }}
         >
@@ -107,15 +124,11 @@ export const GameImages = () => {
         <Image item={image} size={ImageSize.full} />
       </StyledForegroundImage>
       <StyledImageActions>
-        <IconButton
-          onClick={() => {
-            // TODO: implement skip
-          }}
-        >
+        <IconButton onClick={skipImage}>
           <FontAwesomeIcon icon={faForward} />
         </IconButton>
         <VerticalDivider />
-        <IconButton onClick={() => window.open(image.source, '_blank')}>
+        <IconButton onClick={openSource}>
           <FontAwesomeIcon icon={faUpRightFromSquare} />
         </IconButton>
       </StyledImageActions>
