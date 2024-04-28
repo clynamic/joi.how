@@ -9,7 +9,7 @@ export const GameIntensity = () => {
 
   useLooping(
     () => {
-      setIntensity(value => Math.min(value++, 100));
+      setIntensity(prev => Math.min(prev + 1, 100));
     },
     duration,
     phase === GamePhase.active

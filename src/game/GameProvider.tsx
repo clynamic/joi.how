@@ -33,6 +33,7 @@ export interface GameState {
   paws: Paws;
   stroke: Stroke;
   phase: GamePhase;
+  edged: boolean;
 }
 
 export const initialGameState: GameState = {
@@ -42,6 +43,7 @@ export const initialGameState: GameState = {
   paws: Paws.none,
   stroke: Stroke.down,
   phase: GamePhase.active,
+  edged: false,
 };
 
 export const {
