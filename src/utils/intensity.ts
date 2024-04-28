@@ -1,30 +1,24 @@
-import { NumberRange } from './range';
-
 /**
+ * hyperbolic tangent function
+ * f(i) = tanh(s * (i - i_max / 2) - i_min / 2) + 1
+ *
  * Special thanks to @Fauxil for making this intensity mapper function!
  * https://www.desmos.com/calculator/gvwk2rmuix
  */
-export function intensityToPaceBounds(
+export const intensityToPace = (
   intensity: number,
-  steepness: number,
-  paceBounds: NumberRange
-): NumberRange {
-  const maxIntensity = 100;
+  steepness: number
+): number => {
   const minIntensity = 0;
-  const offset = minIntensity / 2;
-  const mid = Math.max(
-    paceBounds.min,
-    Math.min(
-      paceBounds.max,
-      paceBounds.min +
-        0.5 *
-          (paceBounds.max - paceBounds.min) *
-          (Math.tanh(steepness * (intensity - maxIntensity / 2) - offset) + 1)
-    )
-  );
+  const maxIntensity = 100;
 
-  return {
-    max: Math.min(mid + 1.5, paceBounds.max),
-    min: Math.max(mid - 1.5, paceBounds.min),
-  };
-}
+  const minPace = 0.25;
+  const maxPace = 10;
+
+  const bottom = minIntensity * 0.5;
+  const mid = intensity - maxIntensity * 0.5;
+
+  const curve = Math.tanh(steepness * mid - bottom);
+
+  return (curve + 1) * 0.5 * (maxPace - minPace) + minPace;
+};

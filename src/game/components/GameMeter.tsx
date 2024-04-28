@@ -28,6 +28,7 @@ export const GameMeter = () => {
   const [pace] = useGameValue('pace');
 
   const switchDuration = useMemo(() => {
+    if (pace === 0) return 0;
     return (1 / Math.max(1, pace)) * 1000;
   }, [pace]);
 
