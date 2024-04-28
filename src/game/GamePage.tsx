@@ -7,6 +7,7 @@ import {
   GameSound,
   GameInstructions,
   GamePace,
+  GameEvents,
 } from './components';
 import { GameProvider } from './GameProvider';
 
@@ -28,6 +29,7 @@ export const GamePage = () => {
         <GameIntensity />
         <GamePace />
         <GameSound />
+        <GameEvents />
         <GameImages />
         <GameInstructions />
         <GameMeter />

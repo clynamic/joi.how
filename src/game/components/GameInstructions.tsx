@@ -31,8 +31,10 @@ const StyledPaceIcons = styled.div`
   justify-items: center;
 `;
 
-const StyledActiveIcon = styled.div<{ active?: boolean }>`
-  color: ${({ active }) => (active ? '#fff' : 'rgba(255, 255, 255, 0.3)')};
+const StyledActiveIcon = styled.div<{ $active?: boolean }>`
+  color: ${({ $active: active }) =>
+    active ? '#fff' : 'rgba(255, 255, 255, 0.3)'};
+  transition: color 0.2s;
   font-size: 2rem;
   padding: 0 4px;
 `;
@@ -66,15 +68,15 @@ export const GameInstructions = () => {
   return (
     <StyledGameInstructions>
       <StyledPaceIcons>
-        <StyledActiveIcon active={pace <= paceSection}>
+        <StyledActiveIcon $active={pace <= paceSection}>
           <FontAwesomeIcon icon={faPerson} />
         </StyledActiveIcon>
         <StyledActiveIcon
-          active={pace > paceSection && pace <= paceSection * 2}
+          $active={pace > paceSection && pace <= paceSection * 2}
         >
           <FontAwesomeIcon icon={faPersonWalking} />
         </StyledActiveIcon>
-        <StyledActiveIcon active={pace > paceSection * 2}>
+        <StyledActiveIcon $active={pace > paceSection * 2}>
           <FontAwesomeIcon icon={faPersonRunning} />
         </StyledActiveIcon>
         <StyledInfoText>
@@ -88,13 +90,13 @@ export const GameInstructions = () => {
             style={{ alignSelf: 'center' }}
           />
           <StyledGripIcons>
-            <StyledActiveIcon active={paws === 'left' || paws === 'both'}>
+            <StyledActiveIcon $active={paws === 'left' || paws === 'both'}>
               <FontAwesomeIcon
                 style={{ transform: 'scaleX(-1)' }}
                 icon={faHand}
               />
             </StyledActiveIcon>
-            <StyledActiveIcon active={paws === 'right' || paws === 'both'}>
+            <StyledActiveIcon $active={paws === 'right' || paws === 'both'}>
               <FontAwesomeIcon icon={faHand} />
             </StyledActiveIcon>
             <StyledInfoText>

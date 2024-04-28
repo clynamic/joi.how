@@ -1,3 +1,4 @@
+export * from './GameEvents';
 export * from './GameHypno';
 export * from './GameImages';
 export * from './GameInstructions';
