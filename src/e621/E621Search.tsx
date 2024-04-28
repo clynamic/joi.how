@@ -13,7 +13,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import { useImages } from '../images';
+import { useImages } from '../settings';
 import {
   E621SortOrder,
   e621SortOrderLabels,

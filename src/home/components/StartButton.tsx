@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { ContentSection } from '../../common';
-import { useImages } from '../../images';
+import { useImages } from '../../settings';
 import { useNavigate } from 'react-router-dom';
 
 const StyledStartSection = styled(ContentSection)`

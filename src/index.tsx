@@ -2,8 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './app/App.tsx';
 import './index.css';
-import { SettingsProvider } from './settings';
-import { ImageProvider } from './images/ImageProvider.tsx';
+import { SettingsProvider, ImageProvider } from './settings';
 import { E621Provider } from './e621/E621Provider.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
