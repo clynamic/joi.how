@@ -65,7 +65,7 @@ export function createStateProvider<T>({
    */
   function useProviderSelector<K extends keyof T>(
     key: K
-  ): [T[K], (value: T[K]) => void] {
+  ): [T[K], React.Dispatch<React.SetStateAction<T[K]>>] {
     const selected = useContextSelector(StateContext, context => {
       if (!context) {
         throw new Error('useProvider must be used within its Provider');
@@ -82,8 +82,13 @@ export function createStateProvider<T>({
     });
 
     const setSelected = useCallback(
-      (value: T[K]) => {
-        setData(prev => ({ ...prev, [key]: value }));
+      (value: React.SetStateAction<T[K]>) => {
+        setData(data => {
+          return {
+            ...data,
+            [key]: value instanceof Function ? value(data[key]) : value,
+          };
+        });
       },
       [setData, key]
     );
