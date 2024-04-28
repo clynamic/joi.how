@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Sparklines, SparklinesLine } from 'react-sparklines';
-import { intensityToPace } from '../../utils';
+import { intensityToPace, settingsMaxPace, settingsMinPace } from '../../utils';
 import {
   Measure,
   Divider,
@@ -29,8 +29,8 @@ export const PaceSettings = () => {
       </SettingsDescription>
       <SettingsLabel>Minimum</SettingsLabel>
       <Slider
-        min={0.25}
-        max={10}
+        min={settingsMinPace}
+        max={settingsMaxPace}
         step={0.05}
         value={minPace}
         onChange={setMinPace}
@@ -38,8 +38,8 @@ export const PaceSettings = () => {
       <Measure value={minPace} chars={4} unit='b/s' />
       <SettingsLabel>Maximum</SettingsLabel>
       <Slider
-        min={0.25}
-        max={10}
+        min={settingsMinPace}
+        max={settingsMaxPace}
         step={0.05}
         value={maxPace}
         onChange={setMaxPace}
