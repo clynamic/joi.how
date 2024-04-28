@@ -16,6 +16,7 @@ export enum GamePhase {
   warmup = 'warmup',
   active = 'active',
   climax = 'climax',
+  pause = 'pause',
 }
 
 export interface GameState {

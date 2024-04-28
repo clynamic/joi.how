@@ -1,8 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 
 export type LoopingOptions = [
+  /**
+   * The callback to run on each loop.
+   */
   callback: () => void | Promise<void>,
+  /**
+   * The delay in milliseconds or a function that returns the delay in milliseconds.
+   * Is re-evaluated on each loop. Does not effect the current loop.
+   */
   delay: number | (() => number),
+  /**
+   * Whether the loop is paused.
+   * This applies immediately and will stop the current loop.
+   */
   pause?: boolean,
 ];
 
