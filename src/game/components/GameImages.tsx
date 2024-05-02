@@ -68,7 +68,7 @@ const StyledImageActions = styled.div`
   display: flex;
 
   padding: 8px;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay-color);
   border-radius: var(--border-radius) 0 0 0;
 `;
 

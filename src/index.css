@@ -10,6 +10,8 @@
   --hover-transition: background 0.2s ease-in-out;
 
   --primary: #92678d;
+
+  --overlay-color: rgba(0, 0, 0, 0.5);
 }
 
 * {

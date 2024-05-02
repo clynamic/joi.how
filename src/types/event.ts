@@ -1,3 +1,5 @@
+import { PlayerBody } from './body';
+
 export enum GameEvent {
   climax = 'climax',
   edge = 'edge',
@@ -32,4 +34,10 @@ export const GameEventDescriptions: Record<GameEvent, string> = {
   randomPace: 'Randomly select a new pace to jack off at.',
   randomGrip: 'Randomly select a new way for you to grip your cock.', // TODO: use neutral language
   cleanUp: "Clean up any mess you've made along the way.",
+};
+
+export const CleanUpDescriptions: Record<PlayerBody, string> = {
+  penis: "pre you've leaked",
+  vagina: "juices you've made",
+  neuter: "mess you've made",
 };
