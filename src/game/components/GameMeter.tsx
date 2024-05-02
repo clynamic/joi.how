@@ -46,7 +46,7 @@ export const GameMeter = () => {
   useLooping(
     updateStroke,
     switchDuration,
-    [GamePhase.active, GamePhase.climax].includes(phase) && pace > 0
+    [GamePhase.active, GamePhase.finale].includes(phase) && pace > 0
   );
 
   const size = useMemo(() => {
@@ -55,6 +55,7 @@ export const GameMeter = () => {
       case GamePhase.warmup: // no meter during warmup
         return 0;
       case GamePhase.active:
+      case GamePhase.finale:
         return (() => {
           switch (stroke) {
             case Stroke.up:
@@ -74,6 +75,7 @@ export const GameMeter = () => {
       case GamePhase.warmup:
         return 0;
       case GamePhase.active:
+      case GamePhase.finale:
         if (pace >= 5) {
           return 100;
         }
@@ -113,6 +115,7 @@ export const GameMeter = () => {
         transition={{
           duration: Math.min(switchDuration, duration) * 0.001,
           ease: [0.23, 1, 0.32, 1],
+          type: 'spring',
         }}
       />
     </StyledGameMeter>
