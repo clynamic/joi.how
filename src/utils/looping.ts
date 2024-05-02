@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useAutoRef } from './refs';
 
 export type LoopingOptions = [
   /**
@@ -23,22 +24,21 @@ const getDelay = (delay: number | (() => number)) => {
 
 export const useLooping = (...options: LoopingOptions) => {
   const [, setTimer] = useState<number | null>(null);
-  const optionsRef = useRef(options);
-
-  useEffect(() => {
-    optionsRef.current = options;
-  }, [options]);
+  const optionsRef = useAutoRef(options);
+  const effectId = useRef(0);
 
   const [, , enabled = true] = options;
 
   useEffect(() => {
     if (!enabled) return;
+    const currentId = (effectId.current += 1);
 
     const loop = async () => {
       const [callback, delay, enabled = true] = optionsRef.current;
       if (!enabled) return;
-
+      if (currentId !== effectId.current) return;
       await callback();
+      if (currentId !== effectId.current) return;
       const nextDelay = getDelay(delay);
       if (nextDelay <= 0) return;
       setTimer(setTimeout(loop, nextDelay));
@@ -50,10 +50,11 @@ export const useLooping = (...options: LoopingOptions) => {
     setTimer(setTimeout(loop, delay));
 
     return () => {
+      effectId.current += 1;
       setTimer(timer => {
         if (timer) clearInterval(timer);
         return null;
       });
     };
-  }, [enabled]);
+  }, [enabled, optionsRef]);
 };

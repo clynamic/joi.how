@@ -4,6 +4,7 @@ export const VerticalDivider = styled.div<{
   color?: CSSProperties['backgroundColor'];
 }>`
   height: 100%;
+  margin: auto 10px;
 
   &::after {
     display: block;
@@ -13,6 +14,5 @@ export const VerticalDivider = styled.div<{
 
     width: 1px;
     height: 25px;
-    margin: auto 10px;
   }
 `;

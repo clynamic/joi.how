@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Sparklines, SparklinesLine } from 'react-sparklines';
-import { intensityToPace, settingsMaxPace, settingsMinPace } from '../../utils';
+import { intensityToPace } from '../../utils';
 import {
   Measure,
   Divider,
@@ -11,6 +11,9 @@ import {
 } from '../../common';
 import { useSetting } from '../SettingsProvider';
 
+const settingsMinPace = 0.25;
+const settingsMaxPace = 10;
+
 export const PaceSettings = () => {
   const [minPace, setMinPace] = useSetting('minPace');
   const [maxPace, setMaxPace] = useSetting('maxPace');
@@ -19,7 +22,12 @@ export const PaceSettings = () => {
   const sparklines = useMemo(() => {
     return Array.from(new Array(20))
       .map((_, index, array) => (index / array.length) * 100)
-      .map(intensity => intensityToPace(intensity, steepness));
+      .map(intensity =>
+        intensityToPace(intensity, steepness, {
+          min: settingsMinPace,
+          max: settingsMaxPace,
+        })
+      );
   }, [steepness]);
 
   return (
@@ -61,8 +69,8 @@ export const PaceSettings = () => {
         data={sparklines}
         svgWidth={50}
         svgHeight={20}
-        max={11}
-        min={-1}
+        max={settingsMaxPace + 1}
+        min={settingsMinPace - 1}
       >
         <SparklinesLine style={{ strokeWidth: 4 }} />
       </Sparklines>

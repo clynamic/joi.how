@@ -21,7 +21,7 @@ const StyledGameInstructions = styled.div`
 
   padding: 8px;
 
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--overlay-color);
   border-bottom-right-radius: var(--border-radius);
 `;
 

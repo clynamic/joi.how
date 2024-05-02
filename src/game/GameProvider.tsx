@@ -20,10 +20,24 @@ export enum Stroke {
 }
 
 export enum GamePhase {
+  pause = 'pause',
   warmup = 'warmup',
   active = 'active',
+  finale = 'finale',
   climax = 'climax',
-  pause = 'pause',
+}
+
+export interface GameMessagePrompt {
+  title: string;
+  onClick: () => void | Promise<void>;
+}
+
+export interface GameMessage {
+  id: string;
+  title: string;
+  description?: string;
+  prompts?: GameMessagePrompt[];
+  duration?: number;
 }
 
 export interface GameState {
@@ -34,6 +48,7 @@ export interface GameState {
   stroke: Stroke;
   phase: GamePhase;
   edged: boolean;
+  messages: GameMessage[];
 }
 
 export const initialGameState: GameState = {
@@ -44,6 +59,7 @@ export const initialGameState: GameState = {
   stroke: Stroke.down,
   phase: GamePhase.active,
   edged: false,
+  messages: [],
 };
 
 export const {
