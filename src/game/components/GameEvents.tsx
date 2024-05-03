@@ -427,6 +427,7 @@ export const useHandleGameEvent: () => (
           sendMessage({
             id: GameEvent.cleanUp,
             title: `Lick up any ${CleanUpDescriptions[body]}`,
+            duration: undefined,
             prompts: [
               {
                 title: `I'm done, master`, // TODO: variables

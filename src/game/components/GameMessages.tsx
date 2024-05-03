@@ -88,7 +88,7 @@ export const GameMessages = () => {
       (acc, message) => {
         if (message.duration) {
           acc[message.id] = window.setTimeout(
-            () => setMessages(messages => messages.filter(m => m !== message)),
+            () => onRemoveMessage(message),
             message.duration
           );
         }
