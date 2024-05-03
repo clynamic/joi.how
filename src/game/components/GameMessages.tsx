@@ -65,20 +65,6 @@ export const GameMessages = () => {
     setCurrentMessages(messages);
   }, [currentMessages, messages]);
 
-  const onRemoveMessage = useCallback(
-    (message: GameMessage) => {
-      setMessages(messages => messages.filter(m => m !== message));
-      setTimers(timers => {
-        if (!timers[message.id]) return timers;
-        window.clearTimeout(timers[message.id]);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { [message.id]: _, ...newTimers } = timers;
-        return newTimers;
-      });
-    },
-    [setMessages]
-  );
-
   useEffect(() => {
     const addedMessages = currentMessages.filter(
       message => !previousMessages.includes(message)
@@ -88,7 +74,7 @@ export const GameMessages = () => {
       (acc, message) => {
         if (message.duration) {
           acc[message.id] = window.setTimeout(
-            () => onRemoveMessage(message),
+            () => setMessages(messages => messages.filter(m => m !== message)),
             message.duration
           );
         }
@@ -104,17 +90,26 @@ export const GameMessages = () => {
     const removedMessages = previousMessages.filter(
       message => !currentMessages.includes(message)
     );
-    removedMessages.forEach(onRemoveMessage);
+    const removedTimers = removedMessages.map(message => message.id);
 
-    setTimers(timers => ({ ...timers, ...newTimers }));
-  }, [currentMessages, onRemoveMessage, previousMessages, setMessages]);
+    setTimers(timers => ({
+      ...Object.keys(timers).reduce((acc, key) => {
+        if (removedTimers.includes(key)) {
+          window.clearTimeout(timers[key]);
+          return acc;
+        }
+        return { ...acc, [key]: timers[key] };
+      }, {}),
+      ...newTimers,
+    }));
+  }, [currentMessages, previousMessages, setMessages]);
 
   const onMessageClick = useCallback(
     async (message: GameMessage, prompt: GameMessagePrompt) => {
       await prompt.onClick();
-      onRemoveMessage(message);
+      setMessages(messages => messages.filter(m => m !== message));
     },
-    [onRemoveMessage]
+    [setMessages]
   );
 
   return (
