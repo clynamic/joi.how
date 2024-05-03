@@ -1,4 +1,5 @@
-import { createStateProvider } from '../utils';
+import { Dispatch, SetStateAction } from 'react';
+import { createPropertySetter, createStateProvider } from '../utils';
 
 export enum Paws {
   left = 'left',
@@ -69,3 +70,21 @@ export const {
 } = createStateProvider<GameState>({
   defaultData: initialGameState,
 });
+
+export const createSendMessage = (
+  setGame: Dispatch<SetStateAction<GameState>>
+) => {
+  const setMessages = createPropertySetter(setGame, 'messages');
+  return (message: Partial<GameMessage> & { id: string }) => {
+    setMessages(messages => {
+      const previous = messages.find(m => m.id === message.id);
+      return [
+        ...messages.filter(m => m.id !== message.id),
+        {
+          ...previous,
+          ...message,
+        } as GameMessage,
+      ];
+    });
+  };
+};
