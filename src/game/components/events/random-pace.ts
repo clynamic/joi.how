@@ -1,12 +1,12 @@
 import { GameEvent } from '../../../types';
 import { intensityToPaceRange, round, wait } from '../../../utils';
-import { EventData } from '../GameEvents';
+import { EventDataRef } from '../GameEvents';
 
-export const randomPaceEvent = async (data: EventData) => {
+export const randomPaceEvent = async (data: EventDataRef) => {
   const {
     game: { intensity, setPace, sendMessage },
     settings: { minPace, maxPace, steepness },
-  } = data;
+  } = data.current;
 
   const { min, max } = intensityToPaceRange(intensity, steepness, {
     min: minPace,

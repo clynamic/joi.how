@@ -1,12 +1,12 @@
 import { GameEvent } from '../../../types';
 import { wait } from '../../../utils';
 import { GamePhase } from '../../GameProvider';
-import { EventData } from '../GameEvents';
+import { EventDataRef } from '../GameEvents';
 
-export const pauseEvent = async (data: EventData) => {
+export const pauseEvent = async (data: EventDataRef) => {
   const {
     game: { intensity, setPhase, sendMessage },
-  } = data;
+  } = data.current;
 
   sendMessage({
     id: GameEvent.pause,
