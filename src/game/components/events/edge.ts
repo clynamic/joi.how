@@ -1,12 +1,12 @@
 import { GameEvent } from '../../../types';
 import { wait } from '../../../utils';
-import { EventData } from '../GameEvents';
+import { EventDataRef } from '../GameEvents';
 
-export const edgeEvent = async (data: EventData) => {
+export const edgeEvent = async (data: EventDataRef) => {
   const {
     game: { setEdged, setPace, sendMessage },
     settings: { minPace },
-  } = data;
+  } = data.current;
 
   setEdged(true);
   setPace(minPace);

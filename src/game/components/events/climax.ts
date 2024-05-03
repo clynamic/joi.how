@@ -1,13 +1,13 @@
 import { GameEvent } from '../../../types';
 import { wait } from '../../../utils';
 import { GamePhase } from '../../GameProvider';
-import { EventData } from '../GameEvents';
+import { EventDataRef } from '../GameEvents';
 
-export const climaxEvent = (data: EventData) => {
+export const climaxEvent = (data: EventDataRef) => {
   const {
     game: { setPhase, sendMessage, setPace, setIntensity },
     settings: { minPace, climaxChance, ruinChance },
-  } = data;
+  } = data.current;
 
   setPhase(GamePhase.finale); // this disables events
   sendMessage({

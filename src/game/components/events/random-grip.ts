@@ -1,12 +1,12 @@
 import { GameEvent } from '../../../types';
 import { wait } from '../../../utils';
 import { Paws, PawLabels } from '../../GameProvider';
-import { EventData } from '../GameEvents';
+import { EventDataRef } from '../GameEvents';
 
-export const randomGripEvent = async (data: EventData) => {
+export const randomGripEvent = async (data: EventDataRef) => {
   const {
     game: { paws, setPaws, sendMessage },
-  } = data;
+  } = data.current;
 
   let newPaws: Paws;
   const seed = Math.random();
