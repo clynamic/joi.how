@@ -1,11 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useEffect } from 'react';
+import { MutableRefObject, useEffect } from 'react';
 import { GameEvent } from '../../types';
 import {
   createSendMessage,
   GamePhase,
   GameState,
-  Paws,
   useGame,
   useGameValue,
 } from '../GameProvider';
@@ -35,7 +34,9 @@ export interface EventData {
   settings: StateWithSetters<Settings>;
 }
 
-export const rollEventDice = (data: React.MutableRefObject<EventData>) => {
+export type EventDataRef = MutableRefObject<EventData>;
+
+export const rollEventDice = (data: EventDataRef) => {
   const {
     game: { intensity, phase, edged },
     settings: { events },
@@ -94,35 +95,36 @@ export const rollEventDice = (data: React.MutableRefObject<EventData>) => {
   return null;
 };
 
-export const handleEvent = async (
-  event: GameEvent,
-  data: React.MutableRefObject<EventData>
-) => {
-  // you might notice how we pass current, and not the ref itself.
-  // this is for simplicity. it could cause a problem, when
-  // an event uses the wait function, and later sets state based on
-  // outdated data. in some events, such as doublePace, this is
-  // an issue, but its minor, and I am leaving it as is for now.
-  switch (event) {
-    case GameEvent.climax:
-      return climaxEvent(data.current);
-    case GameEvent.edge:
-      return edgeEvent(data.current);
-    case GameEvent.pause:
-      return pauseEvent(data.current);
-    case GameEvent.halfPace:
-      return halfPaceEvent(data.current);
-    case GameEvent.risingPace:
-      return risingPaceEvent(data.current);
-    case GameEvent.doublePace:
-      return doublePaceEvent(data.current);
-    case GameEvent.randomPace:
-      return randomPaceEvent(data.current);
-    case GameEvent.randomGrip:
-      return randomGripEvent(data.current);
-    case GameEvent.cleanUp:
-      return cleanUpEvent(data.current);
-  }
+type EventHandler = (data: EventDataRef) => void | Promise<void>;
+
+const handlers: Record<GameEvent, EventHandler> = {
+  climax: climaxEvent,
+  edge: edgeEvent,
+  pause: pauseEvent,
+  halfPace: halfPaceEvent,
+  risingPace: risingPaceEvent,
+  doublePace: doublePaceEvent,
+  randomPace: randomPaceEvent,
+  randomGrip: randomGripEvent,
+  cleanUp: cleanUpEvent,
+};
+
+export const handleEvent = async (event: GameEvent, data: EventDataRef) => {
+  await handlers[event](data);
+};
+
+export const silenceEventData = (data: EventDataRef): EventDataRef => {
+  return {
+    get current() {
+      return {
+        ...data.current,
+        game: {
+          ...data.current.game,
+          sendMessage: () => {},
+        },
+      };
+    },
+  };
 };
 
 export const GameEvents = () => {
@@ -140,12 +142,9 @@ export const GameEvents = () => {
 
   useEffect(() => {
     if (phase === GamePhase.active && events.includes(GameEvent.randomGrip)) {
-      setPaws(prev => {
-        if (prev !== Paws.none) return prev;
-        return [Paws.left, Paws.right].sort(() => Math.random() - 0.5)[0];
-      });
+      randomGripEvent(silenceEventData(data));
     }
-  }, [events, phase, setPaws]);
+  }, [data, events, phase, setPaws]);
 
   useLooping(
     async () => {

@@ -1,19 +1,19 @@
 import { GameEvent } from '../../../types';
-import { round, wait, intensityToPaceRange } from '../../../utils';
-import { EventData } from '../GameEvents';
+import { round, wait } from '../../../utils';
+import { EventDataRef, silenceEventData } from '../GameEvents';
+import { randomPaceEvent } from './random-pace';
 
-export const doublePaceEvent = async (data: EventData) => {
+export const doublePaceEvent = async (data: EventDataRef) => {
   const {
-    game: { intensity, pace, setPace, sendMessage },
-    settings: { minPace, maxPace, steepness },
-  } = data;
-
+    game: { pace, setPace, sendMessage },
+    settings: { maxPace },
+  } = data.current;
+  const newPace = Math.min(round(pace * 2), maxPace);
+  setPace(newPace);
   sendMessage({
     id: GameEvent.doublePace,
     title: 'Double pace!',
   });
-  const newPace = Math.min(round(pace * 2), maxPace);
-  setPace(newPace);
   const duration = 9000;
   const durationPortion = duration / 3;
   sendMessage({
@@ -37,11 +37,6 @@ export const doublePaceEvent = async (data: EventData) => {
     description: undefined,
     duration: 5000,
   });
-  setPace(() => {
-    const { min, max } = intensityToPaceRange(intensity, steepness, {
-      min: minPace,
-      max: maxPace,
-    });
-    return round(Math.random() * (max - min) + min);
-  });
+
+  randomPaceEvent(silenceEventData(data));
 };

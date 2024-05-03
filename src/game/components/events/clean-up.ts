@@ -1,12 +1,12 @@
 import { GameEvent, CleanUpDescriptions } from '../../../types';
 import { GamePhase } from '../../GameProvider';
-import { EventData } from '../GameEvents';
+import { EventDataRef } from '../GameEvents';
 
-export const cleanUpEvent = async (data: EventData) => {
+export const cleanUpEvent = async (data: EventDataRef) => {
   const {
     game: { setPhase, sendMessage },
     settings: { body },
-  } = data;
+  } = data.current;
 
   setPhase(GamePhase.pause);
   sendMessage({
