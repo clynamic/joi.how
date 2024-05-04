@@ -15,11 +15,11 @@ export const climaxEvent = (data: EventDataRef) => {
     title: 'Are you edging?',
     prompts: [
       {
-        title: "I'm edging, master", // TODO: variables
+        title: "I'm edging, $master",
         onClick: async () => {
           sendMessage({
             id: GameEvent.climax,
-            title: 'Stay on the edge, player', // TODO: variables
+            title: 'Stay on the edge, $player',
             prompts: undefined,
           });
           setPace(minPace);
@@ -40,18 +40,18 @@ export const climaxEvent = (data: EventDataRef) => {
           });
           await wait(5000);
 
-          if (Math.random() * 100 < climaxChance) {
-            if (Math.random() * 100 < ruinChance) {
+          if (Math.random() * 100 <= climaxChance) {
+            if (Math.random() * 100 <= ruinChance) {
               setPhase(GamePhase.pause);
               sendMessage({
                 id: GameEvent.climax,
-                title: 'PAWS OFF! Ruin your orgasm!', // TODO: variables
+                title: '$HANDS OFF! Ruin your orgasm!',
                 description: undefined,
               });
               await wait(3000);
               sendMessage({
                 id: GameEvent.climax,
-                title: 'Clench in desperation', // TODO: variables
+                title: 'Clench in desperation',
               });
             } else {
               setPhase(GamePhase.climax);
@@ -64,7 +64,7 @@ export const climaxEvent = (data: EventDataRef) => {
             await wait(10000);
             sendMessage({
               id: GameEvent.climax,
-              title: 'Good job, player', // TODO: variables
+              title: 'Good job, $player',
               prompts: [
                 {
                   title: 'Leave',
@@ -78,13 +78,13 @@ export const climaxEvent = (data: EventDataRef) => {
             setPhase(GamePhase.pause);
             sendMessage({
               id: GameEvent.climax,
-              title: 'PAWS OFF! Do not cum!', // TODO: variables
+              title: '$HANDS OFF! Do not cum!',
               description: undefined,
             });
             await wait(5000);
             sendMessage({
               id: GameEvent.climax,
-              title: 'Good player. Let yourself cool off', // TODO: variables
+              title: 'Good $player. Let yourself cool off',
             });
             await wait(5000);
             sendMessage({
@@ -114,7 +114,7 @@ export const climaxEvent = (data: EventDataRef) => {
           await wait(20000);
           sendMessage({
             id: GameEvent.climax,
-            title: 'Start pawing again', // TODO: variables
+            title: 'Start to $stroke again',
             duration: 5000,
           });
           setPace(minPace);

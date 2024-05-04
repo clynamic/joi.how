@@ -1,17 +1,17 @@
 export enum PlayerGender {
-  man = 'man',
-  woman = 'woman',
+  male = 'male',
+  female = 'female',
   other = 'other',
 }
 
 export const PlayerGenderLabels: Record<PlayerGender, string> = {
-  man: 'Man',
-  woman: 'Woman',
+  male: 'Male',
+  female: 'Female',
   other: 'Other',
 };
 
 export const PlayerGenderDescriptions: Record<PlayerGender, string> = {
-  man: 'Refer to you as male (he/him/boy)',
-  woman: 'Refer to you as female (she/her/girl)',
+  male: 'Refer to you as male (he/him/boy)',
+  female: 'Refer to you as female (she/her/girl)',
   other: 'Refer to you neutrally (they/them/pup)',
 };
