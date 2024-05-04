@@ -28,7 +28,7 @@ const StyledStartButton = styled.button`
   padding: 15px 20px;
 
   &:hover {
-    background: #595a77;
+    background: var(--primary);
   }
 
   &:disabled {
