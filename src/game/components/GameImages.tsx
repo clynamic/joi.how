@@ -112,10 +112,10 @@ export const GameImages = () => {
           repeat: Infinity,
         }}
       >
-        <Image item={image} size={ImageSize.preview} playable={false} />
+        <Image item={image} size={ImageSize.preview} />
       </StyledBackgroundImage>
       <StyledForegroundImage>
-        <Image item={image} size={ImageSize.full} />
+        <Image item={image} size={ImageSize.full} playable />
       </StyledForegroundImage>
       <StyledImageActions>
         <IconButton onClick={skipImage}>
