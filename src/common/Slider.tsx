@@ -11,6 +11,14 @@ const StyledSlider = styled.input.attrs({ type: 'range' })`
   outline: none;
   cursor: pointer;
 
+  transition: filter 0.2s;
+
+  &:hover,
+  &:focus {
+    outline: none;
+    filter: brightness(1.2);
+  }
+
   &::-webkit-slider-runnable-track {
     height: 8px;
     border-radius: var(--border-radius);
