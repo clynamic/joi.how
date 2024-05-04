@@ -7,7 +7,7 @@ import {
   Slider,
   Space,
   TextInput,
-  Trailing,
+  Surrounded,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
@@ -54,7 +54,7 @@ export const E621Search = () => {
 
   return (
     <StyledE621Search>
-      <Trailing
+      <Surrounded
         trailing={
           <IconButton onClick={runSearch}>
             <FontAwesomeIcon icon={faSearch} />
@@ -67,7 +67,7 @@ export const E621Search = () => {
           onSubmit={runSearch}
           placeholder='Enter tags...'
         />
-      </Trailing>
+      </Surrounded>
       <Space size='medium' />
       <SettingsLabel>Count</SettingsLabel>
       <Slider value={limit} onChange={setLimit} min={1} max={200} step={1} />

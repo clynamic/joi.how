@@ -3,7 +3,7 @@ import {
   SettingsTile,
   SettingsTitle,
   ToggleTile,
-  Trailing,
+  ToggleTileType,
 } from '../../common';
 import {
   PlayerBody,
@@ -13,8 +13,6 @@ import {
   PlayerGenderDescriptions,
   PlayerGenderLabels,
 } from '../../types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleDot, faCircle } from '@fortawesome/free-regular-svg-icons';
 import { useSetting } from '../SettingsProvider';
 
 export const PlayerSettings = () => {
@@ -31,20 +29,10 @@ export const PlayerSettings = () => {
             key={current}
             enabled={gender === current}
             onClick={() => setGender(current)}
-            role='radio'
+            type={ToggleTileType.radio}
           >
-            <Trailing
-              trailing={
-                <h2>
-                  <FontAwesomeIcon
-                    icon={gender === current ? faCircleDot : faCircle}
-                  />
-                </h2>
-              }
-            >
-              <strong>{PlayerGenderLabels[current]}</strong>
-              <p>{PlayerGenderDescriptions[current]}</p>
-            </Trailing>
+            <strong>{PlayerGenderLabels[current]}</strong>
+            <p>{PlayerGenderDescriptions[current]}</p>
           </ToggleTile>
         );
       })}
@@ -57,20 +45,10 @@ export const PlayerSettings = () => {
             key={current}
             enabled={body === current}
             onClick={() => setBody(current)}
-            role='radio'
+            type={ToggleTileType.radio}
           >
-            <Trailing
-              trailing={
-                <h2>
-                  <FontAwesomeIcon
-                    icon={body === current ? faCircleDot : faCircle}
-                  />
-                </h2>
-              }
-            >
-              <strong>{PlayerBodyLabels[current]}</strong>
-              <p>{PlayerBodyDescriptions[current]}</p>
-            </Trailing>
+            <strong>{PlayerBodyLabels[current]}</strong>
+            <p>{PlayerBodyDescriptions[current]}</p>
           </ToggleTile>
         );
       })}

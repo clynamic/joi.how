@@ -2,15 +2,13 @@ import {
   SettingsTile,
   SettingsTitle,
   ToggleTile,
-  Trailing,
+  ToggleTileType,
 } from '../../common';
 import {
   GameHypnoType,
   GameHypnoDescriptions,
   GameHypnoLabels,
 } from '../../types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircle, faCircleDot } from '@fortawesome/free-regular-svg-icons';
 import { useSetting } from '../SettingsProvider';
 
 export const HypnoSettings = () => {
@@ -26,20 +24,10 @@ export const HypnoSettings = () => {
             key={current}
             enabled={hypno === current}
             onClick={() => setHypno(current)}
-            role='radio'
+            type={ToggleTileType.radio}
           >
-            <Trailing
-              trailing={
-                <h2>
-                  <FontAwesomeIcon
-                    icon={hypno === current ? faCircleDot : faCircle}
-                  />
-                </h2>
-              }
-            >
-              <strong>{GameHypnoLabels[current]}</strong>
-              <p>{GameHypnoDescriptions[current]}</p>
-            </Trailing>
+            <strong>{GameHypnoLabels[current]}</strong>
+            <p>{GameHypnoDescriptions[current]}</p>
           </ToggleTile>
         );
       })}

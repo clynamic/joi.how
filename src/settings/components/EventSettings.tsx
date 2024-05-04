@@ -4,10 +4,8 @@ import {
   SettingsTile,
   SettingsTitle,
   ToggleTile,
-  Trailing,
+  ToggleTileType,
 } from '../../common';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSquare, faSquareCheck } from '@fortawesome/free-regular-svg-icons';
 import { useSetting } from '../SettingsProvider';
 
 export const EventSettings = () => {
@@ -36,19 +34,10 @@ export const EventSettings = () => {
             key={event}
             enabled={events.includes(event)}
             onClick={() => toggleEvent(event)}
+            type={ToggleTileType.check}
           >
-            <Trailing
-              trailing={
-                <h2>
-                  <FontAwesomeIcon
-                    icon={events.includes(event) ? faSquareCheck : faSquare}
-                  />
-                </h2>
-              }
-            >
-              <strong>{GameEventLabels[event]}</strong>
-              <p>{GameEventDescriptions[event]}</p>
-            </Trailing>
+            <strong>{GameEventLabels[event]}</strong>
+            <p>{GameEventDescriptions[event]}</p>
           </ToggleTile>
         );
       })}

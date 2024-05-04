@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useImages } from '../../settings';
+import { useImages, useSetting } from '../../settings';
 import { useGameValue } from '../GameProvider';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -76,6 +76,8 @@ export const GameImages = () => {
   const [images] = useImages();
   const [currentImage, setCurrentImage] = useGameValue('currentImage');
   const [intensity] = useGameValue('intensity');
+  const [videoSound] = useSetting('videoSound');
+  const [highRes] = useSetting('highRes');
 
   const image = useMemo(() => images[currentImage], [images, currentImage]);
 
@@ -115,7 +117,12 @@ export const GameImages = () => {
         <Image item={image} size={ImageSize.preview} />
       </StyledBackgroundImage>
       <StyledForegroundImage>
-        <Image item={image} size={ImageSize.full} playable />
+        <Image
+          item={image}
+          size={highRes ? ImageSize.full : ImageSize.preview}
+          playable
+          loud={videoSound}
+        />
       </StyledForegroundImage>
       <StyledImageActions>
         <IconButton onClick={skipImage}>

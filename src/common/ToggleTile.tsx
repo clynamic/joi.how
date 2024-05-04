@@ -1,5 +1,14 @@
+/* eslint-disable react-refresh/only-export-components */
 import { PropsWithChildren } from 'react';
 import styled from 'styled-components';
+import { Surrounded } from './Trailing';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faCircle,
+  faCircleDot,
+  faSquare,
+  faSquareCheck,
+} from '@fortawesome/free-regular-svg-icons';
 
 interface StyledToggleTileProps {
   $enabled: boolean;
@@ -46,27 +55,61 @@ const StyledToggleTile = styled.button<StyledToggleTileProps>`
   }
 `;
 
+export enum ToggleTileType {
+  none = 'none',
+  check = 'check',
+  radio = 'radio',
+}
+
 export interface ToggleTileProps
   extends React.HTMLAttributes<HTMLButtonElement> {
   enabled: boolean;
   onClick: () => void;
+  type?: ToggleTileType;
 }
 
 export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
   children,
   enabled,
   onClick,
+  type = ToggleTileType.none,
   ...props
 }) => {
   return (
     <StyledToggleTile
       $enabled={enabled}
-      role='switch'
+      role={(() => {
+        switch (type) {
+          case ToggleTileType.check:
+            return 'checkbox';
+          case ToggleTileType.radio:
+            return 'radio';
+          default:
+            return 'switch';
+        }
+      })()}
       aria-checked={enabled}
       onClick={onClick}
       {...props}
     >
-      {children}
+      <Surrounded
+        trailing={(() => {
+          switch (type) {
+            case ToggleTileType.check:
+              return (
+                <FontAwesomeIcon icon={enabled ? faSquareCheck : faSquare} />
+              );
+            case ToggleTileType.radio:
+              return (
+                <FontAwesomeIcon icon={enabled ? faCircleDot : faCircle} />
+              );
+            default:
+              return null;
+          }
+        })()}
+      >
+        {children}
+      </Surrounded>
     </StyledToggleTile>
   );
 };

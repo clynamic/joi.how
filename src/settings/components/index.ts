@@ -1,3 +1,4 @@
+export * from './BoardSettings';
 export * from './ClimaxSettings';
 export * from './DurationSettings';
 export * from './EventSettings';
