@@ -11,32 +11,32 @@ import { SettingsDescription } from '../../common/SettingsDescription';
 import { useSetting } from '../SettingsProvider';
 
 export const ClimaxSettings = () => {
-  const [climaxChange, setClimaxChange] = useSetting('climaxChange');
-  const [ruinChange, setRuinChange] = useSetting('ruinChange');
+  const [climaxChance, setClimaxChance] = useSetting('climaxChance');
+  const [ruinChance, setRuinChance] = useSetting('ruinChance');
 
   const climaxText = useMemo(() => {
-    if (climaxChange == 100) {
+    if (climaxChance == 100) {
       return 'You will ejaculate during this game';
     }
 
-    if (climaxChange === 0) {
+    if (climaxChance === 0) {
       return "You won't ejaculate at all during this game";
     }
 
-    return `${climaxChange}% chance you'll ejaculate during this game`;
-  }, [climaxChange]);
+    return `${climaxChance}% chance you'll ejaculate during this game`;
+  }, [climaxChance]);
 
   const ruinText = useMemo(() => {
-    if (ruinChange === 100) {
+    if (ruinChance === 100) {
       return 'You will have a ruined orgasm during this game';
     }
 
-    if (ruinChange === 0) {
+    if (ruinChance === 0) {
       return "You won't have a ruined orgasm during this game";
     }
 
-    return `${ruinChange}% chance you'll have a ruined orgasm during this game`;
-  }, [ruinChange]);
+    return `${ruinChance}% chance you'll have a ruined orgasm during this game`;
+  }, [ruinChance]);
 
   return (
     <SettingsTile grid label={'Climax'}>
@@ -44,18 +44,18 @@ export const ClimaxSettings = () => {
       <SettingsDescription>{climaxText}</SettingsDescription>
       <SettingsLabel>Climax</SettingsLabel>
       <Slider
-        value={climaxChange}
+        value={climaxChance}
         min={0}
         max={100}
-        onChange={setClimaxChange}
+        onChange={setClimaxChance}
       />
-      <Measure value={climaxChange} chars={3} unit='%' />
+      <Measure value={climaxChance} chars={3} unit='%' />
       <Divider />
       <SettingsTitle>Given an orgasm occurs...</SettingsTitle>
       <SettingsDescription>{ruinText}</SettingsDescription>
       <SettingsLabel>Ruin</SettingsLabel>
-      <Slider value={ruinChange} min={0} max={100} onChange={setRuinChange} />
-      <Measure value={ruinChange} chars={3} unit='%' />
+      <Slider value={ruinChance} min={0} max={100} onChange={setRuinChance} />
+      <Measure value={ruinChance} chars={3} unit='%' />
     </SettingsTile>
   );
 };

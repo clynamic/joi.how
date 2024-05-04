@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { GameMessage, GameMessagePrompt, useGameValue } from '../GameProvider';
 import { playTone } from '../../utils';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslate } from '../../settings';
 
 const StyledGameMessages = styled.div`
   position: absolute;
@@ -59,6 +60,7 @@ export const GameMessages = () => {
   const [currentMessages, setCurrentMessages] = useState<GameMessage[]>([]);
   const [previousMessages, setPreviousMessages] = useState<GameMessage[]>([]);
   const [messages, setMessages] = useGameValue('messages');
+  const translate = useTranslate();
 
   useEffect(() => {
     setPreviousMessages(currentMessages);
@@ -137,7 +139,7 @@ export const GameMessages = () => {
                 type: 'spring',
               }}
             >
-              {message.title}
+              {translate(message.title)}
             </StyledGameMessageTitle>
             {message.description && (
               <StyledGameMessageDescription
@@ -167,7 +169,7 @@ export const GameMessages = () => {
                 }}
                 onClick={() => onMessageClick(message, prompt)}
               >
-                {prompt.title}
+                {translate(prompt.title)}
               </StyledGameMessageButton>
             ))}
           </StyledGameMessage>
