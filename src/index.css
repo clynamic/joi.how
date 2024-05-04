@@ -12,6 +12,8 @@
   --primary: #92678d;
 
   --overlay-color: rgba(0, 0, 0, 0.5);
+
+  --icon-size: 1.4rem;
 }
 
 * {

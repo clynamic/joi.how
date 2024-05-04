@@ -1,17 +1,18 @@
 import { PropsWithChildren } from 'react';
 import styled from 'styled-components';
 
-export interface TrailingProps extends PropsWithChildren {
-  trailing: React.ReactNode;
+export interface SurroundedProps extends PropsWithChildren {
+  leading?: React.ReactNode;
+  trailing?: React.ReactNode;
 }
 
-const StyledNonTrailing = styled.div`
+const StyledCenterSurrounded = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
 `;
 
-const StyledTrailing = styled.div`
+const StyledSurrounded = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -20,11 +21,20 @@ const StyledTrailing = styled.div`
   grid-column: 1 / -1;
 `;
 
-export const Trailing = ({ children, trailing }: TrailingProps) => {
+const StyledAround = styled.div`
+  font-size: var(--icon-size);
+`;
+
+export const Surrounded = ({
+  children,
+  leading,
+  trailing,
+}: SurroundedProps) => {
   return (
-    <StyledTrailing>
-      <StyledNonTrailing>{children}</StyledNonTrailing>
-      {trailing}
-    </StyledTrailing>
+    <StyledSurrounded>
+      {leading && <StyledAround>{leading}</StyledAround>}
+      <StyledCenterSurrounded>{children}</StyledCenterSurrounded>
+      {trailing && <StyledAround>{trailing}</StyledAround>}
+    </StyledSurrounded>
   );
 };
