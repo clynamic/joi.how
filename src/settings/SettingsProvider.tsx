@@ -15,6 +15,8 @@ export interface Settings {
   hypno: GameHypnoType;
   gender: PlayerGender;
   body: PlayerBody;
+  highRes: boolean;
+  videoSound: boolean;
 }
 
 export const defaultSettings: Settings = {
@@ -29,6 +31,8 @@ export const defaultSettings: Settings = {
   hypno: GameHypnoType.joi,
   gender: PlayerGender.male,
   body: PlayerBody.penis,
+  highRes: true,
+  videoSound: false,
 };
 
 const settingsStorageKey = 'settings';

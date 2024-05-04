@@ -9,7 +9,7 @@ import {
   PlayerSettings,
   ServiceSettings,
   ImageSettings,
-  WalltalkerSettings,
+  BoardSettings,
   VibratorSettings,
   SharingSettings,
 } from './components';
@@ -28,7 +28,7 @@ export const SettingsSection = () => {
       <EventSettings />
       <HypnoSettings />
       <ClimaxSettings />
-      <WalltalkerSettings />
+      <BoardSettings />
       <ServiceSettings />
       <ImageSettings />
       <VibratorSettings />

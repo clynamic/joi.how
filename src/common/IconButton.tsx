@@ -13,6 +13,8 @@ export const StyledIconButton = styled.button`
   border-radius: var(--border-radius);
   padding: 4px;
 
+  font-size: var(--icon-size);
+
   height: 32px;
   width: 32px;
 
@@ -37,7 +39,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
 }) => {
   return (
     <StyledIconButton onClick={onClick} {...rest}>
-      <h2>{children}</h2>
+      {children}
     </StyledIconButton>
   );
 };

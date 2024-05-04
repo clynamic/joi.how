@@ -19,6 +19,7 @@ export interface ImageProps
   item: ImageItem;
   size: ImageSize;
   playable?: boolean;
+  loud?: boolean;
 }
 
 const StyledImage = styled.img`
@@ -47,6 +48,7 @@ export const Image: React.FC<ImageProps> = ({
   item,
   size,
   playable = false,
+  loud = false,
   ...rest
 }) => {
   let url: string | undefined;
@@ -84,7 +86,7 @@ export const Image: React.FC<ImageProps> = ({
         src={url}
         autoPlay
         loop
-        muted // TODO: configurable
+        muted={!loud}
         playsInline
         {...rest}
       />
