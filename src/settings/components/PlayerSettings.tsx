@@ -1,9 +1,10 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Divider,
   SettingsTile,
   SettingsTitle,
+  Surrounded,
   ToggleTile,
-  ToggleTileType,
 } from '../../common';
 import {
   PlayerBody,
@@ -14,6 +15,11 @@ import {
   PlayerGenderLabels,
 } from '../../types';
 import { useSetting } from '../SettingsProvider';
+import {
+  faMars,
+  faMarsAndVenus,
+  faVenus,
+} from '@fortawesome/free-solid-svg-icons';
 
 export const PlayerSettings = () => {
   const [gender, setGender] = useSetting('gender');
@@ -29,10 +35,27 @@ export const PlayerSettings = () => {
             key={current}
             enabled={gender === current}
             onClick={() => setGender(current)}
-            type={ToggleTileType.radio}
           >
-            <strong>{PlayerGenderLabels[current]}</strong>
-            <p>{PlayerGenderDescriptions[current]}</p>
+            <Surrounded
+              trailing={
+                <FontAwesomeIcon
+                  style={{ aspectRatio: 1 }}
+                  icon={(() => {
+                    switch (current) {
+                      case PlayerGender.male:
+                        return faMars;
+                      case PlayerGender.female:
+                        return faVenus;
+                      case PlayerGender.other:
+                        return faMarsAndVenus;
+                    }
+                  })()}
+                />
+              }
+            >
+              <strong>{PlayerGenderLabels[current]}</strong>
+              <p>{PlayerGenderDescriptions[current]}</p>
+            </Surrounded>
           </ToggleTile>
         );
       })}
@@ -45,10 +68,22 @@ export const PlayerSettings = () => {
             key={current}
             enabled={body === current}
             onClick={() => setBody(current)}
-            type={ToggleTileType.radio}
           >
-            <strong>{PlayerBodyLabels[current]}</strong>
-            <p>{PlayerBodyDescriptions[current]}</p>
+            <Surrounded
+              trailing={(() => {
+                switch (current) {
+                  case PlayerBody.penis:
+                    return '🍆';
+                  case PlayerBody.vagina:
+                    return '🍑';
+                  case PlayerBody.neuter:
+                    return '🥝';
+                }
+              })()}
+            >
+              <strong>{PlayerBodyLabels[current]}</strong>
+              <p>{PlayerBodyDescriptions[current]}</p>
+            </Surrounded>
           </ToggleTile>
         );
       })}
