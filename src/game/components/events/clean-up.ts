@@ -15,11 +15,11 @@ export const cleanUpEvent = async (data: EventDataRef) => {
     duration: undefined,
     prompts: [
       {
-        title: `I'm done, master`, // TODO: variables
+        title: `I'm done, $master`,
         onClick: () => {
           sendMessage({
             id: GameEvent.cleanUp,
-            title: 'Good player', // TODO: variables
+            title: 'Good $player',
             duration: 5000,
             prompts: undefined,
           });
