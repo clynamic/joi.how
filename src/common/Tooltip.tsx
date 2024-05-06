@@ -10,6 +10,7 @@ import {
   useFocus,
   useHover,
   useInteractions,
+  useTransitionStyles,
 } from '@floating-ui/react';
 import { useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -23,15 +24,11 @@ const StyledTooltip = styled.div``;
 
 const StyledTooltipChildren = styled.div``;
 
-const StyledTooltipContent = styled.div<{ $open: boolean }>`
+const StyledTooltipContent = styled.div`
   font-size: 0.8rem;
   background: var(--overlay-color);
   padding: 4px 6px;
   border-radius: var(--border-radius);
-
-  pointer-events: ${({ $open }) => ($open ? 'auto' : 'none')};
-  opacity: ${({ $open }) => ($open ? 1 : 0)};
-  transition: opacity 0.2s;
 `;
 
 export const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
@@ -56,6 +53,8 @@ export const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
     whileElementsMounted: autoUpdate,
   });
 
+  const { isMounted, styles } = useTransitionStyles(context);
+
   const hover = useHover(context, {
     delay: 400,
     move: false,
@@ -74,19 +73,23 @@ export const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
       <StyledTooltipChildren ref={refs.setReference} {...getReferenceProps()}>
         {children}
       </StyledTooltipChildren>
-      <StyledTooltipContent
-        $open={isOpen && content != null}
-        ref={refs.setFloating}
-        {...getFloatingProps()}
-        style={floatingStyles}
-      >
-        <FloatingArrow
-          ref={arrowRef}
-          context={context}
-          fill='var(--overlay-color)'
-        />
-        {content}
-      </StyledTooltipContent>
+      {isMounted && (
+        <StyledTooltipContent
+          ref={refs.setFloating}
+          {...getFloatingProps()}
+          style={{
+            ...floatingStyles,
+            ...styles,
+          }}
+        >
+          <FloatingArrow
+            ref={arrowRef}
+            context={context}
+            fill='var(--overlay-color)'
+          />
+          {content}
+        </StyledTooltipContent>
+      )}
     </StyledTooltip>
   );
 };
