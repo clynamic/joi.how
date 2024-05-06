@@ -1,9 +1,11 @@
 import styled from 'styled-components';
+import { Tooltip } from './Tooltip';
 
 export interface IconButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   onClick: () => void;
+  tooltip?: string;
 }
 
 export const StyledIconButton = styled.button`
@@ -35,11 +37,14 @@ export const StyledIconButton = styled.button`
 export const IconButton: React.FC<IconButtonProps> = ({
   children,
   onClick,
+  tooltip,
   ...rest
 }) => {
   return (
-    <StyledIconButton onClick={onClick} {...rest}>
-      {children}
-    </StyledIconButton>
+    <Tooltip content={tooltip}>
+      <StyledIconButton onClick={onClick} {...rest}>
+        {children}
+      </StyledIconButton>
+    </Tooltip>
   );
 };
