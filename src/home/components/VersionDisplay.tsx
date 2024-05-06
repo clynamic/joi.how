@@ -15,6 +15,7 @@ export const VersionDisplay = () => {
     <StyledVersionDisplay>
       <p>Version {version}</p>
       <IconButton
+        tooltip='View on GitHub'
         onClick={() =>
           window.open('https://github.com/clynamic/joi.how', '_blank')
         }
