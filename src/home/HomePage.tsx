@@ -10,6 +10,7 @@ import {
   StartButton,
 } from './components';
 import { SettingsSection } from '../settings';
+import { HomeProvider } from './HomeProvider';
 
 const StyledHomePage = styled.div`
   display: flex;
@@ -27,16 +28,18 @@ const StyledHomePage = styled.div`
 
 export const HomePage = () => {
   return (
-    <StyledHomePage>
-      <HomeTitle />
-      <AgeWarning />
-      <Introduction />
-      <SettingsSection />
-      <WallTalkerAd />
-      <ReleaseNotes />
-      <VersionDisplay />
-      <Instructions />
-      <StartButton />
-    </StyledHomePage>
+    <HomeProvider>
+      <StyledHomePage>
+        <HomeTitle />
+        <AgeWarning />
+        <Introduction />
+        <SettingsSection />
+        <WallTalkerAd />
+        <ReleaseNotes />
+        <VersionDisplay />
+        <Instructions />
+        <StartButton />
+      </StyledHomePage>
+    </HomeProvider>
   );
 };
