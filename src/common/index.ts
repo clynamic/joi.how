@@ -1,4 +1,5 @@
 export * from './ContentSection';
+export * from './Dialog';
 export * from './Divider';
 export * from './Dropdown';
 export * from './IconButton';
