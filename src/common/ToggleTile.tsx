@@ -63,14 +63,14 @@ export enum ToggleTileType {
 
 export interface ToggleTileProps
   extends React.HTMLAttributes<HTMLButtonElement> {
-  enabled: boolean;
-  onClick: () => void;
+  enabled?: boolean;
+  onClick?: () => void;
   type?: ToggleTileType;
 }
 
 export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
   children,
-  enabled,
+  enabled = true,
   onClick,
   type = ToggleTileType.none,
   ...props

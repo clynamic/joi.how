@@ -56,9 +56,10 @@ export const E621Search = () => {
     <StyledE621Search>
       <Surrounded
         trailing={
-          <IconButton onClick={runSearch}>
-            <FontAwesomeIcon icon={faSearch} />
-          </IconButton>
+          <IconButton
+            onClick={runSearch}
+            icon={<FontAwesomeIcon icon={faSearch} />}
+          />
         }
       >
         <TextInput

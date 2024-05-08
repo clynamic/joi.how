@@ -73,7 +73,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
       <StyledTooltipChildren ref={refs.setReference} {...getReferenceProps()}>
         {children}
       </StyledTooltipChildren>
-      {isMounted && (
+      {content && isMounted && (
         <StyledTooltipContent
           ref={refs.setFloating}
           {...getFloatingProps()}
