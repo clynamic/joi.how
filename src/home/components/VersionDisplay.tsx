@@ -19,9 +19,8 @@ export const VersionDisplay = () => {
         onClick={() =>
           window.open('https://github.com/clynamic/joi.how', '_blank')
         }
-      >
-        <FontAwesomeIcon icon={faGithub} />
-      </IconButton>
+        icon={<FontAwesomeIcon icon={faGithub} />}
+      />
     </StyledVersionDisplay>
   );
 };

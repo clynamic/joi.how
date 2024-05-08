@@ -3,14 +3,15 @@ import { Tooltip } from './Tooltip';
 
 export interface IconButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-  onClick: () => void;
+  icon: React.ReactNode;
+  onClick?: () => void;
   tooltip?: string;
 }
 
 export const StyledIconButton = styled.button`
   background: none;
-  color: var(--text-color);
+  color: var(--color-text);
+  opacity: ${(props: { disabled?: boolean }) => (props.disabled ? 0.5 : 1)};
 
   border-radius: var(--border-radius);
   padding: 4px;
@@ -35,15 +36,15 @@ export const StyledIconButton = styled.button`
 `;
 
 export const IconButton: React.FC<IconButtonProps> = ({
-  children,
+  icon,
   onClick,
   tooltip,
   ...rest
 }) => {
   return (
     <Tooltip content={tooltip}>
-      <StyledIconButton onClick={onClick} {...rest}>
-        {children}
+      <StyledIconButton disabled={onClick == null} onClick={onClick} {...rest}>
+        {icon}
       </StyledIconButton>
     </Tooltip>
   );
