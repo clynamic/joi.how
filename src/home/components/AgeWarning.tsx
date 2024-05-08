@@ -50,7 +50,7 @@ export const AgeWarning = () => {
       onOpenChange={setAgeCheckConfirm}
       closable={false}
       title={'Age Warning'}
-      opaque
+      barrierColor='var(--section-background)'
       content={
         <StyledAgeWarning>
           <ContentSection style={{ margin: 0 }}>

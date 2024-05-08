@@ -11,15 +11,18 @@ import {
 } from '@floating-ui/react';
 import { faClose } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import styled from 'styled-components';
+import styled, { CSSProperties } from 'styled-components';
 import { IconButton } from './IconButton';
+import { useEffect } from 'react';
 
 export interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onVisibleChange?: (visible: boolean) => void;
   closable?: boolean;
   dismissable?: boolean;
-  opaque?: boolean;
+  barrierColor?: CSSProperties['backgroundColor'];
+  background?: CSSProperties['backgroundColor'];
   title?: React.ReactNode;
   content: React.ReactNode;
 }
@@ -44,6 +47,9 @@ const StyledDialogContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
 
+  max-height: 100%;
+  max-width: 100%;
+
   background: var(--section-background);
   color: var(--section-text);
   border-radius: var(--border-radius);
@@ -62,11 +68,13 @@ const StyledDialogTitle = styled.div`
 export const Dialog = ({
   open,
   onOpenChange,
+  onVisibleChange,
   content,
   title,
   closable = true,
   dismissable = false,
-  opaque = false,
+  barrierColor = 'var(--overlay-color)',
+  background = 'var(--section-background)',
   children,
 }: React.PropsWithChildren<DialogProps>) => {
   const { refs, context } = useFloating({
@@ -88,6 +96,10 @@ export const Dialog = ({
     role,
   ]);
 
+  useEffect(() => {
+    onVisibleChange?.(isMounted);
+  }, [isMounted, onVisibleChange]);
+
   return (
     <StyledDialog>
       <StyledDialogChildren ref={refs.setReference} {...getReferenceProps()}>
@@ -98,10 +110,9 @@ export const Dialog = ({
           <FloatingOverlay
             lockScroll
             style={{
-              background: opaque
-                ? 'var(--section-background)'
-                : 'var(--overlay-color)',
+              background: barrierColor,
               ...styles,
+              zIndex: 1000,
             }}
             onClick={() => dismissable && onOpenChange(false)}
           >
@@ -110,14 +121,20 @@ export const Dialog = ({
                 ref={refs.setFloating}
                 {...getFloatingProps()}
               >
-                <StyledDialogContentWrapper>
+                <StyledDialogContentWrapper
+                  onClick={event => event.stopPropagation()}
+                  style={{
+                    background: background,
+                  }}
+                >
                   {(title || closable) && (
                     <StyledDialogTitle>
                       {title || <div />}
                       {closable && (
-                        <IconButton onClick={() => onOpenChange(false)}>
-                          <FontAwesomeIcon icon={faClose} />
-                        </IconButton>
+                        <IconButton
+                          onClick={() => onOpenChange(false)}
+                          icon={<FontAwesomeIcon icon={faClose} />}
+                        />
                       )}
                     </StyledDialogTitle>
                   )}

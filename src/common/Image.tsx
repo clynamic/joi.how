@@ -23,6 +23,7 @@ export interface ImageProps
 }
 
 const StyledImage = styled.img`
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -30,6 +31,7 @@ const StyledImage = styled.img`
 `;
 
 const StyledVideo = styled.video`
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -37,6 +39,7 @@ const StyledVideo = styled.video`
 `;
 
 const StyledImageError = styled.div`
+  display: block;
   width: 100%;
   height: 100%;
   display: flex;
@@ -84,6 +87,7 @@ export const Image: React.FC<ImageProps> = ({
     return (
       <StyledVideo
         src={url}
+        alt={`Video from ${item.service} with id ${item.id}`}
         autoPlay
         loop
         muted={!loud}

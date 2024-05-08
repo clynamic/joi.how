@@ -125,13 +125,15 @@ export const GameImages = () => {
         />
       </StyledForegroundImage>
       <StyledImageActions>
-        <IconButton onClick={skipImage}>
-          <FontAwesomeIcon icon={faForward} />
-        </IconButton>
+        <IconButton
+          onClick={skipImage}
+          icon={<FontAwesomeIcon icon={faForward} />}
+        />
         <VerticalDivider color='rgba(255, 255, 255, 0.3)' />
-        <IconButton onClick={openSource}>
-          <FontAwesomeIcon icon={faUpRightFromSquare} />
-        </IconButton>
+        <IconButton
+          onClick={openSource}
+          icon={<FontAwesomeIcon icon={faUpRightFromSquare} />}
+        />
       </StyledImageActions>
     </StyledGameImages>
   );
