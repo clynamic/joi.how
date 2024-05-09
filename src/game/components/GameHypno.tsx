@@ -3,7 +3,6 @@ import { useSetting } from '../../settings';
 import { GameHypnoType } from '../../types';
 
 const StyledGameHypno = styled.div`
-  position: absolute;
   pointer-events: none;
 `;
 

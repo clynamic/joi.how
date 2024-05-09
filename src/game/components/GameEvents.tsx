@@ -1,12 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import { MutableRefObject, useEffect, useMemo } from 'react';
+import { MutableRefObject, useEffect } from 'react';
 import { GameEvent } from '../../types';
 import {
-  createSendMessage,
   GamePhase,
   GameState,
   useGame,
   useGameValue,
+  useSendMessage,
 } from '../GameProvider';
 import { Settings, useSetting, useSettings } from '../../settings';
 import {
@@ -29,7 +29,7 @@ import {
 
 export interface EventData {
   game: StateWithSetters<GameState> & {
-    sendMessage: ReturnType<typeof createSendMessage>;
+    sendMessage: ReturnType<typeof useSendMessage>;
   };
   settings: StateWithSetters<Settings>;
 }
@@ -127,11 +127,7 @@ export const GameEvents = () => {
   const [phase] = useGameValue('phase');
   const [, setPaws] = useGameValue('paws');
   const [events] = useSetting('events');
-  const [, setMessages] = useGameValue('messages');
-  const sendMessage = useMemo(
-    () => createSendMessage(setMessages),
-    [setMessages]
-  );
+  const sendMessage = useSendMessage();
 
   const data = useAutoRef<EventData>({
     game: {

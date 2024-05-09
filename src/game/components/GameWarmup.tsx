@@ -1,16 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSetting } from '../../settings';
-import { createSendMessage, GamePhase, useGameValue } from '../GameProvider';
+import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 
 export const GameWarmup = () => {
   const [warmup] = useSetting('warmupDuration');
   const [phase, setPhase] = useGameValue('phase');
   const [, setTimer] = useState<number | null>(null);
-  const [, setMessages] = useGameValue('messages');
-  const sendMessage = useMemo(
-    () => createSendMessage(setMessages),
-    [setMessages]
-  );
+  const sendMessage = useSendMessage();
 
   const onStart = useCallback(() => {
     setPhase(GamePhase.active);
@@ -20,7 +16,7 @@ export const GameWarmup = () => {
     });
     sendMessage({
       id: GamePhase.warmup,
-      title: 'Now follow what I say $player!',
+      title: 'Now follow what I say, $player!',
       duration: 5000,
       prompts: undefined,
     });
