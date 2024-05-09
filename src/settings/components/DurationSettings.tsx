@@ -19,7 +19,7 @@ export const DurationSettings = () => {
       <SettingsLabel>Warmup duration</SettingsLabel>
       <Slider
         min='0'
-        max='600'
+        max='300'
         step='60'
         value={warmupDuration}
         onChange={setWarmupDuration}

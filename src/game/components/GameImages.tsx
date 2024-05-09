@@ -3,12 +3,7 @@ import { useImages, useSetting } from '../../settings';
 import { useGameValue } from '../GameProvider';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo } from 'react';
-import { IconButton, Image, ImageSize, VerticalDivider } from '../../common';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faForward,
-  faUpRightFromSquare,
-} from '@fortawesome/free-solid-svg-icons';
+import { Image, ImageSize } from '../../common';
 import { useLooping } from '../../utils';
 
 const StyledGameImages = styled.div`
@@ -60,18 +55,6 @@ const StyledBackgroundImage = motion(styled.div`
   }
 `);
 
-const StyledImageActions = styled.div`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-
-  display: flex;
-
-  padding: 8px;
-  background: var(--overlay-color);
-  border-radius: var(--border-radius) 0 0 0;
-`;
-
 export const GameImages = () => {
   const [images] = useImages();
   const [currentImage, setCurrentImage] = useGameValue('currentImage');
@@ -92,16 +75,6 @@ export const GameImages = () => {
   useLooping(switchImage, switchDuration);
 
   useEffect(() => switchImage(), [switchImage]);
-
-  const skipImage = useCallback(() => {
-    // TODO: also remove from list
-    // TODO: also reset timer?
-    setCurrentImage(Math.floor(Math.random() * images.length));
-  }, [images.length, setCurrentImage]);
-
-  const openSource = useCallback(() => {
-    window.open(image.source, '_blank');
-  }, [image.source]);
 
   return (
     <StyledGameImages>
@@ -124,17 +97,6 @@ export const GameImages = () => {
           loud={videoSound}
         />
       </StyledForegroundImage>
-      <StyledImageActions>
-        <IconButton
-          onClick={skipImage}
-          icon={<FontAwesomeIcon icon={faForward} />}
-        />
-        <VerticalDivider color='rgba(255, 255, 255, 0.3)' />
-        <IconButton
-          onClick={openSource}
-          icon={<FontAwesomeIcon icon={faUpRightFromSquare} />}
-        />
-      </StyledImageActions>
     </StyledGameImages>
   );
 };

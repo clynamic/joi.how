@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react';
+import { useCallback } from 'react';
 import { createStateProvider } from '../utils';
 
 export enum Paws {
@@ -71,19 +71,22 @@ export const {
   defaultData: initialGameState,
 });
 
-export const createSendMessage = (
-  setMessages: Dispatch<SetStateAction<GameMessage[]>>
-) => {
-  return (message: Partial<GameMessage> & { id: string }) => {
-    setMessages(messages => {
-      const previous = messages.find(m => m.id === message.id);
-      return [
-        ...messages.filter(m => m.id !== message.id),
-        {
-          ...previous,
-          ...message,
-        } as GameMessage,
-      ];
-    });
-  };
+export const useSendMessage = () => {
+  const [, setMessages] = useGameValue('messages');
+
+  return useCallback(
+    (message: Partial<GameMessage> & { id: string }) => {
+      setMessages(messages => {
+        const previous = messages.find(m => m.id === message.id);
+        return [
+          ...messages.filter(m => m.id !== message.id),
+          {
+            ...previous,
+            ...message,
+          } as GameMessage,
+        ];
+      });
+    },
+    [setMessages]
+  );
 };
