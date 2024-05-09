@@ -24,6 +24,7 @@ export enum GamePhase {
   pause = 'pause',
   warmup = 'warmup',
   active = 'active',
+  break = 'break',
   finale = 'finale',
   climax = 'climax',
 }
