@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { MutableRefObject, useEffect } from 'react';
+import { MutableRefObject, useEffect, useMemo } from 'react';
 import { GameEvent } from '../../types';
 import {
   createSendMessage,
@@ -95,22 +95,18 @@ export const rollEventDice = (data: EventDataRef) => {
   return null;
 };
 
-type EventHandler = (data: EventDataRef) => void | Promise<void>;
-
-const handlers: Record<GameEvent, EventHandler> = {
-  climax: climaxEvent,
-  edge: edgeEvent,
-  pause: pauseEvent,
-  halfPace: halfPaceEvent,
-  risingPace: risingPaceEvent,
-  doublePace: doublePaceEvent,
-  randomPace: randomPaceEvent,
-  randomGrip: randomGripEvent,
-  cleanUp: cleanUpEvent,
-};
-
 export const handleEvent = async (event: GameEvent, data: EventDataRef) => {
-  await handlers[event](data);
+  await {
+    climax: climaxEvent,
+    edge: edgeEvent,
+    pause: pauseEvent,
+    halfPace: halfPaceEvent,
+    risingPace: risingPaceEvent,
+    doublePace: doublePaceEvent,
+    randomPace: randomPaceEvent,
+    randomGrip: randomGripEvent,
+    cleanUp: cleanUpEvent,
+  }[event](data);
 };
 
 export const silenceEventData = (data: EventDataRef): EventDataRef => {
@@ -131,11 +127,16 @@ export const GameEvents = () => {
   const [phase] = useGameValue('phase');
   const [, setPaws] = useGameValue('paws');
   const [events] = useSetting('events');
+  const [, setMessages] = useGameValue('messages');
+  const sendMessage = useMemo(
+    () => createSendMessage(setMessages),
+    [setMessages]
+  );
 
   const data = useAutoRef<EventData>({
     game: {
       ...createStateSetters(...useGame()),
-      sendMessage: createSendMessage(useGame()[1]),
+      sendMessage: sendMessage,
     },
     settings: createStateSetters(...useSettings()),
   });

@@ -11,7 +11,7 @@ export const GameIntensity = () => {
     () => {
       setIntensity(prev => Math.min(prev + 1, 100));
     },
-    duration,
+    duration * 10,
     phase === GamePhase.active
   );
 

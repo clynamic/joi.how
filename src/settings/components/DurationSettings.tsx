@@ -19,28 +19,24 @@ export const DurationSettings = () => {
       <SettingsLabel>Warmup duration</SettingsLabel>
       <Slider
         min='0'
-        max='6000'
-        step='600'
+        max='600'
+        step='60'
         value={warmupDuration}
         onChange={setWarmupDuration}
       />
-      <Measure
-        value={Math.ceil(warmupDuration / 10 / 60)}
-        chars={2}
-        unit='min'
-      />
+      <Measure value={Math.ceil(warmupDuration / 60)} chars={2} unit='min' />
       <SettingsDescription>
         Session duration is a rough estimate. The game will not forcefully end.
       </SettingsDescription>
       <SettingsLabel>Session duration</SettingsLabel>
       <Slider
-        min='1800'
-        max='18000'
-        step='600'
+        min='180'
+        max='1800'
+        step='60'
         value={gameDuration}
         onChange={setGameDuration}
       />
-      <Measure value={Math.ceil(gameDuration / 10 / 60)} chars={2} unit='min' />
+      <Measure value={Math.ceil(gameDuration / 60)} chars={2} unit='min' />
     </SettingsTile>
   );
 };

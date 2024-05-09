@@ -9,6 +9,7 @@ import {
   GamePace,
   GameEvents,
   GameMessages,
+  GameWarmup,
 } from './components';
 import { GameProvider } from './GameProvider';
 
@@ -27,6 +28,7 @@ export const GamePage = () => {
   return (
     <StyledGamePage>
       <GameProvider>
+        <GameWarmup />
         <GameIntensity />
         <GamePace />
         <GameSound />

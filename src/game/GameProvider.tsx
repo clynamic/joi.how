@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import { createPropertySetter, createStateProvider } from '../utils';
+import { createStateProvider } from '../utils';
 
 export enum Paws {
   left = 'left',
@@ -58,7 +58,7 @@ export const initialGameState: GameState = {
   currentImage: 0,
   paws: Paws.none,
   stroke: Stroke.down,
-  phase: GamePhase.active,
+  phase: GamePhase.warmup,
   edged: false,
   messages: [],
 };
@@ -72,9 +72,8 @@ export const {
 });
 
 export const createSendMessage = (
-  setGame: Dispatch<SetStateAction<GameState>>
+  setMessages: Dispatch<SetStateAction<GameMessage[]>>
 ) => {
-  const setMessages = createPropertySetter(setGame, 'messages');
   return (message: Partial<GameMessage> & { id: string }) => {
     setMessages(messages => {
       const previous = messages.find(m => m.id === message.id);

@@ -1,3 +1,4 @@
+export * from './events';
 export * from './GameEvents';
 export * from './GameHypno';
 export * from './GameImages';
@@ -7,3 +8,4 @@ export * from './GameMessages';
 export * from './GameMeter';
 export * from './GamePace';
 export * from './GameSound';
+export * from './GameWarmup';
