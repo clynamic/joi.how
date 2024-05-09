@@ -1,3 +1,4 @@
+export * from './fullscreen';
 export * from './intensity';
 export * from './localstorage';
 export * from './looping';
