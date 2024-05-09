@@ -19,7 +19,6 @@ const StyledGameMeterCircle = motion(styled.div`
 enum MeterColor {
   light = 'light',
   dark = 'dark',
-  red = 'red',
 }
 
 export const GameMeter = () => {
@@ -51,9 +50,6 @@ export const GameMeter = () => {
 
   const size = useMemo(() => {
     switch (phase) {
-      case GamePhase.pause:
-      case GamePhase.warmup: // no meter during warmup
-        return 0;
       case GamePhase.active:
       case GamePhase.finale:
         return (() => {
@@ -64,16 +60,12 @@ export const GameMeter = () => {
               return 0.6;
           }
         })();
-      case GamePhase.climax:
-        return 0.2;
     }
+    return 0;
   }, [phase, stroke]);
 
   const duration = useMemo(() => {
     switch (phase) {
-      case GamePhase.pause:
-      case GamePhase.warmup:
-        return 0;
       case GamePhase.active:
       case GamePhase.finale:
         if (pace >= 5) {
@@ -83,22 +75,18 @@ export const GameMeter = () => {
           return 250;
         }
         return 550;
-      case GamePhase.climax:
-        return 0;
     }
+    return 0;
   }, [phase, pace]);
 
   const color = useMemo(() => {
-    if (phase === GamePhase.climax) {
-      return MeterColor.red;
-    }
     switch (stroke) {
       case Stroke.up:
         return MeterColor.dark;
       case Stroke.down:
         return MeterColor.light;
     }
-  }, [stroke, phase]);
+  }, [stroke]);
 
   return (
     <StyledGameMeter>
@@ -109,7 +97,6 @@ export const GameMeter = () => {
           backgroundColor: {
             light: 'rgb(114, 114, 114)',
             dark: 'rgb(179, 179, 179)',
-            red: 'rgb(211, 76, 76)',
           }[color],
         }}
         transition={{
