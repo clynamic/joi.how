@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { Dialog } from '../../common';
-import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { Dialog, IconButton, VerticalDivider } from '../../common';
+import { faCog, faCompress, faExpand } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useCallback, useState } from 'react';
 import {
@@ -14,11 +14,9 @@ import {
   PlayerSettings,
 } from '../../settings';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
-import { useLooping } from '../../utils';
+import { useFullscreen, useLooping } from '../../utils';
 
-const StyledGameSettings = styled.div``;
-
-const StyledGameSettingsButton = styled.button`
+const StyledGameSettings = styled.div`
   display: flex;
   height: fit-content;
 
@@ -29,15 +27,7 @@ const StyledGameSettingsButton = styled.button`
   background: var(--overlay-color);
   color: #fff;
 
-  padding: 12px;
-
-  font-size: var(--icon-size);
-
-  cursor: pointer;
-
-  &:hover {
-    filter: brightness(1.2);
-  }
+  padding: 8px;
 `;
 
 interface GameSettingsDialogProps {
@@ -78,6 +68,7 @@ export const GameSettings = () => {
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useGameValue('phase');
   const [timer, setTimer] = useState<number | undefined>(undefined);
+  const [fullscreen, setFullscreen] = useFullscreen();
   const sendMessage = useSendMessage();
   const messageId = 'game-settings';
 
@@ -126,9 +117,15 @@ export const GameSettings = () => {
 
   return (
     <StyledGameSettings>
-      <StyledGameSettingsButton onClick={() => onOpen(true)}>
-        <FontAwesomeIcon icon={faCog} />
-      </StyledGameSettingsButton>
+      <IconButton
+        onClick={() => onOpen(true)}
+        icon={<FontAwesomeIcon icon={faCog} />}
+      />
+      <VerticalDivider color='rgba(255, 255, 255, 0.3)' />
+      <IconButton
+        onClick={() => setFullscreen(fullscreen => !fullscreen)}
+        icon={<FontAwesomeIcon icon={fullscreen ? faCompress : faExpand} />}
+      />
       <GameSettingsDialog open={open} onOpenChange={onOpen} />
     </StyledGameSettings>
   );
