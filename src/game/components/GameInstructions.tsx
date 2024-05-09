@@ -13,11 +13,8 @@ import { GameEvent } from '../../types';
 import { VerticalDivider } from '../../common';
 
 const StyledGameInstructions = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-
   display: flex;
+  height: fit-content;
 
   padding: 8px;
 
