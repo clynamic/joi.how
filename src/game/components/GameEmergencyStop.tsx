@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { playTone, wait } from '../../utils';
+import { wait } from '../../utils';
 import { useSetting } from '../../settings';
 
 const StyledGameEmergencyStop = styled.div`
@@ -45,17 +45,7 @@ export const GameEmergencyStop = () => {
   const onStop = useCallback(async () => {
     const timeToCalmDown = Math.ceil((intensity * 500 + 10000) / 1000);
 
-    setPhase(GamePhase.pause);
-
-    playTone(400);
-    await wait(100);
-    playTone(300);
-    await wait(100);
-    playTone(250);
-    await wait(100);
-    playTone(200);
-    await wait(100);
-    playTone(200);
+    setPhase(GamePhase.break);
 
     sendMessage({
       id: messageId,
@@ -84,16 +74,6 @@ export const GameEmergencyStop = () => {
     });
 
     await wait(2000);
-
-    playTone(200);
-    await wait(100);
-    playTone(300);
-    await wait(100);
-    playTone(350);
-    await wait(100);
-    playTone(400);
-    await wait(100);
-    playTone(400);
 
     setPhase(GamePhase.active);
   }, [intensity, minPace, sendMessage, setIntensity, setPace, setPhase]);
