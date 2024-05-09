@@ -1,7 +1,7 @@
 import {
-  faCheck,
   faArrowUpRightFromSquare,
   faTrash,
+  faCheckSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
@@ -87,23 +87,23 @@ export const ImageDialog: React.FC<PropsWithChildren<ImageDialogProps>> = ({
               loud={loud}
             />
             <StyledImageDialogActions>
-              <ToggleTile
-                onClick={() => {
-                  onSelect?.();
-                  onClose?.();
-                }}
-              >
-                <Surrounded trailing={<FontAwesomeIcon icon={faCheck} />}>
-                  <strong>Select</strong>
-                  <p>Start multi-select here</p>
-                </Surrounded>
-              </ToggleTile>
               <ToggleTile onClick={() => window.open(current.source, '_blank')}>
                 <Surrounded
                   trailing={<FontAwesomeIcon icon={faArrowUpRightFromSquare} />}
                 >
                   <strong>Browse</strong>
                   <p>Open source in new tab</p>
+                </Surrounded>
+              </ToggleTile>
+              <ToggleTile
+                onClick={() => {
+                  onSelect?.();
+                  onClose?.();
+                }}
+              >
+                <Surrounded trailing={<FontAwesomeIcon icon={faCheckSquare} />}>
+                  <strong>Select</strong>
+                  <p>Start multi-select here</p>
                 </Surrounded>
               </ToggleTile>
               <ToggleTile
