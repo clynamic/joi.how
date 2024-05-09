@@ -61,7 +61,10 @@ export const climaxEvent = (data: EventDataRef) => {
                 description: undefined,
               });
             }
-            await wait(10000);
+            for (let i = 0; i < 10; i++) {
+              setIntensity(intensity => intensity - 10);
+              await wait(1000);
+            }
             sendMessage({
               id: GameEvent.climax,
               title: 'Good job, $player',
@@ -81,7 +84,10 @@ export const climaxEvent = (data: EventDataRef) => {
               title: '$HANDS OFF! Do not cum!',
               description: undefined,
             });
-            await wait(5000);
+            for (let i = 0; i < 5; i++) {
+              setIntensity(intensity => intensity - 20);
+              await wait(1000);
+            }
             sendMessage({
               id: GameEvent.climax,
               title: 'Good $player. Let yourself cool off',
