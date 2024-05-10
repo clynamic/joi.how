@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { GamePhase, Stroke, useGameValue } from '../GameProvider';
 import { useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useLooping } from '../../utils';
+import { defaultTransition, useLooping } from '../../utils';
 
 const StyledGameMeter = styled.div`
   pointer-events: none;
@@ -82,9 +82,9 @@ export const GameMeter = () => {
   const color = useMemo(() => {
     switch (stroke) {
       case Stroke.up:
-        return MeterColor.dark;
-      case Stroke.down:
         return MeterColor.light;
+      case Stroke.down:
+        return MeterColor.dark;
     }
   }, [stroke]);
 
@@ -95,14 +95,13 @@ export const GameMeter = () => {
         animate={{
           scale: size,
           backgroundColor: {
-            light: 'rgb(114, 114, 114)',
-            dark: 'rgb(179, 179, 179)',
+            dark: 'rgb(114, 114, 114)',
+            light: 'rgb(179, 179, 179)',
           }[color],
         }}
         transition={{
+          ...defaultTransition,
           duration: Math.min(switchDuration, duration) * 0.001,
-          ease: [0.23, 1, 0.32, 1],
-          type: 'spring',
         }}
       />
     </StyledGameMeter>

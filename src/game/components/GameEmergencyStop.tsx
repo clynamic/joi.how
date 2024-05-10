@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { wait } from '../../utils';
+import { defaultTransition, wait } from '../../utils';
 import { useSetting } from '../../settings';
 
 const StyledGameEmergencyStop = styled.div`
@@ -85,14 +85,8 @@ export const GameEmergencyStop = () => {
           <StyledStopButton
             key='stopAction'
             initial={{ opacity: 0 }}
-            animate={{
-              opacity: 1,
-              transition: {
-                duration: 0.4,
-                ease: [0.23, 1, 0.32, 1],
-                type: 'spring',
-              },
-            }}
+            animate={{ opacity: 1 }}
+            transition={defaultTransition}
             exit={{ opacity: 0 }}
             onClick={onStop}
           >
