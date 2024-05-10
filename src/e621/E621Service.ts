@@ -1,6 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
 import { ImageItem, ImageServiceType, ImageType } from '../types';
-import { E621SortOrder, e621SortOrderTags } from './E621Provider';
+import {
+  E621Credentials,
+  E621SortOrder,
+  e621SortOrderTags,
+} from './E621Provider';
 
 interface E621Post {
   id: number;
@@ -16,6 +20,11 @@ interface E621Post {
   };
 }
 
+interface E621User {
+  name: string;
+  blacklisted_tags: string[];
+}
+
 interface E621PostSearchResponse {
   posts: E621Post[];
 }
@@ -24,6 +33,7 @@ interface E621PostSearchRequest {
   tags: string;
   limit?: number;
   order?: E621SortOrder;
+  credentials?: E621Credentials;
 }
 
 export class E621Service {
@@ -36,16 +46,19 @@ export class E621Service {
   }
 
   async getImages(props: E621PostSearchRequest): Promise<ImageItem[]> {
-    let params = props;
-    if (params.order) {
-      params = {
-        tags: params.tags + ' ' + e621SortOrderTags[params.order],
-      };
-    }
+    const { credentials, order, ...rest } = props;
+    const params = {
+      ...rest,
+      tags: rest.tags + (order ? ' ' + e621SortOrderTags[order] : ''),
+    };
     const response = await this.axiosInstance.get<E621PostSearchResponse>(
       '/posts.json',
       {
         params: params,
+        auth: credentials && {
+          username: credentials.username,
+          password: credentials.apiKey,
+        },
       }
     );
 
@@ -73,5 +86,35 @@ export class E621Service {
       }))
       .filter(post => post.type !== ImageType.flash) // Flash is not supported
       .filter(post => post.full); // deleted posts should not be included
+  }
+
+  async getBlacklist(credentials: E621Credentials): Promise<string[]> {
+    const result = await this.axiosInstance.get<E621User>(
+      `/users/${encodeURIComponent(credentials.username)}.json`,
+      {
+        auth: {
+          username: credentials.username,
+          password: credentials.apiKey,
+        },
+      }
+    );
+    return result.data.blacklisted_tags;
+  }
+
+  async testCredentials(credentials: E621Credentials): Promise<boolean> {
+    try {
+      await this.axiosInstance.get(
+        `/users/${encodeURIComponent(credentials.username)}.json`,
+        {
+          auth: {
+            username: credentials.username,
+            password: credentials.apiKey,
+          },
+        }
+      );
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }

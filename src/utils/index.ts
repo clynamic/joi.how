@@ -1,3 +1,4 @@
+export * from './animation';
 export * from './fullscreen';
 export * from './intensity';
 export * from './localstorage';

@@ -13,6 +13,7 @@ export * from './SettingsTile';
 export * from './SettingsTitle';
 export * from './Slider';
 export * from './Space';
+export * from './Spinner';
 export * from './StackedImage';
 export * from './TextInput';
 export * from './ToggleTile';
