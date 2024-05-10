@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { GameMessage, GameMessagePrompt, useGameValue } from '../GameProvider';
-import { playTone } from '../../utils';
+import { defaultTransition, playTone } from '../../utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslate } from '../../settings';
 
@@ -129,11 +129,7 @@ export const GameMessages = () => {
                 y: '-100%',
                 opacity: 0,
               }}
-              transition={{
-                duration: 0.4,
-                ease: [0.23, 1, 0.32, 1],
-                type: 'spring',
-              }}
+              transition={defaultTransition}
             >
               {translate(message.title)}
             </StyledGameMessageTitle>
@@ -144,9 +140,8 @@ export const GameMessages = () => {
                 animate={{ y: 0 }}
                 exit={{ y: '-100%' }}
                 transition={{
-                  duration: 0.4,
+                  ...defaultTransition,
                   ease: 'circInOut',
-                  type: 'spring',
                 }}
               >
                 {message.description}
@@ -159,9 +154,8 @@ export const GameMessages = () => {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '-100%', opacity: 0 }}
                 transition={{
-                  duration: 0.4,
+                  ...defaultTransition,
                   ease: 'circInOut',
-                  type: 'spring',
                 }}
                 onClick={() => onMessageClick(message, prompt)}
               >

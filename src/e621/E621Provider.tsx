@@ -4,6 +4,12 @@ export interface E621Settings {
   search: string;
   limit: number;
   order: E621SortOrder;
+  credentials?: E621Credentials;
+}
+
+export interface E621Credentials {
+  username: string;
+  apiKey: string;
 }
 
 export enum E621SortOrder {

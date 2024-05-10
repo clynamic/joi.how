@@ -31,7 +31,7 @@ export interface TextInputProps
     'type' | 'value' | 'onChange'
   > {
   type?: 'text' | 'password';
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
 }
 
