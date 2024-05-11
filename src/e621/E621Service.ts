@@ -5,8 +5,9 @@ import {
   E621SortOrder,
   e621SortOrderTags,
 } from './E621Provider';
+import { Blacklist } from './E621Blacklist';
 
-interface E621Post {
+export interface E621Post {
   id: number;
   preview: {
     url: string;
@@ -15,14 +16,23 @@ interface E621Post {
     url: string;
   };
   file: {
-    url: string;
+    url?: string;
     ext: string;
+    height: number;
+    width: number;
   };
+  tags: Record<string, string[]>;
+  score: {
+    total: number;
+  };
+  rating: 's' | 'q' | 'e';
+  uploader_id: number;
+  is_favorited?: boolean;
 }
 
-interface E621User {
+export interface E621User {
   name: string;
-  blacklisted_tags: string[];
+  blacklisted_tags: string;
 }
 
 interface E621PostSearchResponse {
@@ -34,6 +44,7 @@ interface E621PostSearchRequest {
   limit?: number;
   order?: E621SortOrder;
   credentials?: E621Credentials;
+  blacklist?: string[];
 }
 
 export class E621Service {
@@ -62,11 +73,18 @@ export class E621Service {
       }
     );
 
+    const blacklistEntries = Blacklist.entriesParse(props.blacklist || []);
+
     return response.data.posts
-      .map((post: E621Post) => ({
+      .filter(post => post.file.url) // deleted posts should not be included
+      .filter(post => post.file.ext !== 'swf') // Flash is not supported
+      .filter(post =>
+        blacklistEntries.every(entry => !Blacklist.postMatch(post, entry))
+      ) // Blacklisted posts should not be included
+      .map(post => ({
         thumbnail: post.preview.url,
         preview: post.sample.url,
-        full: post.file.url,
+        full: post.file.url!,
         type: (() => {
           switch (post.file.ext) {
             case 'webm':
@@ -74,8 +92,6 @@ export class E621Service {
               return ImageType.video;
             case 'gif':
               return ImageType.gif;
-            case 'swf':
-              return ImageType.flash;
             default:
               return ImageType.image;
           }
@@ -83,9 +99,7 @@ export class E621Service {
         source: `https://e621.net/posts/${post.id}`,
         service: ImageServiceType.e621,
         id: post.id.toString(),
-      }))
-      .filter(post => post.type !== ImageType.flash) // Flash is not supported
-      .filter(post => post.full); // deleted posts should not be included
+      }));
   }
 
   async getBlacklist(credentials: E621Credentials): Promise<string[]> {
@@ -98,7 +112,10 @@ export class E621Service {
         },
       }
     );
-    return result.data.blacklisted_tags;
+    return result.data.blacklisted_tags
+      .split('\n')
+      .map(tag => tag.trim())
+      .filter(tag => tag);
   }
 
   async testCredentials(credentials: E621Credentials): Promise<boolean> {

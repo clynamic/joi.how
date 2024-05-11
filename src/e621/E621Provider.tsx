@@ -5,6 +5,8 @@ export interface E621Settings {
   limit: number;
   order: E621SortOrder;
   credentials?: E621Credentials;
+  blacklist?: string[];
+  enableBlacklist: boolean;
 }
 
 export interface E621Credentials {
@@ -48,5 +50,6 @@ export const {
     search: '',
     limit: 75,
     order: E621SortOrder.Id,
+    enableBlacklist: true,
   },
 });

@@ -32,7 +32,6 @@ const StyledDropdown = styled.select`
     filter: brightness(1.2);
   }
 
-  width: 100%;
   height: fit-content;
 `;
 
