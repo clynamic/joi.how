@@ -9,6 +9,9 @@ const StyledDescription = styled.em`
 
   grid-column: 1 / -1;
   margin: 10px 0px;
+
+  display: inline-flex;
+  align-items: center;
 `;
 
 export const SettingsDescription: React.FC<PropsWithChildren> = ({

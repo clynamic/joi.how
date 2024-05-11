@@ -10,11 +10,18 @@ import {
   Surrounded,
   ToggleTile,
   ToggleTileType,
+  TextArea,
+  SettingsDescription,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faUser } from '@fortawesome/free-solid-svg-icons';
+import {
+  faInfoCircle,
+  faSearch,
+  faSync,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons';
 import { useImages } from '../settings';
 import {
   E621SortOrder,
@@ -38,6 +45,9 @@ export const E621Search = () => {
   const [order, setOrder] = useE621Setting('order');
   const [credentials, setCredentials] = useE621Setting('credentials');
   const [addingCredentials, setAddingCredentials] = useState(false);
+  const [enableBlacklist, setEnableBlacklist] =
+    useE621Setting('enableBlacklist');
+  const [blacklist, setBlacklist] = useE621Setting('blacklist');
 
   const setImages = useImages()[1];
   const e621Service = useMemo(() => new E621Service(), []);
@@ -49,6 +59,8 @@ export const E621Search = () => {
         tags: tags,
         limit,
         order,
+        credentials,
+        blacklist: enableBlacklist ? blacklist : undefined,
       });
       setImages(images => [
         ...result.filter(image => !images.some(i => i.id === image.id)),
@@ -57,7 +69,16 @@ export const E621Search = () => {
     } finally {
       setLoading(false);
     }
-  }, [e621Service, tags, limit, order, setImages]);
+  }, [
+    e621Service,
+    tags,
+    limit,
+    order,
+    credentials,
+    enableBlacklist,
+    blacklist,
+    setImages,
+  ]);
 
   const onToggleCredentials = useCallback(() => {
     if (credentials) {
@@ -85,10 +106,6 @@ export const E621Search = () => {
         />
       </Surrounded>
       <Space size='medium' />
-      <SettingsLabel>Count</SettingsLabel>
-      <Slider value={limit} onChange={setLimit} min={1} max={200} step={1} />
-      <Measure value={limit} chars={3} unit='posts' />
-      <Space size='medium' />
       <SettingsLabel>Order</SettingsLabel>
       <Dropdown
         value={order}
@@ -99,6 +116,10 @@ export const E621Search = () => {
         }))}
         style={{ gridColumn: '2 / -1' }}
       />
+      <Space size='medium' />
+      <SettingsLabel>Count</SettingsLabel>
+      <Slider value={limit} onChange={setLimit} min={1} max={200} step={1} />
+      <Measure value={limit} chars={3} unit='posts' />
       <Space size='medium' />
       <ToggleTile
         style={{ opacity: 1 }}
@@ -128,6 +149,9 @@ export const E621Search = () => {
               onSaved={credentials => {
                 setCredentials(credentials);
                 setAddingCredentials(false);
+                if (!blacklist || !blacklist.length) {
+                  e621Service.getBlacklist(credentials).then(setBlacklist);
+                }
               }}
             />
           </motion.div>
@@ -141,13 +165,77 @@ export const E621Search = () => {
             style={{ gridColumn: '1 / -1' }}
             transition={defaultTransition}
           >
-            <SettingsLabel>
+            <SettingsDescription>
               <p>
                 You are logged in as <strong>{credentials.username}</strong>
               </p>
               <Space size='small' />
               <FontAwesomeIcon icon={faUser} />
-            </SettingsLabel>
+            </SettingsDescription>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <ToggleTile
+        style={{ opacity: 1 }}
+        type={ToggleTileType.check}
+        enabled={enableBlacklist}
+        onClick={() => setEnableBlacklist(!enableBlacklist)}
+      >
+        <strong>Enable blacklist</strong>
+        <p>Hide posts with specific tags</p>
+      </ToggleTile>
+      <AnimatePresence>
+        {enableBlacklist && (
+          <motion.div
+            key='blacklist-label'
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            style={{ gridColumn: '1 / -1' }}
+            transition={defaultTransition}
+          >
+            <Surrounded
+              trailing={
+                <>
+                  <IconButton
+                    style={{ fontSize: '1rem' }}
+                    tooltip='View blacklist help'
+                    onClick={() =>
+                      window.open('https://e621.net/help/blacklist')
+                    }
+                    icon={<FontAwesomeIcon icon={faInfoCircle} />}
+                  />
+                  <IconButton
+                    style={{ fontSize: '1rem' }}
+                    tooltip='Download blacklist from e621'
+                    onClick={
+                      credentials
+                        ? () =>
+                            e621Service
+                              .getBlacklist(credentials)
+                              .then(setBlacklist)
+                        : undefined
+                    }
+                    icon={<FontAwesomeIcon icon={faSync} />}
+                  />
+                </>
+              }
+            >
+              <SettingsDescription>Blacklist</SettingsDescription>
+            </Surrounded>
+            <TextArea
+              style={{ resize: 'vertical' }}
+              value={blacklist?.join('\n') ?? ''}
+              onChange={(value: string) =>
+                setBlacklist(
+                  value
+                    .split('\n')
+                    .map(tag => tag.trim())
+                    .filter(tag => tag)
+                )
+              }
+              placeholder='Enter tags...'
+            />
           </motion.div>
         )}
       </AnimatePresence>

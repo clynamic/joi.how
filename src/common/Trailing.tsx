@@ -22,6 +22,8 @@ const StyledSurrounded = styled.div`
 `;
 
 const StyledAround = styled.div`
+  display: flex;
+  align-items: center;
   font-size: var(--icon-size);
 `;
 
