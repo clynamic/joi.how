@@ -50,7 +50,7 @@ export const {
   defaultData: {
     search: '',
     limit: 75,
-    order: E621SortOrder.Id,
-    enableBlacklist: true,
+    order: E621SortOrder.Random,
+    enableBlacklist: false,
   },
 });
