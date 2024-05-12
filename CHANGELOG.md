@@ -2,11 +2,12 @@
 
 ### Added
 
-- login for e6
+- login credentials
 - blacklist
 - optional warm up
 - video support
 - fullscreen button
+- age warning dialog
 
 ### Fixed
 
