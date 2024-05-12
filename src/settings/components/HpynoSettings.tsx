@@ -22,7 +22,7 @@ export const HypnoSettings = () => {
         return (
           <ToggleTile
             key={current}
-            enabled={hypno === current}
+            value={hypno === current}
             onClick={() => setHypno(current)}
             type={ToggleTileType.radio}
           >

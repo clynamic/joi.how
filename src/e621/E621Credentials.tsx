@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { E621Service } from './E621Service';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   SettingsDescription,
   SettingsLabel,
@@ -14,6 +14,7 @@ export interface E621CredentialsInputProps {
   service: E621Service;
   initialValue?: Partial<E621Credentials>;
   onSaved?: (credentials: E621Credentials) => void;
+  disabled?: boolean;
 }
 
 const StyledE621CredentialsInput = styled.div`
@@ -48,6 +49,7 @@ export const E621CredentialsInput = ({
   service,
   initialValue,
   onSaved,
+  disabled,
 }: E621CredentialsInputProps) => {
   const [input, setInput] = useState<Partial<E621Credentials>>({
     ...initialValue,
@@ -63,6 +65,13 @@ export const E621CredentialsInput = ({
       onSaved?.(input as E621Credentials);
     }
   }, [input, onSaved, service]);
+
+  const hasData = useMemo(
+    () => input?.username && input?.apiKey,
+    [input?.username, input?.apiKey]
+  );
+
+  const locked = useMemo(() => loading || disabled, [loading, disabled]);
 
   return (
     <StyledE621CredentialsInput>
@@ -86,7 +95,7 @@ export const E621CredentialsInput = ({
         }
         placeholder='Username'
         autoComplete='username'
-        disabled={loading}
+        disabled={locked}
       />
       <Space size='small' />
       <SettingsLabel>API Key</SettingsLabel>
@@ -102,7 +111,7 @@ export const E621CredentialsInput = ({
         placeholder='API Key'
         type='password'
         autoComplete='current-password'
-        disabled={loading}
+        disabled={locked}
       />
       <Space size='small' />
       <StyledE621SaveCredentials>
@@ -110,7 +119,7 @@ export const E621CredentialsInput = ({
         <Space size='small' />
         <StyledE621SaveCredentialsButton
           onClick={!loading ? onSave : undefined}
-          disabled={!input.username || !input.apiKey || loading || !onSaved}
+          disabled={!hasData || locked}
         >
           Save
         </StyledE621SaveCredentialsButton>
