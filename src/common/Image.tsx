@@ -72,11 +72,9 @@ export const Image: React.FC<ImageProps> = ({
     case ImageSize.full:
       if (playable && item.type === 'video') {
         // only full res URLs may be videos
-        url = item.full;
         playing = true;
-      } else {
-        url = item.preview;
       }
+      url = item.full;
       break;
   }
 
