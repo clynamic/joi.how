@@ -11,7 +11,7 @@ import {
 } from '@fortawesome/free-regular-svg-icons';
 
 interface StyledToggleTileProps {
-  $enabled: boolean;
+  $value: boolean;
 }
 
 const StyledToggleTile = styled.button<StyledToggleTileProps>`
@@ -29,7 +29,7 @@ const StyledToggleTile = styled.button<StyledToggleTileProps>`
 
   border-radius: var(--border-radius);
 
-  opacity: ${({ $enabled }) => ($enabled ? 1 : 0.3)};
+  opacity: ${({ $value }) => ($value ? 1 : 0.3)};
   transition:
     opacity 0.2s,
     background 0.2s;
@@ -63,21 +63,21 @@ export enum ToggleTileType {
 
 export interface ToggleTileProps
   extends React.HTMLAttributes<HTMLButtonElement> {
-  enabled?: boolean;
+  value?: boolean;
   onClick?: () => void;
   type?: ToggleTileType;
 }
 
 export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
   children,
-  enabled = true,
+  value = true,
   onClick,
   type = ToggleTileType.none,
   ...props
 }) => {
   return (
     <StyledToggleTile
-      $enabled={enabled}
+      $value={value}
       role={(() => {
         switch (type) {
           case ToggleTileType.check:
@@ -88,7 +88,7 @@ export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
             return 'switch';
         }
       })()}
-      aria-checked={enabled}
+      aria-checked={value}
       onClick={onClick}
       {...props}
     >
@@ -97,12 +97,10 @@ export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
           switch (type) {
             case ToggleTileType.check:
               return (
-                <FontAwesomeIcon icon={enabled ? faSquareCheck : faSquare} />
+                <FontAwesomeIcon icon={value ? faSquareCheck : faSquare} />
               );
             case ToggleTileType.radio:
-              return (
-                <FontAwesomeIcon icon={enabled ? faCircleDot : faCircle} />
-              );
+              return <FontAwesomeIcon icon={value ? faCircleDot : faCircle} />;
             default:
               return null;
           }

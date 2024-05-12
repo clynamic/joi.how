@@ -9,16 +9,13 @@ export const BoardSettings = () => {
 
   return (
     <SettingsTile label='Board'>
-      <ToggleTile enabled={highRes} onClick={() => setHighRes(!highRes)}>
+      <ToggleTile value={highRes} onClick={() => setHighRes(!highRes)}>
         <Surrounded trailing={highRes ? '🦄' : '🐴'}>
           <strong>High resolution</strong>
           <p>Use high resolution images/videos.</p>
         </Surrounded>
       </ToggleTile>
-      <ToggleTile
-        enabled={videoSound}
-        onClick={() => setVideoSound(!videoSound)}
-      >
+      <ToggleTile value={videoSound} onClick={() => setVideoSound(!videoSound)}>
         <Surrounded
           trailing={
             <FontAwesomeIcon icon={videoSound ? faVolumeUp : faVolumeMute} />

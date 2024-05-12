@@ -32,7 +32,7 @@ export const EventSettings = () => {
         return (
           <ToggleTile
             key={event}
-            enabled={events.includes(event)}
+            value={events.includes(event)}
             onClick={() => toggleEvent(event)}
             type={ToggleTileType.check}
           >

@@ -6,7 +6,13 @@ export interface DropdownOption {
 }
 
 export interface DropdownProps
-  extends Omit<React.HTMLAttributes<HTMLSelectElement>, 'onChange'> {
+  extends Omit<
+    React.DetailedHTMLProps<
+      React.SelectHTMLAttributes<HTMLSelectElement>,
+      HTMLSelectElement
+    >,
+    'onChange'
+  > {
   value: string;
   options: DropdownOption[];
   onChange: (value: string) => void;
@@ -16,7 +22,6 @@ const StyledDropdown = styled.select`
   background: var(--background);
   color: var(--text-color);
 
-  margin: 0 4px;
   padding: 4px;
 
   font-size: 1rem;

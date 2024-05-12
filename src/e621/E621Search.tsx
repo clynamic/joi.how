@@ -12,13 +12,13 @@ import {
   ToggleTileType,
   TextArea,
   SettingsDescription,
+  Spinner,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faInfoCircle,
-  faSearch,
   faSync,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
@@ -37,8 +37,22 @@ const StyledE621Search = styled.div`
   grid-template-columns: auto 1fr auto;
 `;
 
+const StyledE621SearchButton = styled.button`
+  grid-column: 1 / -1;
+  justify-self: center;
+  padding: 8px 16px;
+  background: var(--focus-color);
+  color: var(--text-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover {
+    background: var(--primary);
+  }
+`;
+
 export const E621Search = () => {
-  const [, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [tags, setTags] = useE621Setting('search');
   const [limit, setLimit] = useE621Setting('limit');
@@ -90,21 +104,15 @@ export const E621Search = () => {
 
   return (
     <StyledE621Search>
-      <Surrounded
-        trailing={
-          <IconButton
-            onClick={runSearch}
-            icon={<FontAwesomeIcon icon={faSearch} />}
-          />
-        }
-      >
-        <TextInput
-          value={tags}
-          onChange={setTags}
-          onSubmit={runSearch}
-          placeholder='Enter tags...'
-        />
-      </Surrounded>
+      <SettingsLabel>Tags</SettingsLabel>
+      <TextInput
+        value={tags}
+        onChange={setTags}
+        onSubmit={runSearch}
+        placeholder='Enter tags...'
+        style={{ gridColumn: '2 / -1' }}
+        disabled={loading}
+      />
       <Space size='medium' />
       <SettingsLabel>Order</SettingsLabel>
       <Dropdown
@@ -115,6 +123,7 @@ export const E621Search = () => {
           label: e621SortOrderLabels[value],
         }))}
         style={{ gridColumn: '2 / -1' }}
+        disabled={loading}
       />
       <Space size='medium' />
       <SettingsLabel>Count</SettingsLabel>
@@ -124,7 +133,7 @@ export const E621Search = () => {
       <ToggleTile
         style={{ opacity: 1 }}
         type={ToggleTileType.check}
-        enabled={!!credentials || addingCredentials}
+        value={!!credentials || addingCredentials}
         onClick={onToggleCredentials}
       >
         <strong>Credentials</strong>
@@ -153,6 +162,7 @@ export const E621Search = () => {
                   e621Service.getBlacklist(credentials).then(setBlacklist);
                 }
               }}
+              disabled={loading}
             />
           </motion.div>
         )}
@@ -178,7 +188,7 @@ export const E621Search = () => {
       <ToggleTile
         style={{ opacity: 1 }}
         type={ToggleTileType.check}
-        enabled={enableBlacklist}
+        value={enableBlacklist}
         onClick={() => setEnableBlacklist(!enableBlacklist)}
       >
         <strong>Enable blacklist</strong>
@@ -239,6 +249,14 @@ export const E621Search = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      <Space size='medium' />
+      <StyledE621SearchButton
+        onClick={runSearch}
+        disabled={loading}
+        style={{ gridColumn: '1 / -1' }}
+      >
+        {loading ? <Spinner /> : <strong>Search & Add</strong>}
+      </StyledE621SearchButton>
       <Space size='medium' />
     </StyledE621Search>
   );
