@@ -6,9 +6,9 @@
 
 </br></br>
 
-This is a small application I've been working on for a bit. Just a web app e621 slideshow that has a jack-off-instruction-style stroke-to-the-beat UI! If you find that sort of thing interesting, check it out [here](https://joi.how)!
+Joi.how is a web app e621 slideshow that has a jack-off-instruction-style stroke-to-the-beat UI!
 
-I'm also taking feature requests! If there's anything you'd like to see added, feel free to [open an issue](/issues) or ask in the [forum thread](https://e621.net/forum_topics/23796).
+If there's anything you'd like to see added, feel free to [open an issue](/issues) or ask in the [forum thread](https://e621.net/forum_topics/23796).
 
 ### Features
 
@@ -19,9 +19,9 @@ I'm also taking feature requests! If there's anything you'd like to see added, f
 - Warmup duration control.
 - Duration control.
 - Orgasm control.
-- Initial support for some basic hypnosis stuff.
-- Codes you can use to share your configs!
-- Integration with various vibrators through [Intiface](https://intiface.com/) to milk you automatically!
+- Basic hypnosis.
+- Settings import/export.
+- Integration with vibrators via [Intiface](https://intiface.com/)
 
 ### Usage
 
@@ -37,7 +37,7 @@ To locally run it:
 3. run
 
 ```sh
-git clone https://github.com/PawCorp/joi.how.git
+git clone https://github.com/clynamic/joi.how.git
 cd joi.how
 yarn
 yarn start
@@ -46,5 +46,5 @@ yarn start
 ### Social
 
 - We have an [e6 forum thread](https://e621.net/forum_topics/23796). We'd love to hear your feedback.
-- Want to let other people set your wallpaper? Try our other app, [Walltaker](https://walltaker.joi.how/).
-- Hang out with us in the [Walltaker discord server](https://discord.com/invite/waaHCqUXj6).
+- Want to let other people set your wallpaper? Try [Walltaker](https://walltaker.joi.how/).
+- Need support? visit our [discord server](https://discord.clynamic.net/).
