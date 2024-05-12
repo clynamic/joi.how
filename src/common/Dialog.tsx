@@ -82,7 +82,9 @@ export const Dialog = ({
     onOpenChange: onOpenChange,
   });
 
-  const { isMounted, styles } = useTransitionStyles(context);
+  const { isMounted, styles } = useTransitionStyles(context, {
+    duration: 200,
+  });
 
   const click = useClick(context);
   const dismiss = useDismiss(context, {
