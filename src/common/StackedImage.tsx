@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Image, ImageProps, ImageSize } from './Image';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 const StyledStackedImage = styled.div`
   position: relative;
@@ -33,6 +33,11 @@ export const StackedImage: React.FC<ImageProps> = ({
     setIsFullLoaded(true);
   }, [setIsFullLoaded]);
 
+  useEffect(() => {
+    setIsPreviewLoaded(false);
+    setIsFullLoaded(false);
+  }, [item]);
+
   return (
     <StyledStackedImage>
       <Image
@@ -40,6 +45,7 @@ export const StackedImage: React.FC<ImageProps> = ({
         item={item}
         size={ImageSize.thumbnail}
         style={{
+          ...props.style,
           visibility: isPreviewLoaded || isFullLoaded ? 'hidden' : 'inherit',
         }}
       />
@@ -48,7 +54,10 @@ export const StackedImage: React.FC<ImageProps> = ({
           {...props}
           item={item}
           size={ImageSize.preview}
-          style={{ visibility: isFullLoaded ? 'hidden' : 'inherit' }}
+          style={{
+            ...props.style,
+            visibility: isFullLoaded ? 'hidden' : 'inherit',
+          }}
           onLoad={handleLoadPreview}
         />
       )}
@@ -59,6 +68,10 @@ export const StackedImage: React.FC<ImageProps> = ({
           size={ImageSize.full}
           onLoad={handleLoadFull}
           onLoadedMetadata={handleLoadFull}
+          style={{
+            ...props.style,
+            visibility: !isFullLoaded ? 'hidden' : 'inherit',
+          }}
         />
       )}
     </StyledStackedImage>
