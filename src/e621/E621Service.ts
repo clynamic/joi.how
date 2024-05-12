@@ -43,6 +43,7 @@ interface E621PostSearchRequest {
   tags: string;
   limit?: number;
   order?: E621SortOrder;
+  score?: number;
   credentials?: E621Credentials;
   blacklist?: string[];
 }
@@ -57,10 +58,17 @@ export class E621Service {
   }
 
   async getImages(props: E621PostSearchRequest): Promise<ImageItem[]> {
-    const { credentials, order, ...rest } = props;
+    const { credentials, order, score: minScore, tags, ...rest } = props;
     const params = {
       ...rest,
-      tags: rest.tags + (order ? ' ' + e621SortOrderTags[order] : ''),
+      tags: [
+        ...tags
+          .split(' ')
+          .filter(tag => tag)
+          .join(' '),
+        order ? ' ' + e621SortOrderTags[order] : '',
+        minScore ? ` score:>=${minScore}` : '',
+      ].join(' '),
     };
     const response = await this.axiosInstance.get<E621PostSearchResponse>(
       '/posts.json',

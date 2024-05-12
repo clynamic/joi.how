@@ -4,6 +4,7 @@ export interface E621Settings {
   search: string;
   limit: number;
   order: E621SortOrder;
+  minScore?: number;
   credentials?: E621Credentials;
   blacklist?: string[];
   enableBlacklist: boolean;
