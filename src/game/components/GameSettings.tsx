@@ -12,6 +12,7 @@ import {
   ImageSettings,
   PaceSettings,
   PlayerSettings,
+  VibratorSettings,
 } from '../../settings';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useFullscreen, useLooping } from '../../utils';
@@ -57,6 +58,7 @@ const GameSettingsDialog: React.FC<GameSettingsDialogProps> = props => {
           <HypnoSettings />
           <ClimaxSettings />
           <BoardSettings />
+          <VibratorSettings />
           <ImageSettings />
         </StyledGameSettingsDialog>
       }
