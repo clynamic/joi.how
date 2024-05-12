@@ -66,6 +66,7 @@ export interface ToggleTileProps
   value?: boolean;
   onClick?: () => void;
   type?: ToggleTileType;
+  trailing?: React.ReactNode;
 }
 
 export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
@@ -73,6 +74,7 @@ export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
   value = true,
   onClick,
   type = ToggleTileType.none,
+  trailing,
   ...props
 }) => {
   return (
@@ -94,6 +96,9 @@ export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
     >
       <Surrounded
         trailing={(() => {
+          if (trailing) {
+            return trailing;
+          }
           switch (type) {
             case ToggleTileType.check:
               return (

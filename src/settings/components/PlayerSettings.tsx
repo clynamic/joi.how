@@ -1,11 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  Divider,
-  SettingsTile,
-  SettingsTitle,
-  Surrounded,
-  ToggleTile,
-} from '../../common';
+import { Divider, SettingsTile, SettingsTitle, ToggleTile } from '../../common';
 import {
   PlayerBody,
   PlayerBodyDescriptions,
@@ -35,27 +29,24 @@ export const PlayerSettings = () => {
             key={current}
             value={gender === current}
             onClick={() => setGender(current)}
+            trailing={
+              <FontAwesomeIcon
+                style={{ aspectRatio: 1 }}
+                icon={(() => {
+                  switch (current) {
+                    case PlayerGender.male:
+                      return faMars;
+                    case PlayerGender.female:
+                      return faVenus;
+                    case PlayerGender.other:
+                      return faMarsAndVenus;
+                  }
+                })()}
+              />
+            }
           >
-            <Surrounded
-              trailing={
-                <FontAwesomeIcon
-                  style={{ aspectRatio: 1 }}
-                  icon={(() => {
-                    switch (current) {
-                      case PlayerGender.male:
-                        return faMars;
-                      case PlayerGender.female:
-                        return faVenus;
-                      case PlayerGender.other:
-                        return faMarsAndVenus;
-                    }
-                  })()}
-                />
-              }
-            >
-              <strong>{PlayerGenderLabels[current]}</strong>
-              <p>{PlayerGenderDescriptions[current]}</p>
-            </Surrounded>
+            <strong>{PlayerGenderLabels[current]}</strong>
+            <p>{PlayerGenderDescriptions[current]}</p>
           </ToggleTile>
         );
       })}
@@ -68,22 +59,19 @@ export const PlayerSettings = () => {
             key={current}
             value={body === current}
             onClick={() => setBody(current)}
+            trailing={(() => {
+              switch (current) {
+                case PlayerBody.penis:
+                  return '🍆';
+                case PlayerBody.vagina:
+                  return '🍑';
+                case PlayerBody.neuter:
+                  return '🥝';
+              }
+            })()}
           >
-            <Surrounded
-              trailing={(() => {
-                switch (current) {
-                  case PlayerBody.penis:
-                    return '🍆';
-                  case PlayerBody.vagina:
-                    return '🍑';
-                  case PlayerBody.neuter:
-                    return '🥝';
-                }
-              })()}
-            >
-              <strong>{PlayerBodyLabels[current]}</strong>
-              <p>{PlayerBodyDescriptions[current]}</p>
-            </Surrounded>
+            <strong>{PlayerBodyLabels[current]}</strong>
+            <p>{PlayerBodyDescriptions[current]}</p>
           </ToggleTile>
         );
       })}
