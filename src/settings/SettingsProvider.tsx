@@ -32,7 +32,7 @@ export const defaultSettings: Settings = {
   hypno: GameHypnoType.joi,
   gender: PlayerGender.male,
   body: PlayerBody.penis,
-  highRes: true,
+  highRes: false,
   videoSound: false,
   vibrations: VibrationMode.thump,
 };
