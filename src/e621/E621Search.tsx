@@ -13,6 +13,7 @@ import {
   TextArea,
   SettingsDescription,
   Spinner,
+  Button,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
@@ -35,20 +36,6 @@ import { defaultTransition } from '../utils';
 const StyledE621Search = styled.div`
   display: grid;
   grid-template-columns: auto 1fr auto;
-`;
-
-const StyledE621SearchButton = styled.button`
-  grid-column: 1 / -1;
-  justify-self: center;
-  padding: 8px 16px;
-  background: var(--focus-color);
-  color: var(--text-color);
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: background 0.2s;
-  &:hover {
-    background: var(--primary);
-  }
 `;
 
 export const E621Search = () => {
@@ -176,11 +163,10 @@ export const E621Search = () => {
             transition={defaultTransition}
           >
             <SettingsDescription>
-              <p>
-                You are logged in as <strong>{credentials.username}</strong>
+              <p style={{ display: 'inline' }}>
+                You are logged in as <strong>{credentials.username}</strong>{' '}
+                <FontAwesomeIcon icon={faUser} />
               </p>
-              <Space size='small' />
-              <FontAwesomeIcon icon={faUser} />
             </SettingsDescription>
           </motion.div>
         )}
@@ -250,13 +236,16 @@ export const E621Search = () => {
         )}
       </AnimatePresence>
       <Space size='medium' />
-      <StyledE621SearchButton
+      <Button
         onClick={runSearch}
         disabled={loading}
-        style={{ gridColumn: '1 / -1' }}
+        style={{
+          gridColumn: '1 / -1',
+          justifySelf: 'center',
+        }}
       >
         {loading ? <Spinner /> : <strong>Search & Add</strong>}
-      </StyledE621SearchButton>
+      </Button>
       <Space size='medium' />
     </StyledE621Search>
   );
