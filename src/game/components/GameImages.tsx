@@ -3,7 +3,7 @@ import { useImages, useSetting } from '../../settings';
 import { useGameValue } from '../GameProvider';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo } from 'react';
-import { Image, ImageSize } from '../../common';
+import { ImageSize, StackedImage } from '../../common';
 import { useLooping } from '../../utils';
 
 const StyledGameImages = styled.div`
@@ -23,12 +23,6 @@ const StyledForegroundImage = styled.div`
   z-index: -1;
   pointer-events: none;
   user-select: none;
-
-  & > img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
 `;
 
 const StyledBackgroundImage = motion(styled.div`
@@ -46,13 +40,6 @@ const StyledBackgroundImage = motion(styled.div`
   align-items: center;
 
   filter: blur(30px);
-
-  & > img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform-origin: center;
-  }
 `);
 
 export const GameImages = () => {
@@ -87,10 +74,13 @@ export const GameImages = () => {
           repeat: Infinity,
         }}
       >
-        <Image item={image} size={ImageSize.preview} />
+        <StackedImage item={image} size={ImageSize.preview} />
       </StyledBackgroundImage>
       <StyledForegroundImage>
-        <Image
+        <StackedImage
+          style={{
+            objectFit: 'contain',
+          }}
           item={image}
           size={highRes ? ImageSize.full : ImageSize.preview}
           playable
