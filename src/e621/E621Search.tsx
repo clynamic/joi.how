@@ -14,6 +14,7 @@ import {
   SettingsDescription,
   Spinner,
   Button,
+  StyledMeasure,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
@@ -44,6 +45,7 @@ export const E621Search = () => {
   const [tags, setTags] = useE621Setting('search');
   const [limit, setLimit] = useE621Setting('limit');
   const [order, setOrder] = useE621Setting('order');
+  const [minScore, setMinScore] = useE621Setting('minScore');
   const [credentials, setCredentials] = useE621Setting('credentials');
   const [addingCredentials, setAddingCredentials] = useState(false);
   const [enableBlacklist, setEnableBlacklist] =
@@ -116,6 +118,24 @@ export const E621Search = () => {
       <SettingsLabel>Count</SettingsLabel>
       <Slider value={limit} onChange={setLimit} min={1} max={200} step={1} />
       <Measure value={limit} chars={3} unit='posts' />
+      <Space size='medium' />
+      <SettingsLabel>Score</SettingsLabel>
+      <Slider
+        value={minScore ?? -1}
+        onChange={value => {
+          setMinScore(value === -1 ? undefined : value);
+        }}
+        min={-1}
+        max={50}
+        step={1}
+      />
+      {!minScore || minScore === -1 ? (
+        <StyledMeasure>
+          <strong>any</strong>
+        </StyledMeasure>
+      ) : (
+        <Measure value={minScore ?? -1} chars={3} unit='votes' />
+      )}
       <Space size='medium' />
       <ToggleTile
         style={{ opacity: 1 }}

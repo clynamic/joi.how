@@ -6,7 +6,7 @@ export interface MeasureProps {
   unit?: string;
 }
 
-const StyledMeasure = styled.span`
+export const StyledMeasure = styled.span`
   white-space: nowrap;
   text-align: end;
   font-family: 'Courier New', Courier, monospace;
