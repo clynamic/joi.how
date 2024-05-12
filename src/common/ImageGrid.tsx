@@ -117,7 +117,7 @@ const StyledImageMiniView = styled.div``;
 const StyledImageMiniViewContent = motion(styled.div``);
 
 const StyledImageMiniViewImage = styled.div`
-  width: 100px;
+  width: 160px;
 
   box-shadow: 0 0 10px rgba(40, 50, 60, 0.75); // TODO: Use CSS variable
   border: 1px solid #fff;
