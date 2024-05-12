@@ -33,7 +33,7 @@ export const PlayerSettings = () => {
         return (
           <ToggleTile
             key={current}
-            enabled={gender === current}
+            value={gender === current}
             onClick={() => setGender(current)}
           >
             <Surrounded
@@ -66,7 +66,7 @@ export const PlayerSettings = () => {
         return (
           <ToggleTile
             key={current}
-            enabled={body === current}
+            value={body === current}
             onClick={() => setBody(current)}
           >
             <Surrounded

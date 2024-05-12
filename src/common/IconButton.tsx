@@ -39,11 +39,16 @@ export const IconButton: React.FC<IconButtonProps> = ({
   icon,
   onClick,
   tooltip,
+  disabled,
   ...rest
 }) => {
   return (
     <Tooltip content={tooltip}>
-      <StyledIconButton disabled={onClick == null} onClick={onClick} {...rest}>
+      <StyledIconButton
+        disabled={disabled || onClick == null}
+        onClick={!disabled ? onClick : undefined}
+        {...rest}
+      >
         {icon}
       </StyledIconButton>
     </Tooltip>
