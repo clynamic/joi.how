@@ -94,6 +94,7 @@ export const GameImages = () => {
           item={image}
           size={highRes ? ImageSize.full : ImageSize.preview}
           playable
+          randomStart
           loud={videoSound}
         />
       </StyledForegroundImage>

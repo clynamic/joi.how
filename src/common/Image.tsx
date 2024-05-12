@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { ImageItem } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { useRef } from 'react';
 
 export enum ImageSize {
   thumbnail = 'thumbnail',
@@ -20,6 +21,7 @@ export interface ImageProps
   size: ImageSize;
   playable?: boolean;
   loud?: boolean;
+  randomStart?: boolean;
 }
 
 const StyledImage = styled.img`
@@ -52,10 +54,13 @@ export const Image: React.FC<ImageProps> = ({
   size,
   playable = false,
   loud = false,
+  randomStart = false,
+  onLoadedMetadata,
   ...rest
 }) => {
   let url: string | undefined;
   let playing = false;
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   switch (size) {
     case ImageSize.thumbnail:
@@ -86,12 +91,22 @@ export const Image: React.FC<ImageProps> = ({
   if (playing) {
     return (
       <StyledVideo
+        ref={videoRef}
         src={url}
         alt={`Video from ${item.service} with id ${item.id}`}
         autoPlay
         loop
         muted={!loud}
         playsInline
+        onLoadedMetadata={event => {
+          if (randomStart) {
+            const video = videoRef.current;
+            if (video) {
+              video.currentTime = Math.random() * video.duration;
+            }
+          }
+          onLoadedMetadata?.(event);
+        }}
         {...rest}
       />
     );
