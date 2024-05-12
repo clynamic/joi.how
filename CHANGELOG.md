@@ -3,23 +3,24 @@
 ### Added
 
 - login for e6
-- blacklisting tags, with e6 sync
-- optional warm up duration
-- add support for loading files from local sources
-- add ability to fullscreen while playing
+- blacklist
+- optional warm up
+- video support
+- fullscreen button
 
 ### Fixed
 
 - min score filtering
+- vibrator integration
+- game message variables
 
 ### Changed
 
-- readme now includes forum thread information
-- game loop now fully stops (including events and images)
-- settings format now secured against all characters
-- now using react router instead of reach router
-- yarn instead of npm
-- upgraded to node 16
+- app design
+- image managment
+- removed skip and open image buttons
+- udpated readme information
+- settings export as file
 
 ### Added
 
