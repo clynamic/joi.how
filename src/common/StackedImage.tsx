@@ -56,7 +56,7 @@ export const StackedImage: React.FC<ImageProps> = ({
           size={ImageSize.preview}
           style={{
             ...props.style,
-            visibility: isFullLoaded ? 'hidden' : 'inherit',
+            visibility: !isPreviewLoaded || isFullLoaded ? 'hidden' : 'inherit',
           }}
           onLoad={handleLoadPreview}
         />
