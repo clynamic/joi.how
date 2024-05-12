@@ -46,6 +46,7 @@ export interface GameState {
   pace: number;
   intensity: number;
   currentImage: number;
+  currentHypno: number;
   paws: Paws;
   stroke: Stroke;
   phase: GamePhase;
@@ -57,6 +58,7 @@ export const initialGameState: GameState = {
   pace: 0,
   intensity: 0,
   currentImage: 0,
+  currentHypno: 0,
   paws: Paws.none,
   stroke: Stroke.down,
   phase: GamePhase.warmup,

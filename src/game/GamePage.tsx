@@ -50,6 +50,18 @@ const StyledTopBar = styled.div`
   }
 `;
 
+const StyledCenter = styled.div`
+  position: relative;
+
+  & > *:nth-child(2) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+`;
+
 const StyledBottomBar = styled.div`
   position: absolute;
   bottom: 0;
@@ -83,12 +95,14 @@ export const GamePage = () => {
           <GameInstructions />
           <GameMessages />
         </StyledTopBar>
+        <StyledCenter>
+          <GameMeter />
+          <GameHypno />
+        </StyledCenter>
         <StyledBottomBar>
           <GameSettings />
           <GameEmergencyStop />
         </StyledBottomBar>
-        <GameMeter />
-        <GameHypno />
       </StyledGamePage>
     </GameProvider>
   );
