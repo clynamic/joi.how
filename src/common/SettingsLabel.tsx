@@ -6,7 +6,4 @@ export const SettingsLabel = styled.label`
 
   white-space: nowrap;
   padding: 0 4px;
-
-  display: inline-flex;
-  align-items: center;
 `;

@@ -1,5 +1,9 @@
-import { PropsWithChildren } from 'react';
 import styled from 'styled-components';
+
+export interface SettingsDescriptionProps
+  extends React.HTMLAttributes<HTMLElement> {
+  children: React.ReactNode;
+}
 
 const StyledDescription = styled.em`
   color: #9495ad; // TODO: Use CSS variable
@@ -10,12 +14,12 @@ const StyledDescription = styled.em`
   grid-column: 1 / -1;
   margin: 10px 0px;
 
-  display: inline-flex;
   align-items: center;
 `;
 
-export const SettingsDescription: React.FC<PropsWithChildren> = ({
+export const SettingsDescription: React.FC<SettingsDescriptionProps> = ({
   children,
+  ...props
 }) => {
-  return <StyledDescription>{children}</StyledDescription>;
+  return <StyledDescription {...props}>{children}</StyledDescription>;
 };

@@ -1,3 +1,4 @@
+export * from './Button';
 export * from './ContentSection';
 export * from './Dialog';
 export * from './Divider';

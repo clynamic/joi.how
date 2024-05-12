@@ -28,7 +28,7 @@ export const GameMeter = () => {
 
   const switchDuration = useMemo(() => {
     if (pace === 0) return 0;
-    return (1 / Math.max(1, pace)) * 1000;
+    return (1 / pace) * 1000;
   }, [pace]);
 
   const updateStroke = useCallback(() => {
@@ -101,7 +101,7 @@ export const GameMeter = () => {
         }}
         transition={{
           ...defaultTransition,
-          duration: Math.min(switchDuration, duration) * 0.001,
+          duration: Math.min(switchDuration, duration) / 1000,
         }}
       />
     </StyledGameMeter>

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { ContentSection } from '../../common';
+import { Button, ContentSection } from '../../common';
 import { useImages } from '../../settings';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,25 +16,10 @@ const StyledStartWarning = styled.p`
   margin-bottom: 1rem;
 `;
 
-const StyledStartButton = styled.button`
-  background: var(--focus-color);
-  color: var(--text-color);
-
-  border-radius: var(--border-radius);
-  transition: var(--hover-transition);
-
+const StyledStartButton = styled(Button)`
   font-size: 1.5rem;
-  cursor: pointer;
   padding: 15px 20px;
-
-  &:hover {
-    background: var(--primary);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  text-transform: uppercase;
 `;
 
 export const StartButton = () => {
@@ -52,7 +37,7 @@ export const StartButton = () => {
         disabled={images.length === 0}
         onClick={() => navigate('/play')}
       >
-        BEGIN
+        begin
       </StyledStartButton>
     </StyledStartSection>
   );

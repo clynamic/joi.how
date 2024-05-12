@@ -10,4 +10,5 @@ export * from './GameMeter';
 export * from './GamePace';
 export * from './GameSettings';
 export * from './GameSound';
+export * from './GameVibrator';
 export * from './GameWarmup';
