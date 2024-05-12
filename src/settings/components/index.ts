@@ -7,6 +7,6 @@ export * from './ImageSettings';
 export * from './PaceSettings';
 export * from './PlayerSettings';
 export * from './ServiceSettings';
-export * from './SharingSettings';
+export * from './TradeSettings';
 export * from './VibratorSettings';
 export * from './WalltalkerSettings';
