@@ -62,10 +62,7 @@ export class E621Service {
     const params = {
       ...rest,
       tags: [
-        ...tags
-          .split(' ')
-          .filter(tag => tag)
-          .join(' '),
+        ...tags.split(' ').filter(tag => tag),
         order ? ' ' + e621SortOrderTags[order] : '',
         minScore ? ` score:>=${minScore}` : '',
       ].join(' '),
