@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { createStateProvider } from '../utils';
+import { ImageItem } from '../types';
 
 export enum Paws {
   left = 'left',
@@ -45,7 +46,9 @@ export interface GameMessage {
 export interface GameState {
   pace: number;
   intensity: number;
-  currentImage: number;
+  currentImage?: ImageItem;
+  seenImages: ImageItem[];
+  nextImages: ImageItem[];
   currentHypno: number;
   paws: Paws;
   stroke: Stroke;
@@ -57,7 +60,9 @@ export interface GameState {
 export const initialGameState: GameState = {
   pace: 0,
   intensity: 0,
-  currentImage: 0,
+  currentImage: undefined,
+  seenImages: [],
+  nextImages: [],
   currentHypno: 0,
   paws: Paws.none,
   stroke: Stroke.down,
