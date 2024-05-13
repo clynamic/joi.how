@@ -19,7 +19,17 @@ const StyledSlider = styled.input.attrs({ type: 'range' })`
     filter: brightness(1.2);
   }
 
-  &::-webkit-slider-runnable-track,
+  &::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: var(--border-radius);
+    background: ${props => {
+      const value = parseFloat(props.value?.toString() ?? '0');
+      const min = parseFloat(props.min?.toString() ?? '0');
+      const max = parseFloat(props.max?.toString() ?? '1');
+      return `linear-gradient(to right, var(--primary) ${((value - min) / (max - min)) * 100}%, var(--background) ${((value - min) / (max - min)) * 100}%)`;
+    }};
+  }
+
   &::-moz-range-track {
     height: 8px;
     border-radius: var(--border-radius);
@@ -31,9 +41,17 @@ const StyledSlider = styled.input.attrs({ type: 'range' })`
     }};
   }
 
-  &::-webkit-slider-thumb,
-  &::-moz-range-thumb {
+  &::-webkit-slider-thumb {
     -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--primary);
+    filter: brightness(1.2);
+    border-radius: 50%;
+    margin-top: -4px;
+  }
+
+  &::-moz-range-thumb {
     width: 16px;
     height: 16px;
     background: var(--primary);
