@@ -134,6 +134,7 @@ export const Dialog = ({
                       {title || <div />}
                       {closable && (
                         <IconButton
+                          aria-label='Close dialog'
                           onClick={() => onOpenChange(false)}
                           icon={<FontAwesomeIcon icon={faClose} />}
                         />
