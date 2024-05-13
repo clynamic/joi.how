@@ -1,7 +1,7 @@
 ## JOI<sup>.how</sup>
 
 <a href="https://joi.how" title="joi.how">
-    <img src="src/assets/logo.svg" alt="eggplant" width="160" />
+    <img src="public/logo.svg" alt="eggplant" width="160" />
 </a>
 
 </br></br>

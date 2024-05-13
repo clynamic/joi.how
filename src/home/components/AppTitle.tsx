@@ -1,4 +1,3 @@
-import Logo from '../../assets/logo.svg';
 import styled from 'styled-components';
 import { ContentSection } from '../../common';
 
@@ -35,7 +34,7 @@ const StyledTitle = styled(ContentSection)`
 export const HomeTitle = () => {
   return (
     <StyledTitle>
-      <img src={Logo} alt='JOI.how' />
+      <img src={'/logo.svg'} alt='JOI.how' />
       <h1>
         <abbr title='Jack Off Instructions'>JOI</abbr>
         <sup>.how</sup>
