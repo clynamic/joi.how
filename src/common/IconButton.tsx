@@ -9,6 +9,10 @@ export interface IconButtonProps
 }
 
 export const StyledIconButton = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   background: none;
   color: var(--color-text);
   opacity: ${(props: { disabled?: boolean }) => (props.disabled ? 0.5 : 1)};
