@@ -1,3 +1,9 @@
+## 2.0.2 - 2024-05-13
+
+### Fixed
+
+- climax event not triggering if edge not enabled
+
 ## 2.0.1 - 2024-05-13
 
 ### Fixed
