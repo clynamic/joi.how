@@ -35,8 +35,8 @@ export const HomePage = () => {
         <Introduction />
         <SettingsSection />
         <WallTalkerAd />
-        <ReleaseNotes />
         <VersionDisplay />
+        <ReleaseNotes />
         <Instructions />
         <StartButton />
       </StyledHomePage>
