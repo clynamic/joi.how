@@ -1,5 +1,6 @@
 export * from './animation';
 export * from './fullscreen';
+export * from './images';
 export * from './intensity';
 export * from './localstorage';
 export * from './looping';
