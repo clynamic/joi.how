@@ -11,7 +11,7 @@ export const useFullscreen = () => {
         );
       });
     } else {
-      if (document.exitFullscreen) {
+      if (document.fullscreenElement) {
         document.exitFullscreen();
       }
     }
