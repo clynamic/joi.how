@@ -120,11 +120,13 @@ export const GameSettings = () => {
   return (
     <StyledGameSettings>
       <IconButton
+        aria-label='Settings'
         onClick={() => onOpen(true)}
         icon={<FontAwesomeIcon icon={faCog} />}
       />
       <VerticalDivider color='rgba(255, 255, 255, 0.3)' />
       <IconButton
+        aria-label='Fullscreen'
         onClick={() => setFullscreen(fullscreen => !fullscreen)}
         icon={<FontAwesomeIcon icon={fullscreen ? faCompress : faExpand} />}
       />

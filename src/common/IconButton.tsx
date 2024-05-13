@@ -49,6 +49,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   return (
     <Tooltip content={tooltip}>
       <StyledIconButton
+        aria-label={tooltip}
         disabled={disabled || onClick == null}
         onClick={!disabled ? onClick : undefined}
         {...rest}
