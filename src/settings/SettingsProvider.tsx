@@ -21,7 +21,7 @@ export interface Settings {
 }
 
 export const defaultSettings: Settings = {
-  gameDuration: 9000,
+  gameDuration: 900,
   warmupDuration: 0,
   climaxChance: 100,
   ruinChance: 0,
