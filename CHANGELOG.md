@@ -1,4 +1,11 @@
-## 2.1.0 - 2024-05-14
+## 2.2.0 - 2024-05-13
+
+### Added
+
+- images are less repetitive
+- images should load faster
+
+## 2.1.0 - 2024-05-13
 
 ### Added
 
