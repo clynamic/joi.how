@@ -1,3 +1,15 @@
+## 2.1.0 - 2024-05-14
+
+### Added
+
+- pwa manifest
+
+### Fixed
+
+- hypno change breaking game board
+- sliders on firefox
+- default session duration
+
 ## 2.0.2 - 2024-05-13
 
 ### Fixed
