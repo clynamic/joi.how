@@ -117,8 +117,15 @@ export const E621Search = () => {
         disabled={loading}
       />
       <Space size='medium' />
-      <SettingsLabel>Count</SettingsLabel>
-      <Slider value={limit} onChange={setLimit} min={1} max={200} step={1} />
+      <SettingsLabel htmlFor='limit'>Count</SettingsLabel>
+      <Slider
+        id='limit'
+        value={limit}
+        onChange={setLimit}
+        min={1}
+        max={200}
+        step={1}
+      />
       <Measure value={limit} chars={3} unit='posts' />
       <Space size='medium' />
       <SettingsLabel htmlFor='minScore'>Score</SettingsLabel>
