@@ -1,10 +1,10 @@
 {
   "short_name": "JOI.how",
-  "name": "JOI.How",
+  "name": "JOI.how",
   "icons": [
     {
       "src": "favicon.png",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "248x248",
       "type": "image/x-icon"
     },
     {
@@ -46,6 +46,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#1c1a1f",
+  "theme_color": "#92678d",
   "background_color": "#1c1b1f"
 }
