@@ -93,8 +93,9 @@ export const E621Search = () => {
 
   return (
     <StyledE621Search>
-      <SettingsLabel>Tags</SettingsLabel>
+      <SettingsLabel htmlFor='tags'>Tags</SettingsLabel>
       <TextInput
+        id='tags'
         value={tags}
         onChange={setTags}
         onSubmit={runSearch}
@@ -103,8 +104,9 @@ export const E621Search = () => {
         disabled={loading}
       />
       <Space size='medium' />
-      <SettingsLabel>Order</SettingsLabel>
+      <SettingsLabel htmlFor='order'>Order</SettingsLabel>
       <Dropdown
+        id='order'
         value={order}
         onChange={(value: string) => setOrder(value as E621SortOrder)}
         options={Object.values(E621SortOrder).map(value => ({
@@ -119,8 +121,9 @@ export const E621Search = () => {
       <Slider value={limit} onChange={setLimit} min={1} max={200} step={1} />
       <Measure value={limit} chars={3} unit='posts' />
       <Space size='medium' />
-      <SettingsLabel>Score</SettingsLabel>
+      <SettingsLabel htmlFor='minScore'>Score</SettingsLabel>
       <Slider
+        id='minScore'
         value={minScore ?? -1}
         onChange={value => {
           setMinScore(value === -1 ? undefined : value);

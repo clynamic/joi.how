@@ -35,8 +35,9 @@ export const PaceSettings = () => {
       <SettingsDescription>
         Pace settings are mesured in beats per second.
       </SettingsDescription>
-      <SettingsLabel>Minimum</SettingsLabel>
+      <SettingsLabel htmlFor='minPace'>Minimum</SettingsLabel>
       <Slider
+        id='minPace'
         min={settingsMinPace}
         max={settingsMaxPace}
         step={0.05}
@@ -44,8 +45,9 @@ export const PaceSettings = () => {
         onChange={setMinPace}
       />
       <Measure value={minPace} chars={4} unit='b/s' />
-      <SettingsLabel>Maximum</SettingsLabel>
+      <SettingsLabel htmlFor='maxPace'>Maximum</SettingsLabel>
       <Slider
+        id='maxPace'
         min={settingsMinPace}
         max={settingsMaxPace}
         step={0.05}
@@ -57,8 +59,9 @@ export const PaceSettings = () => {
       <SettingsDescription>
         How should the pace change over the course of the game?
       </SettingsDescription>
-      <SettingsLabel>Steepness</SettingsLabel>
+      <SettingsLabel htmlFor='steepness'>Steepness</SettingsLabel>
       <Slider
+        id='steepness'
         min={-0.1}
         max={0.1}
         step={0.005}

@@ -16,8 +16,9 @@ export const DurationSettings = () => {
       <SettingsDescription>
         Warmup period allows you to view images, without the game starting.
       </SettingsDescription>
-      <SettingsLabel>Warmup duration</SettingsLabel>
+      <SettingsLabel htmlFor='warmupDuration'>Warmup duration</SettingsLabel>
       <Slider
+        id='warmupDuration'
         min='0'
         max='300'
         step='60'
@@ -28,8 +29,9 @@ export const DurationSettings = () => {
       <SettingsDescription>
         Session duration is a rough estimate. The game will not forcefully end.
       </SettingsDescription>
-      <SettingsLabel>Session duration</SettingsLabel>
+      <SettingsLabel htmlFor='gameDuration'>Session duration</SettingsLabel>
       <Slider
+        id='gameDuration'
         min='180'
         max='1800'
         step='60'
