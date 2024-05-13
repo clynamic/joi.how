@@ -1,7 +1,8 @@
 {
   "name": "joi.how",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.0.2",
+  "description": "jack-off-instruction stroke-to-the-beat slideshow",
   "type": "module",
   "scripts": {
     "dev": "vite",

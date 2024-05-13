@@ -47,7 +47,11 @@ export const rollEventDice = (data: EventDataRef) => {
 
   if (phase !== GamePhase.active) return null;
 
-  if (events.includes(GameEvent.climax) && intensity >= 100 && edged) {
+  if (
+    events.includes(GameEvent.climax) &&
+    intensity >= 100 &&
+    (!events.includes(GameEvent.edge) || edged)
+  ) {
     return GameEvent.climax;
   }
 
