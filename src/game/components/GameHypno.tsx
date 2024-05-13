@@ -22,7 +22,7 @@ export const GameHypno = () => {
 
   const phrase = useMemo(() => {
     const phrases = HypnoPhrases[hypno];
-    if (!phrases) return '';
+    if (!phrases || phrases.length == 0) return '';
     return translate(phrases[current % phrases.length]);
   }, [current, hypno, translate]);
 
