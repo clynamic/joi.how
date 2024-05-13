@@ -42,8 +42,9 @@ export const ClimaxSettings = () => {
     <SettingsTile grid label={'Climax'}>
       <SettingsTitle>Requires the "cum" event to be enabled</SettingsTitle>
       <SettingsDescription>{climaxText}</SettingsDescription>
-      <SettingsLabel>Climax</SettingsLabel>
+      <SettingsLabel htmlFor='climax-chance'>Climax</SettingsLabel>
       <Slider
+        id='climax-chance'
         value={climaxChance}
         min={0}
         max={100}
@@ -53,8 +54,14 @@ export const ClimaxSettings = () => {
       <Divider />
       <SettingsTitle>Given an orgasm occurs...</SettingsTitle>
       <SettingsDescription>{ruinText}</SettingsDescription>
-      <SettingsLabel>Ruin</SettingsLabel>
-      <Slider value={ruinChance} min={0} max={100} onChange={setRuinChance} />
+      <SettingsLabel htmlFor='ruin-chance'>Ruin</SettingsLabel>
+      <Slider
+        id='ruin-chance'
+        value={ruinChance}
+        min={0}
+        max={100}
+        onChange={setRuinChance}
+      />
       <Measure value={ruinChance} chars={3} unit='%' />
     </SettingsTile>
   );
