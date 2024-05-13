@@ -1,6 +1,6 @@
 import { GameEvent } from '../../../types';
 import { intensityToPaceRange, wait, round } from '../../../utils';
-import { EventDataRef, silenceEventData } from '../GameEvents';
+import { EventDataRef } from '../GameEvents';
 import { randomPaceEvent } from './random-pace';
 
 export const risingPaceEvent = async (data: EventDataRef) => {
@@ -39,5 +39,5 @@ export const risingPaceEvent = async (data: EventDataRef) => {
   });
   await wait(15000);
 
-  randomPaceEvent(silenceEventData(data));
+  randomPaceEvent(data);
 };
