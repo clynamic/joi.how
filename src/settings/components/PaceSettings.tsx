@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Sparklines, SparklinesLine } from 'react-sparklines';
-import { intensityToPace } from '../../utils';
+import { ResponsiveContainer, XAxis, YAxis, AreaChart, Area } from 'recharts';
+import { paceGraphPoint } from '../../utils';
 import {
   Measure,
   Divider,
@@ -8,6 +8,7 @@ import {
   SettingsDescription,
   SettingsLabel,
   SettingsTile,
+  Space,
 } from '../../common';
 import { useSetting } from '../SettingsProvider';
 
@@ -18,17 +19,18 @@ export const PaceSettings = () => {
   const [minPace, setMinPace] = useSetting('minPace');
   const [maxPace, setMaxPace] = useSetting('maxPace');
   const [steepness, setSteepness] = useSetting('steepness');
+  const [timeshift, setTimeshift] = useSetting('timeshift');
 
-  const sparklines = useMemo(() => {
-    return Array.from(new Array(20))
-      .map((_, index, array) => (index / array.length) * 100)
-      .map(intensity =>
-        intensityToPace(intensity, steepness, {
+  const chartData = useMemo(() => {
+    return Array.from(new Array(100))
+      .map((_, index) => index / 100)
+      .map(t =>
+        paceGraphPoint(t, steepness, timeshift, {
           min: settingsMinPace,
           max: settingsMaxPace,
         })
       );
-  }, [steepness]);
+  }, [steepness, timeshift]);
 
   return (
     <SettingsTile grid label='Pace'>
@@ -62,21 +64,46 @@ export const PaceSettings = () => {
       <SettingsLabel htmlFor='steepness'>Steepness</SettingsLabel>
       <Slider
         id='steepness'
-        min={-0.1}
-        max={0.1}
-        step={0.005}
+        min={0}
+        max={1}
+        step={0.05}
         value={steepness}
         onChange={setSteepness}
       />
-      <Sparklines
-        data={sparklines}
-        svgWidth={50}
-        svgHeight={20}
-        max={settingsMaxPace + 1}
-        min={settingsMinPace - 1}
+      <Measure value={steepness * 100} chars={2} unit='%' />
+      <SettingsLabel htmlFor='timeshift'>Timeshift</SettingsLabel>
+      <Slider
+        id='timeshift'
+        min={0}
+        max={1}
+        step={0.05}
+        value={timeshift}
+        onChange={setTimeshift}
+      />
+      <Measure value={timeshift * 100} chars={2} unit='%' />
+      <Space size='medium' />
+      <div />
+      <div
+        style={{
+          height: '100px',
+        }}
       >
-        <SparklinesLine style={{ strokeWidth: 4 }} />
-      </Sparklines>
+        <ResponsiveContainer width='100%' height='100%'>
+          <AreaChart data={chartData.map(([x, y]) => ({ x, y }))}>
+            <XAxis type='number' dataKey='x' hide />
+            <YAxis type='number' dataKey='y' hide />
+            <Area
+              animationDuration={0}
+              type='monotone'
+              dataKey='y'
+              stroke='var(--primary)'
+              fill='var(--section-color)'
+              fillOpacity={0.3}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+      <div />
     </SettingsTile>
   );
 };

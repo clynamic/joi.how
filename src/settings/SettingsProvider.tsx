@@ -11,6 +11,7 @@ export interface Settings {
   minPace: number;
   maxPace: number;
   steepness: number;
+  timeshift: number;
   events: GameEvent[];
   hypno: GameHypnoType;
   gender: PlayerGender;
@@ -27,7 +28,8 @@ export const defaultSettings: Settings = {
   ruinChance: 0,
   minPace: 0.25,
   maxPace: 5,
-  steepness: 0.05,
+  steepness: 0.5,
+  timeshift: 0.5,
   events: Object.values(GameEvent),
   hypno: GameHypnoType.joi,
   gender: PlayerGender.male,
