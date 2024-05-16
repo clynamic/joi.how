@@ -16,7 +16,13 @@ export const Measure: React.FC<MeasureProps> = ({ value, chars, unit }) => {
   return (
     <StyledMeasure>
       <strong>
-        {value.toString().padStart(chars, '\u00A0')} {unit ?? ''}
+        {value
+          .toString()
+          .split('')
+          .slice(0, chars)
+          .join('')
+          .padStart(chars, '\u00A0')}{' '}
+        {unit ?? ''}
       </strong>
     </StyledMeasure>
   );
