@@ -5,10 +5,10 @@ import { EventDataRef } from '../GameEvents';
 export const randomPaceEvent = async (data: EventDataRef) => {
   const {
     game: { intensity, setPace, sendMessage },
-    settings: { minPace, maxPace, steepness },
+    settings: { minPace, maxPace, steepness, timeshift },
   } = data.current;
 
-  const { min, max } = intensityToPaceRange(intensity, steepness, {
+  const { min, max } = intensityToPaceRange(intensity, steepness, timeshift, {
     min: minPace,
     max: maxPace,
   });
