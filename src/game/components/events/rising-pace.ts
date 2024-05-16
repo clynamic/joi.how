@@ -6,7 +6,7 @@ import { randomPaceEvent } from './random-pace';
 export const risingPaceEvent = async (data: EventDataRef) => {
   const {
     game: { intensity, setPace, sendMessage },
-    settings: { minPace, maxPace, steepness },
+    settings: { minPace, maxPace, steepness, timeshift },
   } = data.current;
 
   sendMessage({
@@ -14,7 +14,7 @@ export const risingPaceEvent = async (data: EventDataRef) => {
     title: 'Rising pace strokes!',
   });
   const acceleration = Math.round(100 / Math.min(intensity, 35));
-  const { max } = intensityToPaceRange(intensity, steepness, {
+  const { max } = intensityToPaceRange(intensity, steepness, timeshift, {
     min: minPace,
     max: maxPace,
   });
