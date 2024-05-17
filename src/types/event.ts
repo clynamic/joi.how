@@ -29,10 +29,10 @@ export const GameEventDescriptions: Record<GameEvent, string> = {
   edge: "Slows down when intensity is almost at it's highest.",
   pause: 'Paw at twice the current pace for a few seconds.',
   halfPace: 'Paw at half the current pace for a few seconds.',
-  risingPace: 'Stop stroking for a little bit.',
-  doublePace: 'Start from your lowest and slowly pick up speed.',
-  randomPace: 'Randomly select a new pace to jack off at.',
-  randomGrip: 'Randomly select a new way for you to grip your cock.', // TODO: use neutral language
+  risingPace: 'Start from your lowest and slowly pick up speed.',
+  doublePace: 'Stop stroking for a little bit.',
+  randomPace: 'Randomly select a new pace based on your curve.',
+  randomGrip: 'Randomly select new hands to play with.',
   cleanUp: "Clean up any mess you've made along the way.",
 };
 
