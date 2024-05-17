@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { SettingsTile } from '../../common';
 import { faPersonDigging } from '@fortawesome/free-solid-svg-icons';
 
-export const WalltakerSettings = () => {
+export const WalltalkerSettings = () => {
   return (
     <SettingsTile label={'Walltalker'} style={{ opacity: 0.5 }}>
       <div

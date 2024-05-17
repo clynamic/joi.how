@@ -2,12 +2,12 @@ import styled from 'styled-components';
 import { SettingsTile, TabBar } from '../../common';
 import { E621Search } from '../../e621';
 import { useState } from 'react';
-import { WalltakerSearch } from '../../walltaker';
+import { WalltalkerSearch } from '../../walltalker';
 import { LocalImport } from '../../local';
 
 const tabs: Record<string, React.ReactNode> = {
   e621: <E621Search />,
-  walltaker: <WalltakerSearch />,
+  walltalker: <WalltalkerSearch />,
   local: <LocalImport />,
 };
 
@@ -29,7 +29,7 @@ export const ServiceSettings = () => {
         <TabBar
           tabs={[
             { id: 'e621', content: 'e621' },
-            // { id: 'walltaker', content: 'Walltaker' },
+            // { id: 'walltalker', content: 'Walltalker' },
             { id: 'local', content: 'Device' },
           ]}
           current={activeTab}
