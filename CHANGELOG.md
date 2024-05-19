@@ -1,3 +1,9 @@
+## 2.3.1 - 2024-05-19
+
+### Fixed
+
+- event descriptions
+
 ## 2.3.0 - 2024-05-19
 
 ### Added
