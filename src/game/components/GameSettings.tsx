@@ -25,8 +25,8 @@ const StyledGameSettings = styled.div`
   justify-content: center;
 
   border-radius: 0 var(--border-radius) 0 0;
-  background: var(--overlay-color);
-  color: #fff;
+  background: var(--overlay-background);
+  color: var(--overlay-color);
 
   padding: 8px;
 `;

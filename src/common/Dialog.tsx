@@ -73,7 +73,7 @@ export const Dialog = ({
   title,
   closable = true,
   dismissable = false,
-  barrierColor = 'var(--overlay-color)',
+  barrierColor = 'var(--overlay-background)',
   background = 'var(--section-background)',
   children,
 }: React.PropsWithChildren<DialogProps>) => {
