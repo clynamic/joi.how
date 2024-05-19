@@ -42,12 +42,12 @@ const StyledGameMessageButton = motion(styled.button`
   padding: 20px;
   cursor: pointer;
 
-  transition: filter 0.2s;
+  transition: var(--hover-transition);
 
   margin-left: 1px;
 
   &:hover {
-    filter: brightness(1.2);
+    filter: var(--hover-filter);
   }
 `);
 

@@ -2,7 +2,7 @@
   --background: #1c1b1f;
   --text-color: #fff;
 
-  --overlay-background: rgba(28, 27, 31, 0.7);
+  --overlay-background: #1c1b1fb3;
   --overlay-color: #fff;
 
   --primary: #92678d;
@@ -14,7 +14,8 @@
   --button-color: #fff;
 
   --border-radius: 4px;
-  --hover-transition: background 0.2s ease-in-out;
+  --hover-transition: background 0.2s ease-in-out, filter 0.2s ease-in-out;
+  --hover-filter: brightness(1.2);
 
   --icon-size: 1.4rem;
 

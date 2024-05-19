@@ -11,12 +11,12 @@ const StyledSlider = styled.input.attrs({ type: 'range' })`
   outline: none;
   cursor: pointer;
 
-  transition: filter 0.2s;
+  transition: var(--hover-transition);
 
   &:hover,
   &:focus {
     outline: none;
-    filter: brightness(1.2);
+    filter: var(--hover-filter);
   }
 
   &::-webkit-slider-runnable-track {
@@ -46,7 +46,7 @@ const StyledSlider = styled.input.attrs({ type: 'range' })`
     width: 16px;
     height: 16px;
     background: var(--primary);
-    filter: brightness(1.2);
+    filter: var(--hover-filter);
     border-radius: 50%;
     margin-top: -4px;
   }
@@ -55,7 +55,7 @@ const StyledSlider = styled.input.attrs({ type: 'range' })`
     width: 16px;
     height: 16px;
     background: var(--primary);
-    filter: brightness(1.2);
+    filter: var(--hover-filter);
     border-radius: 50%;
     border: none;
     margin-top: -4px;
