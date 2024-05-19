@@ -1,3 +1,13 @@
+## 2.3.0 - 2024-05-19
+
+### Added
+
+- new pace curve options
+
+### Fixed
+
+- event descriptions
+
 ## 2.2.0 - 2024-05-13
 
 ### Added
