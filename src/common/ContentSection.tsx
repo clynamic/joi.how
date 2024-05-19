@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
 export const ContentSection = styled.section`
-  background: var(--section-background);
-  color: var(--section-text);
+  background: var(--card-background);
+  color: var(--card-color);
 
   border-radius: var(--border-radius);
 

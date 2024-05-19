@@ -14,7 +14,7 @@ export const StyledIconButton = styled.button`
   align-items: center;
 
   background: none;
-  color: var(--color-text);
+  color: var(--button-color);
   opacity: ${(props: { disabled?: boolean }) => (props.disabled ? 0.5 : 1)};
 
   border-radius: var(--border-radius);
@@ -28,7 +28,7 @@ export const StyledIconButton = styled.button`
   transition: background 0.2s;
 
   &:hover {
-    background: var(--focus-color);
+    background: var(--button-background);
   }
 
   &:enabled {

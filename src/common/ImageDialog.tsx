@@ -36,7 +36,7 @@ const StyledImageDialogImage = styled(StackedImage)`
 `;
 
 const StyledImageDialogActions = styled.div`
-  background: var(--section-background);
+  background: var(--card-background);
   border-radius: var(--border-radius);
   padding: 8px;
   margin-top: 8px;

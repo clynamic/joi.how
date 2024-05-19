@@ -32,7 +32,7 @@ const StyledWallTalkerAd = styled(ContentSection)`
     position: absolute;
 
     content: 'Walltalker ✨';
-    color: var(--section-text);
+    color: var(--card-color);
     background-color: #000000b5;
     text-align: center;
 

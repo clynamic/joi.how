@@ -31,8 +31,8 @@ const StyledE621SaveCredentials = styled.div`
 `;
 
 const StyledE621SaveCredentialsButton = styled.button`
-  background: var(--focus-color);
-  color: var(--text-color);
+  background: var(--button-background);
+  color: var(--button-color);
   border-radius: var(--border-radius);
   padding: 4px 8px;
   transition:

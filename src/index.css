@@ -1,18 +1,20 @@
 :root {
-  --text-color: #fff;
   --background: #1c1b1f;
+  --text-color: #fff;
 
-  --section-background: #2e2f3b;
-  --section-text: #d3cedc;
-  --focus-color: #595a7766;
-
-  --border-radius: 4px;
-  --hover-transition: background 0.2s ease-in-out;
+  --overlay-background: rgba(28, 27, 31, 0.7);
+  --overlay-color: #fff;
 
   --primary: #92678d;
 
-  --overlay-background: rgba(0, 0, 0, 0.5);
-  --overlay-color: #fff;
+  --card-background: #2e2f3b;
+  --card-color: #d3cedc;
+
+  --button-background: #595a7766;
+  --button-color: #fff;
+
+  --border-radius: 4px;
+  --hover-transition: background 0.2s ease-in-out;
 
   --icon-size: 1.4rem;
 

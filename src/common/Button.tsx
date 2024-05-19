@@ -6,8 +6,8 @@ export interface ButtonProps
 }
 
 const StyledButton = styled.button`
-  background: var(--focus-color);
-  color: var(--text-color);
+  background: var(--button-background);
+  color: var(--button-color);
 
   padding: 8px 16px;
 
