@@ -27,9 +27,9 @@ export const GameEventLabels: Record<GameEvent, string> = {
 export const GameEventDescriptions: Record<GameEvent, string> = {
   randomPace: 'Randomly select a new pace',
   halfPace: 'Paw at half the current pace for a few seconds',
-  doublePace: 'Stop stroking for a little bit',
+  doublePace: 'Paw at twice the current pace for a few seconds',
   risingPace: 'Start from your lowest and slowly pick up speed',
-  pause: 'Paw at twice the current pace for a few seconds',
+  pause: 'Stop stroking for a little bit',
   edge: "Slows down when intensity is almost at it's highest",
   climax: 'Creates an end point to the game',
   randomGrip: 'Randomly select new hands to play with',
