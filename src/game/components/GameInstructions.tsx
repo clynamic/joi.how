@@ -18,7 +18,8 @@ const StyledGameInstructions = styled.div`
 
   padding: 8px;
 
-  background-color: var(--overlay-color);
+  background-color: var(--overlay-background);
+  color: var(--overlay-color);
   border-bottom-right-radius: var(--border-radius);
 `;
 

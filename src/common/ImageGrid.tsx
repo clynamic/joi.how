@@ -77,8 +77,8 @@ const StyledSelectionOverlay = motion(styled.div`
   justify-content: center;
   align-items: center;
 
-  background: var(--overlay-color);
-  color: #fff;
+  background: var(--overlay-background);
+  color: var(--overlay-color);
 `);
 
 interface SelectionOverlayProps {

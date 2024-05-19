@@ -26,7 +26,8 @@ const StyledTooltipChildren = styled.div``;
 
 const StyledTooltipContent = styled.div`
   font-size: 0.8rem;
-  background: var(--overlay-color);
+  background: var(--overlay-background);
+  color: var(--overlay-color);
   padding: 4px 6px;
   border-radius: var(--border-radius);
 `;
@@ -85,7 +86,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
           <FloatingArrow
             ref={arrowRef}
             context={context}
-            fill='var(--overlay-color)'
+            fill='var(--overlay-background)'
           />
           {content}
         </StyledTooltipContent>

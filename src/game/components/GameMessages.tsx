@@ -16,16 +16,16 @@ const StyledGameMessage = motion(styled.div`
 `);
 
 const StyledGameMessageTitle = motion(styled.div`
-  background: var(--overlay-color);
-  color: #fff;
+  background: var(--overlay-background);
+  color: var(--overlay-color);
 
   font-size: 1rem;
   padding: 20px;
 `);
 
 const StyledGameMessageDescription = motion(styled.p`
-  background: var(--overlay-color);
-  color: #fff;
+  background: var(--overlay-background);
+  color: var(--overlay-color);
 
   font-size: 1rem;
   padding: 20px;
