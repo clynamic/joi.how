@@ -13,8 +13,8 @@ interface TradeFormat {
 }
 
 const StyledTradeButtons = styled.div`
-  display: flex;
-  gap: 8px;
+    display: flex;
+    gap: 8px;
 `;
 
 export const TradeSettings = () => {
@@ -57,13 +57,13 @@ export const TradeSettings = () => {
       reader.readAsText(file);
     };
     input.addEventListener('change', e =>
-      onChange(e as unknown as ChangeEvent<HTMLInputElement>)
+      onChange(e as unknown as ChangeEvent<HTMLInputElement>),
     );
     input.click();
   };
 
   return (
-    <SettingsTile label={'Trade'}>
+    <SettingsTile label={'Trade'} style={{ gridColumn: '1 / -1' }}>
       <SettingsTitle>Export or import your settings and images.</SettingsTitle>
       <StyledTradeButtons>
         <Button onClick={onExport}>Export</Button>

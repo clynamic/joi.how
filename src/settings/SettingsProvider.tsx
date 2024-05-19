@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { GameEvent, GameHypnoType, PlayerBody, PlayerGender } from '../types';
+import { GameEvent, GameHypnoType, PlayerBody, PlayerGender, WalltakerConfig } from '../types';
 import { createLocalStorageProvider, VibrationMode } from '../utils';
 import { interpolateWith } from '../utils/translate';
 
@@ -19,6 +19,7 @@ export interface Settings {
   highRes: boolean;
   videoSound: boolean;
   vibrations: VibrationMode;
+  walltaker: WalltakerConfig;
 }
 
 export const defaultSettings: Settings = {
@@ -37,6 +38,10 @@ export const defaultSettings: Settings = {
   highRes: false,
   videoSound: false,
   vibrations: VibrationMode.thump,
+  walltaker: {
+    enabled: false,
+    id: null
+  }
 };
 
 const settingsStorageKey = 'settings';

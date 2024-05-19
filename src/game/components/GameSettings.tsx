@@ -13,22 +13,23 @@ import {
   PaceSettings,
   PlayerSettings,
   VibratorSettings,
+  WalltalkerSettings,
 } from '../../settings';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useFullscreen, useLooping } from '../../utils';
 
 const StyledGameSettings = styled.div`
-  display: flex;
-  height: fit-content;
+    display: flex;
+    height: fit-content;
 
-  align-items: center;
-  justify-content: center;
+    align-items: center;
+    justify-content: center;
 
-  border-radius: 0 var(--border-radius) 0 0;
-  background: var(--overlay-color);
-  color: #fff;
+    border-radius: 0 var(--border-radius) 0 0;
+    background: var(--overlay-color);
+    color: #fff;
 
-  padding: 8px;
+    padding: 8px;
 `;
 
 interface GameSettingsDialogProps {
@@ -37,10 +38,10 @@ interface GameSettingsDialogProps {
 }
 
 const StyledGameSettingsDialog = styled.div`
-  overflow: auto;
-  max-width: 920px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+    overflow: auto;
+    max-width: 920px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
 `;
 
 const GameSettingsDialog: React.FC<GameSettingsDialogProps> = props => {
@@ -59,6 +60,7 @@ const GameSettingsDialog: React.FC<GameSettingsDialogProps> = props => {
           <ClimaxSettings />
           <BoardSettings />
           <VibratorSettings />
+          <WalltalkerSettings />
           <ImageSettings />
         </StyledGameSettingsDialog>
       }
@@ -89,7 +91,7 @@ export const GameSettings = () => {
       }
       setOpen(open);
     },
-    [setPhase]
+    [setPhase],
   );
 
   useLooping(
@@ -114,19 +116,19 @@ export const GameSettings = () => {
       }
     },
     1000,
-    !open && phase === GamePhase.pause && timer !== undefined
+    !open && phase === GamePhase.pause && timer !== undefined,
   );
 
   return (
     <StyledGameSettings>
       <IconButton
-        aria-label='Settings'
+        aria-label="Settings"
         onClick={() => onOpen(true)}
         icon={<FontAwesomeIcon icon={faCog} />}
       />
-      <VerticalDivider color='rgba(255, 255, 255, 0.3)' />
+      <VerticalDivider color="rgba(255, 255, 255, 0.3)" />
       <IconButton
-        aria-label='Fullscreen'
+        aria-label="Fullscreen"
         onClick={() => setFullscreen(fullscreen => !fullscreen)}
         icon={<FontAwesomeIcon icon={fullscreen ? faCompress : faExpand} />}
       />
