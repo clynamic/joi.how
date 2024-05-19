@@ -21,8 +21,8 @@ const StyledAgeWarningButton = styled.button`
   display: flex;
   gap: 8px;
 
-  background: var(--focus-color);
-  color: var(--text-color);
+  background: var(--button-background);
+  color: var(--button-color);
 
   border-radius: var(--border-radius);
   padding: 8px;
@@ -50,7 +50,7 @@ export const AgeWarning = () => {
       onOpenChange={setAgeCheckConfirm}
       closable={false}
       title={'Age Warning'}
-      barrierColor='var(--section-background)'
+      barrierColor='var(--card-background)'
       content={
         <StyledAgeWarning>
           <ContentSection style={{ margin: 0 }}>

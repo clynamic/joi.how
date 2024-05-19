@@ -24,8 +24,8 @@ const StyledToggleTile = styled.button<StyledToggleTileProps>`
   align-items: start;
   text-align: start;
 
-  background: var(--focus-color);
-  color: var(--text-color);
+  background: var(--button-background);
+  color: var(--button-color);
 
   border-radius: var(--border-radius);
 
@@ -51,7 +51,7 @@ const StyledToggleTile = styled.button<StyledToggleTileProps>`
   }
 
   p {
-    color: var(--section-text);
+    color: var(--card-color);
   }
 `;
 

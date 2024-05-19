@@ -35,8 +35,8 @@ const StyledGameMessageDescription = motion(styled.p`
 `);
 
 const StyledGameMessageButton = motion(styled.button`
-  background: var(--focus-color);
-  color: #fff;
+  background: var(--button-background);
+  color: var(--button-color);
 
   font-size: 1rem;
   padding: 20px;

@@ -50,8 +50,8 @@ const StyledDialogContentWrapper = styled.div`
   max-height: 100%;
   max-width: 100%;
 
-  background: var(--section-background);
-  color: var(--section-text);
+  background: var(--card-background);
+  color: var(--card-color);
   border-radius: var(--border-radius);
 
   padding: 8px;
@@ -74,7 +74,7 @@ export const Dialog = ({
   closable = true,
   dismissable = false,
   barrierColor = 'var(--overlay-background)',
-  background = 'var(--section-background)',
+  background = 'var(--card-background)',
   children,
 }: React.PropsWithChildren<DialogProps>) => {
   const { refs, context } = useFloating({

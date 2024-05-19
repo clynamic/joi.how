@@ -14,7 +14,7 @@ const StyledExpandButton = styled.button`
 
   border-radius: var(--border-radius);
   background: transparent;
-  color: var(--text-color);
+  color: var(--button-color);
 
   transition: var(--hover-transition);
 
@@ -23,11 +23,11 @@ const StyledExpandButton = styled.button`
   padding: 15px;
 
   &:hover {
-    background: var(--focus-color);
+    background: var(--button-background);
   }
 
   &[aria-expanded='true'] {
-    background: var(--focus-color);
+    background: var(--button-background);
   }
 `;
 
