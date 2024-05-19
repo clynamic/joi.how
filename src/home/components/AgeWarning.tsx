@@ -27,7 +27,7 @@ const StyledAgeWarningButton = styled.button`
   border-radius: var(--border-radius);
   padding: 8px;
 
-  transition: background 0.2s;
+  transition: var(--hover-transition);
 
   &:hover {
     background: var(--primary);

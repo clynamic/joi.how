@@ -14,7 +14,7 @@ const StyledButton = styled.button`
   border-radius: var(--border-radius);
   cursor: pointer;
 
-  transition: background 0.2s;
+  transition: var(--hover-transition);
 
   &:hover:not(:disabled) {
     background: var(--primary);

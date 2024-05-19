@@ -29,12 +29,12 @@ const StyledDropdown = styled.select`
   border: 1px solid var(--primary);
   border-radius: var(--border-radius);
 
-  transition: filter 0.2s;
+  transition: var(--hover-transition);
 
   &:hover,
   &:focus {
     outline: none;
-    filter: brightness(1.2);
+    filter: var(--hover-filter);
   }
 
   height: fit-content;

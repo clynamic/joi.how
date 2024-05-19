@@ -11,7 +11,7 @@ const StyledWallTalkerAd = styled(ContentSection)`
   position: relative;
 
   cursor: pointer;
-  transition: all 0.2s ease-out;
+  transition: transform 0.2s;
 
   overflow: hidden;
 
