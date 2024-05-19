@@ -1,13 +1,38 @@
 import { PropsWithChildren, useRef } from 'react';
 import { PornSocketContext, PornSocketService } from './porn-socket-service.tsx';
 
-class WalltakerSocketService implements PornSocketService {
+export interface LinkResponse {
+  id: number;
+  expires: string;
+  terms: string;
+  blacklist: string;
+  post_url: string;
+  post_thumbnail_url: string;
+  post_description: string;
+  created_at: string;
+  updated_at: string;
+  response_type?: any;
+  response_text?: any;
+  username: string;
+  online: boolean;
+}
+
+export interface UserResponse {
+  username: string;
+  id: number;
+  set_count: number;
+  online: boolean;
+  authenticated: boolean;
+  links: LinkResponse[];
+}
+
+export class WalltakerSocketService implements PornSocketService {
   private socket: WebSocket | null = null;
 
   connect(): Promise<void> {
     return new Promise((res, rej) => {
       if (this.socket) {
-        switch(this.socket.readyState) {
+        switch (this.socket.readyState) {
           case this.socket.OPEN:
             res();
             return;
@@ -18,7 +43,7 @@ class WalltakerSocketService implements PornSocketService {
           case this.socket.CLOSING:
           case this.socket.CLOSED:
             this.socket = null;
-            return this.connect()
+            return this.connect();
         }
       }
 
@@ -68,6 +93,17 @@ class WalltakerSocketService implements PornSocketService {
       this.socket.send(JSON.stringify(message));
       res();
     });
+  }
+
+  static async getLink(id: number) {
+    return fetch(`https://walltaker.joi.how/api/links/${id}.json`)
+      .then(res => res.json() as unknown as LinkResponse);
+  }
+
+  static async getLinksFromUsername(username: string) {
+    const result = await fetch(`https://walltaker.joi.how/api/users/${username}.json`)
+      .then(res => res.json() as unknown as UserResponse);
+    return result.links;
   }
 
   private channelIdentifierFor(id: number) {
