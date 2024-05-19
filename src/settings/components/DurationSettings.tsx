@@ -1,4 +1,5 @@
 import {
+  Divider,
   Measure,
   SettingsDescription,
   SettingsInfo,
@@ -26,6 +27,7 @@ export const DurationSettings = () => {
         onChange={setWarmupDuration}
       />
       <Measure value={Math.ceil(warmupDuration / 60)} chars={2} unit='min' />
+      <Divider />
       <SettingsInfo>
         A climax event will trigger roughly after this time
       </SettingsInfo>

@@ -1,5 +1,11 @@
 import styled from 'styled-components';
-import { Button, SettingsTile, SettingsDescription, Space } from '../../common';
+import {
+  Button,
+  SettingsTile,
+  SettingsDescription,
+  Space,
+  VerticalDivider,
+} from '../../common';
 import { Settings, useSettings } from '../SettingsProvider';
 import { ImageItem } from '../../types';
 import { useImages } from '../ImageProvider';
@@ -69,6 +75,7 @@ export const TradeSettings = () => {
       </SettingsDescription>
       <StyledTradeButtons>
         <Button onClick={onExport}>Export</Button>
+        <VerticalDivider />
         <Button onClick={onImport}>Import</Button>
       </StyledTradeButtons>
       <Space />
