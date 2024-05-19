@@ -1,10 +1,5 @@
 import { Button, SettingsLabel, SettingsTile, Spinner, TextInput, ToggleTile, ToggleTileType } from '../../common';
-import {
-  faSpinner,
-  faSquare,
-  faCheckSquare,
-  faPowerOff
-} from '@fortawesome/free-solid-svg-icons';
+import { faCheckSquare, faPowerOff, faSpinner, faSquare } from '@fortawesome/free-solid-svg-icons';
 import { usePornSocketService } from '../../utils/porn-socket/porn-socket-service.tsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
@@ -13,6 +8,8 @@ import { useEffect, useState } from 'react';
 import { LinkResponse, WalltakerSocketService } from '../../utils/porn-socket/walltaker.tsx';
 import { defaultTransition } from '../../utils';
 import { motion } from 'framer-motion';
+import { useImages } from '../ImageProvider.tsx';
+import { ImageServiceType, ImageType } from '../../types';
 
 const Header = styled.div`
     display: flex;
@@ -29,6 +26,7 @@ const StyledLinksForm = styled.div`
 `;
 
 export const WalltalkerSettings = () => {
+  const [images, setImages] = useImages();
   const [config, setConfig] = useSetting('walltaker');
   const service = usePornSocketService(config.enabled);
 
@@ -45,6 +43,20 @@ export const WalltalkerSettings = () => {
 
       service.service?.listenTo(config.id)
         .then(() => WalltakerSocketService.getLink(config.id ?? 0))
+        .then(link => {
+          if (images.find(image => image.full === link.post_url)) return link
+
+          setImages([...images, {
+            thumbnail: link.post_thumbnail_url,
+            preview: link.post_thumbnail_url,
+            full: link.post_url,
+            type: ImageType.image,
+            source: link.post_url,
+            service: ImageServiceType.e621,
+            id: link.post_url,
+          }]);
+          return link;
+        })
         .then(link => link && setListenedLink(link))
         .finally(() => setLoadingLink(false));
     }
