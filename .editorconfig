@@ -1,0 +1,45 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+charset = utf-8
+end_of_line = lf
+quote_type = single
+
+[*.js]
+quote_type = single
+semi = true
+trailing_comma = es5
+jsx_quote_type = single
+arrow_parens = avoid
+bracket_spacing = true
+jsx_bracket_same_line = false
+
+[*.jsx]
+quote_type = single
+semi = true
+trailing_comma = es5
+jsx_quote_type = single
+arrow_parens = avoid
+bracket_spacing = true
+jsx_bracket_same_line = false
+
+[*.ts]
+quote_type = single
+semi = true
+trailing_comma = es5
+arrow_parens = avoid
+bracket_spacing = true
+
+[*.tsx]
+quote_type = single
+semi = true
+trailing_comma = es5
+jsx_quote_type = single
+arrow_parens = avoid
+bracket_spacing = true
+jsx_bracket_same_line = false
