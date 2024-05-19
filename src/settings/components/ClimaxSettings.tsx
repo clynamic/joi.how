@@ -16,33 +16,33 @@ export const ClimaxSettings = () => {
 
   const climaxText = useMemo(() => {
     if (climaxChance == 100) {
-      return 'You will ejaculate during this game';
+      return 'You will orgasm';
     }
 
     if (climaxChance === 0) {
-      return "You won't ejaculate at all during this game";
+      return "You won't orgasm at all";
     }
 
-    return `${climaxChance}% chance you'll ejaculate during this game`;
+    return `${climaxChance}% chance you'll orgasm`;
   }, [climaxChance]);
 
   const ruinText = useMemo(() => {
     if (ruinChance === 100) {
-      return 'You will have a ruined orgasm during this game';
+      return 'You will have a ruined orgasm';
     }
 
     if (ruinChance === 0) {
-      return "You won't have a ruined orgasm during this game";
+      return "You won't have a ruined orgasm";
     }
 
-    return `${ruinChance}% chance you'll have a ruined orgasm during this game`;
+    return `${ruinChance}% chance you'll have a ruined orgasm`;
   }, [ruinChance]);
 
   return (
     <SettingsTile grid label={'Climax'}>
-      <SettingsDescription>When a climax event triggers</SettingsDescription>
+      <SettingsDescription>At the game's climax...</SettingsDescription>
       <SettingsInfo>{climaxText}</SettingsInfo>
-      <SettingsLabel htmlFor='climax-chance'>Climax</SettingsLabel>
+      <SettingsLabel htmlFor='climax-chance'>Orgasm</SettingsLabel>
       <Slider
         id='climax-chance'
         value={climaxChance}

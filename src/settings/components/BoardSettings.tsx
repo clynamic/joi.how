@@ -16,7 +16,7 @@ export const BoardSettings = () => {
         trailing={highRes ? '🦄' : '🐴'}
       >
         <strong>High resolution</strong>
-        <p>Use high resolution images/videos.</p>
+        <p>Use high resolution images/videos</p>
       </ToggleTile>
       <ToggleTile
         value={videoSound}
@@ -26,7 +26,7 @@ export const BoardSettings = () => {
         }
       >
         <strong>Video sound</strong>
-        <p>Enable sound for videos.</p>
+        <p>Enable sound for videos</p>
       </ToggleTile>
     </SettingsTile>
   );
