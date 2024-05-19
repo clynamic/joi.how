@@ -1,6 +1,7 @@
 import {
   Measure,
   SettingsDescription,
+  SettingsInfo,
   SettingsLabel,
   SettingsTile,
   Slider,
@@ -13,9 +14,8 @@ export const DurationSettings = () => {
 
   return (
     <SettingsTile grid label='Duration'>
-      <SettingsDescription>
-        Warmup period allows you to view images, without the game starting.
-      </SettingsDescription>
+      <SettingsDescription>Determine game length</SettingsDescription>
+      <SettingsInfo>Warmup period has no beats</SettingsInfo>
       <SettingsLabel htmlFor='warmupDuration'>Warmup duration</SettingsLabel>
       <Slider
         id='warmupDuration'
@@ -26,9 +26,9 @@ export const DurationSettings = () => {
         onChange={setWarmupDuration}
       />
       <Measure value={Math.ceil(warmupDuration / 60)} chars={2} unit='min' />
-      <SettingsDescription>
-        Session duration is a rough estimate. The game will not forcefully end.
-      </SettingsDescription>
+      <SettingsInfo>
+        A climax event will trigger roughly after this time
+      </SettingsInfo>
       <SettingsLabel htmlFor='gameDuration'>Session duration</SettingsLabel>
       <Slider
         id='gameDuration'

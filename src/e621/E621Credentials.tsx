@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { E621Service } from './E621Service';
 import { useCallback, useMemo, useState } from 'react';
 import {
-  SettingsDescription,
+  SettingsInfo,
   SettingsLabel,
   Space,
   Spinner,
@@ -75,13 +75,13 @@ export const E621CredentialsInput = ({
 
   return (
     <StyledE621CredentialsInput>
-      <SettingsDescription>
+      <SettingsInfo>
         Access your API key from{' '}
         <a href='https://e621.net/users/home' target='_blank' rel='noreferrer'>
           your profile
         </a>
         .
-      </SettingsDescription>
+      </SettingsInfo>
       <Space size='small' />
       <SettingsLabel>Username</SettingsLabel>
       <TextInput

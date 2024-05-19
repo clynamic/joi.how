@@ -11,7 +11,7 @@ import {
   ToggleTile,
   ToggleTileType,
   TextArea,
-  SettingsDescription,
+  SettingsInfo,
   Spinner,
   Button,
   StyledMeasure,
@@ -192,12 +192,12 @@ export const E621Search = () => {
             style={{ gridColumn: '1 / -1' }}
             transition={defaultTransition}
           >
-            <SettingsDescription>
+            <SettingsInfo>
               <p style={{ display: 'inline' }}>
                 You are logged in as <strong>{credentials.username}</strong>{' '}
                 <FontAwesomeIcon icon={faUser} />
               </p>
-            </SettingsDescription>
+            </SettingsInfo>
           </motion.div>
         )}
       </AnimatePresence>
@@ -247,7 +247,7 @@ export const E621Search = () => {
                 </>
               }
             >
-              <SettingsDescription>Blacklist</SettingsDescription>
+              <SettingsInfo>Blacklist</SettingsInfo>
             </Surrounded>
             <TextArea
               style={{ resize: 'vertical' }}

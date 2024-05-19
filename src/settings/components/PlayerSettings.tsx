@@ -1,5 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Divider, SettingsTile, SettingsTitle, ToggleTile } from '../../common';
+import {
+  Divider,
+  SettingsTile,
+  SettingsDescription,
+  ToggleTile,
+} from '../../common';
 import {
   PlayerBody,
   PlayerBodyDescriptions,
@@ -21,7 +26,7 @@ export const PlayerSettings = () => {
 
   return (
     <SettingsTile label={'Player'}>
-      <SettingsTitle>Select your gender</SettingsTitle>
+      <SettingsDescription>Select your gender</SettingsDescription>
       {Object.keys(PlayerGender).map(key => {
         const current = PlayerGender[key as keyof typeof PlayerGender];
         return (
@@ -51,7 +56,7 @@ export const PlayerSettings = () => {
         );
       })}
       <Divider />
-      <SettingsTitle>Select your body</SettingsTitle>
+      <SettingsDescription>Select your body</SettingsDescription>
       {Object.keys(PlayerBody).map(key => {
         const current = PlayerBody[key as keyof typeof PlayerBody];
         return (

@@ -4,10 +4,10 @@ import {
   Measure,
   SettingsLabel,
   SettingsTile,
-  SettingsTitle,
+  SettingsDescription,
   Slider,
 } from '../../common';
-import { SettingsDescription } from '../../common/SettingsDescription';
+import { SettingsInfo } from '../../common/SettingsInfo';
 import { useSetting } from '../SettingsProvider';
 
 export const ClimaxSettings = () => {
@@ -40,8 +40,8 @@ export const ClimaxSettings = () => {
 
   return (
     <SettingsTile grid label={'Climax'}>
-      <SettingsTitle>Requires the "cum" event to be enabled</SettingsTitle>
-      <SettingsDescription>{climaxText}</SettingsDescription>
+      <SettingsDescription>When a climax event triggers</SettingsDescription>
+      <SettingsInfo>{climaxText}</SettingsInfo>
       <SettingsLabel htmlFor='climax-chance'>Climax</SettingsLabel>
       <Slider
         id='climax-chance'
@@ -52,8 +52,8 @@ export const ClimaxSettings = () => {
       />
       <Measure value={climaxChance} chars={3} unit='%' />
       <Divider />
-      <SettingsTitle>Given an orgasm occurs...</SettingsTitle>
-      <SettingsDescription>{ruinText}</SettingsDescription>
+      <SettingsDescription>Given an orgasm occurs...</SettingsDescription>
+      <SettingsInfo>{ruinText}</SettingsInfo>
       <SettingsLabel htmlFor='ruin-chance'>Ruin</SettingsLabel>
       <Slider
         id='ruin-chance'

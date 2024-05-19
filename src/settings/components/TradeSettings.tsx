@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Button, SettingsTile, SettingsTitle, Space } from '../../common';
+import { Button, SettingsTile, SettingsDescription, Space } from '../../common';
 import { Settings, useSettings } from '../SettingsProvider';
 import { ImageItem } from '../../types';
 import { useImages } from '../ImageProvider';
@@ -64,7 +64,9 @@ export const TradeSettings = () => {
 
   return (
     <SettingsTile label={'Trade'}>
-      <SettingsTitle>Export or import your settings and images.</SettingsTitle>
+      <SettingsDescription>
+        Export or import your settings and images.
+      </SettingsDescription>
       <StyledTradeButtons>
         <Button onClick={onExport}>Export</Button>
         <Button onClick={onImport}>Import</Button>

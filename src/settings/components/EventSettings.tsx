@@ -2,7 +2,7 @@ import { GameEvent, GameEventDescriptions, GameEventLabels } from '../../types';
 import { useCallback } from 'react';
 import {
   SettingsTile,
-  SettingsTitle,
+  SettingsDescription,
   ToggleTile,
   ToggleTileType,
 } from '../../common';
@@ -24,9 +24,9 @@ export const EventSettings = () => {
 
   return (
     <SettingsTile label={'Events'}>
-      <SettingsTitle>
-        Click to enable/disable occurance of each event.
-      </SettingsTitle>
+      <SettingsDescription>
+        Check the events you want to occur during the game
+      </SettingsDescription>
       {Object.keys(GameEvent).map(key => {
         const event = GameEvent[key as keyof typeof GameEvent];
         return (

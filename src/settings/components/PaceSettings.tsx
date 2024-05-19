@@ -5,10 +5,11 @@ import {
   Measure,
   Divider,
   Slider,
-  SettingsDescription,
+  SettingsInfo,
   SettingsLabel,
   SettingsTile,
   Space,
+  SettingsDescription,
 } from '../../common';
 import { useSetting } from '../SettingsProvider';
 
@@ -34,9 +35,8 @@ export const PaceSettings = () => {
 
   return (
     <SettingsTile grid label='Pace'>
-      <SettingsDescription>
-        Pace settings are mesured in beats per second.
-      </SettingsDescription>
+      <SettingsDescription>Choose beat speed</SettingsDescription>
+      <SettingsInfo>The game will run in beats per second (b/s)</SettingsInfo>
       <SettingsLabel htmlFor='minPace'>Minimum</SettingsLabel>
       <Slider
         id='minPace'
@@ -58,9 +58,9 @@ export const PaceSettings = () => {
       />
       <Measure value={maxPace} chars={4} unit='b/s' />
       <Divider />
-      <SettingsDescription>
-        How should the pace change over the course of the game?
-      </SettingsDescription>
+      <SettingsInfo>
+        The random pace event will pick a pace from this curve
+      </SettingsInfo>
       <SettingsLabel htmlFor='steepness'>Steepness</SettingsLabel>
       <Slider
         id='steepness'

@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
 import {
   Button,
-  SettingsDescription,
+  SettingsInfo,
   SettingsTile,
-  SettingsTitle,
+  SettingsDescription,
   Space,
 } from '../../common';
 import { useVibratorValue, Vibrator } from '../../utils';
@@ -70,8 +70,10 @@ export const VibratorSettings = () => {
 
   return (
     <SettingsTile label={'Vibrator'}>
-      <SettingsTitle>Use compatible device during your game.</SettingsTitle>
-      <SettingsDescription
+      <SettingsDescription>
+        Use compatible device during your game.
+      </SettingsDescription>
+      <SettingsInfo
         style={{
           margin: 0,
         }}
@@ -93,7 +95,7 @@ export const VibratorSettings = () => {
             .
           </p>
         )}
-      </SettingsDescription>
+      </SettingsInfo>
       <Space size='medium' />
       {connection && (
         <>
@@ -120,9 +122,7 @@ export const VibratorSettings = () => {
       {error && (
         <>
           <Space size='small' />
-          <SettingsDescription style={{ color: 'red' }}>
-            {error}
-          </SettingsDescription>
+          <SettingsInfo style={{ color: 'red' }}>{error}</SettingsInfo>
         </>
       )}
       <Space size='small' />
