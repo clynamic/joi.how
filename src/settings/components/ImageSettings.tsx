@@ -18,57 +18,63 @@ import { useState } from 'react';
 import { ImageItem } from '../../types';
 
 const StyledImageActions = styled.div`
-  display: flex;
-  justify-content: space-between;
-  grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    grid-column: 1 / -1;
 
-  margin-bottom: 8px;
+    margin-bottom: 8px;
 `;
 
 const StyledImageButtons = styled.div`
-  display: flex;
+    display: flex;
 `;
 
 const SmallActionButton = styled(IconButton)`
-  font-size: 1rem;
-  color: var(--color-text);
+    font-size: 1rem;
+    color: var(--color-text);
 `;
 
 export const ImageSettings = () => {
   const [images, setImages] = useImages();
+  const [walltakerConfig] = useSetting('walltaker');
   const [selected, setSelected] = useState<ImageItem[]>([]);
   const [clicked, setClicked] = useState<ImageItem | undefined>(undefined);
   const [videoSound] = useSetting('videoSound');
 
   return (
-    <SettingsTile label='Images' style={{ gridColumn: '1 / -1' }}>
+    <SettingsTile label="Images" style={{ gridColumn: '1 / -1' }}>
       <StyledImageActions>
-        <p>{`You have loaded ${images.length} images`}</p>
+        <p>
+          {`You have loaded ${images.length} images`}
+          {walltakerConfig.enabled && walltakerConfig.id
+            && ` and additional wallpapers will load from walltaker link ${walltakerConfig.id}`
+          }
+        </p>
         <StyledImageButtons>
           <SmallActionButton
             onClick={
               selected.length > 0
                 ? () => {
-                    setImages(
-                      images.filter(image => !selected.includes(image))
-                    );
-                    setSelected([]);
-                  }
+                  setImages(
+                    images.filter(image => !selected.includes(image)),
+                  );
+                  setSelected([]);
+                }
                 : undefined
             }
             icon={<FontAwesomeIcon icon={faTrash} />}
-            tooltip='Delete selected images'
+            tooltip="Delete selected images"
           />
           <SmallActionButton
             onClick={
               images.length > 0
                 ? () => {
-                    if (selected.length > 0) {
-                      setSelected([]);
-                    } else {
-                      setSelected(images);
-                    }
+                  if (selected.length > 0) {
+                    setSelected([]);
+                  } else {
+                    setSelected(images);
                   }
+                }
                 : undefined
             }
             icon={
@@ -109,7 +115,7 @@ export const ImageSettings = () => {
           onClickTile={setClicked}
         />
       </ImageDialog>
-      <Space size='medium' />
+      <Space size="medium" />
     </SettingsTile>
   );
 };
