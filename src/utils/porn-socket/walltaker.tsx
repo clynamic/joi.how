@@ -1,4 +1,4 @@
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useRef } from 'react';
 import { PornSocketContext, PornSocketService } from './porn-socket-service.tsx';
 
 class WalltakerSocketService implements PornSocketService {
@@ -94,13 +94,9 @@ class WalltakerSocketService implements PornSocketService {
 
     return handler;
   }
-
-  private makeSocket() {
-  }
-
 }
 
 export function WalltakerSocketServiceProvider({ children }: PropsWithChildren<object>) {
-  const walltakerSocketService = new WalltakerSocketService();
-  return <PornSocketContext.Provider value={walltakerSocketService}>{children}</PornSocketContext.Provider>;
+  const walltakerSocketService = useRef(new WalltakerSocketService());
+  return <PornSocketContext.Provider value={walltakerSocketService.current}>{children}</PornSocketContext.Provider>;
 }

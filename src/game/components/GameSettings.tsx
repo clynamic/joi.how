@@ -13,6 +13,7 @@ import {
   PaceSettings,
   PlayerSettings,
   VibratorSettings,
+  WalltalkerSettings,
 } from '../../settings';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useFullscreen, useLooping } from '../../utils';
@@ -59,6 +60,7 @@ const GameSettingsDialog: React.FC<GameSettingsDialogProps> = props => {
           <ClimaxSettings />
           <BoardSettings />
           <VibratorSettings />
+          <WalltalkerSettings />
           <ImageSettings />
         </StyledGameSettingsDialog>
       }

@@ -13,17 +13,26 @@ export interface PornSocketService {
 
 export const PornSocketContext = createContext<PornSocketService | null>(null);
 
-export function usePornSocketService() {
+export function usePornSocketService(enableDefault = false) {
   const service = useContext(PornSocketContext);
 
+  const [enabled, setEnabled] = useState<boolean>(enableDefault);
   const [ready, setReady] = useState<boolean>(false);
 
   useEffect(() => {
-    service?.connect().then(() => setReady(true))
-  }, [service]);
+    if (enabled) {
+      service?.connect()
+        .then(() => setReady(true))
+        .catch(() => setReady(false));}
+
+    return () => {
+      service?.disconnect().then(() => setReady(false));
+    };
+  }, [service, enabled]);
 
   return {
-    enabled: Boolean(service),
+    enabled: Boolean(service) && enabled,
+    setEnabled,
     ready,
     service,
   };
