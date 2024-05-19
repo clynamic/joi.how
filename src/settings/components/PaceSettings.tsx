@@ -82,7 +82,7 @@ export const PaceSettings = () => {
       />
       <Measure value={timeshift * 100} chars={2} unit='%' />
       <Space size='medium' />
-      <div />
+      <SettingsLabel style={{ alignSelf: 'flex-end' }}>start</SettingsLabel>
       <div
         style={{
           height: '100px',
@@ -97,13 +97,20 @@ export const PaceSettings = () => {
               type='monotone'
               dataKey='y'
               stroke='var(--primary)'
-              fill='var(--section-color)'
+              fill='var(--primary)'
               fillOpacity={0.3}
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
-      <div />
+      <SettingsLabel
+        style={{
+          textAlign: 'right',
+          alignSelf: 'flex-start',
+        }}
+      >
+        end
+      </SettingsLabel>
     </SettingsTile>
   );
 };
