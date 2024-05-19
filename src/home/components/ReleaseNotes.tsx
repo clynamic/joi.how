@@ -33,7 +33,7 @@ const StyledExpandButton = styled.button`
 
 const StyledReleaseNotesBody = styled.div`
   padding: 20px;
-  background: #47495a;
+  background: var(--button-background);
   border-radius: var(--border-radius);
 `;
 

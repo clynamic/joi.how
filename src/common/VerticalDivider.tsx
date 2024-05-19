@@ -1,16 +1,16 @@
-import styled, { CSSProperties } from 'styled-components';
+import styled from 'styled-components';
 
-export const VerticalDivider = styled.div<{
-  color?: CSSProperties['backgroundColor'];
-}>`
+export const VerticalDivider = styled.div`
   height: 100%;
   margin: auto 10px;
+
+  align-self: center;
 
   &::after {
     display: block;
     content: '';
 
-    background: ${({ color }) => color ?? '#595a77'};
+    background: currentColor;
 
     width: 1px;
     height: 25px;

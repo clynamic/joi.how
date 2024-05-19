@@ -8,7 +8,7 @@ export const Divider = styled.div`
     display: block;
     content: '';
 
-    background: #595a77; // TODO: use css variable
+    background: currentColor;
 
     width: 25px;
     height: 1px;

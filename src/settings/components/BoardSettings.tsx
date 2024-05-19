@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { SettingsTile, ToggleTile } from '../../common';
+import { SettingsTile, SettingsDescription, ToggleTile } from '../../common';
 import { useSetting } from '../SettingsProvider';
 import { faVolumeMute, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
 
@@ -9,6 +9,7 @@ export const BoardSettings = () => {
 
   return (
     <SettingsTile label='Board'>
+      <SettingsDescription>How the board is rendered</SettingsDescription>
       <ToggleTile
         value={highRes}
         onClick={() => setHighRes(!highRes)}

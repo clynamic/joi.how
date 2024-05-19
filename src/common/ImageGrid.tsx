@@ -119,8 +119,8 @@ const StyledImageMiniViewContent = motion(styled.div``);
 const StyledImageMiniViewImage = styled.div`
   width: 160px;
 
-  box-shadow: 0 0 10px rgba(40, 50, 60, 0.75); // TODO: Use CSS variable
-  border: 1px solid #fff;
+  box-shadow: 0 0 10px var(--overlay-background);
+  border: 1px solid var(--button-color);
 
   z-index: 20;
   pointer-events: none;

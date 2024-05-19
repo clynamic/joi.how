@@ -83,10 +83,7 @@ export const GameInstructions = () => {
       </StyledPaceIcons>
       {useRandomGrip && (
         <>
-          <VerticalDivider
-            color='rgba(255, 255, 255, 0.3)'
-            style={{ alignSelf: 'center' }}
-          />
+          <VerticalDivider />
           <StyledGripIcons>
             <StyledActiveIcon $active={paws === 'left' || paws === 'both'}>
               <FontAwesomeIcon

@@ -124,7 +124,7 @@ export const GameSettings = () => {
         onClick={() => onOpen(true)}
         icon={<FontAwesomeIcon icon={faCog} />}
       />
-      <VerticalDivider color='rgba(255, 255, 255, 0.3)' />
+      <VerticalDivider />
       <IconButton
         aria-label='Fullscreen'
         onClick={() => setFullscreen(fullscreen => !fullscreen)}

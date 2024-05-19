@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   SettingsTile,
-  SettingsTitle,
+  SettingsDescription,
   ToggleTile,
   ToggleTileType,
 } from '../../common';
@@ -24,7 +24,7 @@ export const HypnoSettings = () => {
 
   return (
     <SettingsTile label={'Hypno'} role='radiogroup'>
-      <SettingsTitle>Select a hypno text set</SettingsTitle>
+      <SettingsDescription>Choose a hypno text set</SettingsDescription>
       {Object.keys(GameHypnoType).map(key => {
         const current = GameHypnoType[key as keyof typeof GameHypnoType];
         return (
