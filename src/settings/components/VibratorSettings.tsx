@@ -71,7 +71,7 @@ export const VibratorSettings = () => {
   return (
     <SettingsTile label={'Vibrator'}>
       <SettingsDescription>
-        Use compatible device during your game.
+        Use compatible device during your game
       </SettingsDescription>
       <SettingsInfo
         style={{
@@ -92,7 +92,6 @@ export const VibratorSettings = () => {
             >
               Intiface® Central
             </a>
-            .
           </p>
         )}
       </SettingsInfo>

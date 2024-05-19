@@ -71,7 +71,7 @@ export const TradeSettings = () => {
   return (
     <SettingsTile label={'Trade'}>
       <SettingsDescription>
-        Export or import your settings and images.
+        Export or import your settings and images
       </SettingsDescription>
       <StyledTradeButtons>
         <Button onClick={onExport}>Export</Button>
