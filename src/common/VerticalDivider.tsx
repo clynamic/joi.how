@@ -4,6 +4,8 @@ export const VerticalDivider = styled.div`
   margin: auto 10px;
 
   align-self: center;
+  width: 1px;
+  height: 25px;
 
   &::after {
     display: block;
@@ -11,7 +13,7 @@ export const VerticalDivider = styled.div`
 
     background: currentColor;
 
-    width: 1px;
-    height: 25px;
+    width: 100%;
+    height: 100%;
   }
 `;

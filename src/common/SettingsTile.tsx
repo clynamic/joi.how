@@ -13,13 +13,13 @@ const StyledSettingsTile = styled.fieldset<{ $grid?: boolean }>`
   grid-template-columns: auto 1fr auto;
   grid-auto-rows: min-content;
 
-  background: rgba(122, 123, 163, 0.123);
+  background: var(--section-background);
   color: #b9bad6;
 
   font-size: 0.8rem;
 
   border: unset;
-  border-left: 2px solid #595a77; // TODO: use css variable
+  border-left: 2px solid var(--legend-background);
 
   margin: 15px;
   padding: 5px 15px;
@@ -30,8 +30,8 @@ const StyledSettingsTile = styled.fieldset<{ $grid?: boolean }>`
 const StyledSettingsLabel = styled.legend`
   width: fit-content;
   padding: 4px 8px;
-  background: #595a77; // TODO: use css variable
-  color: var(--text-color);
+  background: var(--legend-background);
+  color: var(--legend-color);
   line-height: 100%;
   font-size: 1rem;
 `;

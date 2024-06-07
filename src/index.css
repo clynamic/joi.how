@@ -10,8 +10,13 @@
   --card-background: #2e2f3b;
   --card-color: #d3cedc;
 
+  --section-background: #7a7ba31f;
+
   --button-background: #595a7766;
   --button-color: #fff;
+
+  --legend-background: #595a77;
+  --legend-color: #fff;
 
   --border-radius: 4px;
   --hover-transition: background 0.2s ease-in-out, filter 0.2s ease-in-out;
