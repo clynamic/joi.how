@@ -15,6 +15,7 @@ import {
   Spinner,
   Button,
   StyledMeasure,
+  SettingsDescription,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
@@ -93,6 +94,7 @@ export const E621Search = () => {
 
   return (
     <StyledE621Search>
+      <SettingsDescription>Add images from e621</SettingsDescription>
       <SettingsLabel htmlFor='tags'>Tags</SettingsLabel>
       <TextInput
         id='tags'
