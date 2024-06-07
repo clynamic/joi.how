@@ -70,7 +70,7 @@ export const PaceSettings = () => {
         value={steepness}
         onChange={setSteepness}
       />
-      <Measure value={steepness * 100} chars={2} unit='%' />
+      <Measure value={Math.floor(steepness * 100)} chars={3} unit='%' />
       <SettingsLabel htmlFor='timeshift'>Timeshift</SettingsLabel>
       <Slider
         id='timeshift'
@@ -80,7 +80,7 @@ export const PaceSettings = () => {
         value={timeshift}
         onChange={setTimeshift}
       />
-      <Measure value={timeshift * 100} chars={2} unit='%' />
+      <Measure value={Math.floor(timeshift * 100)} chars={3} unit='%' />
       <Space size='medium' />
       <SettingsLabel style={{ alignSelf: 'flex-end' }}>start</SettingsLabel>
       <div
