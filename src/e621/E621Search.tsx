@@ -139,7 +139,7 @@ export const E621Search = () => {
         max={50}
         step={1}
       />
-      {!minScore || minScore === -1 ? (
+      {minScore == undefined || minScore === -1 ? (
         <StyledMeasure>
           <strong>any</strong>
         </StyledMeasure>
