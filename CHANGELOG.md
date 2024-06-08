@@ -1,3 +1,11 @@
+## 2.3.2 - 2024-06-08
+
+### Fixed
+
+- video preload
+- search min score of 0
+- fixed pacing percentage display
+
 ## 2.3.1 - 2024-05-19
 
 ### Fixed
