@@ -85,7 +85,7 @@ function createImageItem(
 }
 
 export const LocalImport = () => {
-  const [nestedFiles, setNestedFiles] = useSetting('nestedFiles');
+  const [nestedFiles] = useSetting('nestedFiles');
   const [localVideos, setLocalVideos] = useSetting('localVideos');
 
   const [images, setImages] = useImages();
@@ -204,14 +204,14 @@ export const LocalImport = () => {
           enabled)
         </p>
       </ToggleTile>
-      <ToggleTile
+      {/*<ToggleTile
         value={nestedFiles}
         type={ToggleTileType.check}
         onClick={() => setNestedFiles(!nestedFiles)}
       >
         <strong>Import Nested Media</strong>
         <p>Allow importing images from sub-folders</p>
-      </ToggleTile>
+      </ToggleTile>*/}
       <Space size='small' />
       <Button
         style={{
