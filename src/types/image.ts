@@ -16,4 +16,5 @@ export interface ImageItem {
 
 export enum ImageServiceType {
   e621,
+  local,
 }
