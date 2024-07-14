@@ -19,6 +19,8 @@ export interface Settings {
   highRes: boolean;
   videoSound: boolean;
   vibrations: VibrationMode;
+  nestedFiles: boolean;
+  localVideos: boolean;
 }
 
 export const defaultSettings: Settings = {
@@ -35,6 +37,8 @@ export const defaultSettings: Settings = {
   gender: PlayerGender.male,
   body: PlayerBody.penis,
   highRes: false,
+  nestedFiles: false,
+  localVideos: true,
   videoSound: false,
   vibrations: VibrationMode.thump,
 };
