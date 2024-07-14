@@ -19,7 +19,7 @@ function scaleDataURL(dataURL: string, maxWidth: number, maxHeight: number) {
   return new Promise(done => {
     const img = new Image();
     img.onload = () => {
-      const scale, newWidth, newHeight, canvas, ctx;
+      let scale: number;
 
       if (img.width > maxWidth) {
         scale = maxWidth / img.width;
@@ -29,14 +29,14 @@ function scaleDataURL(dataURL: string, maxWidth: number, maxHeight: number) {
         scale = 1;
       }
 
-      newWidth = img.width * scale;
-      newHeight = img.height * scale;
+      const newWidth = img.width * scale;
+      const newHeight = img.height * scale;
 
-      canvas = document.createElement('canvas');
+      const canvas = document.createElement('canvas');
       canvas.height = newHeight;
       canvas.width = newWidth;
 
-      ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d');
       //console.log('img', 'scale', scale, 0, 0, img.width, img.height, 0, 0, newWidth, newHeight)
       ctx.drawImage(
         img,
