@@ -157,7 +157,7 @@ export const LocalImport = () => {
             reader.onload = function (event) {
               const base64: string = event.target?.result;
 
-              scaleDataURL(base64, 120, 120)
+              scaleDataURL(base64, 850, 850)
                 .then(compressed64 => {
                   //add to the image pool
                   loaded.push(
