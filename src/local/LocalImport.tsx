@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import styled from 'styled-components';
 import {
   SettingsDescription,
@@ -5,97 +6,58 @@ import {
   Button,
   ToggleTile,
   ToggleTileType,
+  SettingsInfo,
 } from '../common';
 import { useImages, useSetting } from '../settings';
-import { ImageItem, ImageServiceType, ImageType } from '../types';
+import { ImageItem } from '../types';
+import { scaleDataURL } from './base64';
+import { createImageItem } from './image';
 
 const StyledLocalImport = styled.div`
   display: grid;
   grid-template-columns: auto 1fr auto;
 `;
 
-//rescale a base64 image to save space in localstorage https://stackoverflow.com/a/73405800/16216937
-function scaleDataURL(dataURL: string, maxWidth: number, maxHeight: number) {
-  return new Promise(done => {
-    const img = new Image();
-    img.onload = () => {
-      let scale: number;
-
-      if (img.width > maxWidth) {
-        scale = maxWidth / img.width;
-      } else if (img.height > maxHeight) {
-        scale = maxHeight / img.height;
-      } else {
-        scale = 1;
-      }
-
-      const newWidth = img.width * scale;
-      const newHeight = img.height * scale;
-
-      const canvas = document.createElement('canvas');
-      canvas.height = newHeight;
-      canvas.width = newWidth;
-
-      const ctx = canvas.getContext('2d');
-      //console.log('img', 'scale', scale, 0, 0, img.width, img.height, 0, 0, newWidth, newHeight)
-      ctx.drawImage(
-        img,
-        0,
-        0,
-        img.width,
-        img.height,
-        0,
-        0,
-        newWidth,
-        newHeight
-      );
-      done(canvas.toDataURL());
-    };
-    img.src = dataURL;
-  });
-}
-
-//simplify the process of creating a imageitem
-function createImageItem(
-  thumbnail: string,
-  preview: string,
-  full: string,
-  fileName: string,
-  extension: string
-): ImageItem {
-  return {
-    thumbnail: thumbnail,
-    preview: preview,
-    full: full,
-    type: (() => {
-      switch (extension) {
-        case 'webm':
-        case 'mp4':
-          return ImageType.video;
-        case 'gif':
-          return ImageType.gif;
-        default:
-          return ImageType.image;
-      }
-    })(),
-    source: fileName,
-    service: ImageServiceType.local,
-    id: fileName,
-  };
-}
-
 export const LocalImport = () => {
   const [nestedFiles] = useSetting('nestedFiles');
   const [localVideos, setLocalVideos] = useSetting('localVideos');
 
   const [images, setImages] = useImages();
-  //const setImages = useImages()[1];
+  const [highRes] = useSetting('highRes');
+
+  const [fileCount, setFileCount] = useState(0);
+  const [progressCount, setProgressCount] = useState(0);
+  const [disabledButton, setDisabledButton] = useState(false);
 
   const select = async () => {
+    //reset counts
+    setFileCount(0);
+    setProgressCount(0);
+
     try {
       //get user permission to access a directory (limited browser support https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker)
       const dirHandle = await showDirectoryPicker();
       const loaded: ImageItem[] = [...images];
+
+      //get number of files in directory
+      for await (const entry of dirHandle.values()) {
+        if (entry.kind === 'file') {
+          const file = await entry.getFile();
+          const extension = file.name.split('.').pop();
+
+          //dont count videos if they aren't enabled
+          if (!(extension.includes('mp4') || extension.includes('webm'))) {
+            setFileCount(fileCount => fileCount + 1);
+          } else if (
+            localVideos &&
+            (extension.includes('mp4') || extension.includes('webm'))
+          ) {
+            setFileCount(fileCount => fileCount + 1);
+          }
+        }
+      }
+
+      setDisabledButton(true);
 
       //loop through all items in the directory
       for await (const entry of dirHandle.values()) {
@@ -137,6 +99,8 @@ export const LocalImport = () => {
                   loaded.push(
                     createImageItem(thumbBase64, url, url, file.name, extension)
                   );
+
+                  setProgressCount(progressCount => progressCount + 1);
                 }
               });
             };
@@ -155,20 +119,44 @@ export const LocalImport = () => {
             const reader = new FileReader();
 
             reader.onload = function (event) {
-              const base64: string = event.target?.result;
+              const base64 = event.target?.result;
 
-              scaleDataURL(base64, 850, 850)
-                .then(compressed64 => {
-                  //add to the image pool
-                  loaded.push(
-                    createImageItem(
-                      compressed64,
-                      compressed64,
-                      base64,
-                      file.name,
-                      extension
-                    )
-                  );
+              //base64 could be null? most unlikely
+              if (typeof base64 !== 'string') {
+                console.log('base64 of file', file.name, 'is not readable');
+                return;
+              }
+
+              scaleDataURL(base64, 64, 64)
+                .then(mini64 => {
+                  scaleDataURL(base64, 850, 850)
+                    .then(compressed64 => {
+                      //add to the image pool
+                      if (highRes) {
+                        loaded.push(
+                          createImageItem(
+                            mini64, //1:1 mini squares
+                            compressed64, //hover img
+                            base64, //preview img and game img
+                            file.name,
+                            extension
+                          )
+                        );
+                      } else {
+                        loaded.push(
+                          createImageItem(
+                            mini64, //1:1 mini squares
+                            compressed64, //hover img and game img
+                            compressed64, //preview img
+                            file.name,
+                            extension
+                          )
+                        );
+                      }
+
+                      setProgressCount(progressCount => progressCount + 1);
+                    })
+                    .catch(err => console.log(err));
                 })
                 .catch(err => console.log(err));
             };
@@ -178,11 +166,13 @@ export const LocalImport = () => {
         }
       }
 
-      //setImages(images => [
-      //  ...loaded,
-      //  ...images,
-      //]);
+      setDisabledButton(false);
+
+      //localstorage issues https://arty.name/localstorage.html
+      //setImages(images => images.concat(loaded));
+
       setImages(loaded);
+      //todo image section div needs to be reloaded to show all images
     } catch (error) {
       console.log('canceled choosing folder');
     }
@@ -200,7 +190,7 @@ export const LocalImport = () => {
       >
         <strong>Import Videos</strong>
         <p>
-          Allow adding videos from the chosen folder (this needs high resolution
+          Allow adding videos from the chosen folder (needs high resolution
           enabled)
         </p>
       </ToggleTile>
@@ -212,17 +202,29 @@ export const LocalImport = () => {
         <strong>Import Nested Media</strong>
         <p>Allow importing images from sub-folders</p>
       </ToggleTile>*/}
-      <Space size='small' />
+      <Space size='medium' />
       <Button
         style={{
           gridColumn: '1 / -1',
           justifySelf: 'center',
         }}
         onClick={select}
+        disabled={disabledButton}
       >
         Select Folder
       </Button>
-      <Space size='medium' />
+      <Space size='small' />
+      <SettingsInfo
+        style={{
+          gridColumn: '1 / -1',
+          justifySelf: 'center',
+        }}
+      >
+        {fileCount === 0
+          ? 'Please select a folder to import.'
+          : `${progressCount} out of ${fileCount} files have been imported.`}
+      </SettingsInfo>
+      <Space size='small' />
     </StyledLocalImport>
   );
 };
