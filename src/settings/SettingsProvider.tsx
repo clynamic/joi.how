@@ -38,7 +38,7 @@ export const defaultSettings: Settings = {
   body: PlayerBody.penis,
   highRes: false,
   nestedFiles: false,
-  localVideos: true,
+  localVideos: false,
   videoSound: false,
   vibrations: VibrationMode.thump,
 };
