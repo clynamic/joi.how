@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { PawLabels, useGameValue } from '../GameProvider';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faFire,
   faHand,
   faPerson,
   faPersonRunning,
@@ -10,7 +11,7 @@ import {
 import { useSetting } from '../../settings';
 import { useMemo } from 'react';
 import { GameEvent } from '../../types';
-import { VerticalDivider } from '../../common';
+import { ProgressBar, VerticalDivider } from '../../common';
 
 const StyledGameInstructions = styled.div`
   display: flex;
@@ -51,8 +52,16 @@ const StyledGripIcons = styled.div`
   justify-items: center;
 `;
 
+const StyledIntensityMeter = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+`;
+
 export const GameInstructions = () => {
   const [pace] = useGameValue('pace');
+  const [intensity] = useGameValue('intensity');
   const [maxPace] = useSetting('maxPace');
   const paceSection = useMemo(() => maxPace / 3, [maxPace]);
 
@@ -100,6 +109,18 @@ export const GameInstructions = () => {
           </StyledGripIcons>
         </>
       )}
+      <StyledIntensityMeter>
+        <ProgressBar
+          progress={intensity}
+          direction='vertical'
+          background='rgba(255, 255, 255, 0.3)'
+          color='#fff'
+        />
+        <FontAwesomeIcon
+          icon={faFire}
+          color={`rgb(255, ${255 - (intensity / 100) * 255}, ${255 - (intensity / 100) * 255})`}
+        />
+      </StyledIntensityMeter>
     </StyledGameInstructions>
   );
 };
