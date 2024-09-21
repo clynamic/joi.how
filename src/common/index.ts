@@ -23,3 +23,4 @@ export * from './ToggleTile';
 export * from './Tooltip';
 export * from './Trailing';
 export * from './VerticalDivider';
+export * from './ProgressBar';
