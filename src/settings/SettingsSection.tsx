@@ -12,7 +12,6 @@ import {
   BoardSettings,
   VibratorSettings,
   TradeSettings,
-  WalltalkerSettings,
 } from './components';
 
 const StyledSettingsSection = styled(ContentSection)`
@@ -33,7 +32,6 @@ export const SettingsSection = () => {
       <ServiceSettings />
       <ImageSettings />
       <VibratorSettings />
-      <WalltalkerSettings />
       <TradeSettings />
     </StyledSettingsSection>
   );

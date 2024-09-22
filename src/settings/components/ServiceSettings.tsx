@@ -29,7 +29,7 @@ export const ServiceSettings = () => {
         <TabBar
           tabs={[
             { id: 'e621', content: 'e621' },
-            // { id: 'walltalker', content: 'Walltalker' },
+            { id: 'walltalker', content: 'Walltalker' },
             { id: 'local', content: 'Device' },
           ]}
           current={activeTab}
