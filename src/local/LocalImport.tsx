@@ -9,11 +9,7 @@ import {
 } from '../common';
 import { useImages } from '../settings';
 import { AnimatePresence } from 'framer-motion';
-import {
-  discoverImageFiles,
-  imageTypeFromExtension,
-  itemExtensions,
-} from './files';
+import { discoverImageFiles, imageTypeFromExtension } from './files';
 import { LocalImageRequest, useLocalImages } from './LocalProvider';
 import { ImageServiceType } from '../types';
 import { chunk } from 'lodash';
@@ -35,37 +31,23 @@ const StyledLoadingHint = styled(SettingsInfo)`
 export const LocalImport = () => {
   const [loading, setLoading] = useState(false);
   const { storeImage } = useLocalImages();
-
   const [, setImages] = useImages();
-
-  const [files, setFiles] = useState<FileSystemFileHandle[] | undefined>(
-    undefined
-  );
-
+  const [files, setFiles] = useState<File[] | undefined>(undefined);
   const [progress, setProgress] = useState<number | undefined>(undefined);
 
-  const select = async () => {
-    let dir: FileSystemDirectoryHandle | undefined;
-    try {
-      dir = await showDirectoryPicker();
-    } catch (error) {
-      // user canceled
-    }
-    if (!dir) return;
+  const select = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = event.target.files;
+    if (!fileList) return;
+
     try {
       setLoading(true);
       setFiles([]);
       setProgress(0);
-      const files = await discoverImageFiles(dir);
-      setFiles(files);
 
-      const fileChunks = chunk(
-        files.filter(file => {
-          const extension = file.name.split('.').pop()?.toLowerCase();
-          return extension && itemExtensions.includes(extension);
-        }),
-        30
-      );
+      const imageFiles = await discoverImageFiles(fileList);
+      setFiles(imageFiles);
+
+      const fileChunks = chunk(imageFiles, 30);
 
       for (const chunk of fileChunks) {
         const requests = await Promise.all(
@@ -73,7 +55,7 @@ export const LocalImport = () => {
             const extension = file.name.split('.').pop()?.toLowerCase();
             setProgress(prev => (prev ?? 0) + 1);
             return {
-              blob: await file.getFile(),
+              blob: file,
               type: imageTypeFromExtension(extension!),
               name: file.name,
             };
@@ -94,7 +76,6 @@ export const LocalImport = () => {
             id: result.id,
           })),
         ]);
-        setProgress(prev => (prev ?? 0) + chunk.length);
       }
     } finally {
       setLoading(false);
@@ -107,15 +88,20 @@ export const LocalImport = () => {
     <StyledLocalImport>
       <SettingsDescription>Add images from your device</SettingsDescription>
       <Space size='medium' />
+      <input
+        type='file'
+        multiple
+        accept='image/*'
+        style={{ display: 'none' }}
+        id='filePicker'
+        onChange={select}
+      />
       <Button
-        style={{
-          gridColumn: '1 / -1',
-          justifySelf: 'center',
-        }}
-        onClick={select}
+        style={{ gridColumn: '1 / -1', justifySelf: 'center' }}
+        onClick={() => document.getElementById('filePicker')?.click()}
         disabled={loading}
       >
-        Select Folder
+        Select Files
       </Button>
       <Space size='small' />
       <AnimatePresence>
