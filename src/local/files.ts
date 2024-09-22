@@ -1,6 +1,3 @@
-import { ImageItem } from '../types';
-import { processImageElement } from './resize';
-
 export const itemExtensions = [
   'gif',
   'bmp',
@@ -14,60 +11,6 @@ export const itemExtensions = [
 ];
 
 export const videoExtensions = ['mp4', 'webm'];
-
-export const processImageFile = async (entry: FileSystemFileHandle) => {
-  const file = await entry.getFile();
-  const extension = file.name.split('.').pop();
-
-  if (!extension || !itemExtensions.includes(extension)) return undefined;
-
-  try {
-    return await new Promise<ImageItem | undefined>(resolve => {
-      if (videoExtensions.includes(extension)) {
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          const arrayBuffer = event.target?.result as ArrayBuffer;
-          const blob = new Blob([arrayBuffer], { type: 'video/mp4' });
-          const url = URL.createObjectURL(blob);
-
-          const video = document.createElement('video');
-          video.src = url;
-          video.currentTime = 1;
-
-          video.addEventListener('loadeddata', async () => {
-            try {
-              const item = await processImageElement(video, file, extension);
-              resolve(item);
-            } catch (error) {
-              console.error(error);
-              resolve(undefined);
-            }
-          });
-        };
-        reader.readAsArrayBuffer(file);
-      } else {
-        const reader = new FileReader();
-        reader.onload = async event => {
-          const base64 = event.target?.result;
-
-          if (typeof base64 !== 'string') return;
-
-          const image = new Image();
-          image.src = base64;
-
-          image.onload = async () => {
-            const item = await processImageElement(image, file, extension);
-            resolve(item);
-          };
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  } catch (error) {
-    console.error(error);
-    return undefined;
-  }
-};
 
 export const discoverImageFiles = async (
   dir: FileSystemDirectoryHandle

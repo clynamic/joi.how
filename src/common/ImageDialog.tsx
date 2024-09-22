@@ -12,6 +12,7 @@ import { ToggleTile } from './ToggleTile';
 import { Surrounded } from './Trailing';
 import styled from 'styled-components';
 import { StackedImage } from './StackedImage';
+import { useLocalImages } from '../local/LocalProvider';
 
 export interface ImageDialogProps {
   image?: ImageItem;
@@ -52,6 +53,7 @@ export const ImageDialog: React.FC<PropsWithChildren<ImageDialogProps>> = ({
 }) => {
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState<ImageItem | null>(null);
+  const { resolveUrl } = useLocalImages();
 
   useEffect(() => {
     setVisible(!!image);
@@ -87,7 +89,11 @@ export const ImageDialog: React.FC<PropsWithChildren<ImageDialogProps>> = ({
               loud={loud}
             />
             <StyledImageDialogActions>
-              <ToggleTile onClick={() => window.open(current.source, '_blank')}>
+              <ToggleTile
+                onClick={async () =>
+                  window.open(await resolveUrl(current.source), '_blank')
+                }
+              >
                 <Surrounded
                   trailing={<FontAwesomeIcon icon={faArrowUpRightFromSquare} />}
                 >

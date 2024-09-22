@@ -16,6 +16,7 @@ import {
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { ImageItem } from '../../types';
+import { useLocalImages } from '../../local/LocalProvider';
 
 const StyledImageActions = styled.div`
   display: flex;
@@ -36,6 +37,7 @@ const SmallActionButton = styled(IconButton)`
 
 export const ImageSettings = () => {
   const [images, setImages] = useImages();
+  const { removeImage } = useLocalImages();
   const [selected, setSelected] = useState<ImageItem[]>([]);
   const [clicked, setClicked] = useState<ImageItem | undefined>(undefined);
   const [videoSound] = useSetting('videoSound');
@@ -98,6 +100,9 @@ export const ImageSettings = () => {
           setSelected([...selected, clicked]);
         }}
         onDelete={() => {
+          if (clicked) {
+            removeImage(clicked.id);
+          }
           setImages(images.filter(image => image !== clicked));
         }}
         loud={videoSound}
