@@ -42,11 +42,7 @@ export const LocalImport = () => {
       setLoading(true);
       setFiles([]);
       setProgress(0);
-      const files = await discoverImageFiles(dir, file => {
-        requestAnimationFrame(() => {
-          setFiles(files => [...(files ?? []), file]);
-        });
-      });
+      const files = await discoverImageFiles(dir);
       setFiles(files);
       for (const [index, file] of files.entries()) {
         const item = await processImageFile(file);
