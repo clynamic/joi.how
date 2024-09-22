@@ -18,19 +18,19 @@ const StyledTabBar = styled.div`
 `;
 
 const StyledTab = styled.button<{
-  active?: boolean;
-  index?: number;
+  $active?: boolean;
+  $index?: number;
 }>`
   width: fit-content;
   padding: 4px 8px;
   line-height: 100%;
   font-size: 1rem;
 
-  background: ${props =>
-    props.active ? 'var(--legend-background)' : 'var(--section-background)'};
+  background: ${({ $active }) =>
+    $active ? 'var(--legend-background)' : 'var(--section-background)'};
   color: var(--button-color);
 
-  border-left: ${({ index }) =>
+  border-left: ${({ $index: index }) =>
     index && index > 0 ? '1px solid currentColor' : 'unset'};
 
   cursor: pointer;
@@ -57,10 +57,10 @@ export const TabBar: React.FC<TabBarProps> = ({
       {tabs.map((tab, i) => (
         <StyledTab
           key={tab.id}
-          active={tab.id === activeTab}
+          $active={tab.id === activeTab}
           onClick={() => setActiveTab(tab.id)}
           disabled={tab.disabled}
-          index={i}
+          $index={i}
         >
           {tab.content}
         </StyledTab>

@@ -33,7 +33,7 @@ const StyledImageThumbnailTile = styled.div`
 
 const StyledImageThumbnailTileImage = styled.div`
   height: 40px;
-  aspect-ratio: 1;
+  width: 40px;
 `;
 
 const ImageThumbnailTile: React.FC<ImageThumbnailTileProps> = ({
