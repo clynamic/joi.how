@@ -1,17 +1,12 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import {
-  SettingsDescription,
-  Space,
-  Button,
-  ToggleTile,
-  ToggleTileType,
-  SettingsInfo,
-} from '../common';
-import { useImages, useSetting } from '../settings';
+import { SettingsDescription, Space, Button, SettingsInfo } from '../common';
+import { useImages } from '../settings';
 import { ImageItem } from '../types';
-import { scaleDataURL } from './base64';
-import { createImageItem } from './image';
+import { createLocalImageItem } from './image';
+import { AnimatePresence } from 'framer-motion';
+import { resizeCanvas } from './resize';
+import { itemExtensions, videoExtensions } from './extensions';
 
 const StyledLocalImport = styled.div`
   display: grid;
@@ -19,162 +14,130 @@ const StyledLocalImport = styled.div`
 `;
 
 export const LocalImport = () => {
-  const [nestedFiles] = useSetting('nestedFiles');
-  const [localVideos, setLocalVideos] = useSetting('localVideos');
+  const [loading, setLoading] = useState(false);
 
-  const [images, setImages] = useImages();
-  const [highRes] = useSetting('highRes');
+  const [, setImages] = useImages();
 
   const [fileCount, setFileCount] = useState(0);
-  const [progressCount, setProgressCount] = useState(0);
-  const [disabledButton, setDisabledButton] = useState(false);
+
+  const processImageElement = useCallback(
+    async (
+      image: HTMLImageElement | HTMLVideoElement,
+      file: File,
+      extension: string
+    ) => {
+      const originalCanvas = document.createElement('canvas');
+      originalCanvas.width = image.width;
+      originalCanvas.height = image.height;
+
+      const context = originalCanvas.getContext('2d');
+      if (!context) return undefined;
+      context.drawImage(image, 0, 0);
+
+      const thumbnail = await resizeCanvas(originalCanvas, 100);
+      const preview = await resizeCanvas(originalCanvas, 400);
+
+      return createLocalImageItem(
+        thumbnail,
+        preview,
+        image.src,
+        file.name,
+        extension
+      );
+    },
+    []
+  );
+
+  const processFile = useCallback(
+    async (entry: FileSystemFileHandle) => {
+      const file = await entry.getFile();
+      const extension = file.name.split('.').pop();
+
+      if (!extension || !itemExtensions.includes(extension)) return undefined;
+
+      const item = await new Promise<ImageItem | undefined>(resolve => {
+        if (videoExtensions.includes(extension)) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const arrayBuffer = event.target?.result as ArrayBuffer;
+            const blob = new Blob([arrayBuffer], { type: 'video/mp4' });
+            const url = URL.createObjectURL(blob);
+
+            const video = document.createElement('video');
+            video.src = url;
+            video.currentTime = 1;
+
+            video.addEventListener('loadeddata', async () => {
+              const item = await processImageElement(video, file, extension);
+              resolve(item);
+            });
+          };
+          reader.readAsArrayBuffer(file);
+        } else {
+          const reader = new FileReader();
+          reader.onload = async event => {
+            const base64 = event.target?.result;
+
+            if (typeof base64 !== 'string') return;
+
+            const image = new Image();
+            image.src = base64;
+
+            image.onload = async () => {
+              const item = await processImageElement(image, file, extension);
+              resolve(item);
+            };
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      return item;
+    },
+    [processImageElement]
+  );
+
+  const addFiles = useCallback(
+    async (dir: FileSystemDirectoryHandle): Promise<void> => {
+      const entries = [];
+
+      for await (const entry of dir.values()) {
+        entries.push(entry);
+      }
+
+      const CHUNK_SIZE = 5;
+      for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
+        const chunk = entries.slice(i, i + CHUNK_SIZE);
+
+        await Promise.all(
+          chunk.map(async entry => {
+            if (entry.kind === 'directory') {
+              await addFiles(entry);
+            } else if (entry.kind === 'file') {
+              const item = await processFile(entry);
+              if (item) {
+                setImages(images => images.concat(item));
+                setFileCount(count => count + 1);
+              }
+            }
+          })
+        );
+      }
+    },
+    [processFile, setImages]
+  );
 
   const select = async () => {
-    //reset counts
-    setFileCount(0);
-    setProgressCount(0);
-
     try {
-      //get user permission to access a directory (limited browser support https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker)
-      const dirHandle = await showDirectoryPicker();
-      const loaded: ImageItem[] = [...images];
-
-      //get number of files in directory
-      for await (const entry of dirHandle.values()) {
-        if (entry.kind === 'file') {
-          const file = await entry.getFile();
-          const extension = file.name.split('.').pop();
-
-          //dont count videos if they aren't enabled
-          if (!(extension.includes('mp4') || extension.includes('webm'))) {
-            setFileCount(fileCount => fileCount + 1);
-          } else if (
-            localVideos &&
-            (extension.includes('mp4') || extension.includes('webm'))
-          ) {
-            setFileCount(fileCount => fileCount + 1);
-          }
-        }
-      }
-
-      setDisabledButton(true);
-
-      //loop through all items in the directory
-      for await (const entry of dirHandle.values()) {
-        if (entry.kind === 'directory' && nestedFiles) {
-          //todo
-        } else if (entry.kind === 'file') {
-          const file = await entry.getFile();
-          const extension = file.name.split('.').pop();
-
-          if (
-            (extension.includes('mp4') || extension.includes('webm')) &&
-            localVideos
-          ) {
-            //store as a blob to reference later
-            const reader = new FileReader();
-
-            //read the file to an arraybuffer to then convert to blob
-            reader.onload = function (event) {
-              const arrayBuffer = event.target?.result as ArrayBuffer;
-              const blob = new Blob([arrayBuffer], { type: 'video/mp4' });
-              const url = URL.createObjectURL(blob);
-
-              //create a thumbnail for the video
-              const video = document.createElement('video');
-              video.src = url;
-              video.currentTime = 1;
-
-              video.addEventListener('loadeddata', () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-
-                const context = canvas.getContext('2d');
-                if (context) {
-                  context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                  const thumbBase64 = canvas.toDataURL('image/png');
-
-                  //add to the image pool
-                  loaded.push(
-                    createImageItem(thumbBase64, url, url, file.name, extension)
-                  );
-
-                  setProgressCount(progressCount => progressCount + 1);
-                }
-              });
-            };
-
-            reader.readAsArrayBuffer(file);
-          } else if (
-            extension.includes('gif') ||
-            extension.includes('bmp') ||
-            extension.includes('jpg') ||
-            extension.includes('jpeg') ||
-            extension.includes('webp') ||
-            extension.includes('png') ||
-            extension.includes('svg')
-          ) {
-            //store as base64
-            const reader = new FileReader();
-
-            reader.onload = function (event) {
-              const base64 = event.target?.result;
-
-              //base64 could be null? most unlikely
-              if (typeof base64 !== 'string') {
-                console.log('base64 of file', file.name, 'is not readable');
-                return;
-              }
-
-              scaleDataURL(base64, 64, 64)
-                .then(mini64 => {
-                  scaleDataURL(base64, 850, 850)
-                    .then(compressed64 => {
-                      //add to the image pool
-                      if (highRes) {
-                        loaded.push(
-                          createImageItem(
-                            mini64, //1:1 mini squares
-                            compressed64, //hover img
-                            base64, //preview img and game img
-                            file.name,
-                            extension
-                          )
-                        );
-                      } else {
-                        loaded.push(
-                          createImageItem(
-                            mini64, //1:1 mini squares
-                            compressed64, //hover img and game img
-                            compressed64, //preview img
-                            file.name,
-                            extension
-                          )
-                        );
-                      }
-
-                      setProgressCount(progressCount => progressCount + 1);
-                    })
-                    .catch(err => console.log(err));
-                })
-                .catch(err => console.log(err));
-            };
-
-            reader.readAsDataURL(file);
-          }
-        }
-      }
-
-      setDisabledButton(false);
-
-      //localstorage issues https://arty.name/localstorage.html
-      //setImages(images => images.concat(loaded));
-
-      setImages(loaded);
-      //todo image section div needs to be reloaded to show all images
+      const dir = await showDirectoryPicker();
+      setLoading(true);
+      setFileCount(0);
+      await addFiles(dir);
     } catch (error) {
-      console.log('canceled choosing folder');
+      // user canceled
+    } finally {
+      setLoading(false);
+      setFileCount(0);
     }
   };
 
@@ -183,25 +146,6 @@ export const LocalImport = () => {
       <SettingsDescription>
         Add images from your local drive
       </SettingsDescription>
-      <ToggleTile
-        value={localVideos}
-        type={ToggleTileType.check}
-        onClick={() => setLocalVideos(!localVideos)}
-      >
-        <strong>Import Videos</strong>
-        <p>
-          Allow adding videos from the chosen folder (needs high resolution
-          enabled)
-        </p>
-      </ToggleTile>
-      {/*<ToggleTile
-        value={nestedFiles}
-        type={ToggleTileType.check}
-        onClick={() => setNestedFiles(!nestedFiles)}
-      >
-        <strong>Import Nested Media</strong>
-        <p>Allow importing images from sub-folders</p>
-      </ToggleTile>*/}
       <Space size='medium' />
       <Button
         style={{
@@ -209,21 +153,23 @@ export const LocalImport = () => {
           justifySelf: 'center',
         }}
         onClick={select}
-        disabled={disabledButton}
+        disabled={loading}
       >
         Select Folder
       </Button>
       <Space size='small' />
-      <SettingsInfo
-        style={{
-          gridColumn: '1 / -1',
-          justifySelf: 'center',
-        }}
-      >
-        {fileCount === 0
-          ? 'Please select a folder to import.'
-          : `${progressCount} out of ${fileCount} files have been imported.`}
-      </SettingsInfo>
+      <AnimatePresence>
+        {fileCount > 0 && (
+          <SettingsInfo
+            style={{
+              gridColumn: '1 / -1',
+              justifySelf: 'center',
+            }}
+          >
+            {`${fileCount} files have been imported...`}
+          </SettingsInfo>
+        )}
+      </AnimatePresence>
       <Space size='small' />
     </StyledLocalImport>
   );

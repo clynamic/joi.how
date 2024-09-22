@@ -30,6 +30,7 @@
     "framer-motion": "^11.1.9",
     "marked": "^12.0.2",
     "mathjs": "^12.4.2",
+    "pica": "^9.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
@@ -41,9 +42,11 @@
     "wasgen": "^0.18.4"
   },
   "devDependencies": {
+    "@types/pica": "^9.0.4",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@types/react-sparklines": "^1.7.5",
+    "@types/wicg-file-system-access": "^2023.10.5",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react": "^4.2.1",
