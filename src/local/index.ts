@@ -1,4 +1,3 @@
-export * from './extensions';
-export * from './image';
+export * from './files';
 export * from './LocalImport';
 export * from './resize';
