@@ -7,7 +7,7 @@ import {
   VerticalDivider,
 } from '../../common';
 import { Settings, useSettings } from '../SettingsProvider';
-import { ImageItem } from '../../types';
+import { ImageItem, ImageServiceType } from '../../types';
 import { useImages } from '../ImageProvider';
 import { ChangeEvent } from 'react';
 
@@ -32,7 +32,8 @@ export const TradeSettings = () => {
       name: `Export from ${new Date().toLocaleString()}`,
       version: '1',
       settings: settings,
-      images: images,
+      // local images could be base64 encoded, but this would cause significant bloat
+      images: images.filter(image => image.service === ImageServiceType.local),
     };
     const data = JSON.stringify(tradeFormat, null, 2);
     const blob = new Blob([data], { type: 'application/json' });

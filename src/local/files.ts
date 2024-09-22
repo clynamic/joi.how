@@ -1,3 +1,5 @@
+import { ImageType } from '../types';
+
 export const itemExtensions = [
   'gif',
   'bmp',
@@ -11,6 +13,18 @@ export const itemExtensions = [
 ];
 
 export const videoExtensions = ['mp4', 'webm'];
+
+export const imageTypeFromExtension = (extension: string): ImageType => {
+  switch (extension) {
+    case 'webm':
+    case 'mp4':
+      return ImageType.video;
+    case 'gif':
+      return ImageType.gif;
+    default:
+      return ImageType.image;
+  }
+};
 
 export const discoverImageFiles = async (
   dir: FileSystemDirectoryHandle
