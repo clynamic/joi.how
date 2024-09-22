@@ -9,9 +9,14 @@ import {
 } from '../common';
 import { useImages } from '../settings';
 import { AnimatePresence } from 'framer-motion';
-import { discoverImageFiles } from './files';
-import { useLocalImages } from './LocalProvider';
-import { ImageServiceType, ImageType } from '../types';
+import {
+  discoverImageFiles,
+  imageTypeFromExtension,
+  itemExtensions,
+} from './files';
+import { LocalImageRequest, useLocalImages } from './LocalProvider';
+import { ImageServiceType } from '../types';
+import { chunk } from 'lodash';
 
 const StyledLocalImport = styled.div`
   display: grid;
@@ -54,37 +59,42 @@ export const LocalImport = () => {
       const files = await discoverImageFiles(dir);
       setFiles(files);
 
-      for (const file of files) {
-        const extension = file.name.split('.').pop()?.toLowerCase();
-        const type = (() => {
-          switch (extension) {
-            case 'webm':
-            case 'mp4':
-              return ImageType.video;
-            case 'gif':
-              return ImageType.gif;
-            default:
-              return ImageType.image;
-          }
-        })();
-        const result = await storeImage(await file.getFile(), type, file.name);
+      const fileChunks = chunk(
+        files.filter(file => {
+          const extension = file.name.split('.').pop()?.toLowerCase();
+          return extension && itemExtensions.includes(extension);
+        }),
+        30
+      );
+
+      for (const chunk of fileChunks) {
+        const requests = await Promise.all(
+          chunk.map<Promise<LocalImageRequest>>(async file => {
+            const extension = file.name.split('.').pop()?.toLowerCase();
+            setProgress(prev => (prev ?? 0) + 1);
+            return {
+              blob: await file.getFile(),
+              type: imageTypeFromExtension(extension!),
+              name: file.name,
+            };
+          })
+        );
+
+        const results = await storeImage(requests);
+
         setImages(prev => [
           ...(prev ?? []),
-          ...(prev.some(image => image.id === result.id)
-            ? []
-            : [
-                {
-                  thumbnail: `local://thumbnail/${result.id}`,
-                  preview: `local://preview/${result.id}`,
-                  full: `local://full/${result.id}`,
-                  type: result.type,
-                  source: `local://full/${result.id}`,
-                  service: ImageServiceType.local,
-                  id: result.id,
-                },
-              ]),
+          ...results.map(result => ({
+            thumbnail: `local://thumbnail/${result.id}`,
+            preview: `local://preview/${result.id}`,
+            full: `local://full/${result.id}`,
+            type: result.type,
+            source: `local://full/${result.id}`,
+            service: ImageServiceType.local,
+            id: result.id,
+          })),
         ]);
-        setProgress(prev => (prev ?? 0) + 1);
+        setProgress(prev => (prev ?? 0) + chunk.length);
       }
     } finally {
       setLoading(false);
@@ -95,9 +105,7 @@ export const LocalImport = () => {
 
   return (
     <StyledLocalImport>
-      <SettingsDescription>
-        Add images from your local drive
-      </SettingsDescription>
+      <SettingsDescription>Add images from your device</SettingsDescription>
       <Space size='medium' />
       <Button
         style={{

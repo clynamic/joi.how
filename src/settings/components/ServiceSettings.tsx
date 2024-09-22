@@ -8,7 +8,7 @@ import { LocalImport } from '../../local';
 const tabs: Record<string, React.ReactNode> = {
   e621: <E621Search />,
   walltalker: <WalltalkerSearch />,
-  localimport: <LocalImport />,
+  local: <LocalImport />,
 };
 
 type Tab = keyof typeof tabs;
@@ -30,7 +30,7 @@ export const ServiceSettings = () => {
           tabs={[
             { id: 'e621', content: 'e621' },
             // { id: 'walltalker', content: 'Walltalker' },
-            { id: 'localimport', content: 'local import' },
+            { id: 'local', content: 'Device' },
           ]}
           current={activeTab}
           onChange={setActiveTab}
