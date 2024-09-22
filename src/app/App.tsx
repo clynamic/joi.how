@@ -8,8 +8,8 @@ export const App = () => {
     <WalltakerSocketServiceProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/play" element={<GamePage />} />
+          <Route path='/' element={<HomePage />} />
+          <Route path='/play' element={<GamePage />} />
         </Routes>
       </BrowserRouter>
     </WalltakerSocketServiceProvider>

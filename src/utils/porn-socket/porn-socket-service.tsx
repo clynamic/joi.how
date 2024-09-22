@@ -21,9 +21,11 @@ export function usePornSocketService(enableDefault = false) {
 
   useEffect(() => {
     if (enabled) {
-      service?.connect()
+      service
+        ?.connect()
         .then(() => setReady(true))
-        .catch(() => setReady(false));}
+        .catch(() => setReady(false));
+    }
 
     return () => {
       service?.disconnect().then(() => setReady(false));

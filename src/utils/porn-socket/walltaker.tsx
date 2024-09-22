@@ -1,5 +1,8 @@
 import { PropsWithChildren, useEffect, useRef } from 'react';
-import { PornSocketContext, PornSocketService } from './porn-socket-service.tsx';
+import {
+  PornSocketContext,
+  PornSocketService,
+} from './porn-socket-service.tsx';
 import { useImages } from '../../settings';
 import { ImageServiceType, ImageType } from '../../types';
 
@@ -30,8 +33,7 @@ export interface UserResponse {
 
 export class WalltakerSocketService implements PornSocketService {
   private socket: WebSocket | null = null;
-  onChange: (link: LinkResponse) => void = () => {
-  };
+  onChange: (link: LinkResponse) => void = () => {};
 
   connect(): Promise<void> {
     return new Promise((res, rej) => {
@@ -62,7 +64,7 @@ export class WalltakerSocketService implements PornSocketService {
   }
 
   disconnect(): Promise<void> {
-    return new Promise((res) => {
+    return new Promise(res => {
       if (this.socket) {
         this.socket.addEventListener('close', () => res());
         this.socket.close();
@@ -81,7 +83,10 @@ export class WalltakerSocketService implements PornSocketService {
       const channelId = this.channelIdentifierFor(id);
       const message = { command: 'subscribe', identifier: channelId };
 
-      this.socket.addEventListener('message', this.firstMessageHandlerFor('confirm_subscription', id, rej, res));
+      this.socket.addEventListener(
+        'message',
+        this.firstMessageHandlerFor('confirm_subscription', id, rej, res)
+      );
       this.socket.send(JSON.stringify(message));
     });
   }
@@ -102,13 +107,15 @@ export class WalltakerSocketService implements PornSocketService {
   }
 
   static async getLink(id: number) {
-    return fetch(`https://walltaker.joi.how/api/links/${id}.json`)
-      .then(res => res.json() as unknown as LinkResponse);
+    return fetch(`https://walltaker.joi.how/api/links/${id}.json`).then(
+      res => res.json() as unknown as LinkResponse
+    );
   }
 
   static async getLinksFromUsername(username: string) {
-    const result = await fetch(`https://walltaker.joi.how/api/users/${username}.json`)
-      .then(res => res.json() as unknown as UserResponse);
+    const result = await fetch(
+      `https://walltaker.joi.how/api/users/${username}.json`
+    ).then(res => res.json() as unknown as UserResponse);
     return result.links;
   }
 
@@ -123,13 +130,21 @@ export class WalltakerSocketService implements PornSocketService {
     return JSON.stringify({ channel: 'LinkChannel', id });
   }
 
-  private firstMessageHandlerFor(eventName: string, id: number, rej: (message?: string) => void, res: () => void) {
+  private firstMessageHandlerFor(
+    eventName: string,
+    id: number,
+    rej: (message?: string) => void,
+    res: () => void
+  ) {
     const MAX_RETRIES = 4;
     let tries = 0;
 
     const handler = (message: MessageEvent<string>) => {
       const content = JSON.parse(message.data);
-      if (content.type === eventName && content.identifier === this.channelIdentifierFor(id)) {
+      if (
+        content.type === eventName &&
+        content.identifier === this.channelIdentifierFor(id)
+      ) {
         this.socket?.removeEventListener('message', handler);
         res();
         return;
@@ -137,7 +152,9 @@ export class WalltakerSocketService implements PornSocketService {
 
       if (++tries > MAX_RETRIES) {
         this.socket?.removeEventListener('message', handler);
-        rej(`Max retries hit when waiting for subscription confirmation for Link#${id}.`);
+        rej(
+          `Max retries hit when waiting for subscription confirmation for Link#${id}.`
+        );
       }
     };
 
@@ -145,25 +162,34 @@ export class WalltakerSocketService implements PornSocketService {
   }
 }
 
-export function WalltakerSocketServiceProvider({ children }: PropsWithChildren<object>) {
+export function WalltakerSocketServiceProvider({
+  children,
+}: PropsWithChildren<object>) {
   const [images, setImages] = useImages();
   const walltakerSocketService = useRef(new WalltakerSocketService());
 
   useEffect(() => {
-    walltakerSocketService.current.onChange = (link) => {
+    walltakerSocketService.current.onChange = link => {
       if (images.find(image => image.full === link.post_url)) return;
 
-      setImages([...images, {
-        thumbnail: link.post_thumbnail_url,
-        preview: link.post_thumbnail_url,
-        full: link.post_url,
-        type: ImageType.image,
-        source: link.post_url,
-        service: ImageServiceType.e621,
-        id: link.post_url,
-      }]);
+      setImages([
+        ...images,
+        {
+          thumbnail: link.post_thumbnail_url,
+          preview: link.post_thumbnail_url,
+          full: link.post_url,
+          type: ImageType.image,
+          source: link.post_url,
+          service: ImageServiceType.e621,
+          id: link.post_url,
+        },
+      ]);
     };
   }, [images, setImages]);
 
-  return <PornSocketContext.Provider value={walltakerSocketService.current}>{children}</PornSocketContext.Provider>;
+  return (
+    <PornSocketContext.Provider value={walltakerSocketService.current}>
+      {children}
+    </PornSocketContext.Provider>
+  );
 }

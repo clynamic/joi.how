@@ -1,28 +1,44 @@
-import { Button, SettingsLabel, SettingsTile, Spinner, TextInput, ToggleTile, ToggleTileType } from '../../common';
-import { faCheckSquare, faPowerOff, faSpinner, faSquare } from '@fortawesome/free-solid-svg-icons';
+import {
+  Button,
+  SettingsLabel,
+  SettingsTile,
+  Spinner,
+  TextInput,
+  ToggleTile,
+  ToggleTileType,
+} from '../../common';
+import {
+  faCheckSquare,
+  faPowerOff,
+  faSpinner,
+  faSquare,
+} from '@fortawesome/free-solid-svg-icons';
 import { usePornSocketService } from '../../utils/porn-socket/porn-socket-service.tsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 import { useSetting } from '../SettingsProvider.tsx';
 import { useEffect, useState } from 'react';
-import { LinkResponse, WalltakerSocketService } from '../../utils/porn-socket/walltaker.tsx';
+import {
+  LinkResponse,
+  WalltakerSocketService,
+} from '../../utils/porn-socket/walltaker.tsx';
 import { defaultTransition } from '../../utils';
 import { motion } from 'framer-motion';
 import { useImages } from '../ImageProvider.tsx';
 import { ImageServiceType, ImageType } from '../../types';
 
 const Header = styled.div`
-    display: flex;
-    gap: 1ex;
-    align-items: center;
-    margin-bottom: 0.75rem;
+  display: flex;
+  gap: 1ex;
+  align-items: center;
+  margin-bottom: 0.75rem;
 `;
 
 const StyledLinksForm = styled.div`
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 0.75rem;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
 `;
 
 export const WalltalkerSettings = () => {
@@ -41,20 +57,24 @@ export const WalltalkerSettings = () => {
     if (config.id && service.ready) {
       setLoadingLink(true);
 
-      service.service?.listenTo(config.id)
+      service.service
+        ?.listenTo(config.id)
         .then(() => WalltakerSocketService.getLink(config.id ?? 0))
         .then(link => {
-          if (images.find(image => image.full === link.post_url)) return link
+          if (images.find(image => image.full === link.post_url)) return link;
 
-          setImages([...images, {
-            thumbnail: link.post_thumbnail_url,
-            preview: link.post_thumbnail_url,
-            full: link.post_url,
-            type: ImageType.image,
-            source: link.post_url,
-            service: ImageServiceType.e621,
-            id: link.post_url,
-          }]);
+          setImages([
+            ...images,
+            {
+              thumbnail: link.post_thumbnail_url,
+              preview: link.post_thumbnail_url,
+              full: link.post_url,
+              type: ImageType.image,
+              source: link.post_url,
+              service: ImageServiceType.e621,
+              id: link.post_url,
+            },
+          ]);
           return link;
         })
         .then(link => link && setListenedLink(link))
@@ -62,7 +82,8 @@ export const WalltalkerSettings = () => {
     }
 
     return () => {
-      if (config.id) service.service?.muteFrom(config.id).catch(() => setListenedLink(null));
+      if (config.id)
+        service.service?.muteFrom(config.id).catch(() => setListenedLink(null));
     };
   }, [config.id, service.enabled, service.ready, service.service]);
 
@@ -70,7 +91,7 @@ export const WalltalkerSettings = () => {
     setLoadingLinks(true);
 
     WalltakerSocketService.getLinksFromUsername(username)
-      .then((links) => setLinks(links ?? []))
+      .then(links => setLinks(links ?? []))
       .catch(() => setLinks([]))
       .finally(() => setLoadingLinks(false));
   };
@@ -78,7 +99,7 @@ export const WalltalkerSettings = () => {
   const enabledAndReady = config.enabled && service.enabled && service.ready;
 
   return (
-    <SettingsTile label="Walltalker">
+    <SettingsTile label='Walltalker'>
       <ToggleTile
         value={enabledAndReady}
         onClick={() => {
@@ -86,8 +107,13 @@ export const WalltalkerSettings = () => {
           service.setEnabled(!service.enabled);
         }}
         type={ToggleTileType.radio}
-        trailing={service.enabled && !service.ready ? <FontAwesomeIcon icon={faSpinner} spinPulse /> :
-          <FontAwesomeIcon icon={faPowerOff} />}
+        trailing={
+          service.enabled && !service.ready ? (
+            <FontAwesomeIcon icon={faSpinner} spinPulse />
+          ) : (
+            <FontAwesomeIcon icon={faPowerOff} />
+          )
+        }
       >
         <strong>Use Walltaker</strong>
         <p>Let others choose wallpapers for your session, live!</p>
@@ -103,7 +129,12 @@ export const WalltalkerSettings = () => {
           <>
             <FontAwesomeIcon icon={faCheckSquare} />
             <span>Listening to {listenedLink.id}</span>
-            <a href={`https://walltaker.joi.how/links/${listenedLink.id}`} target="_blank">Change Wallpaper</a>
+            <a
+              href={`https://walltaker.joi.how/links/${listenedLink.id}`}
+              target='_blank'
+            >
+              Change Wallpaper
+            </a>
           </>
         )}
         {service.enabled && !service.ready && (
@@ -135,13 +166,13 @@ export const WalltalkerSettings = () => {
           transition={defaultTransition}
         >
           <StyledLinksForm>
-            <SettingsLabel htmlFor="username">Username</SettingsLabel>
+            <SettingsLabel htmlFor='username'>Username</SettingsLabel>
             <TextInput
-              id="username"
+              id='username'
               value={username}
               onChange={setUsername}
               onSubmit={getLinks}
-              placeholder="Enter walltaker username..."
+              placeholder='Enter walltaker username...'
               style={{ gridColumn: '2 / -1' }}
               disabled={!enabledAndReady}
             />
