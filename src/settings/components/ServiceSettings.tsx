@@ -5,6 +5,14 @@ import { useState } from 'react';
 import { WalltalkerSearch } from '../../walltalker';
 import { LocalImport } from '../../local';
 
+const tabs: Record<string, React.ReactNode> = {
+  e621: <E621Search />,
+  walltalker: <WalltalkerSearch />,
+  localimport: <LocalImport />,
+};
+
+type Tab = keyof typeof tabs;
+
 const TabSettingsTile = styled(SettingsTile)`
   & > legend {
     background: var(--card-background);
@@ -13,9 +21,7 @@ const TabSettingsTile = styled(SettingsTile)`
 `;
 
 export const ServiceSettings = () => {
-  const [activeTab, setActiveTab] = useState<
-    'e621' | 'walltalker' | 'localimport'
-  >('e621');
+  const [activeTab, setActiveTab] = useState<Tab>('e621');
 
   return (
     <TabSettingsTile
@@ -27,15 +33,11 @@ export const ServiceSettings = () => {
             { id: 'localimport', content: 'local import' },
           ]}
           current={activeTab}
-          onChange={id =>
-            setActiveTab(id as 'e621' | 'walltalker' | 'localimport')
-          }
+          onChange={setActiveTab}
         />
       }
     >
-      {activeTab === 'e621' && <E621Search />}
-      {activeTab === 'walltalker' && <WalltalkerSearch />}
-      {activeTab === 'localimport' && <LocalImport />}
+      {tabs[activeTab]}
     </TabSettingsTile>
   );
 };
