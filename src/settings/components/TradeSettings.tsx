@@ -20,6 +20,8 @@ interface TradeFormat {
 
 const StyledTradeButtons = styled.div`
   display: flex;
+  flex-direction: row;
+  justify-content: center;
   gap: 8px;
 `;
 
