@@ -70,8 +70,7 @@ export const processImageFile = async (entry: FileSystemFileHandle) => {
 };
 
 export const discoverImageFiles = async (
-  dir: FileSystemDirectoryHandle,
-  onDiscover?: (file: FileSystemFileHandle) => void
+  dir: FileSystemDirectoryHandle
 ): Promise<FileSystemFileHandle[]> => {
   const files: FileSystemFileHandle[] = [];
   const entries: (FileSystemFileHandle | FileSystemDirectoryHandle)[] = [];
@@ -94,7 +93,6 @@ export const discoverImageFiles = async (
 
           if (extension && itemExtensions.includes(extension)) {
             files.push(entry);
-            onDiscover?.(entry);
           }
         }
       })
