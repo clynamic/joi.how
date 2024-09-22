@@ -11,16 +11,8 @@ import { openDB, IDBPDatabase } from 'idb';
 import { ImageSize } from '../common';
 import { ImageType } from '../types';
 import { generateLowResImage, LowResImageSize } from './resize';
-
-export interface LocalImage {
-  thumbnail?: Blob;
-  preview?: Blob;
-  full: Blob;
-  type: ImageType;
-  hash: string;
-  name: string;
-  id: string;
-}
+import SparkMD5 from 'spark-md5';
+import { LocalImage } from './files';
 
 interface LocalImagesDB {
   images: {
@@ -62,9 +54,8 @@ const generateImageId = (name: string, hash: string): string => {
 
 const generateHash = async (blob: Blob): Promise<string> => {
   const buffer = await blob.arrayBuffer();
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+  const hash = SparkMD5.ArrayBuffer.hash(buffer);
+  return hash;
 };
 
 const createThumbnailOrPreview = async (

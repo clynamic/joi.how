@@ -1,4 +1,14 @@
-import { ImageType } from '../types';
+import { ImageItem, ImageServiceType, ImageType } from '../types';
+
+export interface LocalImage {
+  thumbnail?: Blob;
+  preview?: Blob;
+  full: Blob;
+  type: ImageType;
+  hash: string;
+  name: string;
+  id: string;
+}
 
 export const itemExtensions = [
   'gif',
@@ -27,34 +37,30 @@ export const imageTypeFromExtension = (extension: string): ImageType => {
 };
 
 export const discoverImageFiles = async (
-  dir: FileSystemDirectoryHandle
-): Promise<FileSystemFileHandle[]> => {
-  const files: FileSystemFileHandle[] = [];
-  const entries: (FileSystemFileHandle | FileSystemDirectoryHandle)[] = [];
+  fileList: FileList
+): Promise<File[]> => {
+  const files: File[] = [];
 
-  for await (const entry of dir.values()) {
-    entries.push(entry);
-  }
+  for (let i = 0; i < fileList.length; i++) {
+    const file = fileList[i];
+    const extension = file.name.split('.').pop()?.toLowerCase();
 
-  const CHUNK_SIZE = 5;
-  for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
-    const chunk = entries.slice(i, i + CHUNK_SIZE);
-
-    await Promise.all(
-      chunk.map(async entry => {
-        if (entry.kind === 'directory') {
-          files.push(...(await discoverImageFiles(entry)));
-        } else if (entry.kind === 'file') {
-          const file = await entry.getFile();
-          const extension = file.name.split('.').pop();
-
-          if (extension && itemExtensions.includes(extension)) {
-            files.push(entry);
-          }
-        }
-      })
-    );
+    if (extension && itemExtensions.includes(extension)) {
+      files.push(file);
+    }
   }
 
   return files;
+};
+
+export const localImageToImage = (localImage: LocalImage): ImageItem => {
+  return {
+    thumbnail: `local://thumbnail/${localImage.id}`,
+    preview: `local://preview/${localImage.id}`,
+    full: `local://full/${localImage.id}`,
+    type: localImage.type,
+    source: `local://full/${localImage.id}`,
+    service: ImageServiceType.local,
+    id: localImage.id,
+  };
 };
