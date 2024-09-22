@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
 } from 'react';
 import { openDB, IDBPDatabase } from 'idb';
 import { ImageSize } from '../common';
@@ -37,16 +38,20 @@ const initDB = async (): Promise<IDBPDatabase<LocalImagesDB>> => {
   });
 };
 
+export interface LocalImageRequest {
+  blob: Blob;
+  type: ImageType;
+  name: string;
+}
+
 const LocalImagesContext = createContext<
   | {
-      storeImage: (
-        file: Blob,
-        type: ImageType,
-        name: string
-      ) => Promise<LocalImage>;
+      storeImage: <T extends LocalImageRequest | LocalImageRequest[]>(
+        request: T
+      ) => Promise<T extends LocalImageRequest ? LocalImage : LocalImage[]>;
       getImage: (id: string) => Promise<LocalImage | undefined>;
       resolveUrl: (url: string) => Promise<string>;
-      removeImage: (id: string) => Promise<void>;
+      removeImage: (id: string | string[]) => Promise<void>;
     }
   | undefined
 >(undefined);
@@ -55,8 +60,8 @@ const generateImageId = (name: string, hash: string): string => {
   return `${name}-${hash}`;
 };
 
-const generateHash = async (file: Blob): Promise<string> => {
-  const buffer = await file.arrayBuffer();
+const generateHash = async (blob: Blob): Promise<string> => {
+  const buffer = await blob.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
@@ -80,28 +85,78 @@ export const LocalImageProvider: React.FC<PropsWithChildren> = ({
   const dbInit = useMemo<Promise<IDBPDatabase<LocalImagesDB>>>(async () => {
     return initDB();
   }, []);
+  const resolveRequests = useRef<Map<string, Promise<string>>>(new Map());
 
-  const storeImage = useCallback(
-    async (file: Blob, type: ImageType, name: string) => {
+  const resolveUrl = useCallback(
+    async (url: string): Promise<string> => {
       const db = await dbInit;
 
-      const hash = await generateHash(file);
-      const id = generateImageId(name, hash);
+      const match = url.match(/^local:\/\/(thumbnail|preview|full)\/(.+)$/);
 
-      const newImage: LocalImage = {
-        full: file,
-        type,
-        hash,
-        name,
-        id,
-      };
+      if (!match) return url;
 
-      const tx = db.transaction('images', 'readwrite');
-      const store = tx.objectStore('images');
-      await store.put(newImage);
-      await tx.done;
+      const [, size, id] = match;
+      const key = `${size}-${id}`;
 
-      return newImage;
+      if (resolveRequests.current.has(key)) {
+        return resolveRequests.current.get(key)!;
+      }
+
+      const requestPromise = (async () => {
+        const tx = db.transaction('images', 'readonly');
+        const store = tx.objectStore('images');
+        const image: LocalImage = await store.get(id);
+
+        if (!image) throw new Error('Image not found in database');
+
+        let blob: Blob | undefined;
+
+        switch (size as ImageSize) {
+          case ImageSize.thumbnail:
+            if (!image.thumbnail) {
+              const thumbnail = await createThumbnailOrPreview(
+                image,
+                ImageSize.thumbnail
+              );
+              image.thumbnail = thumbnail;
+              const updateTx = db.transaction('images', 'readwrite');
+              const updateStore = updateTx.objectStore('images');
+              await updateStore.put(image);
+              await updateTx.done;
+            }
+            blob = image.thumbnail;
+            break;
+          case ImageSize.preview:
+            if (!image.preview) {
+              const preview = await createThumbnailOrPreview(
+                image,
+                ImageSize.preview
+              );
+              image.preview = preview;
+              const updateTx = db.transaction('images', 'readwrite');
+              const updateStore = updateTx.objectStore('images');
+              await updateStore.put(image);
+              await updateTx.done;
+            }
+            blob = image.preview;
+            break;
+          case ImageSize.full:
+            blob = image.full;
+            break;
+        }
+
+        if (!blob) throw new Error('Failed to resolve image blob');
+        return URL.createObjectURL(blob);
+      })();
+
+      resolveRequests.current.set(key, requestPromise);
+
+      try {
+        const result = await requestPromise;
+        return result;
+      } finally {
+        resolveRequests.current.delete(key);
+      }
     },
     [dbInit]
   );
@@ -117,63 +172,60 @@ export const LocalImageProvider: React.FC<PropsWithChildren> = ({
     [dbInit]
   );
 
-  const resolveUrl = useCallback(
-    async (url: string): Promise<string> => {
+  const storeImage = useCallback(
+    async <T extends LocalImageRequest | LocalImageRequest[]>(
+      request: T
+    ): Promise<T extends LocalImageRequest ? LocalImage : LocalImage[]> => {
       const db = await dbInit;
+      const requests: LocalImageRequest[] = Array.isArray(request)
+        ? request
+        : [request];
 
-      const match = url.match(/^local:\/\/(thumbnail|preview|full)\/(.+)$/);
+      const preparedImages: LocalImage[] = [];
+      for (const { blob, type, name } of requests) {
+        const hash = await generateHash(blob);
+        const id = generateImageId(name, hash);
 
-      if (!match) return url;
+        const newImage: LocalImage = {
+          full: blob,
+          type,
+          hash,
+          name,
+          id,
+        };
 
-      const [, size, id] = match;
-
-      const tx = db.transaction('images', 'readonly');
-      const store = tx.objectStore('images');
-      const image: LocalImage = await store.get(id);
-
-      if (!image) throw new Error('Image not found in database');
-
-      switch (size as ImageSize) {
-        case ImageSize.thumbnail:
-          if (!image.thumbnail) {
-            const thumbnail = await createThumbnailOrPreview(
-              image,
-              ImageSize.thumbnail
-            );
-            image.thumbnail = thumbnail;
-            const updateTx = db.transaction('images', 'readwrite');
-            const updateStore = updateTx.objectStore('images');
-            await updateStore.put(image);
-            await updateTx.done;
-          }
-          return URL.createObjectURL(image.thumbnail);
-        case ImageSize.preview:
-          if (!image.preview) {
-            const preview = await createThumbnailOrPreview(
-              image,
-              ImageSize.preview
-            );
-            image.preview = preview;
-            const updateTx = db.transaction('images', 'readwrite');
-            const updateStore = updateTx.objectStore('images');
-            await updateStore.put(image);
-            await updateTx.done;
-          }
-          return URL.createObjectURL(image.preview);
-        case ImageSize.full:
-          return URL.createObjectURL(image.full);
+        preparedImages.push(newImage);
       }
+
+      const tx = db.transaction('images', 'readwrite');
+      const store = tx.objectStore('images');
+
+      for (const image of preparedImages) {
+        await store.put(image);
+      }
+
+      await tx.done;
+
+      return preparedImages as T extends LocalImageRequest
+        ? LocalImage
+        : LocalImage[];
     },
     [dbInit]
   );
 
   const removeImage = useCallback(
-    async (id: string) => {
+    async (id: string | string[]) => {
       const db = await dbInit;
 
       const tx = db.transaction('images', 'readwrite');
       const store = tx.objectStore('images');
-      await store.delete(id);
+      if (Array.isArray(id)) {
+        for (const imageId of id) {
+          await store.delete(imageId);
+        }
+      } else {
+        await store.delete(id);
+      }
       await tx.done;
     },
     [dbInit]

@@ -51,6 +51,7 @@ export const ImageSettings = () => {
             onClick={
               selected.length > 0
                 ? () => {
+                    removeImage(selected.map(image => image.id));
                     setImages(
                       images.filter(image => !selected.includes(image))
                     );
@@ -100,9 +101,8 @@ export const ImageSettings = () => {
           setSelected([...selected, clicked]);
         }}
         onDelete={() => {
-          if (clicked) {
-            removeImage(clicked.id);
-          }
+          if (!clicked) return;
+          removeImage(clicked.id);
           setImages(images.filter(image => image !== clicked));
         }}
         loud={videoSound}
