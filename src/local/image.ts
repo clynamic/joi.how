@@ -1,7 +1,6 @@
 import { ImageItem, ImageServiceType, ImageType } from '../types';
 
-//simplify the process of creating a imageitem
-export function createImageItem(
+export function createLocalImageItem(
   thumbnail: string,
   preview: string,
   full: string,
