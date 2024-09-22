@@ -9,7 +9,9 @@ import {
 } from '../common';
 import { useImages } from '../settings';
 import { AnimatePresence } from 'framer-motion';
-import { discoverImageFiles, processImageFile } from './files';
+import { discoverImageFiles } from './files';
+import { useLocalImages } from './LocalProvider';
+import { ImageServiceType, ImageType } from '../types';
 
 const StyledLocalImport = styled.div`
   display: grid;
@@ -27,6 +29,7 @@ const StyledLoadingHint = styled(SettingsInfo)`
 
 export const LocalImport = () => {
   const [loading, setLoading] = useState(false);
+  const { storeImage } = useLocalImages();
 
   const [, setImages] = useImages();
 
@@ -37,25 +40,52 @@ export const LocalImport = () => {
   const [progress, setProgress] = useState<number | undefined>(undefined);
 
   const select = async () => {
+    let dir: FileSystemDirectoryHandle | undefined;
     try {
-      const dir = await showDirectoryPicker();
+      dir = await showDirectoryPicker();
+    } catch (error) {
+      // user canceled
+    }
+    if (!dir) return;
+    try {
       setLoading(true);
       setFiles([]);
       setProgress(0);
       const files = await discoverImageFiles(dir);
       setFiles(files);
-      for (const [index, file] of files.entries()) {
-        const item = await processImageFile(file);
-        if (item) {
-          setImages(images => [
-            ...images,
-            ...(images.some(image => image.id === item.id) ? [] : [item]),
-          ]);
-        }
-        setProgress(index + 1);
+
+      for (const file of files) {
+        const extension = file.name.split('.').pop()?.toLowerCase();
+        const type = (() => {
+          switch (extension) {
+            case 'webm':
+            case 'mp4':
+              return ImageType.video;
+            case 'gif':
+              return ImageType.gif;
+            default:
+              return ImageType.image;
+          }
+        })();
+        const result = await storeImage(await file.getFile(), type, file.name);
+        setImages(prev => [
+          ...(prev ?? []),
+          ...(prev.some(image => image.id === result.id)
+            ? []
+            : [
+                {
+                  thumbnail: `local://thumbnail/${result.id}`,
+                  preview: `local://preview/${result.id}`,
+                  full: `local://full/${result.id}`,
+                  type: result.type,
+                  source: `local://full/${result.id}`,
+                  service: ImageServiceType.local,
+                  id: result.id,
+                },
+              ]),
+        ]);
+        setProgress(prev => (prev ?? 0) + 1);
       }
-    } catch (error) {
-      // user canceled
     } finally {
       setLoading(false);
       setFiles(undefined);

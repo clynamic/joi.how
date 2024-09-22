@@ -1,11 +1,11 @@
 import pica from 'pica';
-import { ImageType, ImageServiceType } from '../types';
+import { ImageType } from '../types';
 
 const picaInstance = pica({
   idle: 10000,
   createCanvas: (width, height) => {
     const canvas = new OffscreenCanvas(width, height);
-    // the @types/pica package does not recognize that OffscreenCanvas is a valid return type
+
     return canvas as unknown as HTMLCanvasElement;
   },
 });
@@ -13,7 +13,7 @@ const picaInstance = pica({
 export const resizeCanvas = async (
   canvas: HTMLCanvasElement | OffscreenCanvas,
   targetWidth: number
-): Promise<string> => {
+): Promise<Blob> => {
   const aspectRatio = canvas.width / canvas.height;
   const targetHeight = Math.round(targetWidth / aspectRatio);
 
@@ -26,48 +26,74 @@ export const resizeCanvas = async (
     resizedCanvas
   );
 
-  return picaInstance
-    .toBlob(resizedCanvas, 'image/png')
-    .then(blob => URL.createObjectURL(blob));
+  return picaInstance.toBlob(resizedCanvas, 'image/png');
 };
 
-export const processImageElement = async (
-  image: HTMLImageElement | HTMLVideoElement,
-  file: File,
-  extension: string
-) => {
-  const originalCanvas = new OffscreenCanvas(image.width, image.height);
-  const context = originalCanvas.getContext('2d');
-  if (!context) return undefined;
-  context.drawImage(image, 0, 0);
+export enum LowResImageSize {
+  thumbnail = 'thumbnail',
+  preview = 'preview',
+}
 
-  const thumbnail = await resizeCanvas(
-    originalCanvas as unknown as HTMLCanvasElement,
-    64
+export const generateLowResImage = async (
+  blob: Blob,
+  type: ImageType,
+  size: LowResImageSize
+): Promise<Blob> => {
+  const offscreenCanvas: OffscreenCanvas = await createCanvasFromBlob(
+    blob,
+    type
   );
 
-  const preview = await resizeCanvas(
-    originalCanvas as unknown as HTMLCanvasElement,
-    850
-  );
+  if (size === LowResImageSize.thumbnail) {
+    return await resizeCanvas(
+      offscreenCanvas as unknown as HTMLCanvasElement,
+      64
+    );
+  } else if (size === LowResImageSize.preview) {
+    return await resizeCanvas(
+      offscreenCanvas as unknown as HTMLCanvasElement,
+      850
+    );
+  }
 
-  return {
-    thumbnail: thumbnail,
-    preview: preview,
-    full: URL.createObjectURL(file),
-    type: (() => {
-      switch (extension) {
-        case 'webm':
-        case 'mp4':
-          return ImageType.video;
-        case 'gif':
-          return ImageType.gif;
-        default:
-          return ImageType.image;
-      }
-    })(),
-    source: URL.createObjectURL(file),
-    service: ImageServiceType.local,
-    id: file.name,
-  };
+  throw new Error('Invalid image size provided');
+};
+
+const createCanvasFromBlob = async (
+  blob: Blob,
+  type: ImageType
+): Promise<OffscreenCanvas> => {
+  if (type === ImageType.video) {
+    const video = document.createElement('video');
+    video.src = URL.createObjectURL(blob);
+    video.currentTime = 1;
+
+    await new Promise<void>(resolve => {
+      video.addEventListener('loadeddata', () => resolve());
+    });
+
+    const offscreenCanvas = new OffscreenCanvas(
+      video.videoWidth,
+      video.videoHeight
+    );
+    const context = offscreenCanvas.getContext('2d');
+    if (!context) throw new Error('Failed to get OffscreenCanvas 2D context');
+
+    context.drawImage(video, 0, 0);
+    return offscreenCanvas;
+  } else if (type === ImageType.image || type === ImageType.gif) {
+    const image = new Image();
+    image.src = URL.createObjectURL(blob);
+
+    await new Promise<void>(resolve => (image.onload = () => resolve()));
+
+    const offscreenCanvas = new OffscreenCanvas(image.width, image.height);
+    const context = offscreenCanvas.getContext('2d');
+    if (!context) throw new Error('Failed to get OffscreenCanvas 2D context');
+
+    context.drawImage(image, 0, 0);
+    return offscreenCanvas;
+  }
+
+  throw new Error('Invalid image type');
 };

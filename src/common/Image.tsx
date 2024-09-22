@@ -4,7 +4,8 @@ import styled from 'styled-components';
 import { ImageItem } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCircleExclamation } from '@fortawesome/free-solid-svg-icons';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocalImages } from '../local/LocalProvider';
 
 export enum ImageSize {
   thumbnail = 'thumbnail',
@@ -58,25 +59,37 @@ export const Image: React.FC<ImageProps> = ({
   onLoadedMetadata,
   ...rest
 }) => {
-  let url: string | undefined;
-  let playing = false;
+  const [url, setUrl] = useState<string | undefined>(undefined);
+  const [playing, setPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { resolveUrl } = useLocalImages();
 
-  switch (size) {
-    case ImageSize.thumbnail:
-      url = item.thumbnail;
-      break;
-    case ImageSize.preview:
-      url = item.preview;
-      break;
-    case ImageSize.full:
-      if (playable && item.type === 'video') {
-        // only full res URLs may be videos
-        playing = true;
+  useEffect(() => {
+    let url: string | undefined;
+    switch (size) {
+      case ImageSize.thumbnail:
+        url = item.thumbnail;
+        break;
+      case ImageSize.preview:
+        url = item.preview;
+        break;
+      case ImageSize.full:
+        if (playable && item.type === 'video') {
+          // only full res URLs may be videos
+          setPlaying(true);
+        }
+        url = item.full;
+        break;
+    }
+    resolveUrl(url).then(
+      url => {
+        setUrl(url);
+      },
+      () => {
+        setUrl(undefined);
       }
-      url = item.full;
-      break;
-  }
+    );
+  }, [item, size, playable, resolveUrl]);
 
   if (!url) {
     return (
