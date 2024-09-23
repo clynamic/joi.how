@@ -122,7 +122,8 @@ export const WalltalkerSearch = () => {
                 type={ToggleTileType.radio}
               >
                 <strong>#{link.id}</strong>
-                <p>{link.terms}</p>
+                {/* dangerously set inner html */}
+                <p dangerouslySetInnerHTML={{ __html: link.terms }} />
               </ToggleTile>
             );
           })}

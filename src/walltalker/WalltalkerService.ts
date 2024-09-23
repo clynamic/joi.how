@@ -100,8 +100,6 @@ export class WalltalkerService {
           content.identifier = JSON.parse(content.identifier);
         }
 
-        console.log(content);
-
         if (
           content.type === eventName &&
           isEqual(content.identifier, this.channelIdentifierFor(id))
@@ -124,7 +122,10 @@ export class WalltalkerService {
       this.socket.addEventListener('message', handler);
 
       const channelId = this.channelIdentifierFor(id);
-      const message = { command: 'subscribe', identifier: channelId };
+      const message = {
+        command: 'subscribe',
+        identifier: JSON.stringify(channelId),
+      };
 
       this.socket.send(JSON.stringify(message));
     });
@@ -137,8 +138,11 @@ export class WalltalkerService {
         return;
       }
 
-      const channelId = JSON.stringify(this.channelIdentifierFor(id));
-      const message = { command: 'unsubscribe', identifier: channelId };
+      const channelId = this.channelIdentifierFor(id);
+      const message = {
+        command: 'unsubscribe',
+        identifier: JSON.stringify(channelId),
+      };
 
       this.socket.send(JSON.stringify(message));
       this.subscriptions = this.subscriptions.filter(sub => sub !== id);
@@ -169,6 +173,7 @@ export class WalltalkerService {
         listener(content.message as WalltalkerLink)
       );
     }
+    console.log(content);
   }
 
   private listeners: ((link: WalltalkerLink) => void)[] = [];

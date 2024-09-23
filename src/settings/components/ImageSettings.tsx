@@ -38,7 +38,6 @@ const SmallActionButton = styled(IconButton)`
 export const ImageSettings = () => {
   const [images, setImages] = useImages();
   const { removeImage } = useLocalImages();
-  const [walltakerConfig] = useSetting('walltaker');
   const [selected, setSelected] = useState<ImageItem[]>([]);
   const [clicked, setClicked] = useState<ImageItem | undefined>(undefined);
   const [videoSound] = useSetting('videoSound');
@@ -46,12 +45,7 @@ export const ImageSettings = () => {
   return (
     <SettingsTile label='Images' style={{ gridColumn: '1 / -1' }}>
       <StyledImageActions>
-        <p>
-          {`You have loaded ${images.length} images`}
-          {walltakerConfig.enabled &&
-            walltakerConfig.id &&
-            ` and additional wallpapers will load from walltaker link ${walltakerConfig.id}`}
-        </p>
+        <p>{`You have loaded ${images.length} images`}</p>
         <StyledImageButtons>
           <SmallActionButton
             onClick={
