@@ -1,35 +1,24 @@
-import {
-  faSpinner,
-  faPowerOff,
-  faCheckSquare,
-  faSquare,
-} from '@fortawesome/free-solid-svg-icons';
+import { faSpinner, faWalkieTalkie } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
 import {
   ToggleTile,
   ToggleTileType,
+  SettingsDescription,
   SettingsLabel,
   TextInput,
   Button,
   Spinner,
 } from '../common';
-import { useImages, useSetting } from '../settings';
-import { ImageType, ImageServiceType } from '../types';
-import { defaultTransition } from '../utils';
-import { usePornSocketService } from '../utils/porn-socket/porn-socket-service';
-import {
-  LinkResponse,
-  WalltakerSocketService,
-} from '../utils/porn-socket/walltaker';
 import styled from 'styled-components';
+import { useWalltalker } from './WalltalkerProvider';
+import { motion } from 'framer-motion';
+import { defaultTransition } from '../utils';
+import { useCallback, useState } from 'react';
+import { WalltalkerLink } from './WalltalkerService';
 
-const Header = styled.div`
-  display: flex;
-  gap: 1ex;
-  align-items: center;
-  margin-bottom: 0.75rem;
+const StyledWalltalkerSearch = styled.div`
+  display: grid;
+  grid-template-columns: auto 1fr auto;
 `;
 
 const StyledLinksForm = styled.div`
@@ -40,129 +29,46 @@ const StyledLinksForm = styled.div`
 `;
 
 export const WalltalkerSearch = () => {
-  const [images, setImages] = useImages();
-  const [config, setConfig] = useSetting('walltaker');
-  const service = usePornSocketService(config.enabled);
+  const { service, settings: settingsRef, data } = useWalltalker();
 
-  const [username, setUsername] = useState<string>('');
-  const [loadingLinks, setLoadingLinks] = useState<boolean>(false);
-  const [loadingLink, setLoadingLink] = useState<boolean>(false);
-  const [links, setLinks] = useState<LinkResponse[]>([]);
+  const [settings, setSettings] = settingsRef;
+  const { connected } = data;
 
-  const [listenedLink, setListenedLink] = useState<LinkResponse | null>(null);
+  const [searchLinks, setSearchLinks] = useState<WalltalkerLink[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (config.id && service.ready) {
-      setLoadingLink(true);
-
-      service.service
-        ?.listenTo(config.id)
-        .then(() => WalltakerSocketService.getLink(config.id ?? 0))
-        .then(link => {
-          if (images.find(image => image.full === link.post_url)) return link;
-
-          setImages([
-            ...images,
-            {
-              thumbnail: link.post_thumbnail_url,
-              preview: link.post_thumbnail_url,
-              full: link.post_url,
-              type: ImageType.image,
-              source: link.post_url,
-              service: ImageServiceType.e621,
-              id: link.post_url,
-            },
-          ]);
-          return link;
-        })
-        .then(link => link && setListenedLink(link))
-        .finally(() => setLoadingLink(false));
-    }
-
-    return () => {
-      if (config.id)
-        service.service?.muteFrom(config.id).catch(() => setListenedLink(null));
-    };
-  }, [
-    config.id,
-    images,
-    service.enabled,
-    service.ready,
-    service.service,
-    setImages,
-  ]);
-
-  const getLinks = () => {
-    setLoadingLinks(true);
-
-    WalltakerSocketService.getLinksFromUsername(username)
-      .then(links => setLinks(links ?? []))
-      .catch(() => setLinks([]))
-      .finally(() => setLoadingLinks(false));
-  };
-
-  const enabledAndReady = config.enabled && service.enabled && service.ready;
+  const search = useCallback(async () => {
+    setLoading(true);
+    if (!settings.username) return;
+    const links = await service.getLinksFromUsername(settings.username);
+    setSearchLinks(links);
+    setLoading(false);
+  }, [service, settings.username]);
 
   return (
-    <>
+    <StyledWalltalkerSearch>
+      <SettingsDescription>
+        Automatically add images from your Walltalker links!
+      </SettingsDescription>
       <ToggleTile
-        value={enabledAndReady}
+        value={connected}
         onClick={() => {
-          setConfig({ ...config, enabled: !service.enabled });
-          service.setEnabled(!service.enabled);
+          setSettings({ ...settings, enabled: !settings.enabled });
         }}
         type={ToggleTileType.radio}
         trailing={
-          service.enabled && !service.ready ? (
+          settings.enabled && !connected ? (
             <FontAwesomeIcon icon={faSpinner} spinPulse />
           ) : (
-            <FontAwesomeIcon icon={faPowerOff} />
+            <FontAwesomeIcon icon={faWalkieTalkie} />
           )
         }
       >
         <strong>Use Walltaker</strong>
         <p>Let others choose wallpapers for your session, live!</p>
       </ToggleTile>
-      <Header>
-        {service.enabled && service.ready && !loadingLink && !listenedLink && (
-          <>
-            <FontAwesomeIcon icon={faCheckSquare} />
-            <span>Ready!</span>
-          </>
-        )}
-        {service.enabled && service.ready && !loadingLink && listenedLink && (
-          <>
-            <FontAwesomeIcon icon={faCheckSquare} />
-            <span>Listening to {listenedLink.id}</span>
-            <a
-              href={`https://walltaker.joi.how/links/${listenedLink.id}`}
-              target='_blank'
-            >
-              Change Wallpaper
-            </a>
-          </>
-        )}
-        {service.enabled && !service.ready && (
-          <>
-            <FontAwesomeIcon icon={faSpinner} spinPulse />
-            <span>Connecting...</span>
-          </>
-        )}
-        {service.enabled && service.ready && loadingLink && (
-          <>
-            <FontAwesomeIcon icon={faSpinner} spinPulse />
-            <span>Waiting for #{config.id}</span>
-          </>
-        )}
-        {!service.enabled && (
-          <>
-            <FontAwesomeIcon icon={faSquare} />
-            <span>Disabled</span>
-          </>
-        )}
-      </Header>
 
-      {enabledAndReady && (
+      {connected && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
@@ -174,31 +80,45 @@ export const WalltalkerSearch = () => {
             <SettingsLabel htmlFor='username'>Username</SettingsLabel>
             <TextInput
               id='username'
-              value={username}
-              onChange={setUsername}
-              onSubmit={getLinks}
+              value={settings.username}
+              onChange={value => {
+                setSettings({ ...settings, username: value });
+              }}
+              onSubmit={search}
               placeholder='Enter walltaker username...'
               style={{ gridColumn: '2 / -1' }}
-              disabled={!enabledAndReady}
+              disabled={!connected}
             />
             <Button
-              onClick={getLinks}
-              disabled={!enabledAndReady}
+              onClick={search}
+              disabled={!connected}
               style={{
                 gridColumn: '1 / -1',
                 justifySelf: 'center',
               }}
             >
-              {loadingLinks ? <Spinner /> : <strong>Search</strong>}
+              {loading ? <Spinner /> : <strong>Search</strong>}
             </Button>
           </StyledLinksForm>
-
-          {links.map(link => {
+          <SettingsDescription>Search results</SettingsDescription>
+          {searchLinks.map(link => {
             return (
               <ToggleTile
                 key={link.id}
-                value={config.id === link.id}
-                onClick={() => setConfig({ ...config, id: link.id })}
+                value={settings.ids?.includes(link.id)}
+                onClick={() => {
+                  if (settings.ids?.includes(link.id)) {
+                    setSettings({
+                      ...settings,
+                      ids: settings.ids?.filter(id => id !== link.id),
+                    });
+                  } else {
+                    setSettings({
+                      ...settings,
+                      ids: [...(settings.ids ?? []), link.id],
+                    });
+                  }
+                }}
                 type={ToggleTileType.radio}
               >
                 <strong>#{link.id}</strong>
@@ -208,6 +128,6 @@ export const WalltalkerSearch = () => {
           })}
         </motion.div>
       )}
-    </>
+    </StyledWalltalkerSearch>
   );
 };
