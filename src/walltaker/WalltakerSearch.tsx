@@ -8,13 +8,13 @@ import {
   TextInput,
 } from '../common';
 import styled from 'styled-components';
-import { useWalltalker } from './WalltalkerProvider';
+import { useWalltaker } from './WalltakerProvider';
 import { motion } from 'framer-motion';
 import { defaultTransition } from '../utils';
 import { useCallback, useState } from 'react';
-import { WalltalkerLink } from './WalltalkerService';
+import { WalltakerLink } from './WalltakerService';
 
-const StyledWalltalkerSearch = styled.div`
+const StyledWalltakerSearch = styled.div`
   display: grid;
   grid-template-columns: auto 1fr auto;
 `;
@@ -26,14 +26,14 @@ const StyledLinksForm = styled.div`
   gap: 0.75rem;
 `;
 
-export const WalltalkerSearch = () => {
+export const WalltakerSearch = () => {
   const {
     service,
     settings: [settings, setSettings],
     data: { connected },
-  } = useWalltalker();
+  } = useWalltaker();
 
-  const [searchLinks, setSearchLinks] = useState<WalltalkerLink[]>([]);
+  const [searchLinks, setSearchLinks] = useState<WalltakerLink[]>([]);
   const [, setLoading] = useState(false);
 
   const findLinks = useCallback(async () => {
@@ -45,9 +45,9 @@ export const WalltalkerSearch = () => {
   }, [service, settings.username]);
 
   return (
-    <StyledWalltalkerSearch>
+    <StyledWalltakerSearch>
       <SettingsDescription>
-        Automatically add images from your Walltalker links!
+        Automatically add images from your Walltaker links!
       </SettingsDescription>
       <StyledLinksForm>
         <SettingsLabel htmlFor='username'>Username</SettingsLabel>
@@ -118,6 +118,6 @@ export const WalltalkerSearch = () => {
           })}
         </motion.div>
       )}
-    </StyledWalltalkerSearch>
+    </StyledWalltakerSearch>
   );
 };

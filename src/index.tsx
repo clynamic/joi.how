@@ -6,20 +6,20 @@ import { SettingsProvider, ImageProvider } from './settings';
 import { E621Provider } from './e621';
 import { VibratorProvider } from './utils';
 import { LocalImageProvider } from './local';
-import { WalltalkerProvider } from './walltalker';
+import { WalltakerProvider } from './walltaker';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SettingsProvider>
       <ImageProvider>
         <LocalImageProvider>
-          <WalltalkerProvider>
+          <WalltakerProvider>
             <VibratorProvider>
               <E621Provider>
                 <App />
               </E621Provider>
             </VibratorProvider>
-          </WalltalkerProvider>
+          </WalltakerProvider>
         </LocalImageProvider>
       </ImageProvider>
     </SettingsProvider>

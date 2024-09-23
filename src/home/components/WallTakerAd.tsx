@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ContentSection } from '../../common';
 
-const StyledWallTalkerAd = styled(ContentSection)`
+const StyledWallTakerAd = styled(ContentSection)`
   background: linear-gradient(#ffb300, #916706);
   color: #583c0f;
 
@@ -31,7 +31,7 @@ const StyledWallTalkerAd = styled(ContentSection)`
   &::before {
     position: absolute;
 
-    content: 'Walltalker ✨';
+    content: 'Walltaker ✨';
 
     background-color: #000000b5;
     color: #e6e6e6;
@@ -47,9 +47,9 @@ const StyledWallTalkerAd = styled(ContentSection)`
   }
 `;
 
-export const WallTalkerAd = () => {
+export const WallTakerAd = () => {
   return (
-    <StyledWallTalkerAd>
+    <StyledWallTakerAd>
       <Link to='https://walltaker.joi.how'>
         <h2>Want to let other people set your wallpaper?</h2>
         <p>
@@ -59,6 +59,6 @@ export const WallTalkerAd = () => {
           within your blacklist!
         </p>
       </Link>
-    </StyledWallTalkerAd>
+    </StyledWallTakerAd>
   );
 };

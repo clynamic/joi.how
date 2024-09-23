@@ -2,12 +2,13 @@ import styled from 'styled-components';
 import { SettingsTile, Surrounded, TabBar } from '../../common';
 import { E621Search } from '../../e621';
 import { useState } from 'react';
-import { WalltalkerOnline, WalltalkerSearch } from '../../walltalker';
+
 import { LocalImport } from '../../local';
+import { WalltakerSearch, WalltakerOnline } from '../../walltaker';
 
 const tabs: Record<string, React.ReactNode> = {
   e621: <E621Search />,
-  walltalker: <WalltalkerSearch />,
+  walltaker: <WalltakerSearch />,
   local: <LocalImport />,
 };
 
@@ -30,10 +31,10 @@ export const ServiceSettings = () => {
           tabs={[
             { id: 'e621', content: 'e621' },
             {
-              id: 'walltalker',
+              id: 'walltaker',
               content: (
-                <Surrounded trailing={<WalltalkerOnline />}>
-                  Walltalker
+                <Surrounded trailing={<WalltakerOnline />}>
+                  Walltaker
                 </Surrounded>
               ),
             },

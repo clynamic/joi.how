@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { isEqual } from 'lodash';
 
-export interface WalltalkerLink {
+export interface WalltakerLink {
   id: number;
   expires: string;
   terms: string;
@@ -17,16 +17,16 @@ export interface WalltalkerLink {
   online: boolean;
 }
 
-export interface WalltalkerUser {
+export interface WalltakerUser {
   username: string;
   id: number;
   set_count: number;
   online: boolean;
   authenticated: boolean;
-  links: WalltalkerLink[];
+  links: WalltakerLink[];
 }
 
-export class WalltalkerService {
+export class WalltakerService {
   constructor() {
     this.axiosInstance = axios.create({
       baseURL: 'https://walltaker.joi.how/api',
@@ -183,13 +183,13 @@ export class WalltalkerService {
 
   async getLink(id: number) {
     return this.axiosInstance
-      .get<WalltalkerLink>(`/links/${id}.json`)
+      .get<WalltakerLink>(`/links/${id}.json`)
       .then(res => res.data);
   }
 
   async getLinksFromUsername(username: string) {
     return this.axiosInstance
-      .get<WalltalkerUser>(`/users/${username}.json`)
+      .get<WalltakerUser>(`/users/${username}.json`)
       .then(res => res.data.links);
   }
 
@@ -197,19 +197,19 @@ export class WalltalkerService {
     const content = JSON.parse(message.data);
     if (content.message?.success === true && content.message?.post_url) {
       this.listeners.forEach(listener =>
-        listener(content.message as WalltalkerLink)
+        listener(content.message as WalltakerLink)
       );
     }
     console.log(content);
   }
 
-  private listeners: ((link: WalltalkerLink) => void)[] = [];
+  private listeners: ((link: WalltakerLink) => void)[] = [];
 
-  addLinkListener(callback: (link: WalltalkerLink) => void) {
+  addLinkListener(callback: (link: WalltakerLink) => void) {
     this.listeners.push(callback);
   }
 
-  removeLinkListener(callback: (link: WalltalkerLink) => void) {
+  removeLinkListener(callback: (link: WalltakerLink) => void) {
     this.listeners = this.listeners.filter(listener => listener !== callback);
   }
 }

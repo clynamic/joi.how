@@ -1,5 +1,5 @@
 import styled, { keyframes } from 'styled-components';
-import { useWalltalker } from './WalltalkerProvider';
+import { useWalltaker } from './WalltakerProvider';
 
 const StyledOnlineDotContainer = styled.div`
   display: flex;
@@ -40,10 +40,10 @@ const PulseAnimation = styled.div`
   animation: ${pulse} 2s infinite ease-out;
 `;
 
-export const WalltalkerOnline = () => {
+export const WalltakerOnline = () => {
   const {
     data: { connected },
-  } = useWalltalker();
+  } = useWalltaker();
 
   return (
     <StyledOnlineDotContainer>

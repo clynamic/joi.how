@@ -9,40 +9,40 @@ import {
   useState,
 } from 'react';
 import { createLocalStorageProvider, StateAndSetter } from '../utils';
-import { WalltalkerLink, WalltalkerService } from './WalltalkerService';
+import { WalltakerLink, WalltakerService } from './WalltakerService';
 import { uniqBy } from 'lodash';
 import { useImages } from '../settings';
 import { ImageServiceType, ImageType } from '../types';
 
-export interface WalltalkerSettings {
+export interface WalltakerSettings {
   enabled?: boolean;
   username?: string;
   ids?: number[];
 }
 
-const walltalkerStorageKey = 'walltalker';
+const walltakerStorageKey = 'walltaker';
 
 const {
-  Provider: WalltalkerSettingsProvider,
-  useProvider: useWalltalkerSettings,
-} = createLocalStorageProvider<WalltalkerSettings>({
-  key: walltalkerStorageKey,
+  Provider: WalltakerSettingsProvider,
+  useProvider: useWalltakerSettings,
+} = createLocalStorageProvider<WalltakerSettings>({
+  key: walltakerStorageKey,
   defaultData: {},
 });
 
-const WalltalkerServiceProvider: React.FC<PropsWithChildren> = ({
+const WalltakerServiceProvider: React.FC<PropsWithChildren> = ({
   children,
 }) => {
-  const settingsRef = useWalltalkerSettings();
-  const service = useMemo(() => new WalltalkerService(), []);
+  const settingsRef = useWalltakerSettings();
+  const service = useMemo(() => new WalltakerService(), []);
   const [, setImages] = useImages();
 
   const [settings] = settingsRef;
 
-  const [data, setData] = useState<WalltalkerData>({});
+  const [data, setData] = useState<WalltakerData>({});
 
   const onLink = useCallback(
-    (link: WalltalkerLink) => {
+    (link: WalltakerLink) => {
       setData(prev => ({
         ...prev,
         links: uniqBy([link, ...(prev.links ?? [])], 'id'),
@@ -97,42 +97,40 @@ const WalltalkerServiceProvider: React.FC<PropsWithChildren> = ({
   }, [data.connected, service, settings.enabled, settings.ids]);
 
   return (
-    <WalltalkerContext.Provider
-      value={{ settings: settingsRef, service, data }}
-    >
+    <WalltakerContext.Provider value={{ settings: settingsRef, service, data }}>
       {children}
-    </WalltalkerContext.Provider>
+    </WalltakerContext.Provider>
   );
 };
 
-export interface WalltalkerData {
+export interface WalltakerData {
   connected?: boolean;
-  links?: WalltalkerLink[];
+  links?: WalltakerLink[];
 }
 
-export interface WalltalkerContext {
-  settings: StateAndSetter<WalltalkerSettings>;
-  service: WalltalkerService;
-  data: WalltalkerData;
+export interface WalltakerContext {
+  settings: StateAndSetter<WalltakerSettings>;
+  service: WalltakerService;
+  data: WalltakerData;
 }
 
-const WalltalkerContext = createContext<WalltalkerContext | null>(null);
+const WalltakerContext = createContext<WalltakerContext | null>(null);
 
-export const WalltalkerProvider: React.FC<PropsWithChildren> = ({
+export const WalltakerProvider: React.FC<PropsWithChildren> = ({
   children,
 }) => {
   return (
-    <WalltalkerSettingsProvider>
-      <WalltalkerServiceProvider>{children}</WalltalkerServiceProvider>
-    </WalltalkerSettingsProvider>
+    <WalltakerSettingsProvider>
+      <WalltakerServiceProvider>{children}</WalltakerServiceProvider>
+    </WalltakerSettingsProvider>
   );
 };
 
-export const useWalltalker = (): WalltalkerContext => {
-  const context = useContext(WalltalkerContext);
+export const useWalltaker = (): WalltakerContext => {
+  const context = useContext(WalltakerContext);
 
   if (!context) {
-    throw new Error('useWalltalker must be used within a WalltalkerProvider');
+    throw new Error('useWalltaker must be used within a WalltakerProvider');
   }
 
   return context;

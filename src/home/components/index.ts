@@ -6,4 +6,4 @@ export * from './Introduction';
 export * from './ReleaseNotes';
 export * from './StartButton';
 export * from './VersionDisplay';
-export * from './WallTalkerAd';
+export * from './WallTakerAd';
