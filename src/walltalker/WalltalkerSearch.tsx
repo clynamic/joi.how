@@ -1,4 +1,4 @@
-import { faSpinner, faWalkieTalkie } from '@fortawesome/free-solid-svg-icons';
+import { faRss, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   ToggleTile,
@@ -6,8 +6,6 @@ import {
   SettingsDescription,
   SettingsLabel,
   TextInput,
-  Button,
-  Spinner,
 } from '../common';
 import styled from 'styled-components';
 import { useWalltalker } from './WalltalkerProvider';
@@ -29,15 +27,16 @@ const StyledLinksForm = styled.div`
 `;
 
 export const WalltalkerSearch = () => {
-  const { service, settings: settingsRef, data } = useWalltalker();
-
-  const [settings, setSettings] = settingsRef;
-  const { connected } = data;
+  const {
+    service,
+    settings: [settings, setSettings],
+    data: { connected },
+  } = useWalltalker();
 
   const [searchLinks, setSearchLinks] = useState<WalltalkerLink[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
 
-  const search = useCallback(async () => {
+  const findLinks = useCallback(async () => {
     setLoading(true);
     if (!settings.username) return;
     const links = await service.getLinksFromUsername(settings.username);
@@ -50,8 +49,22 @@ export const WalltalkerSearch = () => {
       <SettingsDescription>
         Automatically add images from your Walltalker links!
       </SettingsDescription>
+      <StyledLinksForm>
+        <SettingsLabel htmlFor='username'>Username</SettingsLabel>
+        <TextInput
+          id='username'
+          value={settings.username}
+          onChange={value => {
+            setSettings({ ...settings, username: value });
+          }}
+          onSubmit={findLinks}
+          placeholder='Enter walltaker username...'
+          style={{ gridColumn: '2 / -1' }}
+          disabled={!connected}
+        />
+      </StyledLinksForm>
       <ToggleTile
-        value={connected}
+        value={connected ?? false}
         onClick={() => {
           setSettings({ ...settings, enabled: !settings.enabled });
         }}
@@ -60,11 +73,11 @@ export const WalltalkerSearch = () => {
           settings.enabled && !connected ? (
             <FontAwesomeIcon icon={faSpinner} spinPulse />
           ) : (
-            <FontAwesomeIcon icon={faWalkieTalkie} />
+            <FontAwesomeIcon icon={faRss} />
           )
         }
       >
-        <strong>Use Walltaker</strong>
+        <strong>Connect</strong>
         <p>Let others choose wallpapers for your session, live!</p>
       </ToggleTile>
 
@@ -76,31 +89,7 @@ export const WalltalkerSearch = () => {
           style={{ gridColumn: '1 / -1' }}
           transition={defaultTransition}
         >
-          <StyledLinksForm>
-            <SettingsLabel htmlFor='username'>Username</SettingsLabel>
-            <TextInput
-              id='username'
-              value={settings.username}
-              onChange={value => {
-                setSettings({ ...settings, username: value });
-              }}
-              onSubmit={search}
-              placeholder='Enter walltaker username...'
-              style={{ gridColumn: '2 / -1' }}
-              disabled={!connected}
-            />
-            <Button
-              onClick={search}
-              disabled={!connected}
-              style={{
-                gridColumn: '1 / -1',
-                justifySelf: 'center',
-              }}
-            >
-              {loading ? <Spinner /> : <strong>Search</strong>}
-            </Button>
-          </StyledLinksForm>
-          <SettingsDescription>Search results</SettingsDescription>
+          <SettingsDescription>Links</SettingsDescription>
           {searchLinks.map(link => {
             return (
               <ToggleTile

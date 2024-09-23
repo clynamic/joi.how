@@ -64,11 +64,48 @@ export class WalltalkerService {
       this.socket = socket;
 
       this.socket.addEventListener('message', this.onAnyMessage.bind(this));
+      this.socket.addEventListener('message', this.pingEcho);
 
       this.socket.addEventListener('open', () => res());
       this.socket.addEventListener('error', () => rej());
     });
   }
+
+  private pingEcho = (message: MessageEvent<string>) => {
+    if (!this.socket) return;
+    const content = JSON.parse(message.data);
+    if (content.type === 'ping') {
+      this.socket.send(JSON.stringify({ type: 'pong' }));
+    }
+  };
+
+  private consumeUntil = async (
+    predicate: (message: MessageEvent<string>) => boolean,
+    timeout: number = 5000
+  ) => {
+    return new Promise<MessageEvent<string>>((res, rej) => {
+      if (!this.socket) {
+        rej('No socket connected.');
+        return;
+      }
+
+      const timer = setTimeout(() => {
+        this.socket?.removeEventListener('message', handler);
+        rej('Timeout reached.');
+      }, timeout);
+
+      const handler = (message: MessageEvent<string>) => {
+        if (predicate(message)) {
+          this.socket?.removeEventListener('message', handler);
+          clearTimeout(timer);
+          res(message);
+        }
+      };
+
+      this.socket.addEventListener('message', handler);
+      this.socket.addEventListener('close', () => rej('Socket closed.'));
+    });
+  };
 
   disconnect(): Promise<void> {
     return new Promise(res => {
@@ -83,43 +120,12 @@ export class WalltalkerService {
 
   listenTo(id: number): Promise<void> {
     return new Promise((resolve, reject) => {
-      const MAX_RETRIES = 4;
-      let tries = 0;
       const eventName = 'confirm_subscription';
 
       if (!this.socket) {
         reject('No socket connected.');
         return;
       }
-
-      const handler = (message: MessageEvent<string>) => {
-        if (!this.socket) return;
-
-        const content = JSON.parse(message.data);
-        if (content.identifier) {
-          content.identifier = JSON.parse(content.identifier);
-        }
-
-        if (
-          content.type === eventName &&
-          isEqual(content.identifier, this.channelIdentifierFor(id))
-        ) {
-          console.log('Handshake confirmed for Link#' + id);
-          this.socket.removeEventListener('message', handler);
-          this.subscriptions.push(id);
-          resolve();
-          return;
-        }
-
-        if (++tries > MAX_RETRIES) {
-          this.socket.removeEventListener('message', handler);
-          reject(
-            `Max retries hit when waiting for handshake confirmation for Link#${id}.`
-          );
-        }
-      };
-
-      this.socket.addEventListener('message', handler);
 
       const channelId = this.channelIdentifierFor(id);
       const message = {
@@ -128,6 +134,27 @@ export class WalltalkerService {
       };
 
       this.socket.send(JSON.stringify(message));
+
+      resolve(
+        this.consumeUntil((message: MessageEvent<string>) => {
+          const content = JSON.parse(message.data);
+          if (content.identifier) {
+            content.identifier = JSON.parse(content.identifier);
+          }
+
+          return (
+            content.type === eventName &&
+            isEqual(content.identifier, this.channelIdentifierFor(id))
+          );
+        })
+          .then(() => {
+            console.log('Handshake confirmed for Link#' + id);
+            this.subscriptions.push(id);
+          })
+          .catch(error => {
+            reject(`Failed to confirm handshake for Link#${id}: ${error}`);
+          })
+      );
     });
   }
 
