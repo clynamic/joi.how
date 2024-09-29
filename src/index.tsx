@@ -5,18 +5,21 @@ import './index.css';
 import { SettingsProvider, ImageProvider } from './settings';
 import { E621Provider } from './e621';
 import { VibratorProvider } from './utils';
-import { LocalImageProvider } from './local/LocalProvider.tsx';
+import { LocalImageProvider } from './local';
+import { WalltakerProvider } from './walltaker';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SettingsProvider>
       <ImageProvider>
         <LocalImageProvider>
-          <VibratorProvider>
-            <E621Provider>
-              <App />
-            </E621Provider>
-          </VibratorProvider>
+          <WalltakerProvider>
+            <VibratorProvider>
+              <E621Provider>
+                <App />
+              </E621Provider>
+            </VibratorProvider>
+          </WalltakerProvider>
         </LocalImageProvider>
       </ImageProvider>
     </SettingsProvider>

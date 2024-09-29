@@ -1,20 +1,13 @@
 import styled from 'styled-components';
-import { E621Service } from './E621Service';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Button,
-  SettingsInfo,
-  SettingsLabel,
-  Space,
-  Spinner,
-  TextInput,
-} from '../common';
-import { E621Credentials } from './E621Provider';
+import { Button, SettingsLabel, Space, Spinner, TextInput } from '../common';
+import { WalltakerService } from './WalltakerService';
+import { WalltakerCredentials } from './WalltakerProvider';
 
-export interface E621CredentialsInputProps {
-  service: E621Service;
-  initialValue?: Partial<E621Credentials>;
-  onSaved?: (credentials: E621Credentials) => void;
+export interface WalltakerCredentialsInputProps {
+  service: WalltakerService;
+  initialValue?: Partial<WalltakerCredentials>;
+  onSaved?: (credentials: WalltakerCredentials) => void;
   disabled?: boolean;
 }
 
@@ -31,13 +24,13 @@ const StyledE621SaveCredentials = styled.div`
   align-items: center;
 `;
 
-export const E621CredentialsInput = ({
+export const WalltakerCredentialsInput = ({
   service,
   initialValue,
   onSaved,
   disabled,
-}: E621CredentialsInputProps) => {
-  const [input, setInput] = useState<Partial<E621Credentials>>({
+}: WalltakerCredentialsInputProps) => {
+  const [input, setInput] = useState<Partial<WalltakerCredentials>>({
     ...initialValue,
     username: '',
     apiKey: '',
@@ -45,10 +38,11 @@ export const E621CredentialsInput = ({
   const [loading, setLoading] = useState(false);
 
   const onSave = useCallback(async () => {
+    const credentials = input as WalltakerCredentials;
     setLoading(true);
-    const valid = await service.testCredentials(input as E621Credentials);
+    const valid = await service.testCredentials(credentials);
     if (valid) {
-      onSaved?.(input as E621Credentials);
+      onSaved?.(credentials);
     }
   }, [input, onSaved, service]);
 
@@ -61,17 +55,10 @@ export const E621CredentialsInput = ({
 
   return (
     <StyledE621CredentialsInput>
-      <SettingsInfo>
-        Access your API key from{' '}
-        <a href='https://e621.net/users/home' target='_blank' rel='noreferrer'>
-          your profile
-        </a>
-        .
-      </SettingsInfo>
       <Space size='small' />
       <SettingsLabel>Username</SettingsLabel>
       <TextInput
-        name='e621-username'
+        name='walltaker-username'
         style={{ gridColumn: '2 / -1' }}
         value={input?.username}
         onChange={username =>
@@ -87,7 +74,7 @@ export const E621CredentialsInput = ({
       <Space size='small' />
       <SettingsLabel>API Key</SettingsLabel>
       <TextInput
-        name='e621-api-key'
+        name='walltaker-api-key'
         style={{ gridColumn: '2 / -1' }}
         value={input?.apiKey}
         onChange={apiKey =>
