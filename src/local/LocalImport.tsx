@@ -86,7 +86,9 @@ export const LocalImport = () => {
 
   return (
     <StyledLocalImport>
-      <SettingsDescription>Add images from your device</SettingsDescription>
+      <SettingsDescription>
+        Add images from your device storage
+      </SettingsDescription>
       <Space size='medium' />
       <input
         type='file'

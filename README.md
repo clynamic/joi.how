@@ -43,7 +43,9 @@ yarn
 yarn build
 yarn preview
 ```
+
 4. open one of the URLs listed in your browser
+
 ### Social
 
 - We have an [e6 forum thread](https://e621.net/forum_topics/23796). We'd love to hear your feedback.

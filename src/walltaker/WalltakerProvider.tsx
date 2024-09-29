@@ -14,9 +14,14 @@ import { uniqBy } from 'lodash';
 import { useImages } from '../settings';
 import { ImageServiceType, ImageType } from '../types';
 
+export interface WalltakerCredentials {
+  username: string;
+  apiKey?: string;
+}
+
 export interface WalltakerSettings {
   enabled?: boolean;
-  username?: string;
+  credentials?: WalltakerCredentials;
   ids?: number[];
 }
 

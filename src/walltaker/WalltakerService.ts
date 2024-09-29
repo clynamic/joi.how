@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { isEqual } from 'lodash';
+import { WalltakerCredentials } from './WalltakerProvider';
 
 export interface WalltakerLink {
   id: number;
@@ -187,9 +188,17 @@ export class WalltakerService {
       .then(res => res.data);
   }
 
-  async getLinksFromUsername(username: string) {
+  async getUserLinks(credentials: WalltakerCredentials) {
     return this.axiosInstance
-      .get<WalltakerUser>(`/users/${username}.json`)
+      .get<WalltakerUser>(`/users/${credentials.username}.json`, {
+        params: {
+          api_key: credentials.apiKey,
+        },
+        headers: {
+          // Something like this; double check with Gray
+          // Authorization: `Bearer ${credentials.apiKey}`,
+        },
+      })
       .then(res => res.data.links);
   }
 
