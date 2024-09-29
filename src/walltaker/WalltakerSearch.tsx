@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPersonDigging } from '@fortawesome/free-solid-svg-icons';
 
-export const WalltalkerSearch = () => {
+export const WalltakerSearch = () => {
   return (
     <div
       style={{
