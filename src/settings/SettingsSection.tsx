@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { ContentSection } from '../home/components';
 import {
   ClimaxSettings,
   DurationSettings,
@@ -13,6 +12,7 @@ import {
   VibratorSettings,
   TradeSettings,
 } from './components';
+import { ContentSection } from '../common';
 
 const StyledSettingsSection = styled(ContentSection)`
   display: grid;
