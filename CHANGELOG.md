@@ -1,8 +1,9 @@
-## Unreleased
+## 2.4.0 - 2024-09-29
 
 ### Added
 
 - local image support
+- intensity progress bar
 
 ## 2.3.2 - 2024-06-08
 
