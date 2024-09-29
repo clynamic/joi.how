@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ContentSection } from '../../common';
 
-const StyledWallTalkerAd = styled(ContentSection)`
+const StyledWallTakerAd = styled(ContentSection)`
   background: linear-gradient(#ffb300, #916706);
   color: #583c0f;
 
@@ -27,29 +27,24 @@ const StyledWallTalkerAd = styled(ContentSection)`
   & a {
     text-decoration: none;
   }
-
-  &::before {
-    position: absolute;
-
-    content: 'Walltalker ✨';
-
-    background-color: #000000b5;
-    color: #e6e6e6;
-    text-align: center;
-
-    right: -20px;
-    bottom: 120px;
-    width: 200px;
-    height: 20px;
-
-    transform: translateY(50%) rotate(-45deg);
-    transform-origin: top right;
-  }
 `;
 
-export const WallTalkerAd = () => {
+const StyledWalltakerMascotBackground = styled.div`
+  bottom: -50px;
+  right: -40px;
+  height: 180px;
+  aspect-ratio: 1/1;
+  position: absolute;
+  background-image: url('https://walltaker.joi.how/assets/mascot/TaylorSFW-1f4700509acff90902c73b80246473840a4879dca17a0052e0d8a41b1e4556e2.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: right bottom;
+`;
+
+export const WallTakerAd = () => {
   return (
-    <StyledWallTalkerAd>
+    <StyledWallTakerAd>
+      <StyledWalltakerMascotBackground />
       <Link to='https://walltaker.joi.how'>
         <h2>Want to let other people set your wallpaper?</h2>
         <p>
@@ -59,6 +54,6 @@ export const WallTalkerAd = () => {
           within your blacklist!
         </p>
       </Link>
-    </StyledWallTalkerAd>
+    </StyledWallTakerAd>
   );
 };
