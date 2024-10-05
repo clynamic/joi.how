@@ -26,7 +26,7 @@ export const defaultSettings: Settings = {
   warmupDuration: 0,
   climaxChance: 100,
   ruinChance: 0,
-  minPace: 0.25,
+  minPace: 1,
   maxPace: 5,
   steepness: 0.5,
   timeshift: 0.5,
