@@ -11,7 +11,7 @@ import {
   SettingsLabel,
   Spinner,
 } from '../../common';
-import { useVibratorValue, Vibrator } from '../../utils';
+import { defaultTransition, useVibratorValue, Vibrator } from '../../utils';
 import {
   ButtplugBrowserWebsocketClientConnector,
   ButtplugClientDevice,
@@ -142,6 +142,7 @@ export const VibratorSettings = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             style={{ gridColumn: '1 / -1' }}
+            transition={defaultTransition}
           >
             <Space size='medium' />
             <StyledUrlFields>

@@ -165,7 +165,6 @@ export const E621Search = () => {
       */}
         {addingCredentials && (
           <motion.div
-            key='credentials-input'
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -187,7 +186,6 @@ export const E621Search = () => {
         )}
         {credentials && (
           <motion.div
-            key='credentials-label'
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -215,7 +213,6 @@ export const E621Search = () => {
       <AnimatePresence>
         {enableBlacklist && (
           <motion.div
-            key='blacklist-label'
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
