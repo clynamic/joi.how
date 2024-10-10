@@ -1,3 +1,9 @@
+## 2.4.1 - 2024-10-10
+
+### Added
+
+- Vibrator Server settings
+
 ## 2.4.0 - 2024-09-29
 
 ### Added

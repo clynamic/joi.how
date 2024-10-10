@@ -5,6 +5,11 @@ import {
   SettingsTile,
   SettingsDescription,
   Space,
+  Surrounded,
+  IconButton,
+  TextInput,
+  SettingsLabel,
+  Spinner,
 } from '../../common';
 import { useVibratorValue, Vibrator } from '../../utils';
 import {
@@ -12,11 +17,26 @@ import {
   ButtplugClientDevice,
 } from 'buttplug';
 import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const StyledDeviceList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
+`;
+
+const StyledUrlFields = styled.div`
+  display: grid;
+  grid-template-columns: auto 1fr 56px;
+  grid-gap: 8px;
+
+  align-items: center;
+
+  input {
+    grid-column: unset;
+  }
 `;
 
 export const VibratorSettings = () => {
@@ -26,7 +46,13 @@ export const VibratorSettings = () => {
   const [error, setError] = useVibratorValue('error');
   const [loading, setLoading] = useState(false);
 
+  const [host, setHost] = useState('127.0.0.1');
+  const [port, setPort] = useState(12345);
+
+  const [expanded, setExpanded] = useState(false);
+
   const onConnect = useCallback(async () => {
+    setExpanded(false);
     setError(undefined);
     setLoading(true);
 
@@ -43,7 +69,7 @@ export const VibratorSettings = () => {
     }
 
     try {
-      const url = 'ws://127.0.0.1:12345';
+      const url = `ws://${host}:${port}`;
       await client.connect(new ButtplugBrowserWebsocketClientConnector(url));
       await client.startScanning();
       client.devices.forEach(e =>
@@ -61,40 +87,82 @@ export const VibratorSettings = () => {
       });
       setConnection(url);
     } catch (e) {
-      setError(String(e));
+      setError(String(e ?? 'Unknown error'));
       setConnection(undefined);
     } finally {
       setLoading(false);
     }
-  }, [client, connection, setConnection, setDevices, setError]);
+  }, [client, connection, host, port, setConnection, setDevices, setError]);
 
   return (
     <SettingsTile label={'Vibrator'}>
-      <SettingsDescription>
-        Use compatible device during your game
-      </SettingsDescription>
-      <SettingsInfo
-        style={{
-          margin: 0,
-        }}
+      <Surrounded
+        trailing={
+          <IconButton
+            style={{
+              fontSize: '1rem',
+            }}
+            tooltip='Settings'
+            icon={<FontAwesomeIcon icon={faGear} />}
+            onClick={() => setExpanded(!expanded)}
+            disabled={loading}
+          />
+        }
       >
-        {connection ? (
-          <p>
-            Connected to <strong>{connection}</strong>
-          </p>
-        ) : (
-          <p>
-            This requires you to install{' '}
-            <a
-              href='https://intiface.com/central/'
-              target={'_blank'}
-              rel='noreferrer'
-            >
-              Intiface® Central
-            </a>
-          </p>
+        <SettingsDescription>
+          Use compatible device during your game
+        </SettingsDescription>
+        <SettingsInfo
+          style={{
+            margin: 0,
+          }}
+        >
+          {connection ? (
+            <p>
+              Connected to <strong>{connection}</strong>
+            </p>
+          ) : (
+            <p>
+              This requires you to install{' '}
+              <a
+                href='https://intiface.com/central/'
+                target={'_blank'}
+                rel='noreferrer'
+              >
+                Intiface® Central
+              </a>
+            </p>
+          )}
+        </SettingsInfo>
+      </Surrounded>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            style={{ gridColumn: '1 / -1' }}
+          >
+            <Space size='medium' />
+            <StyledUrlFields>
+              <SettingsLabel>Server</SettingsLabel>
+              <TextInput
+                placeholder='Host'
+                value={host}
+                onChange={setHost}
+                disabled={loading}
+              />
+              <TextInput
+                placeholder='Port'
+                value={port.toString()}
+                onChange={e => setPort(Number(e))}
+                disabled={loading}
+              />
+            </StyledUrlFields>
+            <Space size='small' />
+          </motion.div>
         )}
-      </SettingsInfo>
+      </AnimatePresence>
       <Space size='medium' />
       {connection && (
         <>
@@ -116,12 +184,20 @@ export const VibratorSettings = () => {
         onClick={onConnect}
         disabled={loading}
       >
-        {connection ? <strong>Disconnect</strong> : <strong>Connect</strong>}
+        {loading ? (
+          <Spinner />
+        ) : connection ? (
+          <strong>Disconnect</strong>
+        ) : (
+          <strong>Connect</strong>
+        )}
       </Button>
       {error && (
         <>
           <Space size='small' />
-          <SettingsInfo style={{ color: 'red' }}>{error}</SettingsInfo>
+          <SettingsInfo style={{ color: 'red', textAlign: 'center' }}>
+            {error}
+          </SettingsInfo>
         </>
       )}
       <Space size='small' />
