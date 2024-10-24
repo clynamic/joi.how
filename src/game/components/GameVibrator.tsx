@@ -22,6 +22,9 @@ export const GameVibrator = () => {
 
   useEffect(() => {
     const { intensity, pace, devices, mode } = data.current;
+    devices.forEach(device =>
+      device.actuators.forEach(() => console.log('actuator activated'))
+    );
     switch (stroke) {
       case Stroke.up:
         switch (mode) {
