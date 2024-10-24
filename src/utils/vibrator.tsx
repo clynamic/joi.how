@@ -1,6 +1,7 @@
 import { createStateProvider } from './state';
 import { ButtplugClient, type ButtplugClientDevice } from 'buttplug';
 import { wait } from './wait';
+import { type ToyActuator, VibrationActuator } from './toyactuator';
 
 export enum VibrationMode {
   constant = 'constant',
@@ -9,8 +10,15 @@ export enum VibrationMode {
 
 export class Vibrator {
   private commandId = 0;
+  actuators: ToyActuator[] = [];
 
-  constructor(private readonly device: ButtplugClientDevice) {}
+  constructor(private readonly device: ButtplugClientDevice) {
+    console.log(device.vibrateAttributes);
+    device.vibrateAttributes.forEach(
+      attribute =>
+        (this.actuators = [...this.actuators, new VibrationActuator(attribute)])
+    );
+  }
 
   async setVibration(intensity: number): Promise<void> {
     ++this.commandId;
