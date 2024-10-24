@@ -22,6 +22,7 @@ import {
   WaTooltip,
 } from '@awesome.me/webawesome/dist/react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ToySettings } from './ToySettings';
 
 const StyledDeviceList = styled.ul`
   list-style: none;
@@ -167,7 +168,9 @@ export const VibratorSettings = () => {
         <>
           <StyledDeviceList>
             {devices.length > 0 ? (
-              devices.map((device, index) => <li key={index}>{device.name}</li>)
+              devices.map((device: Vibrator, index: number) => (
+                <ToySettings key={index} device={device} />
+              ))
             ) : (
               <li>No devices found</li>
             )}
