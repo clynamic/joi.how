@@ -1,5 +1,4 @@
 import { type GenericDeviceMessageAttributes, ActuatorType } from 'buttplug';
-import { createStateProvider } from './state';
 
 export enum ActuatorMode {
   alwaysOn = 'alwaysOn',
@@ -8,7 +7,14 @@ export enum ActuatorMode {
   activeDown = 'activeDown',
 }
 
-export class ToyActuator {
+export const ActuatorModeLabels: Record<ActuatorMode, string> = {
+  [ActuatorMode.alwaysOn]: 'Always On',
+  [ActuatorMode.alwaysOff]: 'Always Off',
+  [ActuatorMode.activeUp]: 'Active on Upstroke',
+  [ActuatorMode.activeDown]: 'Active on Downstroke',
+};
+
+export class ToyActuator implements ToyActuatorSettings {
   index: number;
   actuatorType: ActuatorType;
   intensity: number = 0;
@@ -20,22 +26,23 @@ export class ToyActuator {
   }
 }
 
-export class VibrationActuator extends ToyActuator {}
+export class VibrationActuator
+  extends ToyActuator
+  implements VibrationActuatorSettings
+{
+  mode: ActuatorMode = ActuatorMode.activeUp;
+
+  setMode(newMode: ActuatorMode) {
+    this.mode = newMode;
+    console.log(`${this.actuatorType} ${this.index} mode set to ${newMode}`);
+  }
+}
+
+export interface VibrationActuatorSettings {
+  mode: ActuatorMode;
+}
 
 export interface ToyActuatorSettings {
   index: number;
   actuatorType: ActuatorType;
-  mode: ActuatorMode;
 }
-
-export const {
-  Provider: ActuatorProvider,
-  useProvider: useActuator,
-  useProviderSelector: useActuatorValue,
-} = createStateProvider<ToyActuatorSettings>({
-  defaultData: {
-    index: -1,
-    actuatorType: ActuatorType.Unknown,
-    mode: ActuatorMode.activeUp,
-  },
-});
