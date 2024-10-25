@@ -20,9 +20,11 @@ export class Vibrator {
     );
   }
 
-  async setVibration(intensity: number): Promise<void> {
+  async setVibration(intensity: number | number[]): Promise<void> {
     ++this.commandId;
+    console.log(`setting intensity to ${intensity}`);
     await this.device.vibrate(intensity);
+    console.log(`finished setting intensity to ${intensity}`);
   }
 
   async thump(timeout: number, intensity = 1): Promise<void> {

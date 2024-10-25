@@ -17,8 +17,6 @@ export const ActuatorModeLabels: Record<ActuatorMode, string> = {
 export class ToyActuator implements ToyActuatorSettings {
   index: number;
   actuatorType: ActuatorType;
-  intensity: number = 0;
-  pace: number = 0;
 
   constructor(attributes: GenericDeviceMessageAttributes) {
     this.actuatorType = attributes.ActuatorType;
@@ -31,15 +29,16 @@ export class VibrationActuator
   implements VibrationActuatorSettings
 {
   mode: ActuatorMode = ActuatorMode.activeUp;
+  intensity: number = 0;
 
   setMode(newMode: ActuatorMode) {
     this.mode = newMode;
-    console.log(`${this.actuatorType} ${this.index} mode set to ${newMode}`);
   }
 }
 
 export interface VibrationActuatorSettings {
   mode: ActuatorMode;
+  intensity: number;
 }
 
 export interface ToyActuatorSettings {

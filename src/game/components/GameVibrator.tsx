@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { GamePhase, Stroke, useGameValue } from '../GameProvider';
 import { useAutoRef, useVibratorValue, VibrationMode, wait } from '../../utils';
 import { useSetting } from '../../settings';
+import { ActuatorType } from 'buttplug';
+import { ActuatorMode, VibrationActuator } from '../../utils/toyactuator';
 
 export const GameVibrator = () => {
   const [stroke] = useGameValue('stroke');
@@ -22,28 +24,50 @@ export const GameVibrator = () => {
 
   useEffect(() => {
     const { intensity, pace, devices, mode } = data.current;
+    console.log(`${pace} ${mode}`);
     devices.forEach(device =>
       device.actuators.forEach(() => console.log('actuator activated'))
     );
-    switch (stroke) {
-      case Stroke.up:
-        switch (mode) {
-          case VibrationMode.constant: {
-            const strength = intensity / 100;
-            devices.forEach(device => device.setVibration(strength));
+    devices.forEach(device => {
+      const vibrationArray: number[] = [];
+      device.actuators.forEach(actuator => {
+        switch (actuator.actuatorType) {
+          case ActuatorType.Vibrate:
+            {
+              const vibrationActuator = actuator as VibrationActuator;
+              let vibrationValue = 0;
+              switch (vibrationActuator.mode) {
+                case ActuatorMode.activeUp:
+                  if (stroke == Stroke.up) {
+                    vibrationValue = intensity / 100;
+                  } else {
+                    vibrationValue = 0;
+                  }
+                  break;
+                case ActuatorMode.activeDown:
+                  if (stroke == Stroke.down) {
+                    vibrationValue = intensity / 100;
+                  } else {
+                    vibrationValue = 0;
+                  }
+                  break;
+                case ActuatorMode.alwaysOn:
+                  vibrationValue = intensity / 100;
+                  break;
+                case ActuatorMode.alwaysOff:
+                  break;
+              }
+              vibrationArray[vibrationActuator.index] = vibrationValue;
+            }
             break;
-          }
-          case VibrationMode.thump: {
-            const length = (1 / pace) * 1000;
-            const strength = Math.max(0.25, intensity / 100);
-            devices.forEach(device => device.thump(length, strength));
+          default:
             break;
-          }
         }
-        break;
-      case Stroke.down:
-        break;
-    }
+      });
+      if (vibrationArray.length > 0) {
+        device.setVibration(vibrationArray);
+      }
+    });
   }, [data, stroke]);
 
   useEffect(() => {
