@@ -57,7 +57,7 @@ export class VibrationActuator
   }
 
   override getOutput(stroke: Stroke, intensity: number) {
-    let output = this.minIntensity;
+    let output = 0;
     switch (this.mode) {
       case ActuatorMode.activeUp:
         if (stroke == Stroke.up) {
@@ -73,7 +73,6 @@ export class VibrationActuator
         output = this.mapToRange(intensity / 100);
         break;
       case ActuatorMode.alwaysOff:
-        output = 0;
         break;
     }
     return output;
