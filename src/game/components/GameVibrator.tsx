@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { GamePhase, Stroke, useGameValue } from '../GameProvider';
+import { GamePhase, useGameValue } from '../GameProvider';
 import { useAutoRef, useVibratorValue, VibrationMode, wait } from '../../utils';
 import { useSetting } from '../../settings';
 import { ActuatorType } from 'buttplug';
-import { ActuatorMode, VibrationActuator } from '../../utils/toyactuator';
 
 export const GameVibrator = () => {
   const [stroke] = useGameValue('stroke');
@@ -33,32 +32,11 @@ export const GameVibrator = () => {
       device.actuators.forEach(actuator => {
         switch (actuator.actuatorType) {
           case ActuatorType.Vibrate:
-            {
-              const vibrationActuator = actuator as VibrationActuator;
-              let vibrationValue = 0;
-              switch (vibrationActuator.mode) {
-                case ActuatorMode.activeUp:
-                  if (stroke == Stroke.up) {
-                    vibrationValue = intensity / 100;
-                  } else {
-                    vibrationValue = 0;
-                  }
-                  break;
-                case ActuatorMode.activeDown:
-                  if (stroke == Stroke.down) {
-                    vibrationValue = intensity / 100;
-                  } else {
-                    vibrationValue = 0;
-                  }
-                  break;
-                case ActuatorMode.alwaysOn:
-                  vibrationValue = intensity / 100;
-                  break;
-                case ActuatorMode.alwaysOff:
-                  break;
-              }
-              vibrationArray[vibrationActuator.index] = vibrationValue;
-            }
+            vibrationArray[actuator.index] = actuator.getOutput?.(
+              stroke,
+              intensity,
+              pace
+            ) as number;
             break;
           default:
             break;
