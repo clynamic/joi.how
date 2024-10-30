@@ -11,7 +11,7 @@ import {
   SettingsLabel,
   Spinner,
 } from '../../common';
-import { defaultTransition, useVibratorValue, Vibrator } from '../../utils';
+import { defaultTransition, useToyClientValue, ToyClient } from '../../utils';
 import {
   ButtplugBrowserWebsocketClientConnector,
   ButtplugClientDevice,
@@ -41,10 +41,10 @@ const StyledUrlFields = styled.div`
 `;
 
 export const VibratorSettings = () => {
-  const [client] = useVibratorValue('client');
-  const [connection, setConnection] = useVibratorValue('connection');
-  const [devices, setDevices] = useVibratorValue('devices');
-  const [error, setError] = useVibratorValue('error');
+  const [client] = useToyClientValue('client');
+  const [connection, setConnection] = useToyClientValue('connection');
+  const [devices, setDevices] = useToyClientValue('devices');
+  const [error, setError] = useToyClientValue('error');
   const [loading, setLoading] = useState(false);
 
   const [host, setHost] = useState('127.0.0.1');
@@ -74,10 +74,10 @@ export const VibratorSettings = () => {
       await client.connect(new ButtplugBrowserWebsocketClientConnector(url));
       await client.startScanning();
       client.devices.forEach(e =>
-        setDevices(devices => [...devices, new Vibrator(e)])
+        setDevices(devices => [...devices, new ToyClient(e)])
       );
       client.addListener('deviceadded', (device: ButtplugClientDevice) => {
-        setDevices(devices => [...devices, new Vibrator(device)]);
+        setDevices(devices => [...devices, new ToyClient(device)]);
       });
       client.addListener('deviceremoved', (device: ButtplugClientDevice) => {
         setDevices(devices => devices.filter(e => e.name !== device.name));
@@ -170,7 +170,7 @@ export const VibratorSettings = () => {
         <>
           <StyledDeviceList>
             {devices.length > 0 ? (
-              devices.map((device: Vibrator, index: number) => (
+              devices.map((device: ToyClient, index: number) => (
                 <ToySettings key={index} device={device} />
               ))
             ) : (
