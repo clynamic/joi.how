@@ -4,7 +4,7 @@ import {
   VibrationActuator,
   ActuatorMode,
   ActuatorModeLabels,
-} from '../../utils/toyactuator';
+} from '../../utils';
 import { PropsWithChildren, useState } from 'react';
 // import { Vibrator } from '../../utils/vibrator';
 import { SettingsTile } from '../../common';

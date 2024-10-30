@@ -13,3 +13,4 @@ export * from './state';
 export * from './translate';
 export * from './vibrator';
 export * from './wait';
+export * from './toyactuator';
