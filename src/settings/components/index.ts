@@ -8,6 +8,6 @@ export * from './PaceSettings';
 export * from './PlayerSettings';
 export * from './ServiceSettings';
 export * from './TradeSettings';
-export * from './VibratorSettings';
+export * from './ToyClientSettings';
 export * from './WalltakerSettings';
 export * from './ToySettings';
