@@ -2,7 +2,7 @@ import { Vibrator } from '../../utils/vibrator';
 import { ToyActuatorSettings } from './ToyActuatorSettings';
 import { SettingsTile } from '../../common';
 import { PropsWithChildren } from 'react';
-import { type ToyActuator } from '../../utils/toyactuator';
+import { type ToyActuator } from '../../utils';
 import { SettingsDescription } from '../../common/SettingsDescription';
 
 export interface ToySettingsProps
