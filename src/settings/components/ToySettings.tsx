@@ -1,4 +1,4 @@
-import { ToyClient } from '../../utils/vibrator';
+import { ToyClient } from '../../utils/toyclient';
 import { ToyActuatorSettings } from './ToyActuatorSettings';
 import { SettingsTile } from '../../common';
 import { PropsWithChildren } from 'react';
