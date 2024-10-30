@@ -1,4 +1,4 @@
-import { Vibrator } from '../../utils/vibrator';
+import { ToyClient } from '../../utils/vibrator';
 import { ToyActuatorSettings } from './ToyActuatorSettings';
 import { SettingsTile } from '../../common';
 import { PropsWithChildren } from 'react';
@@ -8,7 +8,7 @@ import { SettingsDescription } from '../../common/SettingsDescription';
 export interface ToySettingsProps
   extends PropsWithChildren<React.HTMLAttributes<HTMLFieldSetElement>> {
   key: number;
-  device: Vibrator;
+  device: ToyClient;
 }
 
 export const ToySettings: React.FC<ToySettingsProps> = ({ key, device }) => {

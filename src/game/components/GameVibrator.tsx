@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { GamePhase, useGameValue } from '../GameProvider';
-import { useAutoRef, useVibratorValue, wait } from '../../utils';
+import { useAutoRef, useToyClientValue, wait } from '../../utils';
 import { ActuatorType } from 'buttplug';
 
 export const GameVibrator = () => {
@@ -8,7 +8,7 @@ export const GameVibrator = () => {
   const [intensity] = useGameValue('intensity');
   const [pace] = useGameValue('pace');
   const [phase] = useGameValue('phase');
-  const [devices] = useVibratorValue('devices');
+  const [devices] = useToyClientValue('devices');
 
   const data = useAutoRef({
     intensity,
