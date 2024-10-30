@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { GamePhase, useGameValue } from '../GameProvider';
-import { useAutoRef, useToyClientValue, wait } from '../../utils';
+import {
+  useAutoRef,
+  useToyClientValue,
+  wait,
+  VibrationActuator,
+} from '../../utils';
 import { ActuatorType } from 'buttplug';
 
 export const GameVibrator = () => {
@@ -20,15 +25,11 @@ export const GameVibrator = () => {
 
   useEffect(() => {
     const { intensity, pace, devices } = data.current;
-    devices.forEach(device =>
-      device.actuators.forEach(() => console.log('actuator activated'))
-    );
     devices.forEach(device => {
       const vibrationArray: number[] = [];
       device.actuators.forEach(actuator => {
         switch (actuator.actuatorType) {
           case ActuatorType.Vibrate:
-            console.log(`Actual intensity: ${intensity}`);
             vibrationArray[actuator.index] = actuator.getOutput?.(
               stroke,
               intensity,
@@ -57,7 +58,24 @@ export const GameVibrator = () => {
         (async () => {
           for (let i = 0; i < 15; i++) {
             const strength = Math.max(0, 1 - i * 0.067);
-            devices.forEach(device => device.setVibration(strength));
+            devices.forEach(device => {
+              const vibrationArray: number[] = [];
+              device.actuators.forEach(actuator => {
+                switch (actuator.actuatorType) {
+                  case ActuatorType.Vibrate: {
+                    const vibrationActuator = actuator as VibrationActuator;
+                    vibrationArray[actuator.index] =
+                      vibrationActuator.mapToRange(strength);
+                    break;
+                  }
+                  default:
+                    break;
+                }
+                if (vibrationArray.length > 0) {
+                  device.setVibration(vibrationArray);
+                }
+              });
+            });
             await wait(400);
           }
         })();

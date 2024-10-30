@@ -6,7 +6,6 @@ export class ToyClient {
   actuators: ToyActuator[] = [];
 
   constructor(private readonly device: ButtplugClientDevice) {
-    console.log(device.vibrateAttributes);
     device.vibrateAttributes.forEach(
       attribute =>
         (this.actuators = [...this.actuators, new VibrationActuator(attribute)])
@@ -14,9 +13,7 @@ export class ToyClient {
   }
 
   async setVibration(intensity: number | number[]): Promise<void> {
-    console.log(`setting intensity to ${intensity}`);
     await this.device.vibrate(intensity);
-    console.log(`finished setting intensity to ${intensity}`);
   }
 
   async stop() {
