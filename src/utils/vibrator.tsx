@@ -2,7 +2,7 @@ import { createStateProvider } from './state';
 import { ButtplugClient, type ButtplugClientDevice } from 'buttplug';
 import { type ToyActuator, VibrationActuator } from './toyactuator';
 
-export class Vibrator {
+export class ToyClient {
   actuators: ToyActuator[] = [];
 
   constructor(private readonly device: ButtplugClientDevice) {
@@ -28,18 +28,18 @@ export class Vibrator {
   }
 }
 
-export interface VibratorSettings {
+export interface ToyClientSettings {
   client: ButtplugClient;
   connection?: string;
-  devices: Vibrator[];
+  devices: ToyClient[];
   error?: string;
 }
 
 export const {
-  Provider: VibratorProvider,
-  useProvider: useVibrators,
-  useProviderSelector: useVibratorValue,
-} = createStateProvider<VibratorSettings>({
+  Provider: ToyClientProvider,
+  useProvider: useToyClients,
+  useProviderSelector: useToyClientValue,
+} = createStateProvider<ToyClientSettings>({
   defaultData: {
     client: new ButtplugClient('JOI.how'),
     devices: [],
