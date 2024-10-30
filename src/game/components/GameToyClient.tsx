@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 import { GamePhase, useGameValue } from '../GameProvider';
-import {
-  useAutoRef,
-  useToyClientValue,
-  wait,
-  VibrationActuator,
-} from '../../utils';
-import { ActuatorType } from 'buttplug';
+import { useAutoRef, useToyClientValue } from '../../utils';
 
 export const GameVibrator = () => {
   const [stroke] = useGameValue('stroke');
@@ -26,23 +20,7 @@ export const GameVibrator = () => {
   useEffect(() => {
     const { intensity, pace, devices } = data.current;
     devices.forEach(device => {
-      const vibrationArray: number[] = [];
-      device.actuators.forEach(actuator => {
-        switch (actuator.actuatorType) {
-          case ActuatorType.Vibrate:
-            vibrationArray[actuator.index] = actuator.getOutput?.(
-              stroke,
-              intensity,
-              pace
-            ) as number;
-            break;
-          default:
-            break;
-        }
-      });
-      if (vibrationArray.length > 0) {
-        device.setVibration(vibrationArray);
-      }
+      device.actuate(stroke, intensity, pace);
     });
   }, [data, stroke]);
 
@@ -55,30 +33,9 @@ export const GameVibrator = () => {
         devices.forEach(device => device.stop());
         break;
       case GamePhase.climax:
-        (async () => {
-          for (let i = 0; i < 15; i++) {
-            const strength = Math.max(0, 1 - i * 0.067);
-            devices.forEach(device => {
-              const vibrationArray: number[] = [];
-              device.actuators.forEach(actuator => {
-                switch (actuator.actuatorType) {
-                  case ActuatorType.Vibrate: {
-                    const vibrationActuator = actuator as VibrationActuator;
-                    vibrationArray[actuator.index] =
-                      vibrationActuator.mapToRange(strength);
-                    break;
-                  }
-                  default:
-                    break;
-                }
-                if (vibrationArray.length > 0) {
-                  device.setVibration(vibrationArray);
-                }
-              });
-            });
-            await wait(400);
-          }
-        })();
+        devices.forEach(device => device.climax());
+      // (async () => {
+      // })();
     }
     setCurrentPhase(phase);
   }, [data, currentPhase, phase]);
