@@ -1,6 +1,12 @@
 import { createStateProvider } from './state';
-import { ButtplugClient, type ButtplugClientDevice } from 'buttplug';
+import {
+  ButtplugClient,
+  type ButtplugClientDevice,
+  ActuatorType,
+} from 'buttplug';
 import { type ToyActuator, VibrationActuator } from './toyactuator';
+import { Stroke } from '../game/GameProvider';
+import { wait } from '../utils';
 
 export class ToyClient {
   actuators: ToyActuator[] = [];
@@ -12,8 +18,47 @@ export class ToyClient {
     );
   }
 
-  async setVibration(intensity: number | number[]): Promise<void> {
-    await this.device.vibrate(intensity);
+  async actuate(stroke: Stroke, intensity: number, pace: number) {
+    const vibrationArray: number[] = [];
+    this.actuators.forEach(actuator => {
+      switch (actuator.actuatorType) {
+        case ActuatorType.Vibrate:
+          vibrationArray[actuator.index] = actuator.getOutput?.(
+            stroke,
+            intensity,
+            pace
+          ) as number;
+          break;
+        default:
+          break;
+      }
+    });
+    if (vibrationArray.length > 0) {
+      this.device.vibrate(vibrationArray);
+    }
+  }
+
+  async climax() {
+    for (let i = 0; i < 15; i++) {
+      const strength = Math.max(0, 1 - i * 0.067);
+      const vibrationArray: number[] = [];
+      this.actuators.forEach(actuator => {
+        switch (actuator.actuatorType) {
+          case ActuatorType.Vibrate: {
+            const vibrationActuator = actuator as VibrationActuator;
+            vibrationArray[actuator.index] =
+              vibrationActuator.mapToRange(strength);
+            break;
+          }
+          default:
+            break;
+        }
+        if (vibrationArray.length > 0) {
+          this.device.vibrate(vibrationArray);
+        }
+      });
+      await wait(400);
+    }
   }
 
   async stop() {
