@@ -1,15 +1,8 @@
 import { createStateProvider } from './state';
 import { ButtplugClient, type ButtplugClientDevice } from 'buttplug';
-import { wait } from './wait';
 import { type ToyActuator, VibrationActuator } from './toyactuator';
 
-export enum VibrationMode {
-  constant = 'constant',
-  thump = 'thump',
-}
-
 export class Vibrator {
-  private commandId = 0;
   actuators: ToyActuator[] = [];
 
   constructor(private readonly device: ButtplugClientDevice) {
@@ -21,19 +14,13 @@ export class Vibrator {
   }
 
   async setVibration(intensity: number | number[]): Promise<void> {
-    ++this.commandId;
     console.log(`setting intensity to ${intensity}`);
     await this.device.vibrate(intensity);
     console.log(`finished setting intensity to ${intensity}`);
   }
 
-  async thump(timeout: number, intensity = 1): Promise<void> {
-    const id = ++this.commandId;
-    await this.device.vibrate(intensity);
-    await wait(timeout);
-    if (id === this.commandId) {
-      await this.device.stop();
-    }
+  async stop() {
+    await this.device.stop();
   }
 
   get name(): string {
