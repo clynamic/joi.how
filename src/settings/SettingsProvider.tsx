@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { GameEvent, GameHypnoType, PlayerBody, PlayerGender } from '../types';
-import { createLocalStorageProvider, VibrationMode } from '../utils';
+import { createLocalStorageProvider } from '../utils';
 import { interpolateWith } from '../utils/translate';
 
 export interface Settings {
@@ -18,7 +18,6 @@ export interface Settings {
   body: PlayerBody;
   highRes: boolean;
   videoSound: boolean;
-  vibrations: VibrationMode;
 }
 
 export const defaultSettings: Settings = {
@@ -36,7 +35,6 @@ export const defaultSettings: Settings = {
   body: PlayerBody.penis,
   highRes: false,
   videoSound: false,
-  vibrations: VibrationMode.thump,
 };
 
 const settingsStorageKey = 'settings';

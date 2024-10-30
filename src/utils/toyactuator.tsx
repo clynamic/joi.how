@@ -76,6 +76,7 @@ export class VibrationActuator
         output = 0;
         break;
     }
+    console.log(`Setting ${this.actuatorType} ${this.index} to ${output}`);
     return output;
   }
 
