@@ -1,4 +1,3 @@
-// import { useActuatorSettings } from '../../utils'
 import {
   ToyActuator,
   VibrationActuator,
@@ -6,7 +5,6 @@ import {
   ActuatorModeLabels,
 } from '../../utils';
 import { PropsWithChildren, useState } from 'react';
-// import { Vibrator } from '../../utils/vibrator';
 import { SettingsTile } from '../../common';
 import { SettingsDescription } from '../../common/SettingsDescription';
 import { Dropdown } from '../../common/Dropdown';
