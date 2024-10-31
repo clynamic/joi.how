@@ -34,8 +34,6 @@ export const GameVibrator = () => {
         break;
       case GamePhase.climax:
         devices.forEach(device => device.climax());
-      // (async () => {
-      // })();
     }
     setCurrentPhase(phase);
   }, [data, currentPhase, phase]);
