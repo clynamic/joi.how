@@ -4,7 +4,7 @@ import {
   type ButtplugClientDevice,
   ActuatorType,
 } from 'buttplug';
-import { type ToyActuator, VibrationActuator } from './toyactuator';
+import { ToyActuator, VibrationActuator } from './toyactuator';
 import { Stroke } from '../game/GameProvider';
 import { wait } from '../utils';
 
@@ -15,6 +15,18 @@ export class ToyClient {
     device.vibrateAttributes.forEach(
       attribute =>
         (this.actuators = [...this.actuators, new VibrationActuator(attribute)])
+    );
+    device.linearAttributes.forEach(
+      attribute =>
+        (this.actuators = [...this.actuators, new ToyActuator(attribute)])
+    );
+    device.oscillateAttributes.forEach(
+      attribute =>
+        (this.actuators = [...this.actuators, new ToyActuator(attribute)])
+    );
+    device.rotateAttributes.forEach(
+      attribute =>
+        (this.actuators = [...this.actuators, new ToyActuator(attribute)])
     );
   }
 
