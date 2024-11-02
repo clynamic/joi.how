@@ -4,7 +4,7 @@ import {
   type ButtplugClientDevice,
   ActuatorType,
 } from 'buttplug';
-import { ToyActuator, VibrationActuator } from './toyactuator';
+import { ToyActuator, VibrationActuator, LinearActuator } from './toyactuator';
 import { Stroke } from '../game/GameProvider';
 import { wait } from '../utils';
 
@@ -18,7 +18,7 @@ export class ToyClient {
     );
     device.linearAttributes.forEach(
       attribute =>
-        (this.actuators = [...this.actuators, new ToyActuator(attribute)])
+        (this.actuators = [...this.actuators, new LinearActuator(attribute)])
     );
     device.oscillateAttributes.forEach(
       attribute =>

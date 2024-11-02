@@ -31,6 +31,8 @@ export const ToyActuatorSettings: React.FC<ToySettingsProps> = ({
         switch (toyActuator.actuatorType) {
           case ActuatorType.Vibrate:
             return <VibratorActuatorSettings toyActuator={toyActuator} />;
+          case ActuatorType.Position:
+            return <PositionActuatorSettings toyActuator={toyActuator} />;
           default:
             return <UnknownActuatorSettings />;
         }
@@ -104,14 +106,14 @@ export const VibratorActuatorSettings: React.FC<ToySettingsProps> = ({
   );
 };
 
-export const LinearActuatorSettings: React.FC<ToySettingsProps> = ({
+export const PositionActuatorSettings: React.FC<ToySettingsProps> = ({
   toyActuator,
 }) => {
   const linearActuator = toyActuator as LinearActuator;
   const descriptor = `${linearActuator.actuatorType}_${linearActuator.index}`;
   const [mode, setMode] = useState(linearActuator.mode);
-  // const [min, setMin] = useState(linearActuator.minPosition);
-  // const [max, setMax] = useState(linearActuator.maxPosition);
+  const [min, setMin] = useState(linearActuator.minPosition);
+  const [max, setMax] = useState(linearActuator.maxPosition);
 
   return (
     <div>
@@ -129,6 +131,39 @@ export const LinearActuatorSettings: React.FC<ToySettingsProps> = ({
         options={Object.values(LinearMode).map(value => ({
           value,
           label: LinearModeLabels[value],
+        }))}
+      />
+      <SettingsDescription>
+        Change the range of motion for this component.
+      </SettingsDescription>
+      <SettingsLabel>From</SettingsLabel>
+      <Dropdown
+        id={`{${descriptor}_min}`}
+        value={`${min}`}
+        onChange={(value: string) => {
+          const newMin = +value;
+          if (newMin > linearActuator.maxPosition) return;
+          setMin(newMin);
+          linearActuator.setMinPosition(newMin);
+        }}
+        options={linearActuator.positionRange.map(value => ({
+          value: `${value}`,
+          label: `${value}%`,
+        }))}
+      />
+      <SettingsLabel>To</SettingsLabel>
+      <Dropdown
+        id={`{${descriptor}_max}`}
+        value={`${max}`}
+        onChange={(value: string) => {
+          const newMax = +value;
+          if (newMax < linearActuator.minPosition) return;
+          setMax(newMax);
+          linearActuator.setMaxPosition(newMax);
+        }}
+        options={linearActuator.positionRange.map(value => ({
+          value: `${value}`,
+          label: `${value}%`,
         }))}
       />
     </div>
