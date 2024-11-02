@@ -96,7 +96,7 @@ export const VibratorSettings = () => {
   }, [client, connection, host, port, setConnection, setDevices, setError]);
 
   return (
-    <SettingsTile label={'Vibrator'}>
+    <SettingsTile label={'Connect Devices'}>
       <Surrounded
         trailing={
           <IconButton
@@ -111,7 +111,7 @@ export const VibratorSettings = () => {
         }
       >
         <SettingsDescription>
-          Use compatible device during your game
+          Use compatible devices during your game
         </SettingsDescription>
         <SettingsInfo
           style={{
