@@ -32,6 +32,7 @@ export class ToyClient {
 
   async actuate(stroke: Stroke, intensity: number, pace: number) {
     const vibrationArray: number[] = [];
+    const linearArray: [number, number][] = [];
     this.actuators.forEach(actuator => {
       switch (actuator.actuatorType) {
         case ActuatorType.Vibrate:
@@ -41,12 +42,22 @@ export class ToyClient {
             pace
           ) as number;
           break;
+        case ActuatorType.Position:
+          linearArray[actuator.index] = actuator.getOutput?.(
+            stroke,
+            intensity,
+            pace
+          ) as [number, number];
+          break;
         default:
           break;
       }
     });
     if (vibrationArray.length > 0) {
       this.device.vibrate(vibrationArray);
+    }
+    if (linearArray.length > 0) {
+      this.device.linear(linearArray);
     }
   }
 

@@ -1,8 +1,11 @@
 import {
   ToyActuator,
   VibrationActuator,
-  ActuatorMode,
-  ActuatorModeLabels,
+  LinearActuator,
+  VibrateMode,
+  LinearMode,
+  VibrateModeLabels,
+  LinearModeLabels,
 } from '../../utils';
 import { PropsWithChildren, useState } from 'react';
 import { SettingsTile } from '../../common';
@@ -54,13 +57,13 @@ export const VibratorActuatorSettings: React.FC<ToySettingsProps> = ({
         id={`${descriptor}_mode`}
         value={mode}
         onChange={(value: string) => {
-          const newMode = value as ActuatorMode;
+          const newMode = value as VibrateMode;
           setMode(newMode);
           vibratorActuator.setMode(newMode);
         }}
-        options={Object.values(ActuatorMode).map(value => ({
+        options={Object.values(VibrateMode).map(value => ({
           value,
-          label: ActuatorModeLabels[value],
+          label: VibrateModeLabels[value],
         }))}
       />
       <Space size='medium' />
@@ -95,6 +98,37 @@ export const VibratorActuatorSettings: React.FC<ToySettingsProps> = ({
         options={vibratorActuator.intensityRange.map(value => ({
           value: `${value}`,
           label: `${(value * 100).toFixed(0)}%`,
+        }))}
+      />
+    </div>
+  );
+};
+
+export const LinearActuatorSettings: React.FC<ToySettingsProps> = ({
+  toyActuator,
+}) => {
+  const linearActuator = toyActuator as LinearActuator;
+  const descriptor = `${linearActuator.actuatorType}_${linearActuator.index}`;
+  const [mode, setMode] = useState(linearActuator.mode);
+  // const [min, setMin] = useState(linearActuator.minPosition);
+  // const [max, setMax] = useState(linearActuator.maxPosition);
+
+  return (
+    <div>
+      <SettingsDescription>
+        Select when this component will activate.
+      </SettingsDescription>
+      <Dropdown
+        id={`${descriptor}_mode`}
+        value={mode}
+        onChange={(value: string) => {
+          const newMode = value as LinearMode;
+          setMode(newMode);
+          linearActuator.setMode(newMode);
+        }}
+        options={Object.values(LinearMode).map(value => ({
+          value,
+          label: LinearModeLabels[value],
         }))}
       />
     </div>
