@@ -89,7 +89,7 @@ export const VibratorSettings = () => {
   }, [client, connection, host, port, setConnection, setDevices, setError]);
 
   return (
-    <Fields label={'Vibrator'}>
+    <Fields label={'Connect Devices'}>
       <JoiStack
         direction='row'
         justifyContent='space-between'
@@ -97,7 +97,7 @@ export const VibratorSettings = () => {
       >
         <JoiStack>
           <SettingsDescription>
-            Use compatible device during your game
+            Use compatible devices during your game
           </SettingsDescription>
           <SettingsInfo
             style={{
