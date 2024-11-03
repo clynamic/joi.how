@@ -148,7 +148,7 @@ export const PositionActuatorSettings: React.FC<ToySettingsProps> = ({
         }}
         options={linearActuator.positionRange.map(value => ({
           value: `${value}`,
-          label: `${value}%`,
+          label: `${(value * 100).toFixed(0)}%`,
         }))}
       />
       <SettingsLabel>To</SettingsLabel>
@@ -163,7 +163,7 @@ export const PositionActuatorSettings: React.FC<ToySettingsProps> = ({
         }}
         options={linearActuator.positionRange.map(value => ({
           value: `${value}`,
-          label: `${value}%`,
+          label: `${(value * 100).toFixed(0)}%`,
         }))}
       />
     </div>
