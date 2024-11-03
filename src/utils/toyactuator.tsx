@@ -50,7 +50,7 @@ export class VibrationActuator
 
   constructor(attributes: GenericDeviceMessageAttributes) {
     super(attributes);
-    const intensityStep = 100.0 / attributes.StepCount;
+    const intensityStep = 1.0 / attributes.StepCount;
     for (let i = 0; i <= attributes.StepCount; ++i) {
       this.intensityRange[i] = intensityStep * i;
     }
@@ -103,12 +103,12 @@ export class LinearActuator
 {
   mode: LinearMode = LinearMode.normal;
   minPosition: number = 0;
-  maxPosition: number = 100;
+  maxPosition: number = 1.0;
   positionRange: number[] = [];
 
   constructor(attributes: GenericDeviceMessageAttributes) {
     super(attributes);
-    const positionStep = 100.0 / attributes.StepCount;
+    const positionStep = 1.0 / attributes.StepCount;
     for (let i = 0; i <= attributes.StepCount; ++i) {
       this.positionRange[i] = positionStep * i;
     }
