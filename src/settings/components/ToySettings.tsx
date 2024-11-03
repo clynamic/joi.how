@@ -7,19 +7,18 @@ import { SettingsDescription } from '../../common/SettingsDescription';
 
 export interface ToySettingsProps
   extends PropsWithChildren<React.HTMLAttributes<HTMLFieldSetElement>> {
-  key: number;
   device: ToyClient;
 }
 
-export const ToySettings: React.FC<ToySettingsProps> = ({ key, device }) => {
+export const ToySettings: React.FC<ToySettingsProps> = ({ device }) => {
   return (
-    <li key={key}>
-      <SettingsTile label={device.name}>
-        <SettingsDescription>
+    <li key={device.name}>
+      <SettingsTile label={device.name} key={device.name}>
+        <SettingsDescription key={device.name}>
           Change the settings for each controllable component on your toy.
         </SettingsDescription>
         {device.actuators.map((a: ToyActuator) => (
-          <ToyActuatorSettings toyActuator={a} />
+          <ToyActuatorSettings toyActuator={a} key={a.index} />
         ))}
       </SettingsTile>
     </li>

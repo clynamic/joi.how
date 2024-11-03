@@ -13,6 +13,7 @@ import { defaultTransition, useToyClientValue, ToyClient } from '../../utils';
 import {
   ButtplugBrowserWebsocketClientConnector,
   ButtplugClientDevice,
+  ButtplugClient,
 } from 'buttplug';
 import styled from 'styled-components';
 import {
@@ -31,7 +32,7 @@ const StyledDeviceList = styled.ul`
 `;
 
 export const VibratorSettings = () => {
-  const [client] = useToyClientValue('client');
+  const [client, setClient] = useToyClientValue('client');
   const [connection, setConnection] = useToyClientValue('connection');
   const [devices, setDevices] = useToyClientValue('devices');
   const [error, setError] = useToyClientValue('error');
@@ -50,6 +51,7 @@ export const VibratorSettings = () => {
     if (connection) {
       try {
         await client.disconnect();
+        setClient(new ButtplugClient('JOI.how'));
       } catch (e) {
         setError(String(e));
       } finally {
@@ -76,6 +78,9 @@ export const VibratorSettings = () => {
         setDevices(devices => devices.filter(e => e.name !== device.name));
       });
       client.addListener('disconnect', () => {
+        client.removeListener('deviceadded');
+        client.removeListener('deviceremoved');
+        client.removeListener('disconnect');
         setDevices([]);
         setConnection(undefined);
       });
@@ -86,7 +91,16 @@ export const VibratorSettings = () => {
     } finally {
       setLoading(false);
     }
-  }, [client, connection, host, port, setConnection, setDevices, setError]);
+  }, [
+    client,
+    connection,
+    host,
+    port,
+    setClient,
+    setConnection,
+    setDevices,
+    setError,
+  ]);
 
   return (
     <Fields label={'Connect Devices'}>
@@ -169,7 +183,7 @@ export const VibratorSettings = () => {
           <StyledDeviceList>
             {devices.length > 0 ? (
               devices.map((device: ToyClient, index: number) => (
-                <ToySettings key={index} device={device} />
+                <ToySettings device={device} key={`${device.name}${index}`} />
               ))
             ) : (
               <li>No devices found</li>
