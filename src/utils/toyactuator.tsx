@@ -109,7 +109,7 @@ export class LinearActuator
   constructor(attributes: GenericDeviceMessageAttributes) {
     super(attributes);
     const positionStep = 100.0 / attributes.StepCount;
-    for (let i = 0; i < attributes.StepCount; ++i) {
+    for (let i = 0; i <= attributes.StepCount; ++i) {
       this.positionRange[i] = positionStep * i;
     }
   }
@@ -128,7 +128,7 @@ export class LinearActuator
 
   override getOutput(stroke: Stroke, intensity: number, pace: number) {
     let targetPosition = this.minPosition;
-    let movementTime = 1000.0 / pace;
+    let movementTime = Math.round(1000.0 / pace);
     switch (this.mode) {
       case LinearMode.normal:
         if (stroke == Stroke.up) {
