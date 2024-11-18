@@ -94,7 +94,7 @@ export const E621Search = () => {
 
   return (
     <StyledE621Search>
-      <SettingsDescription>Add images from e621</SettingsDescription>
+      <SettingsDescription>Add images from e621's search</SettingsDescription>
       <SettingsLabel htmlFor='tags'>Tags</SettingsLabel>
       <TextInput
         id='tags'

@@ -9,4 +9,3 @@ export * from './PlayerSettings';
 export * from './ServiceSettings';
 export * from './TradeSettings';
 export * from './VibratorSettings';
-export * from './WalltakerSettings';

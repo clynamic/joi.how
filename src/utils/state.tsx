@@ -14,6 +14,8 @@ interface StateContextType<T> {
   setData: React.Dispatch<React.SetStateAction<T>>;
 }
 
+export type StateAndSetter<T> = [T, React.Dispatch<React.SetStateAction<T>>];
+
 export function createStateProvider<T>({
   defaultData: globalDefaultData,
 }: StateProviderOptions<T>) {
@@ -48,7 +50,7 @@ export function createStateProvider<T>({
     );
   };
 
-  const useProvider = (): [T, React.Dispatch<React.SetStateAction<T>>] => {
+  const useProvider = (): StateAndSetter<T> => {
     const context = useContext(StateContext);
     if (!context) {
       throw new Error('useProvider must be used within its Provider');
