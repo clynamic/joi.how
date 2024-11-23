@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { GamePhase, useGameValue } from '../GameProvider';
 import { useAutoRef, useToyClientValue } from '../../utils';
 
-export const GameVibrator = () => {
+export const GameToyClient = () => {
   const [stroke] = useGameValue('stroke');
   const [intensity] = useGameValue('intensity');
   const [pace] = useGameValue('pace');
