@@ -11,15 +11,18 @@ import {
   SettingsLabel,
   Spinner,
 } from '../../common';
-import { defaultTransition, useVibratorValue, Vibrator } from '../../utils';
+import { defaultTransition } from '../../utils';
+import { useToyClientValue, ToyClient } from '../../toy';
 import {
   ButtplugBrowserWebsocketClientConnector,
   ButtplugClientDevice,
+  ButtplugClient,
 } from 'buttplug';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ToySettings } from './ToySettings';
 
 const StyledDeviceList = styled.ul`
   list-style: none;
@@ -40,10 +43,10 @@ const StyledUrlFields = styled.div`
 `;
 
 export const VibratorSettings = () => {
-  const [client] = useVibratorValue('client');
-  const [connection, setConnection] = useVibratorValue('connection');
-  const [devices, setDevices] = useVibratorValue('devices');
-  const [error, setError] = useVibratorValue('error');
+  const [client, setClient] = useToyClientValue('client');
+  const [connection, setConnection] = useToyClientValue('connection');
+  const [devices, setDevices] = useToyClientValue('devices');
+  const [error, setError] = useToyClientValue('error');
   const [loading, setLoading] = useState(false);
 
   const [host, setHost] = useState('127.0.0.1');
@@ -59,6 +62,7 @@ export const VibratorSettings = () => {
     if (connection) {
       try {
         await client.disconnect();
+        setClient(new ButtplugClient('JOI.how'));
       } catch (e) {
         setError(String(e));
       } finally {
@@ -73,15 +77,18 @@ export const VibratorSettings = () => {
       await client.connect(new ButtplugBrowserWebsocketClientConnector(url));
       await client.startScanning();
       client.devices.forEach(e =>
-        setDevices(devices => [...devices, new Vibrator(e)])
+        setDevices(devices => [...devices, new ToyClient(e)])
       );
       client.addListener('deviceadded', (device: ButtplugClientDevice) => {
-        setDevices(devices => [...devices, new Vibrator(device)]);
+        setDevices(devices => [...devices, new ToyClient(device)]);
       });
       client.addListener('deviceremoved', (device: ButtplugClientDevice) => {
         setDevices(devices => devices.filter(e => e.name !== device.name));
       });
       client.addListener('disconnect', () => {
+        client.removeListener('deviceadded');
+        client.removeListener('deviceremoved');
+        client.removeListener('disconnect');
         setDevices([]);
         setConnection(undefined);
       });
@@ -92,10 +99,19 @@ export const VibratorSettings = () => {
     } finally {
       setLoading(false);
     }
-  }, [client, connection, host, port, setConnection, setDevices, setError]);
+  }, [
+    client,
+    connection,
+    host,
+    port,
+    setClient,
+    setConnection,
+    setDevices,
+    setError,
+  ]);
 
   return (
-    <SettingsTile label={'Vibrator'}>
+    <SettingsTile label={'Connect Devices'}>
       <Surrounded
         trailing={
           <IconButton
@@ -110,7 +126,7 @@ export const VibratorSettings = () => {
         }
       >
         <SettingsDescription>
-          Use compatible device during your game
+          Use compatible devices during your game
         </SettingsDescription>
         <SettingsInfo
           style={{
@@ -169,7 +185,9 @@ export const VibratorSettings = () => {
         <>
           <StyledDeviceList>
             {devices.length > 0 ? (
-              devices.map((device, index) => <li key={index}>{device.name}</li>)
+              devices.map((device: ToyClient, index: number) => (
+                <ToySettings device={device} key={`${device.name}${index}`} />
+              ))
             ) : (
               <li>No devices found</li>
             )}
