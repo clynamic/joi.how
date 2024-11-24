@@ -11,7 +11,8 @@ import {
   SettingsLabel,
   Spinner,
 } from '../../common';
-import { defaultTransition, useToyClientValue, ToyClient } from '../../utils';
+import { defaultTransition } from '../../utils';
+import { useToyClientValue, ToyClient } from '../../toy';
 import {
   ButtplugBrowserWebsocketClientConnector,
   ButtplugClientDevice,

@@ -1,8 +1,7 @@
-import { ToyClient } from '../../utils/toyclient';
+import { ToyClient, type ToyActuator } from '../../toy';
 import { ToyActuatorSettings } from './ToyActuatorSettings';
 import { SettingsTile } from '../../common';
 import { PropsWithChildren } from 'react';
-import { type ToyActuator } from '../../utils';
 import { SettingsDescription } from '../../common/SettingsDescription';
 
 export interface ToySettingsProps

@@ -4,7 +4,7 @@ import { App } from './app/App.tsx';
 import './index.css';
 import { SettingsProvider, ImageProvider } from './settings';
 import { E621Provider } from './e621';
-import { ToyClientProvider } from './utils';
+import { ToyClientProvider } from './toy';
 import { LocalImageProvider } from './local/LocalProvider.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

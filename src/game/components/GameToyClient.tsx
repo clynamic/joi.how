@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { GamePhase, useGameValue } from '../GameProvider';
-import { useAutoRef, useToyClientValue } from '../../utils';
+import { useAutoRef } from '../../utils';
+import { useToyClientValue } from '../../toy';
 
 export const GameToyClient = () => {
   const [stroke] = useGameValue('stroke');
