@@ -1,4 +1,3 @@
-import { createStateProvider } from './state';
 import {
   ButtplugClient,
   type ButtplugClientDevice,
@@ -6,7 +5,7 @@ import {
 } from 'buttplug';
 import { ToyActuator, VibrationActuator, LinearActuator } from './toyactuator';
 import { Stroke } from '../game/GameProvider';
-import { wait } from '../utils';
+import { wait, createStateProvider } from '../utils';
 
 export class ToyClient {
   actuators: ToyActuator[] = [];

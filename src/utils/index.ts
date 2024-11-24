@@ -11,6 +11,4 @@ export * from './setters';
 export * from './sound';
 export * from './state';
 export * from './translate';
-export * from './toyclient';
 export * from './wait';
-export * from './toyactuator';
