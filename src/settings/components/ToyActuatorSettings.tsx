@@ -3,7 +3,7 @@ import {
   VibrationActuator,
   ActuatorMode,
   ActuatorModeLabels,
-} from '../../utils';
+} from '../../toy';
 import { PropsWithChildren, useState } from 'react';
 import { SettingsTile } from '../../common';
 import { SettingsDescription } from '../../common/SettingsDescription';
