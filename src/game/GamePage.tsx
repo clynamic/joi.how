@@ -12,7 +12,7 @@ import {
   GameWarmup,
   GameEmergencyStop,
   GameSettings,
-  GameVibrator,
+  GameToyClient,
 } from './components';
 import { GameProvider } from './GameProvider';
 
@@ -89,7 +89,7 @@ export const GamePage = () => {
           <GameIntensity />
           <GamePace />
           <GameSound />
-          <GameVibrator />
+          <GameToyClient />
           <GameEvents />
         </StyledLogicElements>
         <GameImages />
