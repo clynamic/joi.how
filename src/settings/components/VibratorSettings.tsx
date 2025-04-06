@@ -1,43 +1,28 @@
 import { useCallback, useState } from 'react';
-import {
-  Button,
-  SettingsInfo,
-  SettingsTile,
-  SettingsDescription,
-  Space,
-  Surrounded,
-  IconButton,
-  TextInput,
-  SettingsLabel,
-  Spinner,
-} from '../../common';
 import { defaultTransition, useVibratorValue, Vibrator } from '../../utils';
 import {
   ButtplugBrowserWebsocketClientConnector,
   ButtplugClientDevice,
 } from 'buttplug';
-import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { AnimatePresence, motion } from 'framer-motion';
-
-const StyledDeviceList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-`;
-
-const StyledUrlFields = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr 56px;
-  grid-gap: 8px;
-
-  align-items: center;
-
-  input {
-    grid-column: unset;
-  }
-`;
+import {
+  Box,
+  Button,
+  IconButton,
+  Link,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
+import {
+  Fields,
+  SettingsDescription,
+  SettingsInfo,
+  SettingsLabel,
+  Space,
+  Spinner,
+} from '../../common';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 export const VibratorSettings = () => {
   const [client] = useVibratorValue('client');
@@ -95,46 +80,40 @@ export const VibratorSettings = () => {
   }, [client, connection, host, port, setConnection, setDevices, setError]);
 
   return (
-    <SettingsTile label={'Vibrator'}>
-      <Surrounded
-        trailing={
-          <IconButton
-            style={{
-              fontSize: '1rem',
-            }}
-            tooltip='Settings'
-            icon={<FontAwesomeIcon icon={faGear} />}
-            onClick={() => setExpanded(!expanded)}
-            disabled={loading}
-          />
-        }
-      >
-        <SettingsDescription>
-          Use compatible device during your game
-        </SettingsDescription>
-        <SettingsInfo
-          style={{
-            margin: 0,
-          }}
+    <Fields label={'Vibrator'}>
+      <Stack direction='row' alignItems='center'>
+        <Stack direction='column' flex={1}>
+          <SettingsDescription>
+            Use compatible device during your game
+          </SettingsDescription>
+          <SettingsInfo sx={{ margin: 0 }}>
+            {connection ? (
+              <Typography variant='inherit'>
+                Connected to{' '}
+                <Typography fontWeight='bold'>{connection}</Typography>
+              </Typography>
+            ) : (
+              <Typography variant='inherit'>
+                This requires you to install{' '}
+                <Link
+                  href='https://intiface.com/central/'
+                  target={'_blank'}
+                  rel='noreferrer'
+                >
+                  Intiface® Central
+                </Link>
+              </Typography>
+            )}
+          </SettingsInfo>
+        </Stack>
+        <IconButton
+          size='small'
+          onClick={() => setExpanded(!expanded)}
+          disabled={loading}
         >
-          {connection ? (
-            <p>
-              Connected to <strong>{connection}</strong>
-            </p>
-          ) : (
-            <p>
-              This requires you to install{' '}
-              <a
-                href='https://intiface.com/central/'
-                target={'_blank'}
-                rel='noreferrer'
-              >
-                Intiface® Central
-              </a>
-            </p>
-          )}
-        </SettingsInfo>
-      </Surrounded>
+          <SettingsIcon />
+        </IconButton>
+      </Stack>
       <AnimatePresence>
         {expanded && (
           <motion.div
@@ -145,63 +124,72 @@ export const VibratorSettings = () => {
             transition={defaultTransition}
           >
             <Space size='medium' />
-            <StyledUrlFields>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr auto 56px',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
               <SettingsLabel>Server</SettingsLabel>
-              <TextInput
+              <TextField
+                variant='outlined'
                 placeholder='Host'
                 value={host}
-                onChange={setHost}
+                onChange={e => setHost(e.target.value)}
                 disabled={loading}
               />
-              <TextInput
+              <Typography>:</Typography>
+              <TextField
+                variant='outlined'
                 placeholder='Port'
                 value={port.toString()}
-                onChange={e => setPort(Number(e))}
+                onChange={e => setPort(Number(e.target.value))}
                 disabled={loading}
+                inputMode='numeric'
               />
-            </StyledUrlFields>
+            </Box>
             <Space size='small' />
           </motion.div>
         )}
       </AnimatePresence>
       <Space size='medium' />
       {connection && (
-        <>
-          <StyledDeviceList>
+        <Stack direction='column'>
+          <Box
+            component='ul'
+            sx={{
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+            }}
+          >
             {devices.length > 0 ? (
               devices.map((device, index) => <li key={index}>{device.name}</li>)
             ) : (
               <li>No devices found</li>
             )}
-          </StyledDeviceList>
+          </Box>
           <Space size='medium' />
-        </>
+        </Stack>
       )}
-      <Button
-        style={{
-          width: 'fit-content',
-          alignSelf: 'center',
-        }}
-        onClick={onConnect}
-        disabled={loading}
-      >
-        {loading ? (
-          <Spinner />
-        ) : connection ? (
-          <strong>Disconnect</strong>
-        ) : (
-          <strong>Connect</strong>
+      <Stack direction='column' alignItems='center'>
+        <Button variant='contained' onClick={onConnect} disabled={loading}>
+          <Typography>
+            {loading ? <Spinner /> : connection ? 'Disconnect' : 'Connect'}
+          </Typography>
+        </Button>
+        {error && (
+          <Stack direction='column'>
+            <Space size='small' />
+            <SettingsInfo style={{ color: 'red', textAlign: 'center' }}>
+              {error}
+            </SettingsInfo>
+          </Stack>
         )}
-      </Button>
-      {error && (
-        <>
-          <Space size='small' />
-          <SettingsInfo style={{ color: 'red', textAlign: 'center' }}>
-            {error}
-          </SettingsInfo>
-        </>
-      )}
-      <Space size='small' />
-    </SettingsTile>
+        <Space size='small' />
+      </Stack>
+    </Fields>
   );
 };

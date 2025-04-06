@@ -1,9 +1,8 @@
-import styled from 'styled-components';
-import { ImageItem } from '../types';
+import { Box, Typography } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState } from 'react';
 import { faCheck, faImage } from '@fortawesome/free-solid-svg-icons';
-import { Image, ImageSize } from './Image';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   autoUpdate,
   flip,
@@ -16,8 +15,9 @@ import {
   useInteractions,
   useTransitionStyles,
 } from '@floating-ui/react';
-import { motion } from 'framer-motion';
+import { Image, ImageSize } from './Image';
 import { StackedImage } from './StackedImage';
+import { ImageItem } from '../types';
 
 interface ImageThumbnailTileProps {
   item: ImageItem;
@@ -27,15 +27,6 @@ interface ImageThumbnailTileProps {
   onClick?: () => void;
 }
 
-const StyledImageThumbnailTile = styled.div`
-  position: relative;
-`;
-
-const StyledImageThumbnailTileImage = styled.div`
-  height: 40px;
-  width: 40px;
-`;
-
 const ImageThumbnailTile: React.FC<ImageThumbnailTileProps> = ({
   item,
   selected,
@@ -44,42 +35,25 @@ const ImageThumbnailTile: React.FC<ImageThumbnailTileProps> = ({
   onClick,
 }) => {
   return (
-    <StyledImageThumbnailTile>
+    <Box position='relative'>
       <ImageMiniView item={item}>
-        <StyledImageThumbnailTileImage
+        <Box
+          height={40}
+          width={40}
           onClick={onClick}
-          style={{
-            cursor: onClick ? 'pointer' : 'default',
-          }}
+          sx={{ cursor: onClick ? 'pointer' : 'default' }}
         >
           <Image item={item} size={ImageSize.thumbnail} />
-        </StyledImageThumbnailTileImage>
+        </Box>
       </ImageMiniView>
       <SelectionOverlay
         selecting={selecting}
         selected={selected}
         onSelectedChange={onSelectedChange}
       />
-    </StyledImageThumbnailTile>
+    </Box>
   );
 };
-
-const StyledSelectionOverlay = motion(styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  z-index: 15;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  background: var(--overlay-background);
-  color: var(--overlay-color);
-`);
 
 interface SelectionOverlayProps {
   selecting?: boolean;
@@ -93,17 +67,29 @@ const SelectionOverlay: React.FC<SelectionOverlayProps> = ({
   onSelectedChange,
 }) => {
   return (
-    <StyledSelectionOverlay
+    <Box
+      component={motion.div}
       initial={{ opacity: 0 }}
       animate={{ opacity: selected ? 1 : 0 }}
-      style={{
+      onClick={() => onSelectedChange?.(!selected)}
+      sx={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 15,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: 'var(--overlay-background)',
+        color: 'var(--overlay-color)',
         pointerEvents: selecting ? 'auto' : 'none',
         cursor: selecting ? 'pointer' : 'default',
       }}
-      onClick={() => onSelectedChange?.(!selected)}
     >
       <FontAwesomeIcon icon={faCheck} />
-    </StyledSelectionOverlay>
+    </Box>
   );
 };
 
@@ -111,20 +97,6 @@ interface ImageMiniViewProps extends React.HTMLAttributes<HTMLDivElement> {
   item: ImageItem;
   children: React.ReactNode;
 }
-
-const StyledImageMiniView = styled.div``;
-
-const StyledImageMiniViewContent = motion(styled.div``);
-
-const StyledImageMiniViewImage = styled.div`
-  width: 160px;
-
-  box-shadow: 0 0 10px var(--overlay-background);
-  border: 1px solid var(--button-color);
-
-  z-index: 20;
-  pointer-events: none;
-`;
 
 const ImageMiniView: React.FC<ImageMiniViewProps> = ({ item, children }) => {
   const [hovered, setHovered] = useState(false);
@@ -140,9 +112,7 @@ const ImageMiniView: React.FC<ImageMiniViewProps> = ({ item, children }) => {
         alignmentAxis: -rects.floating.width + 10,
       })),
       flip(),
-      shift({
-        padding: 8,
-      }),
+      shift({ padding: 8 }),
     ],
     whileElementsMounted: autoUpdate,
   });
@@ -165,30 +135,38 @@ const ImageMiniView: React.FC<ImageMiniViewProps> = ({ item, children }) => {
   ]);
 
   return (
-    <StyledImageMiniView>
-      <StyledImageMiniViewContent
+    <Box>
+      <Box
+        component={motion.div}
         ref={refs.setReference}
         {...getReferenceProps()}
-        style={{
+        sx={{
           position: 'relative',
           zIndex: hovered ? 10 : 0,
-          scale: hovered ? 1.4 : 1,
+          transform: hovered ? 'scale(1.4)' : 'scale(1)',
           boxShadow: hovered ? '0 0 10px rgba(40, 50, 60, 0.75)' : 'none',
         }}
       >
         {children}
-      </StyledImageMiniViewContent>
+      </Box>
       {isMounted && (
-        <StyledImageMiniViewImage
+        <Box
           ref={refs.setFloating}
           {...getFloatingProps()}
-          style={{ ...floatingStyles, ...styles }}
+          sx={{
+            width: 160,
+            boxShadow: '0 0 10px var(--overlay-background)',
+            border: '1px solid var(--button-color)',
+            zIndex: 20,
+            pointerEvents: 'none',
+            ...floatingStyles,
+            ...styles,
+          }}
         >
-          {/* could also be full */}
           <StackedImage item={item} size={ImageSize.preview} playable />
-        </StyledImageMiniViewImage>
+        </Box>
       )}
-    </StyledImageMiniView>
+    </Box>
   );
 };
 
@@ -199,22 +177,6 @@ export interface ImageGridProps {
   onClickTile?: (item: ImageItem) => void;
 }
 
-const StyledImageGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-`;
-
-const StyledNoImages = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  margin: 16px 0px;
-
-  columns: 1 / -1;
-`;
-
 export const ImageGrid: React.FC<ImageGridProps> = ({
   images,
   selected,
@@ -222,14 +184,20 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
   onClickTile,
 }) => {
   return images.length === 0 ? (
-    <StyledNoImages>
-      <h2>
+    <Box
+      display='flex'
+      flexDirection='column'
+      alignItems='center'
+      my={2}
+      sx={{ gridColumn: '1 / -1' }}
+    >
+      <Typography variant='h5'>
         <FontAwesomeIcon icon={faImage} />
-      </h2>
-      <p>No images have been added</p>
-    </StyledNoImages>
+      </Typography>
+      <Typography>No images have been added</Typography>
+    </Box>
   ) : (
-    <StyledImageGrid>
+    <Box display='flex' flexWrap='wrap' width='100%'>
       {images.map((item, index) => (
         <ImageThumbnailTile
           key={index}
@@ -246,6 +214,6 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
           onClick={onClickTile ? () => onClickTile(item) : undefined}
         />
       ))}
-    </StyledImageGrid>
+    </Box>
   );
 };

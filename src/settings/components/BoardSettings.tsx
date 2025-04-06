@@ -1,33 +1,36 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { SettingsTile, SettingsDescription, ToggleTile } from '../../common';
+import { Fields, SettingsDescription, ToggleCard } from '../../common';
 import { useSetting } from '../SettingsProvider';
 import { faVolumeMute, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
+import { Typography } from '@mui/material';
 
 export const BoardSettings = () => {
   const [highRes, setHighRes] = useSetting('highRes');
   const [videoSound, setVideoSound] = useSetting('videoSound');
 
   return (
-    <SettingsTile label='Board'>
+    <Fields label='Board'>
       <SettingsDescription>How the board is rendered</SettingsDescription>
-      <ToggleTile
+      <ToggleCard
         value={highRes}
         onClick={() => setHighRes(!highRes)}
         trailing={highRes ? '🦄' : '🐴'}
       >
-        <strong>High resolution</strong>
-        <p>Use high resolution images/videos</p>
-      </ToggleTile>
-      <ToggleTile
+        <Typography variant='subtitle2'>High resolution</Typography>
+        <Typography variant='caption'>
+          Use high resolution images/videos
+        </Typography>
+      </ToggleCard>
+      <ToggleCard
         value={videoSound}
         onClick={() => setVideoSound(!videoSound)}
         trailing={
           <FontAwesomeIcon icon={videoSound ? faVolumeUp : faVolumeMute} />
         }
       >
-        <strong>Video sound</strong>
-        <p>Enable sound for videos</p>
-      </ToggleTile>
-    </SettingsTile>
+        <Typography variant='subtitle2'>Video sound</Typography>
+        <Typography variant='caption'>Enable sound for videos</Typography>
+      </ToggleCard>
+    </Fields>
   );
 };

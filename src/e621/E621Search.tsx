@@ -1,30 +1,16 @@
-import styled from 'styled-components';
 import {
-  Dropdown,
-  IconButton,
   Measure,
   SettingsLabel,
-  Slider,
   Space,
-  TextInput,
-  Surrounded,
-  ToggleTile,
+  ToggleCard,
   ToggleTileType,
-  TextArea,
   SettingsInfo,
-  Spinner,
-  Button,
-  StyledMeasure,
   SettingsDescription,
+  SettingsGrid,
+  SettingsRow,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faInfoCircle,
-  faSync,
-  faUser,
-} from '@fortawesome/free-solid-svg-icons';
 import { useImages } from '../settings';
 import {
   E621SortOrder,
@@ -34,11 +20,19 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { E621CredentialsInput } from './E621Credentials';
 import { defaultTransition } from '../utils';
-
-const StyledE621Search = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-`;
+import {
+  Button,
+  CircularProgress,
+  IconButton,
+  MenuItem,
+  Select,
+  Slider,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import { Info, Sync, Person } from '@mui/icons-material';
 
 export const E621Search = () => {
   const [loading, setLoading] = useState(false);
@@ -93,146 +87,161 @@ export const E621Search = () => {
   }, [credentials, setCredentials, addingCredentials, setAddingCredentials]);
 
   return (
-    <StyledE621Search>
+    <SettingsGrid sx={{ gap: 2 }}>
       <SettingsDescription>Add images from e621</SettingsDescription>
-      <SettingsLabel htmlFor='tags'>Tags</SettingsLabel>
-      <TextInput
-        id='tags'
-        value={tags}
-        onChange={setTags}
-        onSubmit={runSearch}
-        placeholder='Enter tags...'
-        style={{ gridColumn: '2 / -1' }}
-        disabled={loading}
-      />
-      <Space size='medium' />
-      <SettingsLabel htmlFor='order'>Order</SettingsLabel>
-      <Dropdown
-        id='order'
-        value={order}
-        onChange={(value: string) => setOrder(value as E621SortOrder)}
-        options={Object.values(E621SortOrder).map(value => ({
-          value,
-          label: e621SortOrderLabels[value],
-        }))}
-        style={{ gridColumn: '2 / -1' }}
-        disabled={loading}
-      />
-      <Space size='medium' />
-      <SettingsLabel htmlFor='limit'>Count</SettingsLabel>
-      <Slider
-        id='limit'
-        value={limit}
-        onChange={setLimit}
-        min={1}
-        max={200}
-        step={1}
-      />
-      <Measure value={limit} chars={3} unit='posts' />
-      <Space size='medium' />
-      <SettingsLabel htmlFor='minScore'>Score</SettingsLabel>
-      <Slider
-        id='minScore'
-        value={minScore ?? -1}
-        onChange={value => {
-          setMinScore(value === -1 ? undefined : value);
-        }}
-        min={-1}
-        max={50}
-        step={1}
-      />
-      {minScore == undefined || minScore === -1 ? (
-        <StyledMeasure>
-          <strong>any</strong>
-        </StyledMeasure>
-      ) : (
-        <Measure value={minScore ?? -1} chars={3} unit='votes' />
-      )}
-      <Space size='medium' />
-      <ToggleTile
-        style={{ opacity: 1 }}
-        type={ToggleTileType.check}
-        value={!!credentials || addingCredentials}
-        onClick={onToggleCredentials}
-      >
-        <strong>Credentials</strong>
-        <p>Use your e621 account to access restricted content</p>
-      </ToggleTile>
-      <AnimatePresence>
-        {/* 
-        Toggling this rapidly will lead to it being stuck open. 
-        This is a bug in framer-motion, and tracked here: https://github.com/framer/motion/issues/2554
-      */}
-        {addingCredentials && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            style={{ gridColumn: '1 / -1' }}
-            transition={defaultTransition}
-          >
-            <E621CredentialsInput
-              service={e621Service}
-              onSaved={credentials => {
-                setCredentials(credentials);
-                setAddingCredentials(false);
-                if (!blacklist || !blacklist.length) {
-                  e621Service.getBlacklist(credentials).then(setBlacklist);
-                }
-              }}
-              disabled={loading}
-            />
-          </motion.div>
-        )}
-        {credentials && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            style={{ gridColumn: '1 / -1' }}
-            transition={defaultTransition}
-          >
-            <SettingsInfo>
-              <p style={{ display: 'inline' }}>
-                You are logged in as <strong>{credentials.username}</strong>{' '}
-                <FontAwesomeIcon icon={faUser} />
-              </p>
-            </SettingsInfo>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <ToggleTile
+      <SettingsRow>
+        <SettingsLabel htmlFor='tags'>Tags</SettingsLabel>
+        <TextField
+          id='tags'
+          value={tags}
+          onChange={e => setTags(e.target.value)}
+          placeholder='Enter tags...'
+          disabled={loading}
+          onSubmit={runSearch}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              runSearch();
+            }
+          }}
+          fullWidth
+          size='small'
+        />
+      </SettingsRow>
+      <SettingsRow>
+        <SettingsLabel htmlFor='order'>Order</SettingsLabel>
+        <Select
+          id='order'
+          placeholder='Order'
+          value={order}
+          onChange={event => setOrder(event.target.value as E621SortOrder)}
+          disabled={loading}
+          fullWidth
+        >
+          {Object.values(E621SortOrder).map(value => (
+            <MenuItem key={value} value={value}>
+              {e621SortOrderLabels[value]}
+            </MenuItem>
+          ))}
+        </Select>
+      </SettingsRow>
+      <SettingsRow>
+        <SettingsLabel htmlFor='limit'>Count</SettingsLabel>
+        <Slider
+          id='limit'
+          value={limit}
+          onChange={(_, value) => setLimit(value as number)}
+          min={1}
+          max={200}
+          step={1}
+        />
+        <Measure value={limit} chars={3} unit='posts' />
+      </SettingsRow>
+      <SettingsRow>
+        <SettingsLabel htmlFor='minScore'>Score</SettingsLabel>
+        <Slider
+          id='minScore'
+          value={minScore ?? -1}
+          onChange={(_, value) => {
+            setMinScore(value === -1 ? undefined : (value as number));
+          }}
+          min={-1}
+          max={50}
+          step={1}
+        />
+        <Measure
+          value={minScore ?? -1}
+          chars={minScore == undefined || minScore === -1 ? 0 : 3}
+          unit={minScore == undefined || minScore === -1 ? 'any' : 'votes'}
+        />
+      </SettingsRow>
+      <Stack>
+        <ToggleCard
+          style={{ opacity: 1 }}
+          type={ToggleTileType.check}
+          value={!!credentials || addingCredentials}
+          onClick={onToggleCredentials}
+        >
+          <Typography variant='subtitle2'>Credentials</Typography>
+          <Typography variant='caption'>
+            Use your e621 account to access restricted content
+          </Typography>
+        </ToggleCard>
+        <AnimatePresence>
+          {addingCredentials && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={defaultTransition}
+            >
+              <E621CredentialsInput
+                service={e621Service}
+                onSaved={credentials => {
+                  setCredentials(credentials);
+                  setAddingCredentials(false);
+                  if (!blacklist || !blacklist.length) {
+                    e621Service.getBlacklist(credentials).then(setBlacklist);
+                  }
+                }}
+                disabled={loading}
+              />
+            </motion.div>
+          )}
+          {credentials && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={defaultTransition}
+            >
+              <SettingsInfo>
+                <Typography
+                  variant='caption'
+                  component='p'
+                  sx={{ display: 'inline' }}
+                >
+                  You are logged in as <strong>{credentials.username}</strong>{' '}
+                </Typography>
+                <Person fontSize='small' style={{ verticalAlign: 'middle' }} />
+              </SettingsInfo>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Stack>
+      <ToggleCard
         style={{ opacity: 1 }}
         type={ToggleTileType.check}
         value={enableBlacklist}
         onClick={() => setEnableBlacklist(!enableBlacklist)}
       >
-        <strong>Enable blacklist</strong>
-        <p>Hide posts with specific tags</p>
-      </ToggleTile>
+        <Typography variant='subtitle2'>Enable blacklist</Typography>
+        <Typography variant='caption'>Hide posts with specific tags</Typography>
+      </ToggleCard>
       <AnimatePresence>
         {enableBlacklist && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ gridColumn: '1 / -1' }}
             transition={defaultTransition}
           >
-            <Surrounded
-              trailing={
-                <>
+            <Stack direction='row' justifyContent={'space-between'}>
+              <SettingsDescription>Blacklist</SettingsDescription>
+              <Stack direction='row'>
+                <Tooltip title='View blacklist help'>
                   <IconButton
-                    style={{ fontSize: '1rem' }}
-                    tooltip='View blacklist help'
+                    size='small'
                     onClick={() =>
                       window.open('https://e621.net/help/blacklist')
                     }
-                    icon={<FontAwesomeIcon icon={faInfoCircle} />}
-                  />
+                  >
+                    <Info />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title='Download blacklist from e621'>
                   <IconButton
-                    style={{ fontSize: '1rem' }}
-                    tooltip='Download blacklist from e621'
+                    size='small'
                     onClick={
                       credentials
                         ? () =>
@@ -241,41 +250,48 @@ export const E621Search = () => {
                               .then(setBlacklist)
                         : undefined
                     }
-                    icon={<FontAwesomeIcon icon={faSync} />}
-                  />
-                </>
-              }
-            >
-              <SettingsInfo>Blacklist</SettingsInfo>
-            </Surrounded>
-            <TextArea
-              style={{ resize: 'vertical' }}
+                    disabled={!credentials}
+                  >
+                    <Sync />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            </Stack>
+            <TextField
+              multiline
+              minRows={3}
+              maxRows={10}
+              sx={{ resize: 'vertical' }}
               value={blacklist?.join('\n') ?? ''}
-              onChange={(value: string) =>
+              onChange={event =>
                 setBlacklist(
-                  value
+                  event.target.value
                     .split('\n')
                     .map(tag => tag.trim())
                     .filter(tag => tag)
                 )
               }
               placeholder='Enter tags...'
+              fullWidth
             />
           </motion.div>
         )}
       </AnimatePresence>
-      <Space size='medium' />
       <Button
         onClick={runSearch}
+        variant='contained'
         disabled={loading}
-        style={{
-          gridColumn: '1 / -1',
+        sx={{
           justifySelf: 'center',
         }}
       >
-        {loading ? <Spinner /> : <strong>Search & Add</strong>}
+        {loading ? (
+          <CircularProgress size={24} />
+        ) : (
+          <Typography>Search & Add</Typography>
+        )}
       </Button>
       <Space size='medium' />
-    </StyledE621Search>
+    </SettingsGrid>
   );
 };

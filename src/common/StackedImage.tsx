@@ -1,21 +1,6 @@
-import styled from 'styled-components';
+import { Box } from '@mui/material';
 import { Image, ImageProps, ImageSize } from './Image';
 import { useState, useCallback, useEffect } from 'react';
-
-const StyledStackedImage = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
-
-  // the first child provides the size of the container
-  & > *:not(:first-child) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
-`;
 
 export const StackedImage: React.FC<ImageProps> = ({
   item,
@@ -27,11 +12,11 @@ export const StackedImage: React.FC<ImageProps> = ({
 
   const handleLoadPreview = useCallback(() => {
     setIsPreviewLoaded(true);
-  }, [setIsPreviewLoaded]);
+  }, []);
 
   const handleLoadFull = useCallback(() => {
     setIsFullLoaded(true);
-  }, [setIsFullLoaded]);
+  }, []);
 
   useEffect(() => {
     setIsPreviewLoaded(false);
@@ -39,7 +24,22 @@ export const StackedImage: React.FC<ImageProps> = ({
   }, [item]);
 
   return (
-    <StyledStackedImage>
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+
+        // the first child provides the size of the container
+        '& > *:not(:first-child)': {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        },
+      }}
+    >
       <Image
         {...props}
         item={item}
@@ -49,18 +49,20 @@ export const StackedImage: React.FC<ImageProps> = ({
           visibility: isPreviewLoaded || isFullLoaded ? 'hidden' : 'inherit',
         }}
       />
+
       {[ImageSize.preview, ImageSize.full].includes(size) && (
         <Image
           {...props}
           item={item}
           size={ImageSize.preview}
+          onLoad={handleLoadPreview}
           style={{
             ...props.style,
             visibility: !isPreviewLoaded || isFullLoaded ? 'hidden' : 'inherit',
           }}
-          onLoad={handleLoadPreview}
         />
       )}
+
       {size === ImageSize.full && (
         <Image
           {...props}
@@ -74,6 +76,6 @@ export const StackedImage: React.FC<ImageProps> = ({
           }}
         />
       )}
-    </StyledStackedImage>
+    </Box>
   );
 };

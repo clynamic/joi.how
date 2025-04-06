@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { Tab, Tabs } from '@mui/material';
 
 export interface TabBarProps {
   tabs: Tab[];
@@ -12,59 +12,49 @@ export interface Tab {
   disabled?: boolean;
 }
 
-const StyledTabBar = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-`;
-
-const StyledTab = styled.button<{
-  $active?: boolean;
-  $index?: number;
-}>`
-  width: fit-content;
-  padding: 4px 8px;
-  line-height: 100%;
-  font-size: 1rem;
-
-  background: ${({ $active }) =>
-    $active ? 'var(--legend-background)' : 'var(--section-background)'};
-  color: var(--button-color);
-
-  border-left: ${({ $index: index }) =>
-    index && index > 0 ? '1px solid currentColor' : 'unset'};
-
-  cursor: pointer;
-
-  transition: var(--hover-transition);
-
-  &:hover:not(:disabled) {
-    background: var(--primary);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
 export const TabBar: React.FC<TabBarProps> = ({
   tabs,
   current: activeTab,
   onChange: setActiveTab,
 }) => {
   return (
-    <StyledTabBar>
-      {tabs.map((tab, i) => (
-        <StyledTab
-          key={tab.id}
-          $active={tab.id === activeTab}
-          onClick={() => setActiveTab(tab.id)}
-          disabled={tab.disabled}
-          $index={i}
-        >
-          {tab.content}
-        </StyledTab>
+    <Tabs
+      variant='scrollable'
+      value={activeTab}
+      onChange={(_, id) => setActiveTab(id)}
+      sx={{
+        minHeight: 'unset',
+      }}
+    >
+      {tabs.map(({ id, content, disabled }) => (
+        <Tab
+          key={id}
+          label={content}
+          value={id}
+          disabled={disabled}
+          sx={{
+            minHeight: 'unset',
+            minWidth: 'unset',
+            background:
+              activeTab === id
+                ? 'var(--legend-background)'
+                : 'var(--section-background)',
+
+            fontSize: '1rem',
+            lineHeight: '100%',
+
+            '&.MuiButtonBase-root': {
+              width: 'fit-content',
+              padding: '4px 8px',
+              textTransform: 'none',
+
+              '&.Mui-selected': {
+                color: 'var(--button-color)',
+              },
+            },
+          }}
+        />
       ))}
-    </StyledTabBar>
+    </Tabs>
   );
 };

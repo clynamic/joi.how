@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { Typography } from '@mui/material';
 
 export interface MeasureProps {
   value: number;
@@ -6,24 +6,23 @@ export interface MeasureProps {
   unit?: string;
 }
 
-export const StyledMeasure = styled.span`
-  white-space: nowrap;
-  text-align: end;
-  font-family: 'Courier New', Courier, monospace;
-`;
-
 export const Measure: React.FC<MeasureProps> = ({ value, chars, unit }) => {
   return (
-    <StyledMeasure>
-      <strong>
-        {value
-          .toString()
-          .split('')
-          .slice(0, chars)
-          .join('')
-          .padStart(chars, '\u00A0')}{' '}
-        {unit ?? ''}
-      </strong>
-    </StyledMeasure>
+    <Typography
+      variant={'caption'}
+      whiteSpace={'nowrap'}
+      textAlign={'end'}
+      fontFamily={'Courier New, Courier, monospace'}
+      fontWeight={'bold'}
+      sx={{ width: '100%' }}
+    >
+      {value
+        .toString()
+        .split('')
+        .slice(0, chars)
+        .join('')
+        .padStart(chars, '\u00A0')}{' '}
+      {unit ?? ''}
+    </Typography>
   );
 };

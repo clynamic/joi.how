@@ -1,12 +1,13 @@
 import { GameEvent, GameEventDescriptions, GameEventLabels } from '../../types';
 import { useCallback } from 'react';
 import {
-  SettingsTile,
+  Fields,
   SettingsDescription,
-  ToggleTile,
+  ToggleCard,
   ToggleTileType,
 } from '../../common';
 import { useSetting } from '../SettingsProvider';
+import { Typography } from '@mui/material';
 
 export const EventSettings = () => {
   const [events, setEvents] = useSetting('events');
@@ -23,24 +24,28 @@ export const EventSettings = () => {
   );
 
   return (
-    <SettingsTile label={'Events'}>
+    <Fields label={'Events'}>
       <SettingsDescription>
         Check the events you want to occur during the game
       </SettingsDescription>
       {Object.keys(GameEvent).map(key => {
         const event = GameEvent[key as keyof typeof GameEvent];
         return (
-          <ToggleTile
+          <ToggleCard
             key={event}
             value={events.includes(event)}
             onClick={() => toggleEvent(event)}
             type={ToggleTileType.check}
           >
-            <strong>{GameEventLabels[event]}</strong>
-            <p>{GameEventDescriptions[event]}</p>
-          </ToggleTile>
+            <Typography variant='subtitle2'>
+              {GameEventLabels[event]}
+            </Typography>
+            <Typography variant='caption'>
+              {GameEventDescriptions[event]}
+            </Typography>
+          </ToggleCard>
         );
       })}
-    </SettingsTile>
+    </Fields>
   );
 };

@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 
-import styled from 'styled-components';
+import { Box } from '@mui/material';
 import { ImageItem } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCircleExclamation } from '@fortawesome/free-solid-svg-icons';
@@ -24,31 +24,6 @@ export interface ImageProps
   loud?: boolean;
   randomStart?: boolean;
 }
-
-const StyledImage = styled.img`
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  user-select: none;
-`;
-
-const StyledVideo = styled.video`
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  user-select: none;
-`;
-
-const StyledImageError = styled.div`
-  display: block;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
 
 export const Image: React.FC<ImageProps> = ({
   item,
@@ -93,15 +68,24 @@ export const Image: React.FC<ImageProps> = ({
 
   if (!url) {
     return (
-      <StyledImageError>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+        }}
+      >
         <FontAwesomeIcon icon={faFileCircleExclamation} />
-      </StyledImageError>
+      </Box>
     );
   }
 
   if (playing) {
     return (
-      <StyledVideo
+      <Box
+        component='video'
         ref={videoRef}
         src={url}
         alt={`Video from ${item.service} with id ${item.id}`}
@@ -118,15 +102,30 @@ export const Image: React.FC<ImageProps> = ({
           }
           onLoadedMetadata?.(event);
         }}
+        sx={{
+          display: 'block',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          userSelect: 'none',
+        }}
         {...rest}
       />
     );
   }
 
   return (
-    <StyledImage
+    <Box
+      component='img'
       src={url}
       alt={`Image from ${item.service} with id ${item.id}`}
+      sx={{
+        display: 'block',
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        userSelect: 'none',
+      }}
       {...rest}
     />
   );

@@ -1,15 +1,25 @@
-import { PropsWithChildren } from 'react';
-import styled from 'styled-components';
+import { ReactNode } from 'react';
+import { Typography, TypographyProps } from '@mui/material';
 
-const StyledSettingsDescription = styled.p`
-  line-height: 1.1;
+export interface SettingsDescriptionProps
+  extends TypographyProps<'p', { component?: 'p' }> {
+  children: ReactNode;
+}
 
-  grid-column: 1 / -1;
-  margin: 10px 0px;
-`;
-
-export const SettingsDescription: React.FC<PropsWithChildren> = ({
+export const SettingsDescription: React.FC<SettingsDescriptionProps> = ({
   children,
+  ...props
 }) => {
-  return <StyledSettingsDescription>{children}</StyledSettingsDescription>;
+  return (
+    <Typography
+      component='p'
+      lineHeight={1.1}
+      sx={{
+        margin: '10px 0',
+      }}
+      {...props}
+    >
+      {children}
+    </Typography>
+  );
 };

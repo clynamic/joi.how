@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  SettingsTile,
+  Fields,
   SettingsDescription,
-  ToggleTile,
+  ToggleCard,
   ToggleTileType,
 } from '../../common';
 import {
@@ -18,17 +18,18 @@ import {
   faOtter,
   faPowerOff,
 } from '@fortawesome/free-solid-svg-icons';
+import { Typography } from '@mui/material';
 
 export const HypnoSettings = () => {
   const [hypno, setHypno] = useSetting('hypno');
 
   return (
-    <SettingsTile label={'Hypno'} role='radiogroup'>
+    <Fields label={'Hypno'} role='radiogroup'>
       <SettingsDescription>Choose a hypno text set</SettingsDescription>
       {Object.keys(GameHypnoType).map(key => {
         const current = GameHypnoType[key as keyof typeof GameHypnoType];
         return (
-          <ToggleTile
+          <ToggleCard
             key={current}
             value={hypno === current}
             onClick={() => setHypno(current)}
@@ -48,11 +49,15 @@ export const HypnoSettings = () => {
               }
             })()}
           >
-            <strong>{GameHypnoLabels[current]}</strong>
-            <p>{GameHypnoDescriptions[current]}</p>
-          </ToggleTile>
+            <Typography variant='subtitle2'>
+              {GameHypnoLabels[current]}
+            </Typography>
+            <Typography variant='caption'>
+              {GameHypnoDescriptions[current]}
+            </Typography>
+          </ToggleCard>
         );
       })}
-    </SettingsTile>
+    </Fields>
   );
 };

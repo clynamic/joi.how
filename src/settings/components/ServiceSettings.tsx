@@ -1,5 +1,4 @@
-import styled from 'styled-components';
-import { SettingsTile, TabBar } from '../../common';
+import { Fields, TabBar } from '../../common';
 import { E621Search } from '../../e621';
 import { useState } from 'react';
 import { WalltakerSearch } from '../../walltaker';
@@ -13,18 +12,17 @@ const tabs: Record<string, React.ReactNode> = {
 
 type Tab = keyof typeof tabs;
 
-const TabSettingsTile = styled(SettingsTile)`
-  & > legend {
-    background: var(--card-background);
-    padding: 0;
-  }
-`;
-
 export const ServiceSettings = () => {
   const [activeTab, setActiveTab] = useState<Tab>('e621');
 
   return (
-    <TabSettingsTile
+    <Fields
+      sx={{
+        '& > legend': {
+          background: 'var(--card-background)',
+          padding: 0,
+        },
+      }}
       label={
         <TabBar
           tabs={[
@@ -38,6 +36,6 @@ export const ServiceSettings = () => {
       }
     >
       {tabs[activeTab]}
-    </TabSettingsTile>
+    </Fields>
   );
 };

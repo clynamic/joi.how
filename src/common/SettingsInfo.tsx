@@ -1,25 +1,27 @@
-import styled from 'styled-components';
+import { Typography, TypographyProps } from '@mui/material';
+import { ReactNode } from 'react';
 
 export interface SettingsDescriptionProps
-  extends React.HTMLAttributes<HTMLElement> {
-  children: React.ReactNode;
+  extends TypographyProps<'em', { component?: 'em' }> {
+  children: ReactNode;
 }
-
-const StyledSettingsInfo = styled.em`
-  color: #9495ad; // TODO: Use CSS variable
-  font-size: 0.8rem;
-
-  line-height: 1.1;
-
-  grid-column: 1 / -1;
-  margin: 10px 0px;
-
-  align-items: center;
-`;
 
 export const SettingsInfo: React.FC<SettingsDescriptionProps> = ({
   children,
   ...props
 }) => {
-  return <StyledSettingsInfo {...props}>{children}</StyledSettingsInfo>;
+  return (
+    <Typography
+      component='em'
+      fontSize={'0.8rem'}
+      lineHeight={1.1}
+      sx={{
+        color: '#9495ad', // TODO: Use CSS variable
+        margin: '10px 0',
+      }}
+      {...props}
+    >
+      {children}
+    </Typography>
+  );
 };
