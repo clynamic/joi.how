@@ -1,6 +1,13 @@
 import { Composer, Transformer } from '../Composer';
 import { GameContext, Pipe } from '../State';
-import { GameAction, dispatchAction } from './Action';
+import {
+  ActionContext,
+  GameAction,
+  assembleActionKey,
+  disassembleActionKey,
+  dispatchAction,
+  getActions,
+} from './Action';
 
 const PLUGIN_NAMESPACE = 'core.scheduler';
 
@@ -21,54 +28,69 @@ export type SchedulerContext = {
 
 export const schedulerPipe: Pipe = ({ state, context }) => {
   const deltaTime = context.deltaTime;
+  const stateComposer = new Composer(state);
 
-  // TODO: scheduled actions should be stored in the state, not context.
-  // Use context to store scheduled scheduled actions, then transfer them to state when they arrive here.
-  const contextComposer = new Composer<GameContext>(context);
+  const { scheduled = [] } =
+    stateComposer.from<SchedulerState>(PLUGIN_NAMESPACE);
 
-  const scheduled =
-    contextComposer.from<SchedulerState>(PLUGIN_NAMESPACE).scheduled ?? [];
+  const { actions } = getActions(
+    context,
+    assembleActionKey(PLUGIN_NAMESPACE, '*'),
+    { consume: true }
+  );
 
-  const remaining: ScheduledAction[] = [];
-  const actionsToDispatch: GameAction[] = [];
+  const updatedSchedule = [...scheduled];
+  const toDispatch: GameAction[] = [];
 
-  for (const entry of scheduled) {
-    const nextTime = entry.duration - deltaTime;
-    if (nextTime <= 0) {
-      actionsToDispatch.push(entry.action);
-    } else {
-      remaining.push({ ...entry, duration: nextTime });
+  for (const action of actions) {
+    const key = disassembleActionKey(action.type).key;
+
+    if (key === 'schedule') {
+      updatedSchedule.push(action.payload);
+    }
+
+    if (key === 'cancel') {
+      const id = action.payload;
+      const idx = updatedSchedule.findIndex(s => s.id === id);
+      if (idx !== -1) updatedSchedule.splice(idx, 1);
     }
   }
 
-  contextComposer.setIn(PLUGIN_NAMESPACE, { scheduled: remaining });
+  const remaining: ScheduledAction[] = [];
 
-  for (const action of actionsToDispatch) {
-    contextComposer.apply(dispatchAction, action);
+  for (const entry of updatedSchedule) {
+    const time = entry.duration - deltaTime;
+    if (time <= 0) {
+      toDispatch.push(entry.action);
+    } else {
+      remaining.push({ ...entry, duration: time });
+    }
   }
+
+  stateComposer.setIn(PLUGIN_NAMESPACE, { scheduled: remaining });
+
+  const contextComposer = new Composer(context);
+  for (const a of toDispatch) contextComposer.apply(dispatchAction, a);
 
   contextComposer.setIn(PLUGIN_NAMESPACE, {
     schedule: (action: ScheduledAction) =>
-      Composer.build<GameContext>(c =>
-        c.setIn(PLUGIN_NAMESPACE, {
-          scheduled: [
-            ...(c.from<SchedulerState>(PLUGIN_NAMESPACE).scheduled ?? []),
-            action,
-          ],
+      Composer.build<GameContext>(ctx =>
+        ctx.apply(ctx.from<ActionContext>('core.actions').dispatch, {
+          type: assembleActionKey(PLUGIN_NAMESPACE, 'schedule'),
+          payload: action,
         })
       ),
     cancel: (id: string) =>
-      Composer.build<GameContext>(c =>
-        c.setIn(PLUGIN_NAMESPACE, {
-          scheduled: (
-            c.from<SchedulerState>(PLUGIN_NAMESPACE).scheduled ?? []
-          ).filter(s => s.id !== id),
+      Composer.build<GameContext>(ctx =>
+        ctx.apply(ctx.from<ActionContext>('core.actions').dispatch, {
+          type: assembleActionKey(PLUGIN_NAMESPACE, 'cancel'),
+          payload: id,
         })
       ),
   });
 
   return {
-    state: state,
+    state: stateComposer.get(),
     context: contextComposer.get(),
   };
 };
