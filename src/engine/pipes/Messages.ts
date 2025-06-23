@@ -1,6 +1,6 @@
 import { GameContext, Pipe } from '../State';
 import { Composer, Transformer } from '../Composer';
-import { GameAction } from './Action';
+import { ActionContext, assembleActionKey, GameAction } from './Action';
 
 export interface GameMessagePrompt {
   title: string;
@@ -20,11 +20,7 @@ export type PartialGameMessage = Partial<GameMessage> & Pick<GameMessage, 'id'>;
 const PLUGIN_NAMESPACE = 'core.messages';
 
 export type MessageContext = {
-  pendingMessages?: PartialGameMessage[];
-  sendMessage: Transformer<
-    [Partial<GameMessage> & { id: string }],
-    GameContext
-  >;
+  sendMessage: Transformer<[PartialGameMessage], GameContext>;
 };
 
 export type MessageState = {
@@ -40,8 +36,12 @@ export const messagesPipe: Pipe = ({ state, context }) => {
 
   const { messages = [], timers = {} } =
     stateComposer.from<MessageState>(PLUGIN_NAMESPACE);
-  const { pendingMessages = [] } =
-    contextComposer.from<MessageContext>(PLUGIN_NAMESPACE);
+
+  const { handle } = contextComposer.from<ActionContext>('core.actions');
+
+  const { actions } = handle(context, `${PLUGIN_NAMESPACE}/sendMessage`, {
+    consume: true,
+  });
 
   const updated: GameMessage[] = [];
   const updatedTimers: Record<string, number> = {};
@@ -59,17 +59,13 @@ export const messagesPipe: Pipe = ({ state, context }) => {
     }
   }
 
-  for (const patch of pendingMessages) {
+  for (const action of actions) {
+    const patch = action.payload as GameMessage;
     const existing = updated.find(m => m.id === patch.id);
-
     if (!existing && !patch.title) continue;
 
     const base = existing ?? { id: patch.id, title: patch.title! };
-
-    const merged: GameMessage = {
-      ...base,
-      ...patch,
-    };
+    const merged: GameMessage = { ...base, ...patch };
 
     const index = updated.findIndex(m => m.id === patch.id);
     if (index >= 0) updated[index] = merged;
@@ -86,15 +82,11 @@ export const messagesPipe: Pipe = ({ state, context }) => {
   });
 
   contextComposer.setIn(PLUGIN_NAMESPACE, {
-    pendingMessages: [],
     sendMessage: (msg: GameMessage) =>
-      Composer.build<MessageContext>(ctx =>
-        ctx.setIn(PLUGIN_NAMESPACE, {
-          pendingMessages: [
-            ...(ctx.from<MessageContext>(PLUGIN_NAMESPACE).pendingMessages ??
-              []),
-            msg,
-          ],
+      Composer.build<GameContext>(ctx =>
+        ctx.apply(ctx.from<ActionContext>('core.actions').dispatch, {
+          type: assembleActionKey(PLUGIN_NAMESPACE, 'sendMessage'),
+          payload: msg,
         })
       ),
   });
