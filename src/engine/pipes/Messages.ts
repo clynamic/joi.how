@@ -15,10 +15,12 @@ export interface GameMessage {
   duration?: number;
 }
 
+export type PartialGameMessage = Partial<GameMessage> & Pick<GameMessage, 'id'>;
+
 const PLUGIN_NAMESPACE = 'core.messages';
 
 export type MessageContext = {
-  pendingMessages?: (Partial<GameMessage> & Pick<GameMessage, 'id'>)[];
+  pendingMessages?: PartialGameMessage[];
   sendMessage: Transformer<
     [Partial<GameMessage> & { id: string }],
     GameContext

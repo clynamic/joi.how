@@ -3,7 +3,11 @@ import { GameEngineProvider } from './GameProvider';
 import { FpsDisplay } from './components/FpsDisplay';
 import { useCallback } from 'react';
 import { PipeValue } from '../engine';
-import { messagesPipe } from '../engine/pipes/Messages';
+import {
+  MessageContext,
+  messagesPipe,
+  PartialGameMessage,
+} from '../engine/pipes/Messages';
 import { GameMessages } from './components/GameMessages';
 import { PauseButton } from './components/Pause';
 import {
@@ -83,34 +87,35 @@ export const GamePage = () => {
     const composer = new Composer(context);
     const { sent } = composer.from<{ sent: boolean }>(MSG_TEST_NAMESPACE);
 
-    if (!sent) {
-      composer.focus('core', core =>
-        core.focus('messages', msg =>
-          msg.apply(msg.get().sendMessage, {
-            id: messageId,
-            title: 'Test Message',
-            description:
-              'This is a test message to demonstrate the message system.',
-            prompts: [
-              {
-                title: 'Acknowledge',
-                action: {
-                  type: assembleActionKey(
-                    MSG_TEST_NAMESPACE,
-                    'acknowledgeMessage'
-                  ),
-                },
-              },
-              {
-                title: 'Dismiss',
-                action: {
-                  type: assembleActionKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
-                },
-              },
-            ],
-          })
-        )
+    const send = (msg: PartialGameMessage) =>
+      composer.apply(
+        composer.from<{ sendMessage: MessageContext['sendMessage'] }>(
+          'core.messages'
+        ).sendMessage,
+        msg
       );
+
+    if (!sent) {
+      send({
+        id: messageId,
+        title: 'Test Message',
+        description:
+          'This is a test message to demonstrate the message system.',
+        prompts: [
+          {
+            title: 'Acknowledge',
+            action: {
+              type: assembleActionKey(MSG_TEST_NAMESPACE, 'acknowledgeMessage'),
+            },
+          },
+          {
+            title: 'Dismiss',
+            action: {
+              type: assembleActionKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+            },
+          },
+        ],
+      });
     }
 
     const { actions } = getActions(
@@ -122,65 +127,45 @@ export const GamePage = () => {
       const key = disassembleActionKey(action.type).key;
 
       if (key === 'acknowledgeMessage') {
-        composer.focus('core', core =>
-          core
-            .focus('scheduler', sched =>
-              sched.apply(
-                sched.from<SchedulerContext>('core.scheduler').schedule,
-                {
-                  duration: 2000,
-                  action: {
-                    type: assembleActionKey(
-                      MSG_TEST_NAMESPACE,
-                      'followupMessage'
-                    ),
-                  },
-                }
-              )
-            )
-            .focus('messages', msg =>
-              msg.apply(msg.get().sendMessage, {
-                id: messageId,
-                duration: 0,
-              })
-            )
-        );
+        const schedule =
+          composer.from<SchedulerContext>('core.scheduler').schedule;
+
+        composer.apply(schedule, {
+          duration: 2000,
+          action: {
+            type: assembleActionKey(MSG_TEST_NAMESPACE, 'followupMessage'),
+          },
+        });
+
+        send({
+          id: messageId,
+          duration: 0,
+        });
       }
 
       if (key === 'dismissMessage') {
-        composer.focus('core', core =>
-          core.focus('messages', msg =>
-            msg.apply(msg.get().sendMessage, {
-              id: messageId,
-              duration: 0,
-            })
-          )
-        );
+        send({
+          id: messageId,
+          duration: 0,
+        });
       }
 
       if (key === 'followupMessage') {
-        composer.focus('core', core =>
-          core.focus('messages', msg =>
-            msg.apply(msg.get().sendMessage, {
-              id: 'followup-message',
-              title: 'Follow-up Message',
-              description:
-                'This is a follow-up message after acknowledging the test message.',
-              prompts: [
-                {
-                  title: 'Close',
-                  action: {
-                    type: assembleActionKey(
-                      MSG_TEST_NAMESPACE,
-                      'dismissMessage'
-                    ),
-                    payload: { id: 'followup-message' },
-                  },
-                },
-              ],
-            })
-          )
-        );
+        send({
+          id: 'followup-message',
+          title: 'Follow-up Message',
+          description:
+            'This is a follow-up message after acknowledging the test message.',
+          prompts: [
+            {
+              title: 'Close',
+              action: {
+                type: assembleActionKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+                payload: { id: 'followup-message' },
+              },
+            },
+          ],
+        });
       }
     }
 
