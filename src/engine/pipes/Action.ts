@@ -1,4 +1,4 @@
-import { Composer } from '../Composer';
+import { Composer, Transformer } from '../Composer';
 import { GameContext, Pipe } from '../State';
 
 export type GameAction = {
@@ -6,9 +6,10 @@ export type GameAction = {
   payload?: any;
 };
 
-type ActionContext = {
-  pendingActions?: GameAction[];
-  currentActions?: GameAction[];
+export type ActionContext = {
+  pendingActions: GameAction[];
+  currentActions: GameAction[];
+  dispatch: Transformer<[GameAction], GameContext>;
 };
 
 const PLUGIN_NAMESPACE = 'core.actions';
@@ -96,5 +97,14 @@ export const actionPipe: Pipe = Composer.buildFocus('context', ctx =>
     pendingActions: [],
     currentActions:
       ctx.from<ActionContext>(PLUGIN_NAMESPACE).pendingActions ?? [],
+    dispatch: (action: GameAction) =>
+      Composer.build<GameContext>(c =>
+        c.setIn(PLUGIN_NAMESPACE, {
+          pendingActions: [
+            ...(c.from<ActionContext>(PLUGIN_NAMESPACE).pendingActions ?? []),
+            action,
+          ],
+        })
+      ),
   })
 );
