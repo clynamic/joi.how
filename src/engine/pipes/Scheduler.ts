@@ -1,5 +1,5 @@
 import { Composer, Transformer } from '../Composer';
-import { GameContext, GameState, Pipe } from '../State';
+import { GameContext, Pipe } from '../State';
 import { GameAction, dispatchAction } from './Action';
 
 const PLUGIN_NAMESPACE = 'core.scheduler';
@@ -22,11 +22,10 @@ export type SchedulerContext = {
 export const schedulerPipe: Pipe = ({ state, context }) => {
   const deltaTime = context.deltaTime;
 
-  const stateComposer = new Composer<GameState>(state);
   const contextComposer = new Composer<GameContext>(context);
 
   const scheduled =
-    stateComposer.from<SchedulerState>(PLUGIN_NAMESPACE).scheduled ?? [];
+    contextComposer.from<SchedulerState>(PLUGIN_NAMESPACE).scheduled ?? [];
 
   const remaining: ScheduledAction[] = [];
   const actionsToDispatch: GameAction[] = [];
@@ -40,7 +39,7 @@ export const schedulerPipe: Pipe = ({ state, context }) => {
     }
   }
 
-  stateComposer.setIn(PLUGIN_NAMESPACE, { scheduled: remaining });
+  contextComposer.setIn(PLUGIN_NAMESPACE, { scheduled: remaining });
 
   for (const action of actionsToDispatch) {
     contextComposer.apply(dispatchAction, action);
@@ -67,7 +66,7 @@ export const schedulerPipe: Pipe = ({ state, context }) => {
   });
 
   return {
-    state: stateComposer.get(),
+    state: state,
     context: contextComposer.get(),
   };
 };
