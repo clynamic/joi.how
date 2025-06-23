@@ -1,7 +1,7 @@
-import { PipeValue } from '../State';
+import { Pipe } from '../State';
 import { namespaced } from '../Namespace';
 
-export const fpsPipe = ({ state, context }: PipeValue): PipeValue => {
+export const fpsPipe: Pipe = ({ state, context }) => {
   const { deltaTime } = context;
 
   const fps = deltaTime > 0 ? 1000 / deltaTime : 0;
