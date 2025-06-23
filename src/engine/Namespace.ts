@@ -20,9 +20,9 @@ export const namespaced =
     return base;
   };
 
-export const fromNamespace = <T = any>(context: any, namespace: string): T => {
+export const fromNamespace = <T = any>(values: any, namespace: string): T => {
   const parts = namespace.split('.');
-  let current = context;
+  let current = values;
 
   for (const key of parts) {
     if (current == null) return {} as T;

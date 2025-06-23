@@ -1,5 +1,5 @@
-import { GameContext, PipeValue } from '../State';
-import { fromNamespace, namespaced } from '../Namespace';
+import { GameContext, Pipe } from '../State';
+import { Composer, Transformer } from '../Composer';
 import { GameAction } from './Action';
 
 export interface GameMessagePrompt {
@@ -19,9 +19,10 @@ const PLUGIN_NAMESPACE = 'core.messages';
 
 export type MessageContext = {
   pendingMessages?: (Partial<GameMessage> & Pick<GameMessage, 'id'>)[];
-  sendMessage: (
-    msg: Partial<GameMessage> & Pick<GameMessage, 'id'>
-  ) => GameContext;
+  sendMessage: Transformer<
+    [Partial<GameMessage> & { id: string }],
+    GameContext
+  >;
 };
 
 export type MessageState = {
@@ -29,18 +30,16 @@ export type MessageState = {
   timers: Record<string, number>;
 };
 
-export const messagesPipe = ({ state, context }: PipeValue): PipeValue => {
+export const messagesPipe: Pipe = ({ state, context }) => {
   const deltaTime = context.deltaTime;
 
-  const { pendingMessages = [] } = fromNamespace<MessageContext>(
-    context,
-    PLUGIN_NAMESPACE
-  );
+  const stateComposer = new Composer(state);
+  const contextComposer = new Composer(context);
 
-  const { messages = [], timers = {} } = fromNamespace<MessageState>(
-    state,
-    PLUGIN_NAMESPACE
-  );
+  const { messages = [], timers = {} } =
+    stateComposer.from<MessageState>(PLUGIN_NAMESPACE);
+  const { pendingMessages = [] } =
+    contextComposer.from<MessageContext>(PLUGIN_NAMESPACE);
 
   const updated: GameMessage[] = [];
   const updatedTimers: Record<string, number> = {};
@@ -61,9 +60,7 @@ export const messagesPipe = ({ state, context }: PipeValue): PipeValue => {
   for (const patch of pendingMessages) {
     const existing = updated.find(m => m.id === patch.id);
 
-    if (!existing) {
-      if (!patch.title) continue;
-    }
+    if (!existing && !patch.title) continue;
 
     const base = existing ?? { id: patch.id, title: patch.title! };
 
@@ -81,25 +78,27 @@ export const messagesPipe = ({ state, context }: PipeValue): PipeValue => {
     }
   }
 
-  const newState = namespaced(PLUGIN_NAMESPACE, {
+  stateComposer.setIn(PLUGIN_NAMESPACE, {
     messages: updated,
     timers: updatedTimers,
-  })(state);
+  });
 
-  const newContext = namespaced(PLUGIN_NAMESPACE, {
+  contextComposer.setIn(PLUGIN_NAMESPACE, {
     pendingMessages: [],
-    sendMessage: (msg: Partial<GameMessage> & { id: string }): GameContext => {
-      const queue =
-        fromNamespace<MessageContext>(newContext, PLUGIN_NAMESPACE)
-          .pendingMessages ?? [];
-      return namespaced(PLUGIN_NAMESPACE, {
-        pendingMessages: [...queue, msg],
-      })(newContext);
-    },
-  })(context);
+    sendMessage: (msg: GameMessage) =>
+      Composer.build<MessageContext>(ctx =>
+        ctx.setIn(PLUGIN_NAMESPACE, {
+          pendingMessages: [
+            ...(ctx.from<MessageContext>(PLUGIN_NAMESPACE).pendingMessages ??
+              []),
+            msg,
+          ],
+        })
+      ),
+  });
 
   return {
-    state: newState,
-    context: newContext,
+    state: stateComposer.get(),
+    context: contextComposer.get(),
   };
 };

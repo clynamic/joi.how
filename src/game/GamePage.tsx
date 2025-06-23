@@ -3,12 +3,17 @@ import { GameEngineProvider } from './GameProvider';
 import { FpsDisplay } from './components/FpsDisplay';
 import { useCallback } from 'react';
 import { PipeValue } from '../engine';
-import { fromNamespace, namespaced } from '../engine/Namespace';
-import { MessageContext, messagesPipe } from '../engine/pipes/Messages';
+import { messagesPipe } from '../engine/pipes/Messages';
 import { GameMessages } from './components/GameMessages';
 import { PauseButton } from './components/Pause';
-import { assembleActionKey, getActions } from '../engine/pipes/Action';
+import {
+  assembleActionKey,
+  disassembleActionKey,
+  getActions,
+} from '../engine/pipes/Action';
 import { fpsPipe } from '../engine/pipes/Fps';
+import { SchedulerContext } from '../engine/pipes/Scheduler';
+import { Composer } from '../engine/Composer';
 
 const StyledGamePage = styled.div`
   position: relative;
@@ -73,59 +78,119 @@ const StyledBottomBar = styled.div`
 export const GamePage = () => {
   const messageTestPipe = useCallback(({ context, state }: PipeValue) => {
     const MSG_TEST_NAMESPACE = 'core.message_test';
-    const { sent } = fromNamespace<{ sent?: boolean }>(
-      state,
-      MSG_TEST_NAMESPACE
-    );
-    const { sendMessage } = fromNamespace<MessageContext>(
-      context,
-      'core.messages'
-    );
-
-    let newContext = context;
-
     const messageId = 'test-message';
 
+    const composer = new Composer(context);
+    const { sent } = composer.from<{ sent: boolean }>(MSG_TEST_NAMESPACE);
+
     if (!sent) {
-      newContext = sendMessage({
-        id: messageId,
-        title: 'Test Message',
-        description:
-          'This is a test message to demonstrate the message system.',
-        prompts: [
-          {
-            title: 'Acknowledge',
-            action: {
-              type: assembleActionKey(MSG_TEST_NAMESPACE, 'acknowledgeMessage'),
-              payload: { id: messageId },
-            },
-          },
-          {
-            title: 'Dismiss',
-            action: {
-              type: assembleActionKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
-              payload: { id: messageId },
-            },
-          },
-        ],
-      });
+      composer.focus('core', core =>
+        core.focus('messages', msg =>
+          msg.apply(msg.get().sendMessage, {
+            id: messageId,
+            title: 'Test Message',
+            description:
+              'This is a test message to demonstrate the message system.',
+            prompts: [
+              {
+                title: 'Acknowledge',
+                action: {
+                  type: assembleActionKey(
+                    MSG_TEST_NAMESPACE,
+                    'acknowledgeMessage'
+                  ),
+                },
+              },
+              {
+                title: 'Dismiss',
+                action: {
+                  type: assembleActionKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+                },
+              },
+            ],
+          })
+        )
+      );
     }
 
     const { actions } = getActions(
-      newContext,
+      composer.get(),
       assembleActionKey(MSG_TEST_NAMESPACE, '*')
     );
 
-    for (const _ of actions) {
-      newContext = sendMessage({
-        id: messageId,
-        duration: 0,
-      });
+    for (const action of actions) {
+      const key = disassembleActionKey(action.type).key;
+
+      if (key === 'acknowledgeMessage') {
+        composer.focus('core', core =>
+          core
+            .focus('scheduler', sched =>
+              sched.apply(
+                sched.from<SchedulerContext>('core.scheduler').schedule,
+                {
+                  duration: 2000,
+                  action: {
+                    type: assembleActionKey(
+                      MSG_TEST_NAMESPACE,
+                      'followupMessage'
+                    ),
+                  },
+                }
+              )
+            )
+            .focus('messages', msg =>
+              msg.apply(msg.get().sendMessage, {
+                id: messageId,
+                duration: 0,
+              })
+            )
+        );
+      }
+
+      if (key === 'dismissMessage') {
+        composer.focus('core', core =>
+          core.focus('messages', msg =>
+            msg.apply(msg.get().sendMessage, {
+              id: messageId,
+              duration: 0,
+            })
+          )
+        );
+      }
+
+      if (key === 'followupMessage') {
+        composer.focus('core', core =>
+          core.focus('messages', msg =>
+            msg.apply(msg.get().sendMessage, {
+              id: 'followup-message',
+              title: 'Follow-up Message',
+              description:
+                'This is a follow-up message after acknowledging the test message.',
+              prompts: [
+                {
+                  title: 'Close',
+                  action: {
+                    type: assembleActionKey(
+                      MSG_TEST_NAMESPACE,
+                      'dismissMessage'
+                    ),
+                    payload: { id: 'followup-message' },
+                  },
+                },
+              ],
+            })
+          )
+        );
+      }
     }
 
+    console.log(composer.get());
+
     return {
-      state: namespaced(MSG_TEST_NAMESPACE, { sent: true })(state),
-      context: newContext,
+      state: new Composer(state)
+        .setIn(MSG_TEST_NAMESPACE, { sent: true })
+        .get(),
+      context: composer.get(),
     };
   }, []);
 

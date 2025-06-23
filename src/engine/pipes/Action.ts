@@ -1,9 +1,14 @@
-import { fromNamespace, namespaced } from '../Namespace';
+import { Composer } from '../Composer';
 import { GameContext, Pipe } from '../State';
 
 export type GameAction = {
   type: string;
   payload?: any;
+};
+
+type ActionContext = {
+  pendingActions?: GameAction[];
+  currentActions?: GameAction[];
 };
 
 const PLUGIN_NAMESPACE = 'core.actions';
@@ -25,31 +30,31 @@ export const disassembleActionKey = (
   };
 };
 
-export const createActionContext = (
-  action: GameAction
-): Partial<GameContext> => {
-  return namespaced(PLUGIN_NAMESPACE, {
-    pendingActions: [action],
-  })({});
-};
+export const createActionContext = (action: GameAction): Partial<GameContext> =>
+  new Composer({})
+    .setIn(PLUGIN_NAMESPACE, {
+      pendingActions: [action],
+    })
+    .get();
 
-export const dispatchAction = (
-  context: GameContext,
-  action: GameAction
-): GameContext => {
-  const { pendingActions = [] } = fromNamespace(context, PLUGIN_NAMESPACE);
-
-  return namespaced(PLUGIN_NAMESPACE, {
-    pendingActions: [...pendingActions, action],
-  })(context);
-};
+export const dispatchAction = (action: GameAction) =>
+  Composer.build<GameContext>(c =>
+    c.setIn(PLUGIN_NAMESPACE, {
+      pendingActions: [
+        ...(c.from<ActionContext>(PLUGIN_NAMESPACE).pendingActions ?? []),
+        action,
+      ],
+    })
+  );
 
 export const getActions = (
   context: GameContext,
   type: string,
   { consume = false }: { consume?: boolean } = {}
 ): { context: GameContext; actions: GameAction[] } => {
-  const { currentActions = [] } = fromNamespace(context, PLUGIN_NAMESPACE);
+  const composer = new Composer(context);
+  const { currentActions = [] } =
+    composer.from<ActionContext>(PLUGIN_NAMESPACE);
 
   const { namespace, key } = disassembleActionKey(type);
   const isWildcard = key === '*';
@@ -58,36 +63,38 @@ export const getActions = (
   const unmatched: GameAction[] = [];
 
   for (const action of currentActions) {
-    const { namespace: actionNamespace, key: actionKey } = disassembleActionKey(
+    const { namespace: actionNs, key: actionKey } = disassembleActionKey(
       action.type
     );
-
     const isMatch = isWildcard
-      ? actionNamespace === namespace
-      : actionNamespace === namespace && actionKey === key;
+      ? actionNs === namespace
+      : actionNs === namespace && actionKey === key;
 
     if (isMatch) matched.push(action);
     else unmatched.push(action);
   }
 
+  if (consume) {
+    composer.setIn(PLUGIN_NAMESPACE, {
+      currentActions: unmatched,
+    });
+  }
+
   return {
-    context: consume
-      ? namespaced(PLUGIN_NAMESPACE, {
-          currentActions: unmatched,
-        })(context)
-      : context,
+    context: composer.get(),
     actions: matched,
   };
 };
 
-export const actionPipeline: Pipe = ({ state, context }) => {
-  const { pendingActions = [] } = fromNamespace(context, PLUGIN_NAMESPACE);
-
-  return {
-    state,
-    context: namespaced(PLUGIN_NAMESPACE, {
-      pendingActions: [],
-      currentActions: pendingActions,
-    })(context),
-  };
-};
+/**
+ * Moves actions from pending to current.
+ * This prevents actions from being processed during the same frame they are created.
+ * This is important because pipes later in the pipeline add new actions.
+ */
+export const actionPipe: Pipe = Composer.buildFocus('context', ctx =>
+  ctx.setIn(PLUGIN_NAMESPACE, {
+    pendingActions: [],
+    currentActions:
+      ctx.from<ActionContext>(PLUGIN_NAMESPACE).pendingActions ?? [],
+  })
+);
