@@ -10,6 +10,11 @@ export type ActionContext = {
   pendingActions: GameAction[];
   currentActions: GameAction[];
   dispatch: Transformer<[GameAction], GameContext>;
+  handle: (
+    ctx: GameContext,
+    type: string,
+    opts?: { consume?: boolean }
+  ) => { context: GameContext; actions: GameAction[] };
 };
 
 const PLUGIN_NAMESPACE = 'core.actions';
@@ -97,14 +102,12 @@ export const actionPipe: Pipe = Composer.buildFocus('context', ctx =>
     pendingActions: [],
     currentActions:
       ctx.from<ActionContext>(PLUGIN_NAMESPACE).pendingActions ?? [],
-    dispatch: (action: GameAction) =>
-      Composer.build<GameContext>(c =>
-        c.setIn(PLUGIN_NAMESPACE, {
-          pendingActions: [
-            ...(c.from<ActionContext>(PLUGIN_NAMESPACE).pendingActions ?? []),
-            action,
-          ],
-        })
-      ),
+    dispatch: dispatchAction,
+    handle: (
+      ctx: GameContext,
+      type: string,
+      opts: { consume?: boolean } = {}
+    ): { context: GameContext; actions: GameAction[] } =>
+      getActions(ctx, type, opts),
   })
 );
