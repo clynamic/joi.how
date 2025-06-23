@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { GameEngineProvider } from './GameProvider';
 import { FpsDisplay } from './components/FpsDisplay';
 import { useCallback } from 'react';
-import { PipeValue } from '../engine';
+import { Pipe } from '../engine';
 import {
   MessageContext,
   messagesPipe,
@@ -80,7 +80,7 @@ const StyledBottomBar = styled.div`
 `;
 
 export const GamePage = () => {
-  const messageTestPipe = useCallback(({ context, state }: PipeValue) => {
+  const messageTestPipe: Pipe = useCallback(({ context, state }) => {
     const MSG_TEST_NAMESPACE = 'core.message_test';
     const messageId = 'test-message';
 
@@ -127,8 +127,8 @@ export const GamePage = () => {
       const key = disassembleActionKey(action.type).key;
 
       if (key === 'acknowledgeMessage') {
-        const schedule =
-          contextComposer.from<SchedulerContext>('core.scheduler').schedule;
+        const { schedule } =
+          contextComposer.from<SchedulerContext>('core.scheduler');
 
         contextComposer.apply(schedule, {
           duration: 2000,
