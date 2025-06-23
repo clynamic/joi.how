@@ -22,6 +22,8 @@ export type SchedulerContext = {
 export const schedulerPipe: Pipe = ({ state, context }) => {
   const deltaTime = context.deltaTime;
 
+  // TODO: scheduled actions should be stored in the state, not context.
+  // Use context to store scheduled scheduled actions, then transfer them to state when they arrive here.
   const contextComposer = new Composer<GameContext>(context);
 
   const scheduled =
