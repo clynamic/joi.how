@@ -84,16 +84,16 @@ export const GamePage = () => {
     const MSG_TEST_NAMESPACE = 'core.message_test';
     const messageId = 'test-message';
 
-    const composer = new Composer(context);
-    const { sent } = composer.from<{ sent: boolean }>(MSG_TEST_NAMESPACE);
+    const stateComposer = new Composer(state);
+    const contextComposer = new Composer(context);
 
     const send = (msg: PartialGameMessage) =>
-      composer.apply(
-        composer.from<{ sendMessage: MessageContext['sendMessage'] }>(
-          'core.messages'
-        ).sendMessage,
+      contextComposer.apply(
+        contextComposer.from<MessageContext>('core.messages').sendMessage,
         msg
       );
+
+    const { sent } = stateComposer.from<{ sent: boolean }>(MSG_TEST_NAMESPACE);
 
     if (!sent) {
       send({
@@ -119,7 +119,7 @@ export const GamePage = () => {
     }
 
     const { actions } = getActions(
-      composer.get(),
+      contextComposer.get(),
       assembleActionKey(MSG_TEST_NAMESPACE, '*')
     );
 
@@ -128,9 +128,9 @@ export const GamePage = () => {
 
       if (key === 'acknowledgeMessage') {
         const schedule =
-          composer.from<SchedulerContext>('core.scheduler').schedule;
+          contextComposer.from<SchedulerContext>('core.scheduler').schedule;
 
-        composer.apply(schedule, {
+        contextComposer.apply(schedule, {
           duration: 2000,
           action: {
             type: assembleActionKey(MSG_TEST_NAMESPACE, 'followupMessage'),
@@ -146,6 +146,11 @@ export const GamePage = () => {
       if (key === 'dismissMessage') {
         send({
           id: messageId,
+          duration: 0,
+        });
+
+        send({
+          id: 'followup-message',
           duration: 0,
         });
       }
@@ -169,13 +174,9 @@ export const GamePage = () => {
       }
     }
 
-    console.log(composer.get());
-
     return {
-      state: new Composer(state)
-        .setIn(MSG_TEST_NAMESPACE, { sent: true })
-        .get(),
-      context: composer.get(),
+      state: stateComposer.setIn(MSG_TEST_NAMESPACE, { sent: true }).get(),
+      context: contextComposer.get(),
     };
   }, []);
 
