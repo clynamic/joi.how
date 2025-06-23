@@ -1,15 +1,8 @@
 import { Pipe } from '../State';
-import { namespaced } from '../Namespace';
+import { Composer } from '../Composer';
 
-export const fpsPipe: Pipe = ({ state, context }) => {
-  const { deltaTime } = context;
-
-  const fps = deltaTime > 0 ? 1000 / deltaTime : 0;
-
-  return {
-    state,
-    context: namespaced('core', {
-      fps,
-    })(context),
-  };
-};
+export const fpsPipe: Pipe = Composer.buildFocus('context', ctx =>
+  ctx.setIn('core', {
+    fps: ctx.get().deltaTime > 0 ? 1000 / ctx.get().deltaTime : 0,
+  })
+);

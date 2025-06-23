@@ -1,7 +1,10 @@
-import { fromNamespace } from '../../engine/Namespace';
+import { Composer } from '../../engine/Composer';
 import { useGameEngine } from '../GameProvider';
 
 export const useGameValue = <T = any,>(path: string): T => {
   const { state } = useGameEngine();
-  return fromNamespace<T>(state, path);
+  if (!state) {
+    return {} as T;
+  }
+  return new Composer(state).from<T>(path) as T;
 };
