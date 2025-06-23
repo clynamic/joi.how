@@ -1,9 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { GameMessage, GameMessagePrompt, useGameValue } from '../GameProvider';
-import { defaultTransition, playTone } from '../../utils';
+import { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import styled from 'styled-components';
 import { useTranslate } from '../../settings';
+
+import { defaultTransition, playTone } from '../../utils';
+import { GameMessage, MessageState } from '../../engine/pipes/Messages';
+import { useGameValue } from '../hooks/UseGameValue';
+
+import _ from 'lodash';
+import { useDispatchAction } from '../hooks/UseDispatchAction';
 
 const StyledGameMessages = styled.div`
   display: flex;
@@ -54,83 +59,37 @@ const StyledGameMessageButton = motion(styled.button`
 `);
 
 export const GameMessages = () => {
-  const [, setTimers] = useState<Record<string, number>>({});
-  const [currentMessages, setCurrentMessages] = useState<GameMessage[]>([]);
-  const [previousMessages, setPreviousMessages] = useState<GameMessage[]>([]);
-  const [messages, setMessages] = useGameValue('messages');
+  const { messages } = useGameValue<MessageState>('core.messages');
+  const { dispatchAction } = useDispatchAction();
   const translate = useTranslate();
 
-  useEffect(() => {
-    setPreviousMessages(currentMessages);
-    setCurrentMessages(messages);
-  }, [currentMessages, messages]);
+  const prevMessagesRef = useRef<GameMessage[]>([]);
 
   useEffect(() => {
-    const addedMessages = currentMessages.filter(
-      message => !previousMessages.includes(message)
-    );
+    const prevMessages = prevMessagesRef.current;
 
-    const newTimers = addedMessages.reduce(
-      (acc, message) => {
-        if (message.duration) {
-          acc[message.id] = window.setTimeout(
-            () => setMessages(messages => messages.filter(m => m !== message)),
-            message.duration
-          );
-        }
-        return acc;
-      },
-      {} as Record<string, number>
-    );
+    const changed = messages?.some(newMsg => {
+      const oldMsg = prevMessages.find(prev => prev.id === newMsg.id);
+      return !oldMsg || !_.isEqual(oldMsg, newMsg);
+    });
 
-    if (addedMessages.length > 0) {
+    if (changed) {
       playTone(200);
     }
 
-    const removedMessages = previousMessages.filter(
-      message => !currentMessages.includes(message)
-    );
-    const removedTimers = removedMessages.map(message => message.id);
-
-    setTimers(timers => ({
-      ...Object.keys(timers).reduce((acc, key) => {
-        if (removedTimers.includes(key)) {
-          window.clearTimeout(timers[key]);
-          return acc;
-        }
-        return { ...acc, [key]: timers[key] };
-      }, {}),
-      ...newTimers,
-    }));
-  }, [currentMessages, previousMessages, setMessages]);
-
-  const onMessageClick = useCallback(
-    async (message: GameMessage, prompt: GameMessagePrompt) => {
-      await prompt.onClick();
-      setMessages(messages => messages.filter(m => m !== message));
-    },
-    [setMessages]
-  );
+    prevMessagesRef.current = messages ?? [];
+  }, [messages]);
 
   return (
     <StyledGameMessages>
       <AnimatePresence>
-        {currentMessages.map(message => (
+        {messages?.map(message => (
           <StyledGameMessage key={message.id}>
             <StyledGameMessageTitle
               key={message.title}
-              initial={{
-                y: '-100%',
-                opacity: 0,
-              }}
-              animate={{
-                y: '0%',
-                opacity: 1,
-              }}
-              exit={{
-                y: '-100%',
-                opacity: 0,
-              }}
+              initial={{ y: '-100%', opacity: 0 }}
+              animate={{ y: '0%', opacity: 1 }}
+              exit={{ y: '-100%', opacity: 0 }}
               transition={defaultTransition}
             >
               {translate(message.title)}
@@ -159,7 +118,7 @@ export const GameMessages = () => {
                   ...defaultTransition,
                   ease: 'circInOut',
                 }}
-                onClick={() => onMessageClick(message, prompt)}
+                onClick={() => dispatchAction(prompt.action)}
               >
                 {translate(prompt.title)}
               </StyledGameMessageButton>
