@@ -10,11 +10,7 @@ import {
 } from '../engine/pipes/Messages';
 import { GameMessages } from './components/GameMessages';
 import { PauseButton } from './components/Pause';
-import {
-  assembleActionKey,
-  disassembleActionKey,
-  getActions,
-} from '../engine/pipes/Action';
+import { getEventKey, readEventKey, getEvents } from '../engine/pipes/Events';
 import { fpsPipe } from '../engine/pipes/Fps';
 import { SchedulerContext } from '../engine/pipes/Scheduler';
 import { Composer } from '../engine/Composer';
@@ -104,27 +100,27 @@ export const GamePage = () => {
         prompts: [
           {
             title: 'Acknowledge',
-            action: {
-              type: assembleActionKey(MSG_TEST_NAMESPACE, 'acknowledgeMessage'),
+            event: {
+              type: getEventKey(MSG_TEST_NAMESPACE, 'acknowledgeMessage'),
             },
           },
           {
             title: 'Dismiss',
-            action: {
-              type: assembleActionKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+            event: {
+              type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
             },
           },
         ],
       });
     }
 
-    const { actions } = getActions(
+    const { events } = getEvents(
       contextComposer.get(),
-      assembleActionKey(MSG_TEST_NAMESPACE, '*')
+      getEventKey(MSG_TEST_NAMESPACE, '*')
     );
 
-    for (const action of actions) {
-      const key = disassembleActionKey(action.type).key;
+    for (const event of events) {
+      const key = readEventKey(event.type).key;
 
       if (key === 'acknowledgeMessage') {
         const { schedule } =
@@ -132,8 +128,8 @@ export const GamePage = () => {
 
         contextComposer.apply(schedule, {
           duration: 2000,
-          action: {
-            type: assembleActionKey(MSG_TEST_NAMESPACE, 'followupMessage'),
+          event: {
+            type: getEventKey(MSG_TEST_NAMESPACE, 'followupMessage'),
           },
         });
 
@@ -164,8 +160,8 @@ export const GamePage = () => {
           prompts: [
             {
               title: 'Close',
-              action: {
-                type: assembleActionKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+              event: {
+                type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
                 payload: { id: 'followup-message' },
               },
             },
