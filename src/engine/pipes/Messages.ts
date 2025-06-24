@@ -1,10 +1,10 @@
 import { GameContext, Pipe } from '../State';
 import { Composer, Transformer } from '../Composer';
-import { ActionContext, assembleActionKey, GameAction } from './Action';
+import { EventContext, getEventKey, GameEvent } from './Events';
 
 export interface GameMessagePrompt {
   title: string;
-  action: GameAction;
+  event: GameEvent;
 }
 
 export interface GameMessage {
@@ -37,9 +37,9 @@ export const messagesPipe: Pipe = ({ state, context }) => {
   const { messages = [], timers = {} } =
     stateComposer.from<MessageState>(PLUGIN_NAMESPACE);
 
-  const { handle } = contextComposer.from<ActionContext>('core.actions');
+  const { handle } = contextComposer.from<EventContext>('core.events');
 
-  const { actions } = handle(context, `${PLUGIN_NAMESPACE}/sendMessage`, {
+  const { events } = handle(context, `${PLUGIN_NAMESPACE}/sendMessage`, {
     consume: true,
   });
 
@@ -59,8 +59,8 @@ export const messagesPipe: Pipe = ({ state, context }) => {
     }
   }
 
-  for (const action of actions) {
-    const patch = action.payload as GameMessage;
+  for (const event of events) {
+    const patch = event.payload as GameMessage;
     const existing = updated.find(m => m.id === patch.id);
     if (!existing && !patch.title) continue;
 
@@ -84,8 +84,8 @@ export const messagesPipe: Pipe = ({ state, context }) => {
   contextComposer.setIn(PLUGIN_NAMESPACE, {
     sendMessage: (msg: GameMessage) =>
       Composer.build<GameContext>(ctx =>
-        ctx.apply(ctx.from<ActionContext>('core.actions').dispatch, {
-          type: assembleActionKey(PLUGIN_NAMESPACE, 'sendMessage'),
+        ctx.apply(ctx.from<EventContext>('core.events').dispatch, {
+          type: getEventKey(PLUGIN_NAMESPACE, 'sendMessage'),
           payload: msg,
         })
       ),
