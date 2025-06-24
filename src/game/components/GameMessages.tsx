@@ -8,7 +8,7 @@ import { GameMessage, MessageState } from '../../engine/pipes/Messages';
 import { useGameValue } from '../hooks/UseGameValue';
 
 import _ from 'lodash';
-import { useDispatchAction } from '../hooks/UseDispatchAction';
+import { useDispatchEvent } from '../hooks/UseDispatchEvent';
 
 const StyledGameMessages = styled.div`
   display: flex;
@@ -60,7 +60,7 @@ const StyledGameMessageButton = motion(styled.button`
 
 export const GameMessages = () => {
   const { messages } = useGameValue<MessageState>('core.messages');
-  const { dispatchAction } = useDispatchAction();
+  const { dispatchEvent } = useDispatchEvent();
   const translate = useTranslate();
 
   const prevMessagesRef = useRef<GameMessage[]>([]);
@@ -118,7 +118,7 @@ export const GameMessages = () => {
                   ...defaultTransition,
                   ease: 'circInOut',
                 }}
-                onClick={() => dispatchAction(prompt.action)}
+                onClick={() => dispatchEvent(prompt.event)}
               >
                 {translate(prompt.title)}
               </StyledGameMessageButton>

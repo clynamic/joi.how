@@ -7,7 +7,7 @@ import {
   ReactNode,
 } from 'react';
 import { GameEngine, GameState, Pipe, GameContext } from '../engine';
-import { actionPipe } from '../engine/pipes/Action';
+import { eventPipe } from '../engine/pipes/Events';
 import { schedulerPipe } from '../engine/pipes/Scheduler';
 
 type GameEngineContextValue = {
@@ -86,7 +86,7 @@ export function GameEngineProvider({
 
     engineRef.current = new GameEngine({}, [
       contextInjector,
-      actionPipe,
+      eventPipe,
       schedulerPipe,
       ...pipes,
     ]);
