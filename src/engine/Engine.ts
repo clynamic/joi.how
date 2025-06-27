@@ -1,10 +1,10 @@
-import { GameState, GameContext, Pipe, GameTiming } from './State';
+import { GameState, GameContext, Pipe, GameTiming, GameFrame } from './State';
 import cloneDeep from 'lodash/cloneDeep';
 
 export class GameEngine {
-  constructor(initial: Partial<GameState>, pipes: Pipe[]) {
+  constructor(initial: GameState, pipe: Pipe) {
     this.state = { ...initial };
-    this.pipes = pipes;
+    this.pipe = pipe;
     this.timing = {
       tick: 0,
       deltaTime: 0,
@@ -21,9 +21,9 @@ export class GameEngine {
   private state: GameState;
 
   /**
-   * Engine pipes transform the game state and context by accepting the current state and context, and returning a new state and context.
+   * The pipe is a function that produces a new game frame based on the current game frame.
    */
-  private pipes: Pipe[];
+  private pipe: Pipe;
 
   /**
    * The context of the engine. May contain any ephemeral information of any plugin, however it is to be noted;
@@ -62,25 +62,21 @@ export class GameEngine {
     this.timing.deltaTime = deltaTime;
     this.timing.elapsedTime += deltaTime;
 
-    let state = this.state;
-    let context = this.context;
+    const frame: GameFrame = {
+      state: this.state,
+      context: {
+        ...this.context,
+        ...this.timing,
+      },
+    };
 
-    const buildContext = (): GameContext => ({
-      ...context,
+    const result = this.pipe(frame);
+
+    this.state = cloneDeep(result.state);
+    this.context = cloneDeep({
+      ...result.context,
       ...this.timing,
     });
-
-    for (const pipe of this.pipes) {
-      try {
-        ({ state, context } = pipe({ state, context: buildContext() }));
-      } catch (err) {
-        // TODO: add debug info wrapper to pipe functions so they can be traced back to plugins
-        console.error('Pipe error:', err);
-      }
-    }
-
-    this.state = cloneDeep(state);
-    this.context = cloneDeep(buildContext());
 
     return this.state;
   }

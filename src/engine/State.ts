@@ -12,9 +12,11 @@ export type GameTiming = {
   elapsedTime: number;
 };
 
-export type PipeValue = {
+export type GameFrame = {
   state: GameState;
   context: GameContext;
 };
 
-export type Pipe = (value: PipeValue) => PipeValue;
+export type Pipe = (value: GameFrame) => GameFrame;
+
+export type PipeTransformer<TArgs extends any[]> = (...args: TArgs) => Pipe;

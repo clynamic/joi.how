@@ -1,19 +1,11 @@
 import styled from 'styled-components';
 import { GameEngineProvider } from './GameProvider';
 import { FpsDisplay } from './components/FpsDisplay';
-import { useCallback } from 'react';
-import { Pipe } from '../engine';
-import {
-  MessageContext,
-  messagesPipe,
-  PartialGameMessage,
-} from '../engine/pipes/Messages';
+import { messagesPipe } from '../engine/pipes/Messages';
 import { GameMessages } from './components/GameMessages';
 import { PauseButton } from './components/Pause';
-import { getEventKey, readEventKey, getEvents } from '../engine/pipes/Events';
 import { fpsPipe } from '../engine/pipes/Fps';
-import { SchedulerContext } from '../engine/pipes/Scheduler';
-import { Composer } from '../engine/Composer';
+import { messageTestPipe } from './test';
 
 const StyledGamePage = styled.div`
   position: relative;
@@ -76,106 +68,6 @@ const StyledBottomBar = styled.div`
 `;
 
 export const GamePage = () => {
-  const messageTestPipe: Pipe = useCallback(({ context, state }) => {
-    const MSG_TEST_NAMESPACE = 'core.message_test';
-    const messageId = 'test-message';
-
-    const stateComposer = new Composer(state);
-    const contextComposer = new Composer(context);
-
-    const send = (msg: PartialGameMessage) =>
-      contextComposer.apply(
-        contextComposer.from<MessageContext>('core.messages').sendMessage,
-        msg
-      );
-
-    const { sent } = stateComposer.from<{ sent: boolean }>(MSG_TEST_NAMESPACE);
-
-    if (!sent) {
-      send({
-        id: messageId,
-        title: 'Test Message',
-        description:
-          'This is a test message to demonstrate the message system.',
-        prompts: [
-          {
-            title: 'Acknowledge',
-            event: {
-              type: getEventKey(MSG_TEST_NAMESPACE, 'acknowledgeMessage'),
-            },
-          },
-          {
-            title: 'Dismiss',
-            event: {
-              type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
-            },
-          },
-        ],
-      });
-    }
-
-    const { events } = getEvents(
-      contextComposer.get(),
-      getEventKey(MSG_TEST_NAMESPACE, '*')
-    );
-
-    for (const event of events) {
-      const key = readEventKey(event.type).key;
-
-      if (key === 'acknowledgeMessage') {
-        const { schedule } =
-          contextComposer.from<SchedulerContext>('core.scheduler');
-
-        contextComposer.apply(schedule, {
-          duration: 2000,
-          event: {
-            type: getEventKey(MSG_TEST_NAMESPACE, 'followupMessage'),
-          },
-        });
-
-        send({
-          id: messageId,
-          duration: 0,
-        });
-      }
-
-      if (key === 'dismissMessage') {
-        send({
-          id: messageId,
-          duration: 0,
-        });
-
-        send({
-          id: 'followup-message',
-          duration: 0,
-        });
-      }
-
-      if (key === 'followupMessage') {
-        send({
-          id: 'followup-message',
-          title: 'Follow-up Message',
-          description:
-            'This is a follow-up message after acknowledging the test message.',
-          prompts: [
-            {
-              title: 'Close',
-              event: {
-                type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
-                payload: { id: 'followup-message' },
-              },
-            },
-          ],
-        });
-      }
-    }
-
-    return {
-      state: stateComposer.setIn(MSG_TEST_NAMESPACE, { sent: true }).get(),
-      context: contextComposer.get(),
-    };
-  }, []);
-
   return (
     <GameEngineProvider pipes={[fpsPipe, messagesPipe, messageTestPipe]}>
       <StyledGamePage>
