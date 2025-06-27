@@ -1,8 +1,10 @@
 import { Pipe } from '../State';
 import { Composer } from '../Composer';
 
-export const fpsPipe: Pipe = Composer.buildFocus('context', ctx =>
-  ctx.setIn('core', {
-    fps: ctx.get().deltaTime > 0 ? 1000 / ctx.get().deltaTime : 0,
-  })
+export const fpsPipe: Pipe = Composer.build(c =>
+  c.bind<number>(
+    ['context', 'deltaTime'],
+    delta => c =>
+      c.set(['context', 'core', 'fps'], delta > 0 ? 1000 / delta : 0)
+  )
 );
