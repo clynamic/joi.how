@@ -56,6 +56,16 @@ export class Composer<T extends object> {
   }
 
   /**
+   * Shorthand for building a composer that applies a transformer.
+   */
+  static apply<TArgs extends any[], T extends object>(
+    tool: Transformer<TArgs, T>,
+    ...args: TArgs
+  ) {
+    return (obj: T): T => tool(...args)(obj);
+  }
+
+  /**
    * Applies a series of mapping functions to the current object.
    */
   pipe(...pipes: ((t: T) => T)[]): this {
@@ -97,6 +107,14 @@ export class Composer<T extends object> {
   }
 
   /**
+   * Shorthand for building a composer that sets a path.
+   */
+  static set<A>(path: Path, value: A) {
+    return <T extends object>(obj: T): T =>
+      lensFromPath<T, A>(path).set(value)(obj);
+  }
+
+  /**
    * Runs a composer on a sub-object at the specified path,
    * then updates the original composer and returns it.
    */
@@ -117,6 +135,14 @@ export class Composer<T extends object> {
   over<A>(path: Path, fn: (a: A) => A): this {
     this.obj = lensFromPath<T, A>(path).over(fn)(this.obj);
     return this;
+  }
+
+  /**
+   * Shorthand for building a composer that updates a path.
+   */
+  static over<A>(path: Path, fn: (a: A) => A) {
+    return <T extends object>(obj: T): T =>
+      lensFromPath<T, A>(path).over(fn)(obj);
   }
 
   /**

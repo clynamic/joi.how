@@ -81,22 +81,20 @@ export const messageTestPipe: Pipe = Composer.build(c => {
     )
 
     .apply(handle, getEventKey(MSG_TEST_NAMESPACE, 'followupMessage'), () =>
-      Composer.build(c =>
-        c.apply(sendMessage, {
-          id: followupId,
-          title: 'Follow-up Message',
-          description:
-            'This is a follow-up message after acknowledging the test message.',
-          prompts: [
-            {
-              title: 'Close',
-              event: {
-                type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
-                payload: { id: followupId },
-              },
+      Composer.apply(sendMessage, {
+        id: followupId,
+        title: 'Follow-up Message',
+        description:
+          'This is a follow-up message after acknowledging the test message.',
+        prompts: [
+          {
+            title: 'Close',
+            event: {
+              type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+              payload: { id: followupId },
             },
-          ],
-        })
-      )
+          },
+        ],
+      })
     );
 });

@@ -38,12 +38,10 @@ export const messagesPipe: Pipe = Composer.build(c => {
   return c
     .set<MessageContext>(['context', PLUGIN_NAMESPACE], {
       sendMessage: (msg: PartialGameMessage) =>
-        Composer.build(c =>
-          c.apply(dispatch, {
-            type: getEventKey(PLUGIN_NAMESPACE, 'sendMessage'),
-            payload: msg,
-          })
-        ),
+        Composer.apply(dispatch, {
+          type: getEventKey(PLUGIN_NAMESPACE, 'sendMessage'),
+          payload: msg,
+        }),
     })
 
     .apply(handle, getEventKey(PLUGIN_NAMESPACE, 'sendMessage'), event =>
@@ -96,13 +94,11 @@ export const messagesPipe: Pipe = Composer.build(c => {
     )
 
     .apply(handle, getEventKey(PLUGIN_NAMESPACE, 'expireMessage'), event =>
-      Composer.build(c =>
-        c.over<MessageState>(
-          ['state', PLUGIN_NAMESPACE],
-          ({ messages = [] }) => ({
-            messages: messages.filter(m => m.id !== event.payload),
-          })
-        )
+      Composer.over<MessageState>(
+        ['state', PLUGIN_NAMESPACE],
+        ({ messages = [] }) => ({
+          messages: messages.filter(m => m.id !== event.payload),
+        })
       )
     );
 });
