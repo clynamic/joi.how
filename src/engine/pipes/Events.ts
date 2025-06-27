@@ -36,18 +36,16 @@ export const readEventKey = (
 };
 
 export const dispatchEvent: PipeTransformer<[GameEvent]> = event =>
-  Composer.build(frame =>
-    frame.over<EventState['pending']>(
-      `state.${PLUGIN_NAMESPACE}.pending`,
-      (pending = []) => [...pending, event]
-    )
+  Composer.over<EventState['pending']>(
+    `state.${PLUGIN_NAMESPACE}.pending`,
+    (pending = []) => [...pending, event]
   );
 
 export const handleEvent: PipeTransformer<
   [string, (event: GameEvent) => Pipe]
 > = (type, fn) =>
-  Composer.build(frame =>
-    frame.bind<EventState>(
+  Composer.build(c =>
+    c.bind<EventState>(
       `state.${PLUGIN_NAMESPACE}`,
       ({ current = [] }) =>
         c =>
