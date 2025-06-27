@@ -77,7 +77,10 @@ export const schedulerPipe: Pipe = Composer.build(c => {
       Composer.build(c =>
         c.over<ScheduledEvent[]>(
           ['state', PLUGIN_NAMESPACE, 'scheduled'],
-          (list = []) => [...list, event.payload]
+          (list = []) => [
+            ...list.filter(e => e.id !== event.payload.id),
+            event.payload,
+          ]
         )
       )
     )

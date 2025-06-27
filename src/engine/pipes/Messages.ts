@@ -1,6 +1,7 @@
 import { Pipe, PipeTransformer } from '../State';
 import { Composer } from '../Composer';
 import { EventContext, getEventKey, GameEvent } from './Events';
+import { SchedulerContext } from './Scheduler';
 
 export interface GameMessagePrompt {
   title: string;
@@ -25,7 +26,6 @@ export type MessageContext = {
 
 export type MessageState = {
   messages: GameMessage[];
-  timers: Record<string, number>;
 };
 
 export const messagesPipe: Pipe = Composer.build(c => {
@@ -36,33 +36,6 @@ export const messagesPipe: Pipe = Composer.build(c => {
   ]);
 
   return c
-    .bind<number>(
-      ['context', 'deltaTime'],
-      delta => c =>
-        c.over<MessageState>(
-          ['state', PLUGIN_NAMESPACE],
-          ({ messages = [], timers = {} }) => {
-            const updated: GameMessage[] = [];
-            const updatedTimers: Record<string, number> = {};
-
-            for (const message of messages) {
-              const remaining = timers[message.id];
-              if (remaining != null) {
-                const next = remaining - delta;
-                if (next > 0) {
-                  updated.push(message);
-                  updatedTimers[message.id] = next;
-                }
-              } else {
-                updated.push(message);
-              }
-            }
-
-            return { messages: updated, timers: updatedTimers };
-          }
-        )
-    )
-
     .set<MessageContext>(['context', PLUGIN_NAMESPACE], {
       sendMessage: (msg: PartialGameMessage) =>
         Composer.build(c =>
@@ -74,29 +47,58 @@ export const messagesPipe: Pipe = Composer.build(c => {
     })
 
     .apply(handle, getEventKey(PLUGIN_NAMESPACE, 'sendMessage'), event =>
+      Composer.build(c => {
+        const messageId = (event.payload as GameMessage).id;
+        const { schedule, cancel } = c.get<SchedulerContext>([
+          'context',
+          'core.scheduler',
+        ]);
+
+        return c
+          .over<MessageState>(
+            ['state', PLUGIN_NAMESPACE],
+            ({ messages = [] }) => {
+              const existing = messages.find(m => m.id === messageId);
+              const patch = event.payload as GameMessage;
+              return {
+                messages: [
+                  ...messages.filter(m => m.id !== messageId),
+                  ...(existing || patch.title
+                    ? [{ ...existing, ...patch }]
+                    : []),
+                ],
+              };
+            }
+          )
+
+          .bind<MessageState>(
+            ['state', PLUGIN_NAMESPACE],
+            ({ messages = [] }) =>
+              c => {
+                const updated = messages.find(m => m.id === messageId);
+                const scheduleId = `${PLUGIN_NAMESPACE}.message.${messageId}`;
+                return updated?.duration !== undefined
+                  ? c.apply(schedule, {
+                      id: scheduleId,
+                      duration: updated!.duration!,
+                      event: {
+                        type: getEventKey(PLUGIN_NAMESPACE, 'expireMessage'),
+                        payload: updated.id,
+                      },
+                    })
+                  : c.apply(cancel, scheduleId);
+              }
+          );
+      })
+    )
+
+    .apply(handle, getEventKey(PLUGIN_NAMESPACE, 'expireMessage'), event =>
       Composer.build(c =>
         c.over<MessageState>(
           ['state', PLUGIN_NAMESPACE],
-          ({ messages = [], timers = {} }) => {
-            const patch = event.payload as GameMessage;
-            const existing = messages.find(m => m.id === patch.id);
-            if (!existing && !patch.title) return { messages, timers };
-
-            const base = existing ?? { id: patch.id, title: patch.title! };
-            const merged: GameMessage = { ...base, ...patch };
-
-            const newMessages = [...messages];
-            const index = newMessages.findIndex(m => m.id === patch.id);
-            if (index >= 0) newMessages[index] = merged;
-            else newMessages.push(merged);
-
-            const newTimers = { ...timers };
-            if (patch.duration !== undefined) {
-              newTimers[patch.id] = patch.duration;
-            }
-
-            return { messages: newMessages, timers: newTimers };
-          }
+          ({ messages = [] }) => ({
+            messages: messages.filter(m => m.id !== event.payload),
+          })
         )
       )
     );
