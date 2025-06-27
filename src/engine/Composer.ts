@@ -1,7 +1,17 @@
+import { lensFromPath, Path } from './Lens';
+
+/**
+ * A curried function that that maps an object from T to T,
+ * given a set of arguments.
+ */
 export type Transformer<TArgs extends any[], TObj> = (
   ...args: TArgs
 ) => (obj: TObj) => TObj;
 
+/**
+ * A generalized object manipulation utility
+ * in a functional chaining style.
+ */
 export class Composer<T extends object> {
   private obj: T;
 
@@ -10,8 +20,8 @@ export class Composer<T extends object> {
   }
 
   /**
-   * Creates a new ObjectComposer and applies the provided function to it,
-   * returning the transformed object.
+   * A shortcut to easily build a mapping function for an object,
+   * using the created composer and returning the modified object.
    */
   static build<T extends object>(
     fn: (composer: Composer<T>) => Composer<T>
@@ -20,73 +30,22 @@ export class Composer<T extends object> {
   }
 
   /**
-   * Creates a composer focused on a specific key of the object,
-   * but returns the entire object when done.
-   */
-  static focus<TObj extends object, K extends keyof TObj>(
-    base: TObj,
-    key: K,
-    fn: (
-      inner: Composer<Extract<TObj[K], object>>
-    ) => Composer<Extract<TObj[K], object>>
-  ): Composer<TObj> {
-    return new Composer(base).focus(key, fn);
-  }
-
-  /**
-   * Focuses on a specific key of the object, allowing for
-   * transformation of that key's value.
-   */
-  focus<K extends keyof T>(
-    key: K,
-    fn: (
-      composer: Composer<Extract<T[K], object>>
-    ) => Composer<Extract<T[K], object>>
-  ): this {
-    const base = this.obj as any;
-    const focused = new Composer(base[key] ?? {});
-    const updated = fn(focused).get();
-    this.obj = {
-      ...this.obj,
-      [key]: { ...(this.obj[key] as any), ...updated },
-    };
-    return this;
-  }
-
-  /**
-   * Like `build, but specifically for composing a focus on a key
-   * of an object.
-   */
-  static buildFocus<TObj extends object, K extends keyof TObj>(
-    key: K,
-    fn: (
-      composer: Composer<Extract<TObj[K], object>>
-    ) => Composer<Extract<TObj[K], object>>
-  ): (obj: TObj) => TObj {
-    return (obj: TObj) =>
-      Composer.focus(
-        obj,
-        key,
-        fn as (composer: Composer<any>) => Composer<any>
-      ).get();
-  }
-
-  /**
-   * Returns a new ObjectComposer with the transformed object.
+   * Modifies the object, then returns it in a new Composer instance.
    */
   map(fn: (obj: T) => T): Composer<T> {
     return new Composer(fn(this.obj));
   }
 
   /**
-   * Chains a function that receives the composer instance.
+   * Runs a composer function.
    */
   chain(fn: (composer: this) => this): this {
     return fn(this);
   }
 
   /**
-   * Applies a transformation tool to the current object.
+   * Applies a transformer function to the current object,
+   * passing the provided arguments.
    */
   apply<TArgs extends any[]>(
     tool: Transformer<TArgs, T>,
@@ -97,47 +56,92 @@ export class Composer<T extends object> {
   }
 
   /**
-   * Sets a value in a specific namespace within the object.
+   * Applies a series of mapping functions to the current object.
    */
-  setIn(namespace: string, partial: object): this {
-    const parts = namespace.split('.');
-    const last = parts.pop()!;
-    const root = { ...this.obj };
-    let node: any = root;
-
-    for (const key of parts) {
-      node[key] = { ...(node[key] ?? {}) };
-      node = node[key];
-    }
-
-    node[last] = {
-      ...(node[last] ?? {}),
-      ...partial,
-    };
-
-    this.obj = root;
+  pipe(...pipes: ((t: T) => T)[]): this {
+    for (const p of pipes) this.obj = p(this.obj);
     return this;
   }
 
   /**
-   * Returns the value of a specific namespace within the object.
+   * Extracts the current object from the composer.
    */
-  from<TNamespace>(namespace: string): TNamespace {
-    const parts = namespace.split('.');
-    let current: any = this.obj;
-
-    for (const part of parts) {
-      if (current == null) return {} as TNamespace;
-      current = current[part];
-    }
-
-    return current ?? ({} as TNamespace);
+  get(): T;
+  /**
+   * Gets a value at the specified path in the object.
+   */
+  get<A = unknown>(path: Path): A;
+  get<A = unknown>(path?: Path): A | T {
+    if (path === undefined) return this.obj;
+    return lensFromPath<T, A>(path).get(this.obj);
   }
 
   /**
-   * Returns the current object.
+   * Replaces the current object with a new value.
    */
-  get(): T {
-    return this.obj;
+  set(value: T): this;
+  /**
+   * Sets a value at the specified path in the object.
+   */
+  set<A>(path: Path, value: A): this;
+
+  set(pathOrValue: Path | T, maybeValue?: any): this {
+    if (maybeValue === undefined) {
+      this.obj = pathOrValue as T;
+    } else {
+      this.obj = lensFromPath<T, any>(pathOrValue as Path).set(maybeValue)(
+        this.obj
+      );
+    }
+    return this;
+  }
+
+  /**
+   * Runs a composer on a sub-object at the specified path,
+   * then updates the original composer and returns it.
+   */
+  zoom<A extends object>(
+    path: Path,
+    fn: (inner: Composer<A>) => Composer<A>
+  ): this {
+    const lens = lensFromPath<T, A>(path);
+    const inner = new Composer<A>(lens.get(this.obj));
+    const updated = fn(inner).get();
+    this.obj = lens.set(updated)(this.obj);
+    return this;
+  }
+
+  /**
+   * Updates the value at the specified path with the mapping function.
+   */
+  over<A>(path: Path, fn: (a: A) => A): this {
+    this.obj = lensFromPath<T, A>(path).over(fn)(this.obj);
+    return this;
+  }
+
+  /**
+   * Runs a composer function with the value at the specified path.
+   */
+  bind<A>(
+    path: Path,
+    fn: (value: A) => (composer: Composer<T>) => Composer<T>
+  ): Composer<T> {
+    const lens = lensFromPath<T, A>(path);
+    const value = lens.get(this.obj) ?? ({} as A);
+    return fn(value)(this);
+  }
+
+  /**
+   * Runs a composer function when the condition is true.
+   */
+  when(condition: boolean, fn: (c: this) => this): this {
+    return condition ? fn(this) : this;
+  }
+
+  /**
+   * Runs a composer function when the condition is false.
+   */
+  unless(condition: boolean, fn: (c: this) => this): this {
+    return this.when(!condition, fn);
   }
 }

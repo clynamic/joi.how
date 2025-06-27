@@ -1,16 +1,16 @@
 import { useMemo } from 'react';
-import { createEventContext, GameEvent } from '../../engine/pipes/Events';
+import { dispatchEvent, GameEvent } from '../../engine/pipes/Events';
 import { useGameEngine } from '../GameProvider';
 
 export function useDispatchEvent() {
-  const { injectContext } = useGameEngine();
+  const { injectImpulse } = useGameEngine();
 
   return useMemo(
     () => ({
       dispatchEvent: (event: GameEvent) => {
-        injectContext(createEventContext(event));
+        injectImpulse(dispatchEvent(event));
       },
     }),
-    [injectContext]
+    [injectImpulse]
   );
 }

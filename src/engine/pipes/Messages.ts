@@ -1,5 +1,5 @@
-import { GameContext, Pipe } from '../State';
-import { Composer, Transformer } from '../Composer';
+import { Pipe, PipeTransformer } from '../State';
+import { Composer } from '../Composer';
 import { EventContext, getEventKey, GameEvent } from './Events';
 
 export interface GameMessagePrompt {
@@ -20,7 +20,7 @@ export type PartialGameMessage = Partial<GameMessage> & Pick<GameMessage, 'id'>;
 const PLUGIN_NAMESPACE = 'core.messages';
 
 export type MessageContext = {
-  sendMessage: Transformer<[PartialGameMessage], GameContext>;
+  sendMessage: PipeTransformer<[PartialGameMessage]>;
 };
 
 export type MessageState = {
@@ -28,71 +28,76 @@ export type MessageState = {
   timers: Record<string, number>;
 };
 
-export const messagesPipe: Pipe = ({ state, context }) => {
-  const deltaTime = context.deltaTime;
+export const messagesPipe: Pipe = Composer.build(c => {
+  const { dispatch, handle } = c.get<EventContext>([
+    'context',
+    'core',
+    'events',
+  ]);
 
-  const stateComposer = new Composer(state);
-  const contextComposer = new Composer(context);
+  return c
+    .bind<number>(
+      ['context', 'deltaTime'],
+      delta => c =>
+        c.over<MessageState>(
+          ['state', PLUGIN_NAMESPACE],
+          ({ messages = [], timers = {} }) => {
+            const updated: GameMessage[] = [];
+            const updatedTimers: Record<string, number> = {};
 
-  const { messages = [], timers = {} } =
-    stateComposer.from<MessageState>(PLUGIN_NAMESPACE);
+            for (const message of messages) {
+              const remaining = timers[message.id];
+              if (remaining != null) {
+                const next = remaining - delta;
+                if (next > 0) {
+                  updated.push(message);
+                  updatedTimers[message.id] = next;
+                }
+              } else {
+                updated.push(message);
+              }
+            }
 
-  const { handle } = contextComposer.from<EventContext>('core.events');
+            return { messages: updated, timers: updatedTimers };
+          }
+        )
+    )
 
-  const { events } = handle(context, `${PLUGIN_NAMESPACE}/sendMessage`, {
-    consume: true,
-  });
+    .set<MessageContext>(['context', PLUGIN_NAMESPACE], {
+      sendMessage: (msg: PartialGameMessage) =>
+        Composer.build(c =>
+          c.apply(dispatch, {
+            type: getEventKey(PLUGIN_NAMESPACE, 'sendMessage'),
+            payload: msg,
+          })
+        ),
+    })
 
-  const updated: GameMessage[] = [];
-  const updatedTimers: Record<string, number> = {};
+    .apply(handle, getEventKey(PLUGIN_NAMESPACE, 'sendMessage'), event =>
+      Composer.build(c =>
+        c.over<MessageState>(
+          ['state', PLUGIN_NAMESPACE],
+          ({ messages = [], timers = {} }) => {
+            const patch = event.payload as GameMessage;
+            const existing = messages.find(m => m.id === patch.id);
+            if (!existing && !patch.title) return { messages, timers };
 
-  for (const message of messages) {
-    const remaining = timers[message.id];
-    if (remaining != null) {
-      const next = remaining - deltaTime;
-      if (next > 0) {
-        updated.push(message);
-        updatedTimers[message.id] = next;
-      }
-    } else {
-      updated.push(message);
-    }
-  }
+            const base = existing ?? { id: patch.id, title: patch.title! };
+            const merged: GameMessage = { ...base, ...patch };
 
-  for (const event of events) {
-    const patch = event.payload as GameMessage;
-    const existing = updated.find(m => m.id === patch.id);
-    if (!existing && !patch.title) continue;
+            const newMessages = [...messages];
+            const index = newMessages.findIndex(m => m.id === patch.id);
+            if (index >= 0) newMessages[index] = merged;
+            else newMessages.push(merged);
 
-    const base = existing ?? { id: patch.id, title: patch.title! };
-    const merged: GameMessage = { ...base, ...patch };
+            const newTimers = { ...timers };
+            if (patch.duration !== undefined) {
+              newTimers[patch.id] = patch.duration;
+            }
 
-    const index = updated.findIndex(m => m.id === patch.id);
-    if (index >= 0) updated[index] = merged;
-    else updated.push(merged);
-
-    if (patch.duration !== undefined) {
-      updatedTimers[patch.id] = patch.duration;
-    }
-  }
-
-  stateComposer.setIn(PLUGIN_NAMESPACE, {
-    messages: updated,
-    timers: updatedTimers,
-  });
-
-  contextComposer.setIn(PLUGIN_NAMESPACE, {
-    sendMessage: (msg: GameMessage) =>
-      Composer.build<GameContext>(ctx =>
-        ctx.apply(ctx.from<EventContext>('core.events').dispatch, {
-          type: getEventKey(PLUGIN_NAMESPACE, 'sendMessage'),
-          payload: msg,
-        })
-      ),
-  });
-
-  return {
-    state: stateComposer.get(),
-    context: contextComposer.get(),
-  };
-};
+            return { messages: newMessages, timers: newTimers };
+          }
+        )
+      )
+    );
+});
