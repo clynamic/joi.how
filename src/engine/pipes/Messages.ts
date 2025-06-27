@@ -58,16 +58,19 @@ export const messagesPipe: Pipe = Composer.build(c => {
           .over<MessageState>(
             ['state', PLUGIN_NAMESPACE],
             ({ messages = [] }) => {
-              const existing = messages.find(m => m.id === messageId);
               const patch = event.payload as GameMessage;
-              return {
-                messages: [
-                  ...messages.filter(m => m.id !== messageId),
-                  ...(existing || patch.title
-                    ? [{ ...existing, ...patch }]
-                    : []),
-                ],
+              const index = messages.findIndex(m => m.id === patch.id);
+              const existing = messages[index];
+
+              if (!existing && !patch.title) return { messages };
+
+              const updated = [...messages];
+              updated[index < 0 ? updated.length : index] = {
+                ...existing,
+                ...patch,
               };
+
+              return { messages: updated };
             }
           )
 
