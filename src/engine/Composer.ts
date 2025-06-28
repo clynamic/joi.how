@@ -4,7 +4,7 @@ import { lensFromPath, Path } from './Lens';
  * A curried function that that maps an object from T to T,
  * given a set of arguments.
  */
-export type Transformer<TArgs extends any[], TObj> = (
+export type Transformer<TArgs extends unknown[], TObj> = (
   ...args: TArgs
 ) => (obj: TObj) => TObj;
 
@@ -44,33 +44,18 @@ export class Composer<T extends object> {
   }
 
   /**
-   * Applies a transformer function to the current object,
-   * passing the provided arguments.
-   */
-  apply<TArgs extends any[]>(
-    tool: Transformer<TArgs, T>,
-    ...args: TArgs
-  ): this {
-    this.obj = tool(...args)(this.obj);
-    return this;
-  }
-
-  /**
-   * Shorthand for building a composer that applies a transformer.
-   */
-  static apply<TArgs extends any[], T extends object>(
-    tool: Transformer<TArgs, T>,
-    ...args: TArgs
-  ) {
-    return (obj: T): T => tool(...args)(obj);
-  }
-
-  /**
    * Applies a series of mapping functions to the current object.
    */
   pipe(...pipes: ((t: T) => T)[]): this {
     for (const p of pipes) this.obj = p(this.obj);
     return this;
+  }
+
+  /**
+   * Shorthand for building a composer that applies a series of mapping functions to the current object.
+   */
+  static pipe<T extends object>(...pipes: ((t: T) => T)[]): (obj: T) => T {
+    return Composer.build<T>(composer => composer.pipe(...pipes));
   }
 
   /**
@@ -95,11 +80,11 @@ export class Composer<T extends object> {
    */
   set<A>(path: Path, value: A): this;
 
-  set(pathOrValue: Path | T, maybeValue?: any): this {
+  set(pathOrValue: Path | T, maybeValue?: unknown): this {
     if (maybeValue === undefined) {
       this.obj = pathOrValue as T;
     } else {
-      this.obj = lensFromPath<T, any>(pathOrValue as Path).set(maybeValue)(
+      this.obj = lensFromPath<T, unknown>(pathOrValue as Path).set(maybeValue)(
         this.obj
       );
     }
@@ -111,7 +96,7 @@ export class Composer<T extends object> {
    */
   static set<A>(path: Path, value: A) {
     return <T extends object>(obj: T): T =>
-      lensFromPath<T, A>(path).set(value)(obj);
+      Composer.build<T>(c => c.set<A>(path, value))(obj);
   }
 
   /**
@@ -142,7 +127,7 @@ export class Composer<T extends object> {
    */
   static over<A>(path: Path, fn: (a: A) => A) {
     return <T extends object>(obj: T): T =>
-      lensFromPath<T, A>(path).over(fn)(obj);
+      Composer.build<T>(c => c.over<A>(path, fn))(obj);
   }
 
   /**
