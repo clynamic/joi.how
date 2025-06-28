@@ -32,8 +32,6 @@ export const messageTestPipe: Pipe = Composer.build(c => {
                 sendMessage({
                   id: messageId,
                   title: 'Test Message',
-                  description:
-                    'This is a test message to demonstrate the message system.',
                   prompts: [
                     {
                       title: 'Acknowledge',
@@ -90,8 +88,7 @@ export const messageTestPipe: Pipe = Composer.build(c => {
           sendMessage({
             id: followupId,
             title: 'Follow-up Message',
-            description:
-              'This is a follow-up message after acknowledging the test message.',
+            description: 'Ready',
             prompts: [
               {
                 title: 'Close',
