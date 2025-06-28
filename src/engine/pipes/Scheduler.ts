@@ -57,25 +57,25 @@ export const schedulerPipe: Pipe = Composer.build(c => {
 
     .set<SchedulerContext>(['context', PLUGIN_NAMESPACE], {
       schedule: (e: ScheduledEvent) =>
-        Composer.build(c =>
-          c.apply(dispatch, {
+        Composer.pipe(
+          dispatch({
             type: getEventKey(PLUGIN_NAMESPACE, 'schedule'),
             payload: e,
           })
         ),
 
       cancel: (id: string) =>
-        Composer.build(c =>
-          c.apply(dispatch, {
+        Composer.pipe(
+          dispatch({
             type: getEventKey(PLUGIN_NAMESPACE, 'cancel'),
             payload: id,
           })
         ),
     })
 
-    .apply(handle, getEventKey(PLUGIN_NAMESPACE, 'schedule'), event =>
-      Composer.build(c =>
-        c.over<ScheduledEvent[]>(
+    .pipe(
+      handle(getEventKey(PLUGIN_NAMESPACE, 'schedule'), event =>
+        Composer.over<ScheduledEvent[]>(
           ['state', PLUGIN_NAMESPACE, 'scheduled'],
           (list = []) => [
             ...list.filter(e => e.id !== event.payload.id),
@@ -85,9 +85,9 @@ export const schedulerPipe: Pipe = Composer.build(c => {
       )
     )
 
-    .apply(handle, getEventKey(PLUGIN_NAMESPACE, 'cancel'), event =>
-      Composer.build(c =>
-        c.over<ScheduledEvent[]>(
+    .pipe(
+      handle(getEventKey(PLUGIN_NAMESPACE, 'cancel'), event =>
+        Composer.over<ScheduledEvent[]>(
           ['state', PLUGIN_NAMESPACE, 'scheduled'],
           (list = []) => list.filter(s => s.id !== event.payload)
         )
