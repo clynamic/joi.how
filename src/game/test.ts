@@ -28,73 +28,81 @@ export const messageTestPipe: Pipe = Composer.build(c => {
         c =>
           c.unless(sent, c =>
             c
-              .apply(sendMessage, {
-                id: messageId,
-                title: 'Test Message',
-                description:
-                  'This is a test message to demonstrate the message system.',
-                prompts: [
-                  {
-                    title: 'Acknowledge',
-                    event: {
-                      type: getEventKey(
-                        MSG_TEST_NAMESPACE,
-                        'acknowledgeMessage'
-                      ),
+              .pipe(
+                sendMessage({
+                  id: messageId,
+                  title: 'Test Message',
+                  description:
+                    'This is a test message to demonstrate the message system.',
+                  prompts: [
+                    {
+                      title: 'Acknowledge',
+                      event: {
+                        type: getEventKey(
+                          MSG_TEST_NAMESPACE,
+                          'acknowledgeMessage'
+                        ),
+                      },
                     },
-                  },
-                  {
-                    title: 'Dismiss',
-                    event: {
-                      type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+                    {
+                      title: 'Dismiss',
+                      event: {
+                        type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+                      },
                     },
-                  },
-                ],
-              })
+                  ],
+                })
+              )
 
               .set(['state', MSG_TEST_NAMESPACE, 'sent'], true)
           )
     )
 
-    .apply(handle, getEventKey(MSG_TEST_NAMESPACE, 'acknowledgeMessage'), () =>
-      Composer.build(c =>
-        c
-          .apply(schedule, {
+    .pipe(
+      handle(getEventKey(MSG_TEST_NAMESPACE, 'acknowledgeMessage'), () =>
+        Composer.pipe(
+          schedule({
             duration: 2000,
             event: {
               type: getEventKey(MSG_TEST_NAMESPACE, 'followupMessage'),
             },
-          })
-          .apply(sendMessage, {
+          }),
+          sendMessage({
             id: messageId,
             duration: 0,
           })
+        )
       )
     )
 
-    .apply(handle, getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'), () =>
-      Composer.build(c =>
-        c
-          .apply(sendMessage, { id: messageId, duration: 0 })
-          .apply(sendMessage, { id: followupId, duration: 0 })
+    .pipe(
+      handle(getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'), () =>
+        Composer.pipe(
+          sendMessage({ id: messageId, duration: 0 }),
+          sendMessage({ id: followupId, duration: 0 })
+        )
       )
     )
 
-    .apply(handle, getEventKey(MSG_TEST_NAMESPACE, 'followupMessage'), () =>
-      Composer.apply(sendMessage, {
-        id: followupId,
-        title: 'Follow-up Message',
-        description:
-          'This is a follow-up message after acknowledging the test message.',
-        prompts: [
-          {
-            title: 'Close',
-            event: {
-              type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
-              payload: { id: followupId },
-            },
-          },
-        ],
-      })
+    .pipe(
+      handle(getEventKey(MSG_TEST_NAMESPACE, 'followupMessage'), () =>
+        Composer.pipe(
+          sendMessage({
+            id: followupId,
+            title: 'Follow-up Message',
+            description:
+              'This is a follow-up message after acknowledging the test message.',
+            prompts: [
+              {
+                title: 'Close',
+                event: {
+                  type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+                  payload: { id: followupId },
+                },
+              },
+            ],
+          })
+        )
+      )
     );
 });
