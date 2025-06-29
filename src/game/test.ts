@@ -25,7 +25,7 @@ export const messageTestPipe: Pipe = Composer.build(c => {
     .bind<{ sent: boolean }>(
       ['state', MSG_TEST_NAMESPACE],
       ({ sent = false }) =>
-        c =>
+        Composer.build(c =>
           c.unless(sent, c =>
             c
               .pipe(
@@ -54,6 +54,7 @@ export const messageTestPipe: Pipe = Composer.build(c => {
 
               .set(['state', MSG_TEST_NAMESPACE, 'sent'], true)
           )
+        )
     )
 
     .pipe(

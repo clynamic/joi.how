@@ -78,7 +78,7 @@ export const messagesPipe: Pipe = Composer.build(c => {
             .bind<MessageState>(
               ['state', PLUGIN_NAMESPACE],
               ({ messages = [] }) =>
-                c => {
+                Composer.build(c => {
                   const updated = messages.find(m => m.id === messageId);
                   const scheduleId = `${PLUGIN_NAMESPACE}.message.${messageId}`;
                   return c.pipe(
@@ -96,7 +96,7 @@ export const messagesPipe: Pipe = Composer.build(c => {
                         })
                       : cancel(scheduleId)
                   );
-                }
+                })
             );
         })
       )

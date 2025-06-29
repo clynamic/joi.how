@@ -44,22 +44,15 @@ export const dispatchEvent: PipeTransformer<[GameEvent]> = event =>
 export const handleEvent: PipeTransformer<
   [string, (event: GameEvent) => Pipe]
 > = (type, fn) =>
-  Composer.build(c =>
-    c.bind<EventState>(
-      `state.${PLUGIN_NAMESPACE}`,
-      ({ current = [] }) =>
-        c =>
-          c.pipe(
-            ...current
-              .filter(event => {
-                const { namespace: ns, key: k } = readEventKey(event.type);
-                const { namespace, key } = readEventKey(type);
-                return key === '*'
-                  ? ns === namespace
-                  : ns === namespace && k === key;
-              })
-              .map(fn)
-          )
+  Composer.bind<EventState>(`state.${PLUGIN_NAMESPACE}`, ({ current = [] }) =>
+    Composer.pipe(
+      ...current
+        .filter(event => {
+          const { namespace: ns, key: k } = readEventKey(event.type);
+          const { namespace, key } = readEventKey(type);
+          return key === '*' ? ns === namespace : ns === namespace && k === key;
+        })
+        .map(fn)
     )
   );
 
