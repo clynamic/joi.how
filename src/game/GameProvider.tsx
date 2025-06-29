@@ -74,7 +74,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
   useEffect(() => {
     // To inject one-shot pipes (impulses) into the engine,
     // we use the pending ref to stage them, and the active ref to apply them.
-    const impulsePipe: Pipe = Composer.build(c =>
+    const impulsePipe: Pipe = Composer.chain(c =>
       c.pipe(...activeImpulseRef.current)
     );
 
