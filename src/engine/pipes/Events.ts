@@ -61,7 +61,7 @@ export const handleEvent: PipeTransformer<
  * This prevents events from being processed during the same frame they are created.
  * This is important because pipes later in the pipeline may add new events.
  */
-export const eventPipe: Pipe = Composer.build(frame =>
+export const eventPipe: Pipe = Composer.chain(frame =>
   frame
     .zoom<GameState>('state', state =>
       state.over<EventState>(PLUGIN_NAMESPACE, ({ pending = [] }) => ({

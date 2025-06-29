@@ -28,7 +28,7 @@ export type MessageState = {
   messages: GameMessage[];
 };
 
-export const messagesPipe: Pipe = Composer.build(c => {
+export const messagesPipe: Pipe = Composer.chain(c => {
   const { dispatch, handle } = c.get<EventContext>([
     'context',
     'core',
@@ -48,7 +48,7 @@ export const messagesPipe: Pipe = Composer.build(c => {
 
     .pipe(
       handle(getEventKey(PLUGIN_NAMESPACE, 'sendMessage'), event =>
-        Composer.build(c => {
+        Composer.chain(c => {
           const messageId = (event.payload as GameMessage).id;
           const { schedule, cancel } = c.get<SchedulerContext>([
             'context',
@@ -78,7 +78,7 @@ export const messagesPipe: Pipe = Composer.build(c => {
             .bind<MessageState>(
               ['state', PLUGIN_NAMESPACE],
               ({ messages = [] }) =>
-                Composer.build(c => {
+                Composer.chain(c => {
                   const updated = messages.find(m => m.id === messageId);
                   const scheduleId = `${PLUGIN_NAMESPACE}.message.${messageId}`;
                   return c.pipe(

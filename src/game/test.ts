@@ -8,7 +8,7 @@ const MSG_TEST_NAMESPACE = 'core.message_test';
 const messageId = 'test-message';
 const followupId = 'followup-message';
 
-export const messageTestPipe: Pipe = Composer.build(c => {
+export const messageTestPipe: Pipe = Composer.chain(c => {
   const { sendMessage } = c.get<MessageContext>([
     'context',
     'core',
@@ -25,35 +25,33 @@ export const messageTestPipe: Pipe = Composer.build(c => {
     .bind<{ sent: boolean }>(
       ['state', MSG_TEST_NAMESPACE],
       ({ sent = false }) =>
-        Composer.build(c =>
-          c.unless(sent, c =>
-            c
-              .pipe(
-                sendMessage({
-                  id: messageId,
-                  title: 'Test Message',
-                  prompts: [
-                    {
-                      title: 'Acknowledge',
-                      event: {
-                        type: getEventKey(
-                          MSG_TEST_NAMESPACE,
-                          'acknowledgeMessage'
-                        ),
-                      },
+        Composer.unless(sent, c =>
+          c
+            .pipe(
+              sendMessage({
+                id: messageId,
+                title: 'Test Message',
+                prompts: [
+                  {
+                    title: 'Acknowledge',
+                    event: {
+                      type: getEventKey(
+                        MSG_TEST_NAMESPACE,
+                        'acknowledgeMessage'
+                      ),
                     },
-                    {
-                      title: 'Dismiss',
-                      event: {
-                        type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
-                      },
+                  },
+                  {
+                    title: 'Dismiss',
+                    event: {
+                      type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
                     },
-                  ],
-                })
-              )
+                  },
+                ],
+              })
+            )
 
-              .set(['state', MSG_TEST_NAMESPACE, 'sent'], true)
-          )
+            .set(['state', MSG_TEST_NAMESPACE, 'sent'], true)
         )
     )
 
