@@ -133,13 +133,18 @@ export class Composer<T extends object> {
   /**
    * Runs a composer function with the value at the specified path.
    */
-  bind<A>(
-    path: Path,
-    fn: (value: A) => (composer: Composer<T>) => Composer<T>
-  ): Composer<T> {
-    const lens = lensFromPath<T, A>(path);
-    const value = lens.get(this.obj) ?? ({} as A);
-    return fn(value)(this);
+  bind<A>(path: Path, fn: Transformer<[A], T>): this {
+    const value = lensFromPath<T, A>(path).get(this.obj) ?? ({} as A);
+    this.obj = fn(value)(this.obj);
+    return this;
+  }
+
+  /**
+   * Shorthand for building a composer that reads a value at a path and applies a transformer.
+   */
+  static bind<A>(path: Path, fn: Transformer<[A], any>) {
+    return <T extends object>(obj: T): T =>
+      Composer.build<T>(c => c.bind<A>(path, fn))(obj);
   }
 
   /**
