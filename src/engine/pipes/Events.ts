@@ -13,7 +13,7 @@ export type EventState = {
 
 export type EventContext = {
   dispatch: PipeTransformer<[GameEvent]>;
-  handle: PipeTransformer<[string, (event: GameEvent) => Pipe]>;
+  handle: PipeTransformer<[string, PipeTransformer<[GameEvent]>]>;
 };
 
 const PLUGIN_NAMESPACE = 'core.events';
