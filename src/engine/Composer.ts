@@ -8,6 +8,10 @@ export type Transformer<TArgs extends unknown[], TObj> = (
   ...args: TArgs
 ) => (obj: TObj) => TObj;
 
+export type Compositor<T extends object> = (
+  composer: Composer<T>
+) => Composer<T>;
+
 /**
  * A generalized object manipulation utility
  * in a functional chaining style.
@@ -20,27 +24,17 @@ export class Composer<T extends object> {
   }
 
   /**
-   * A shortcut to easily build a mapping function for an object,
-   * using the created composer and returning the modified object.
-   */
-  static build<T extends object>(
-    fn: (composer: Composer<T>) => Composer<T>
-  ): (obj: T) => T {
-    return (obj: T) => fn(new Composer(obj)).get();
-  }
-
-  /**
-   * Modifies the object, then returns it in a new Composer instance.
-   */
-  map(fn: (obj: T) => T): Composer<T> {
-    return new Composer(fn(this.obj));
-  }
-
-  /**
    * Runs a composer function.
    */
   chain(fn: (composer: this) => this): this {
     return fn(this);
+  }
+
+  /**
+   * Shorthand for building a composer that runs a function.
+   */
+  static chain<T extends object>(fn: Compositor<T>): (obj: T) => T {
+    return (obj: T) => fn(new Composer(obj)).get();
   }
 
   /**
@@ -55,7 +49,7 @@ export class Composer<T extends object> {
    * Shorthand for building a composer that applies a series of mapping functions to the current object.
    */
   static pipe<T extends object>(...pipes: ((t: T) => T)[]): (obj: T) => T {
-    return Composer.build<T>(composer => composer.pipe(...pipes));
+    return Composer.chain<T>(composer => composer.pipe(...pipes));
   }
 
   /**
@@ -96,22 +90,27 @@ export class Composer<T extends object> {
    */
   static set<A>(path: Path, value: A) {
     return <T extends object>(obj: T): T =>
-      Composer.build<T>(c => c.set<A>(path, value))(obj);
+      Composer.chain<T>(c => c.set<A>(path, value))(obj);
   }
 
   /**
    * Runs a composer on a sub-object at the specified path,
    * then updates the original composer and returns it.
    */
-  zoom<A extends object>(
-    path: Path,
-    fn: (inner: Composer<A>) => Composer<A>
-  ): this {
+  zoom<A extends object>(path: Path, fn: Compositor<A>): this {
     const lens = lensFromPath<T, A>(path);
     const inner = new Composer<A>(lens.get(this.obj));
     const updated = fn(inner).get();
     this.obj = lens.set(updated)(this.obj);
     return this;
+  }
+
+  /**
+   * Shorthand for building a composer that zooms into a path
+   */
+  static zoom<A extends object>(path: Path, fn: Compositor<A>) {
+    return <T extends object>(obj: T): T =>
+      new Composer(obj).zoom(path, fn).get();
   }
 
   /**
@@ -127,7 +126,7 @@ export class Composer<T extends object> {
    */
   static over<A>(path: Path, fn: (a: A) => A) {
     return <T extends object>(obj: T): T =>
-      Composer.build<T>(c => c.over<A>(path, fn))(obj);
+      Composer.chain<T>(c => c.over<A>(path, fn))(obj);
   }
 
   /**
@@ -144,7 +143,7 @@ export class Composer<T extends object> {
    */
   static bind<A>(path: Path, fn: Transformer<[A], any>) {
     return <T extends object>(obj: T): T =>
-      Composer.build<T>(c => c.bind<A>(path, fn))(obj);
+      Composer.chain<T>(c => c.bind<A>(path, fn))(obj);
   }
 
   /**
@@ -155,9 +154,29 @@ export class Composer<T extends object> {
   }
 
   /**
+   * Shorthand for building a composer that runs a function when the condition is true.
+   */
+  static when<T extends object>(
+    condition: boolean,
+    fn: Compositor<T>
+  ): (obj: T) => T {
+    return (obj: T) => Composer.chain<T>(c => c.when(condition, fn))(obj);
+  }
+
+  /**
    * Runs a composer function when the condition is false.
    */
   unless(condition: boolean, fn: (c: this) => this): this {
     return this.when(!condition, fn);
+  }
+
+  /**
+   * Shorthand for building a composer that runs a function when the condition is false.
+   */
+  static unless<T extends object>(
+    condition: boolean,
+    fn: Compositor<T>
+  ): (obj: T) => T {
+    return Composer.when<T>(!condition, fn);
   }
 }
