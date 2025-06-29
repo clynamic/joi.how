@@ -28,31 +28,28 @@ export const schedulerPipe: Pipe = Composer.build(c => {
   ]);
 
   return c
-    .bind<number>(
-      ['context', 'deltaTime'],
-      delta => c =>
-        c.over<SchedulerState>(
-          ['state', PLUGIN_NAMESPACE],
-          ({ scheduled = [] }) => {
-            const remaining: ScheduledEvent[] = [];
-            const current: GameEvent[] = [];
+    .bind<number>(['context', 'deltaTime'], delta =>
+      Composer.over<SchedulerState>(
+        ['state', PLUGIN_NAMESPACE],
+        ({ scheduled = [] }) => {
+          const remaining: ScheduledEvent[] = [];
+          const current: GameEvent[] = [];
 
-            for (const entry of scheduled) {
-              const time = entry.duration - delta;
-              if (time <= 0) {
-                current.push(entry.event);
-              } else {
-                remaining.push({ ...entry, duration: time });
-              }
+          for (const entry of scheduled) {
+            const time = entry.duration - delta;
+            if (time <= 0) {
+              current.push(entry.event);
+            } else {
+              remaining.push({ ...entry, duration: time });
             }
-
-            return { scheduled: remaining, current };
           }
-        )
+
+          return { scheduled: remaining, current };
+        }
+      )
     )
-    .bind<GameEvent[]>(
-      ['state', PLUGIN_NAMESPACE, 'current'],
-      events => c => c.pipe(...events.map(dispatch))
+    .bind<GameEvent[]>(['state', PLUGIN_NAMESPACE, 'current'], events =>
+      Composer.pipe(...events.map(dispatch))
     )
 
     .set<SchedulerContext>(['context', PLUGIN_NAMESPACE], {
