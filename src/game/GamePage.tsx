@@ -7,6 +7,8 @@ import { PauseButton } from './components/Pause';
 import { fpsPipe } from '../engine/pipes/Fps';
 import { messageTestPipe } from './test';
 import { useSettingsPipe } from './pipes';
+import { GameIntensity } from './components/GameIntensity';
+import { intensityPipe } from './pipes/Intensity';
 
 const StyledGamePage = styled.div`
   position: relative;
@@ -73,10 +75,17 @@ export const GamePage = () => {
 
   return (
     <GameEngineProvider
-      pipes={[fpsPipe, messagesPipe, settingsPipe, messageTestPipe]}
+      pipes={[
+        fpsPipe,
+        messagesPipe,
+        settingsPipe,
+        intensityPipe,
+        messageTestPipe,
+      ]}
     >
       <StyledGamePage>
         <StyledTopBar>
+          <GameIntensity />
           <FpsDisplay />
           <GameMessages />
         </StyledTopBar>

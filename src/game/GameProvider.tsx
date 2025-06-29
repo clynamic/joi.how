@@ -115,6 +115,10 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
 
     return () => {
       cancelAnimationFrame(frameId);
+      lastTimeRef.current = null;
+      engineRef.current = null;
+      pendingImpulseRef.current = [];
+      activeImpulseRef.current = [];
     };
   }, [pipes]);
 
