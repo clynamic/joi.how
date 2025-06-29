@@ -20,7 +20,7 @@ export type SchedulerContext = {
   cancel: PipeTransformer<[string]>;
 };
 
-export const schedulerPipe: Pipe = Composer.build(c => {
+export const schedulerPipe: Pipe = Composer.chain(c => {
   const { dispatch, handle } = c.get<EventContext>([
     'context',
     'core',
