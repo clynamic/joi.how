@@ -45,6 +45,7 @@ export const messageTestPipe: Pipe = Composer.chain(c => {
                     title: 'Dismiss',
                     event: {
                       type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+                      payload: { id: messageId },
                     },
                   },
                 ],
@@ -73,11 +74,8 @@ export const messageTestPipe: Pipe = Composer.chain(c => {
     )
 
     .pipe(
-      handle(getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'), () =>
-        Composer.pipe(
-          sendMessage({ id: messageId, duration: 0 }),
-          sendMessage({ id: followupId, duration: 0 })
-        )
+      handle(getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'), event =>
+        Composer.pipe(sendMessage({ id: event.payload.id, duration: 0 }))
       )
     )
 
