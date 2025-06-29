@@ -37,14 +37,14 @@ export const readEventKey = (
 
 export const dispatchEvent: PipeTransformer<[GameEvent]> = event =>
   Composer.over<EventState['pending']>(
-    `state.${PLUGIN_NAMESPACE}.pending`,
+    ['state', PLUGIN_NAMESPACE, 'pending'],
     (pending = []) => [...pending, event]
   );
 
 export const handleEvent: PipeTransformer<
   [string, (event: GameEvent) => Pipe]
 > = (type, fn) =>
-  Composer.bind<EventState>(`state.${PLUGIN_NAMESPACE}`, ({ current = [] }) =>
+  Composer.bind<EventState>(['state', PLUGIN_NAMESPACE], ({ current = [] }) =>
     Composer.pipe(
       ...current
         .filter(event => {
