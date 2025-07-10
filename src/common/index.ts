@@ -1,5 +1,6 @@
 export * from './Button';
 export * from './ContentSection';
+export * from './ColorPicker';
 export * from './Dialog';
 export * from './Divider';
 export * from './Dropdown';

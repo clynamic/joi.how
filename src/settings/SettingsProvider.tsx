@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { GameEvent, GameHypnoType, PlayerBody, PlayerGender } from '../types';
+import { RGBA } from '../common';
 import { createLocalStorageProvider, VibrationMode } from '../utils';
 import { interpolateWith } from '../utils/translate';
 
@@ -14,6 +15,17 @@ export interface Settings {
   timeshift: number;
   events: GameEvent[];
   hypno: GameHypnoType;
+  hypnoSpiralEnabled: boolean;
+  hypnoSpiralSpinSpeed: number;
+  hypnoSpiralThrobSpeed: number;
+  hypnoSpiralThrobStrength: number;
+  hypnoSpiralZoom: number;
+  hypnoSpiralPrimary: RGBA;
+  hypnoSpiralSecondary: RGBA;
+  hypnoSpiralRainbowColors: boolean;
+  hypnoSpiralRainbowSaturation: number;
+  hypnoSpiralRainbowLightness: number;
+  hypnoSpiralRainbowHueSpeed: number;
   gender: PlayerGender;
   body: PlayerBody;
   highRes: boolean;
@@ -32,6 +44,17 @@ export const defaultSettings: Settings = {
   timeshift: 0.5,
   events: Object.values(GameEvent),
   hypno: GameHypnoType.joi,
+  hypnoSpiralEnabled: true,
+  hypnoSpiralSpinSpeed: 1,
+  hypnoSpiralThrobSpeed: 1,
+  hypnoSpiralThrobStrength: 1,
+  hypnoSpiralZoom: 1,
+  hypnoSpiralPrimary: { r: 65, g: 105, b: 225, a: 30 },
+  hypnoSpiralSecondary: { r: 0, g: 0, b: 0, a: 30 },
+  hypnoSpiralRainbowColors: false,
+  hypnoSpiralRainbowSaturation: 100,
+  hypnoSpiralRainbowLightness: 50,
+  hypnoSpiralRainbowHueSpeed: 1,
   gender: PlayerGender.male,
   body: PlayerBody.penis,
   highRes: false,
