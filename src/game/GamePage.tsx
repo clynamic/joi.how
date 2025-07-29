@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import {
   GameHypno,
+  GameHypnoSpiral,
   GameImages,
   GameMeter,
   GameIntensity,
@@ -93,6 +94,7 @@ export const GamePage = () => {
           <GameEvents />
         </StyledLogicElements>
         <GameImages />
+        <GameHypnoSpiral />
         <StyledTopBar>
           <GameInstructions />
           <GameMessages />
