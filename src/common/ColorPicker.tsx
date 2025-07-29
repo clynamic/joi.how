@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
+// 0-255
 export interface RGBA {
   r: number;
   g: number;
@@ -195,7 +196,7 @@ function rgbaToHex({ r, g, b, a }: RGBA): string {
 function rgbaToHsv({ r, g, b }: RGBA): [number, number, number] {
   r /= 255;
   g /= 255;
-  g /= 255;
+  b /= 255;
   const max = Math.max(r, g, b),
     min = Math.min(r, g, b),
     delta = max - min,
@@ -252,7 +253,7 @@ function hsvToRgba(h: number, s: number, v: number, a: number): RGBA {
 }
 
 function rgbaToCss({ r, g, b, a }: RGBA): string {
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
+  return `rgba(${r}, ${g}, ${b}, ${a / 255})`;
 }
 
 function hexToRgba(hex: string): RGBA {
@@ -308,7 +309,6 @@ export const ColorPicker: React.FC<ColorPickerTileProps> = ({
 
   const updateColor = (h: number, s: number, v: number, a: number) => {
     const newColor = hsvToRgba(h, s, v, a);
-    setHex(rgbaToHex(newColor));
     onChange(newColor);
   };
 
@@ -317,8 +317,6 @@ export const ColorPicker: React.FC<ColorPickerTileProps> = ({
     const rect = areaRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-    setSaturation(x);
-    setValue(1 - y);
     updateColor(hue, x, 1 - y, alpha);
   };
 
@@ -411,9 +409,7 @@ export const ColorPicker: React.FC<ColorPickerTileProps> = ({
             onChange={e => {
               const val = e.target.value.replace(/^#/, '');
               if (/^[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/.test(val)) {
-                const rgba = hexToRgba(`#${val}`);
-                setHex(`#${val}`);
-                onChange(rgba);
+                onChange(hexToRgba(`#${val}`));
               } else if (val.length <= 8) setHex(`#${val}`);
             }}
             spellCheck={false}

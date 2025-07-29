@@ -74,17 +74,22 @@ export const GameHypnoSpiral = () => {
   }
 
   useEffect(() => {
-    const animFrame = () => {
-      if (targetRef.current != null) {
-        setDimensions({
-          width: targetRef.current.offsetWidth,
-          height: targetRef.current.offsetHeight,
-        });
-        requestAnimationFrame(animFrame);
-      }
+    const nextFrame = () => {
+      // redraw
+      setDimensions(d => ({ ...d }));
+      requestAnimationFrame(nextFrame);
     };
+    requestAnimationFrame(nextFrame);
+  }, []);
 
-    requestAnimationFrame(animFrame);
+  useEffect(() => {
+    if (!targetRef.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setDimensions({ width, height });
+    });
+    observer.observe(targetRef.current);
+    return () => observer.disconnect();
   }, [targetRef]);
 
   return (
