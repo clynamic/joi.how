@@ -22,38 +22,33 @@ export const messageTestPipe: Pipe = Composer.chain(c => {
   ]);
 
   return c
-    .bind<{ sent: boolean }>(
-      ['state', MSG_TEST_NAMESPACE],
-      ({ sent = false }) =>
-        Composer.unless(sent, c =>
-          c
-            .pipe(
-              sendMessage({
-                id: messageId,
-                title: 'Test Message',
-                prompts: [
-                  {
-                    title: 'Acknowledge',
-                    event: {
-                      type: getEventKey(
-                        MSG_TEST_NAMESPACE,
-                        'acknowledgeMessage'
-                      ),
-                    },
+    .bind<boolean>(['state', MSG_TEST_NAMESPACE, 'sent'], sent =>
+      Composer.unless(sent, c =>
+        c
+          .pipe(
+            sendMessage({
+              id: messageId,
+              title: 'Test Message',
+              prompts: [
+                {
+                  title: 'Acknowledge',
+                  event: {
+                    type: getEventKey(MSG_TEST_NAMESPACE, 'acknowledgeMessage'),
                   },
-                  {
-                    title: 'Dismiss',
-                    event: {
-                      type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
-                      payload: { id: messageId },
-                    },
+                },
+                {
+                  title: 'Dismiss',
+                  event: {
+                    type: getEventKey(MSG_TEST_NAMESPACE, 'dismissMessage'),
+                    payload: { id: messageId },
                   },
-                ],
-              })
-            )
+                },
+              ],
+            })
+          )
 
-            .set(['state', MSG_TEST_NAMESPACE, 'sent'], true)
-        )
+          .set(['state', MSG_TEST_NAMESPACE, 'sent'], true)
+      )
     )
 
     .pipe(

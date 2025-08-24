@@ -133,7 +133,7 @@ export class Composer<T extends object> {
    * Runs a composer function with the value at the specified path.
    */
   bind<A>(path: Path, fn: Transformer<[A], T>): this {
-    const value = lensFromPath<T, A>(path).get(this.obj) ?? ({} as A);
+    const value = lensFromPath<T, A>(path).get(this.obj);
     this.obj = fn(value)(this.obj);
     return this;
   }
