@@ -14,8 +14,8 @@ export const FpsDisplay = () => {
     <div
       style={{
         position: 'absolute',
-        top: 8,
-        right: 8,
+        top: 90,
+        left: 8,
         background: 'black',
         color: 'white',
         padding: '4px 8px',

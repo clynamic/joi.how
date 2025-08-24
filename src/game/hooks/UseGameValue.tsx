@@ -1,6 +1,6 @@
 import { Composer } from '../../engine/Composer';
 import { Path } from '../../engine/Lens';
-import { useGameEngine } from '../GameProvider';
+import { useGameEngine } from './UseGameEngine';
 
 export const useGameState = <T = any,>(path: Path): T => {
   const { state } = useGameEngine();
