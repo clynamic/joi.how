@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  ReactNode,
-} from 'react';
+import { createContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { GameEngine, GameState, Pipe, GameContext } from '../engine';
 import { eventPipe } from '../engine/pipes/Events';
 import { schedulerPipe } from '../engine/pipes/Scheduler';
@@ -39,17 +32,9 @@ type GameEngineContextValue = {
   injectImpulse: (pipe: Pipe) => void;
 };
 
-const GameEngineContext = createContext<GameEngineContextValue | undefined>(
-  undefined
-);
-
-// eslint-disable-next-line react-refresh/only-export-components
-export function useGameEngine() {
-  const ctx = useContext(GameEngineContext);
-  if (!ctx)
-    throw new Error('useGameEngine must be used inside GameEngineProvider');
-  return ctx;
-}
+export const GameEngineContext = createContext<
+  GameEngineContextValue | undefined
+>(undefined);
 
 type Props = {
   children: ReactNode;
