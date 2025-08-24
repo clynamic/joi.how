@@ -5,8 +5,7 @@ import { messagesPipe } from '../engine/pipes/Messages';
 import { GameMessages } from './components/GameMessages';
 import { PauseButton } from './components/Pause';
 import { fpsPipe } from '../engine/pipes/Fps';
-import { messageTestPipe } from './test';
-import { useSettingsPipe } from './pipes';
+import { useSettingsPipe, warmupPipe } from './pipes';
 import { GameIntensity } from './components/GameIntensity';
 import { intensityPipe } from './pipes/Intensity';
 import { imagePipe, randomImagesPipe } from './pipes';
@@ -86,7 +85,8 @@ export const GamePage = () => {
         intensityPipe,
         imagePipe,
         randomImagesPipe,
-        messageTestPipe,
+        warmupPipe,
+        // messageTestPipe,
       ]}
     >
       <StyledGamePage>

@@ -4,6 +4,10 @@ import { EventContext, GameEvent, getEventKey } from './Events';
 
 const PLUGIN_NAMESPACE = 'core.scheduler';
 
+export const getScheduleKey = (namespace: string, key: string): string => {
+  return `${namespace}/schedule/${key}`;
+};
+
 export type ScheduledEvent = {
   id?: string;
   duration: number;
