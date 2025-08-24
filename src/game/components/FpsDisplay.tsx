@@ -1,9 +1,14 @@
-import { useGameEngine } from '../GameProvider';
+import { FpsContext } from '../../engine';
+import { useGameContext } from '../hooks';
 
 export const FpsDisplay = () => {
-  const { context } = useGameEngine();
+  const { history, value } = useGameContext<FpsContext>('core.fps');
 
-  const fps = context?.core?.fps ? Math.round(context.core.fps) : null;
+  const fps = Math.round(
+    history?.length > 0
+      ? history.reduce((sum, fps) => sum + fps, 0) / history.length
+      : value ?? 0
+  );
 
   return (
     <div
