@@ -9,7 +9,7 @@ import { messageTestPipe } from './test';
 import { useSettingsPipe } from './pipes';
 import { GameIntensity } from './components/GameIntensity';
 import { intensityPipe } from './pipes/Intensity';
-import { imagePipe } from './pipes/Image';
+import { imagePipe, randomImagesPipe } from './pipes';
 import { GameImages } from './components/GameImages';
 
 const StyledGamePage = styled.div`
@@ -83,6 +83,7 @@ export const GamePage = () => {
         settingsPipe,
         intensityPipe,
         imagePipe,
+        randomImagesPipe,
         messageTestPipe,
       ]}
     >
