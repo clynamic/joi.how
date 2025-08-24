@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
-import { useGameEngine } from '../GameProvider';
+import { useGameEngine } from '../hooks/UseGameEngine';
 
 const PauseContainer = styled.div`
   position: absolute;
