@@ -1,16 +1,27 @@
 import { useEffect, useRef } from 'react';
-import { useSettings } from '../../settings';
+import { useSettings, useImages } from '../../settings';
 import { Composer, Pipe } from '../../engine';
 
 export const useSettingsPipe = (): Pipe => {
   const [settings] = useSettings();
-  const ref = useRef(settings);
+  const [images] = useImages();
+  const settingsRef = useRef(settings);
+  const imagesRef = useRef(images);
 
   useEffect(() => {
-    if (ref.current !== settings) {
-      ref.current = settings;
+    if (settingsRef.current !== settings) {
+      settingsRef.current = settings;
     }
   }, [settings]);
 
-  return Composer.set(['context', 'settings'], ref.current);
+  useEffect(() => {
+    if (imagesRef.current !== images) {
+      imagesRef.current = images;
+    }
+  }, [images]);
+
+  return Composer.pipe(
+    Composer.set(['context', 'settings'], settingsRef.current),
+    Composer.set(['context', 'images'], imagesRef.current)
+  );
 };

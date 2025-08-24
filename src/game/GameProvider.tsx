@@ -43,6 +43,7 @@ const GameEngineContext = createContext<GameEngineContextValue | undefined>(
   undefined
 );
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useGameEngine() {
   const ctx = useContext(GameEngineContext);
   if (!ctx)

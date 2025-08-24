@@ -9,6 +9,8 @@ import { messageTestPipe } from './test';
 import { useSettingsPipe } from './pipes';
 import { GameIntensity } from './components/GameIntensity';
 import { intensityPipe } from './pipes/Intensity';
+import { imagePipe } from './pipes/Image';
+import { GameImages } from './components/GameImages';
 
 const StyledGamePage = styled.div`
   position: relative;
@@ -80,10 +82,12 @@ export const GamePage = () => {
         messagesPipe,
         settingsPipe,
         intensityPipe,
+        imagePipe,
         messageTestPipe,
       ]}
     >
       <StyledGamePage>
+        <GameImages />
         <StyledTopBar>
           <GameIntensity />
           <FpsDisplay />
