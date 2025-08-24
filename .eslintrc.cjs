@@ -16,5 +16,8 @@ module.exports = {
       { allowConstantExport: true },
     ],
     '@typescript-eslint/no-unused-vars': 'warn',
+    // I am going to be real with you, this pipe system is not going to be very typed.
+    // Lets just. put this aside for now.
+    '@typescript-eslint/no-explicit-any': 'off',
   },
 };
