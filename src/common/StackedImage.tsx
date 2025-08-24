@@ -37,7 +37,7 @@ export const StackedImage: React.FC<ImageProps> = ({
   useEffect(() => {
     setIsPreviewLoaded(false);
     setIsFullLoaded(false);
-  }, [item]);
+  }, [item.id]);
 
   return (
     <StyledStackedImage>

@@ -1,11 +1,11 @@
 import styled from 'styled-components';
-import { useImages, useSetting } from '../../settings';
-import { useGameValue } from '../GameProvider';
+import { useSetting } from '../../settings';
 import { motion } from 'framer-motion';
 import { StackedImage } from '../../common';
-import { useAutoRef, useImagePreloader, useLooping } from '../../utils';
+import { useImagePreloader } from '../../utils';
 import { ImageSize } from '../../types';
-import { useCallback, useMemo, useEffect } from 'react';
+import { useGameState } from '../hooks';
+import { ImageState } from '../pipes';
 
 const StyledGameImages = styled.div`
   position: absolute;
@@ -44,58 +44,16 @@ const StyledBackgroundImage = motion(styled.div`
 `);
 
 export const GameImages = () => {
-  const [images] = useImages();
-  const [currentImage, setCurrentImage] = useGameValue('currentImage');
-  const [seenImages, setSeenImages] = useGameValue('seenImages');
-  const [nextImages, setNextImages] = useGameValue('nextImages');
-  const [intensity] = useGameValue('intensity');
+  const { currentImage, nextImages = [] } = useGameState<ImageState>([
+    'core.images',
+  ]);
+  const { intensity } = useGameState(['core.intensity']);
   const [videoSound] = useSetting('videoSound');
   const [highRes] = useSetting('highRes');
 
   useImagePreloader(nextImages, highRes ? ImageSize.full : ImageSize.preview);
 
-  const imagesTracker = useAutoRef({
-    images,
-    currentImage,
-    setCurrentImage,
-    seenImages,
-    setSeenImages,
-    nextImages,
-    setNextImages,
-  });
-
-  const switchImage = useCallback(() => {
-    const {
-      images,
-      currentImage,
-      setCurrentImage,
-      seenImages,
-      setSeenImages,
-      nextImages,
-      setNextImages,
-    } = imagesTracker.current;
-
-    let next = nextImages;
-    if (next.length <= 0) {
-      next = images.sort(() => Math.random() - 0.5).slice(0, 3);
-    }
-    const seen = [...seenImages, ...(currentImage ? [currentImage] : [])];
-    if (seen.length > images.length / 2) {
-      seen.shift();
-    }
-    const unseen = images.filter(i => !seen.includes(i));
-    setCurrentImage(next.shift());
-    setSeenImages(seen);
-    setNextImages([...next, unseen[Math.floor(Math.random() * unseen.length)]]);
-  }, [imagesTracker]);
-
-  const switchDuration = useMemo(() => {
-    return Math.max((100 - intensity) * 80, 2000);
-  }, [intensity]);
-
-  useEffect(() => switchImage(), [switchImage]);
-
-  useLooping(switchImage, switchDuration);
+  const switchDuration = Math.max((100 - intensity * 100) * 80, 2000);
 
   return (
     <StyledGameImages>
