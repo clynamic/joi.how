@@ -11,6 +11,7 @@ import { GameIntensity } from './components/GameIntensity';
 import { intensityPipe } from './pipes/Intensity';
 import { imagePipe, randomImagesPipe } from './pipes';
 import { GameImages } from './components/GameImages';
+import { phasePipe } from './pipes/Phase';
 
 const StyledGamePage = styled.div`
   position: relative;
@@ -81,6 +82,7 @@ export const GamePage = () => {
         fpsPipe,
         messagesPipe,
         settingsPipe,
+        phasePipe,
         intensityPipe,
         imagePipe,
         randomImagesPipe,
