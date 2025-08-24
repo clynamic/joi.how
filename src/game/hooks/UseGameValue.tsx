@@ -2,7 +2,7 @@ import { Composer } from '../../engine/Composer';
 import { Path } from '../../engine/Lens';
 import { useGameEngine } from '../GameProvider';
 
-export const useGameValue = <T = any,>(path: Path): T => {
+export const useGameState = <T = any,>(path: Path): T => {
   const { state } = useGameEngine();
   if (!state) {
     return {} as T;

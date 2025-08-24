@@ -5,7 +5,7 @@ import { useTranslate } from '../../settings';
 
 import { defaultTransition, playTone } from '../../utils';
 import { GameMessage, MessageState } from '../../engine/pipes/Messages';
-import { useGameValue } from '../hooks/UseGameValue';
+import { useGameState } from '../hooks/UseGameValue';
 
 import _ from 'lodash';
 import { useDispatchEvent } from '../hooks/UseDispatchEvent';
@@ -59,7 +59,7 @@ const StyledGameMessageButton = motion(styled.button`
 `);
 
 export const GameMessages = () => {
-  const { messages } = useGameValue<MessageState>('core.messages');
+  const { messages } = useGameState<MessageState>('core.messages');
   const { dispatchEvent } = useDispatchEvent();
   const translate = useTranslate();
 
