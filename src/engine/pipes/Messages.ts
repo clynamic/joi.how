@@ -1,7 +1,7 @@
 import { Pipe, PipeTransformer } from '../State';
 import { Composer } from '../Composer';
-import { EventContext, getEventKey, GameEvent } from './Events';
-import { SchedulerContext } from './Scheduler';
+import { getEventKey, GameEvent, Events } from './Events';
+import { Scheduler } from './Scheduler';
 
 export interface GameMessagePrompt {
   title: string;
@@ -28,88 +28,72 @@ export type MessageState = {
   messages: GameMessage[];
 };
 
-export const messagesPipe: Pipe = Composer.chain(c => {
-  const { dispatch, handle } = c.get<EventContext>([
-    'context',
-    'core',
-    'events',
-  ]);
+export class Messages {
+  static send(message: PartialGameMessage): Pipe {
+    return Composer.bind<MessageContext>(
+      ['context', PLUGIN_NAMESPACE],
+      ({ sendMessage }) => sendMessage(message)
+    );
+  }
+}
 
-  return c
-    .set<MessageContext>(['context', PLUGIN_NAMESPACE], {
-      sendMessage: msg =>
-        Composer.pipe(
-          dispatch({
-            type: getEventKey(PLUGIN_NAMESPACE, 'sendMessage'),
-            payload: msg,
-          })
-        ),
-    })
+export const messagesPipe: Pipe = Composer.pipe(
+  Composer.set<MessageContext>(['context', PLUGIN_NAMESPACE], {
+    sendMessage: msg =>
+      Events.dispatch({
+        type: getEventKey(PLUGIN_NAMESPACE, 'sendMessage'),
+        payload: msg,
+      }),
+  }),
 
-    .pipe(
-      handle(getEventKey(PLUGIN_NAMESPACE, 'sendMessage'), event =>
-        Composer.chain(c => {
+  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'sendMessage'), event =>
+    Composer.pipe(
+      Composer.over<MessageState>(
+        ['state', PLUGIN_NAMESPACE],
+        ({ messages = [] }) => {
+          const patch = event.payload as GameMessage;
+          const index = messages.findIndex(m => m.id === patch.id);
+          const existing = messages[index];
+
+          if (!existing && !patch.title) return { messages };
+
+          const updated = [...messages];
+          updated[index < 0 ? updated.length : index] = {
+            ...existing,
+            ...patch,
+          };
+
+          return { messages: updated };
+        }
+      ),
+
+      Composer.bind<MessageState>(
+        ['state', PLUGIN_NAMESPACE],
+        ({ messages = [] }) => {
           const messageId = (event.payload as GameMessage).id;
-          const { schedule, cancel } = c.get<SchedulerContext>([
-            'context',
-            'core.scheduler',
-          ]);
-
-          return c
-            .over<MessageState>(
-              ['state', PLUGIN_NAMESPACE],
-              ({ messages = [] }) => {
-                const patch = event.payload as GameMessage;
-                const index = messages.findIndex(m => m.id === patch.id);
-                const existing = messages[index];
-
-                if (!existing && !patch.title) return { messages };
-
-                const updated = [...messages];
-                updated[index < 0 ? updated.length : index] = {
-                  ...existing,
-                  ...patch,
-                };
-
-                return { messages: updated };
-              }
-            )
-
-            .bind<MessageState>(
-              ['state', PLUGIN_NAMESPACE],
-              ({ messages = [] }) =>
-                Composer.chain(c => {
-                  const updated = messages.find(m => m.id === messageId);
-                  const scheduleId = `${PLUGIN_NAMESPACE}.message.${messageId}`;
-                  return c.pipe(
-                    updated?.duration !== undefined
-                      ? schedule({
-                          id: scheduleId,
-                          duration: updated!.duration!,
-                          event: {
-                            type: getEventKey(
-                              PLUGIN_NAMESPACE,
-                              'expireMessage'
-                            ),
-                            payload: updated.id,
-                          },
-                        })
-                      : cancel(scheduleId)
-                  );
-                })
-            );
-        })
+          const updated = messages.find(m => m.id === messageId);
+          const scheduleId = `${PLUGIN_NAMESPACE}.message.${messageId}`;
+          return updated?.duration !== undefined
+            ? Scheduler.schedule({
+                id: scheduleId,
+                duration: updated!.duration!,
+                event: {
+                  type: getEventKey(PLUGIN_NAMESPACE, 'expireMessage'),
+                  payload: updated.id,
+                },
+              })
+            : Scheduler.cancel(scheduleId);
+        }
       )
     )
+  ),
 
-    .pipe(
-      handle(getEventKey(PLUGIN_NAMESPACE, 'expireMessage'), event =>
-        Composer.over<MessageState>(
-          ['state', PLUGIN_NAMESPACE],
-          ({ messages = [] }) => ({
-            messages: messages.filter(m => m.id !== event.payload),
-          })
-        )
-      )
-    );
-});
+  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'expireMessage'), event =>
+    Composer.over<MessageState>(
+      ['state', PLUGIN_NAMESPACE],
+      ({ messages = [] }) => ({
+        messages: messages.filter(m => m.id !== event.payload),
+      })
+    )
+  )
+);
