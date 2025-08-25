@@ -115,9 +115,9 @@ export class Composer<T extends object> {
   /**
    * Shorthand for building a composer that zooms into a path
    */
-  static zoom<A extends object>(path: Path, fn: Compositor<A>) {
+  static zoom<A extends object>(path: Path, fn: (a: A) => A) {
     return <T extends object>(obj: T): T =>
-      new Composer(obj).zoom(path, fn).get();
+      Composer.chain<T>(c => c.zoom<A>(path, c => c.pipe(fn)))(obj);
   }
 
   /**
@@ -165,9 +165,9 @@ export class Composer<T extends object> {
    */
   static when<T extends object>(
     condition: boolean,
-    fn: Compositor<T>
+    fn: (obj: T) => T
   ): (obj: T) => T {
-    return (obj: T) => Composer.chain<T>(c => c.when(condition, fn))(obj);
+    return Composer.chain<T>(c => c.when(condition, c => c.pipe(fn)));
   }
 
   /**
@@ -182,7 +182,7 @@ export class Composer<T extends object> {
    */
   static unless<T extends object>(
     condition: boolean,
-    fn: Compositor<T>
+    fn: (obj: T) => T
   ): (obj: T) => T {
     return Composer.when<T>(!condition, fn);
   }

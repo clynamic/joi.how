@@ -78,14 +78,16 @@ export class Events {
  * This is important because pipes later in the pipeline may add new events.
  */
 export const eventPipe: Pipe = Composer.pipe(
-  Composer.zoom<GameState>('state', state =>
-    state.over<EventState>(PLUGIN_NAMESPACE, ({ pending = [] }) => ({
+  Composer.zoom<GameState>(
+    'state',
+    Composer.over<EventState>(PLUGIN_NAMESPACE, ({ pending = [] }) => ({
       pending: [],
       current: pending,
     }))
   ),
-  Composer.zoom<GameContext>('context', context =>
-    context.set<EventContext>(PLUGIN_NAMESPACE, {
+  Composer.zoom<GameContext>(
+    'context',
+    Composer.set<EventContext>(PLUGIN_NAMESPACE, {
       dispatch: dispatchEvent,
       handle: handleEvent,
     })
