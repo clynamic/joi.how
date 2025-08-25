@@ -1,18 +1,11 @@
-import {
-  faArrowUpRightFromSquare,
-  faTrash,
-  faCheckSquare,
-} from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
-import { ImageItem } from '../types';
-import { Dialog } from './Dialog';
-import { ImageSize } from './Image';
-import { ToggleTile } from './ToggleTile';
-import { Surrounded } from './Trailing';
-import styled from 'styled-components';
+import '@awesome.me/webawesome/dist/components/card/card.js';
+import { useCallback, useEffect, useState } from 'react';
+import { ImageItem, ImageSize } from '../types';
 import { StackedImage } from './StackedImage';
 import { useLocalImages } from '../local/LocalProvider';
+import styled from 'styled-components';
+import { ToggleTile } from './ToggleTile';
+import { WaDialog, WaCard } from '@awesome.me/webawesome/dist/react';
 
 export interface ImageDialogProps {
   image?: ImageItem;
@@ -22,34 +15,37 @@ export interface ImageDialogProps {
   loud?: boolean;
 }
 
-const StyledImageDialogContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 400px;
-  max-width: 100%;
-  max-height: 100%;
-  overflow: auto;
+const StyledImageDialog = styled(WaDialog)`
+  &::part(dialog) {
+    background-color: transparent;
+  }
+
+  wa-card {
+    background-color: var(--wa-color-surface-raised);
+  }
+  wa-card::part(body) {
+    padding: var(--wa-space-xs);
+  }
 `;
 
-const StyledImageDialogImage = styled(StackedImage)`
-  max-height: 400px;
-  object-fit: contain;
+const StyledTitle = styled.h4`
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
 `;
 
-const StyledImageDialogActions = styled.div`
-  background: var(--card-background);
-  border-radius: var(--border-radius);
-  padding: 8px;
-  margin-top: 8px;
+const StyledCaption = styled.p`
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.7;
 `;
 
-export const ImageDialog: React.FC<PropsWithChildren<ImageDialogProps>> = ({
+export const ImageDialog: React.FC<ImageDialogProps> = ({
   image,
   onClose,
   onSelect,
   onDelete,
   loud,
-  children,
 }) => {
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState<ImageItem | null>(null);
@@ -57,77 +53,68 @@ export const ImageDialog: React.FC<PropsWithChildren<ImageDialogProps>> = ({
 
   useEffect(() => {
     setVisible(!!image);
-    if (image) {
-      setCurrent(image);
-    }
+    if (image) setCurrent(image);
   }, [image]);
 
-  const onVisibleChange = useCallback(
-    (visible: boolean) => {
-      setVisible(visible);
-      if (!visible) {
+  const handleOpenChange = useCallback(
+    (event: any) => {
+      const isOpen = event.target.open;
+      setVisible(isOpen);
+      if (!isOpen) {
         setCurrent(null);
+        onClose?.();
       }
     },
-    [setVisible, setCurrent]
+    [onClose]
   );
 
   return (
-    <Dialog
-      dismissable
-      onVisibleChange={onVisibleChange}
-      background='transparent'
+    <StyledImageDialog
       open={visible}
-      onOpenChange={value => value || onClose?.()}
-      content={
-        current && (
-          <StyledImageDialogContent>
-            <StyledImageDialogImage
-              item={current}
-              size={ImageSize.full}
-              playable
-              loud={loud}
-            />
-            <StyledImageDialogActions>
-              <ToggleTile
-                onClick={async () =>
-                  window.open(await resolveUrl(current.source), '_blank')
-                }
-              >
-                <Surrounded
-                  trailing={<FontAwesomeIcon icon={faArrowUpRightFromSquare} />}
-                >
-                  <strong>Browse</strong>
-                  <p>Open source in new tab</p>
-                </Surrounded>
-              </ToggleTile>
-              <ToggleTile
-                onClick={() => {
-                  onSelect?.();
-                  onClose?.();
-                }}
-              >
-                <Surrounded trailing={<FontAwesomeIcon icon={faCheckSquare} />}>
-                  <strong>Select</strong>
-                  <p>Start multi-select here</p>
-                </Surrounded>
-              </ToggleTile>
-              <ToggleTile
-                onClick={() => {
-                  onDelete?.();
-                  onClose?.();
-                }}
-              >
-                <Surrounded trailing={<FontAwesomeIcon icon={faTrash} />}>
-                  <strong>Delete</strong>
-                  <p>Remove from library</p>
-                </Surrounded>
-              </ToggleTile>
-            </StyledImageDialogActions>
-          </StyledImageDialogContent>
-        )
-      }
-      children={children}
-    />
+      lightDismiss
+      onWaAfterHide={handleOpenChange}
+    >
+      {current && (
+        <div className='wa-stack'>
+          <StackedImage
+            item={current}
+            size={ImageSize.full}
+            playable
+            loud={loud}
+            style={{ maxHeight: 400, objectFit: 'contain' }}
+          />
+          <WaCard appearance='filled'>
+            <ToggleTile
+              onClick={async () =>
+                window.open(await resolveUrl(current.source), '_blank')
+              }
+            >
+              <StyledTitle>Browse</StyledTitle>
+              <StyledCaption>Open source in new tab</StyledCaption>
+            </ToggleTile>
+
+            <ToggleTile
+              onClick={() => {
+                onSelect?.();
+                onClose?.();
+              }}
+            >
+              <StyledTitle>Select</StyledTitle>
+              <StyledCaption>Start multi-select here</StyledCaption>
+            </ToggleTile>
+
+            <ToggleTile
+              onClick={() => {
+                onDelete?.();
+                onClose?.();
+              }}
+            >
+              <StyledTitle>Delete</StyledTitle>
+              <StyledCaption>Remove from library</StyledCaption>
+            </ToggleTile>
+          </WaCard>
+        </div>
+      )}
+    </StyledImageDialog>
   );
 };

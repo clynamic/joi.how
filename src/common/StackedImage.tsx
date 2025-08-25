@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { Image, ImageProps, ImageSize } from './Image';
+import { ImageSize } from '../types';
+import { Image, ImageProps } from './Image';
 import { useState, useCallback, useEffect } from 'react';
 
 const StyledStackedImage = styled.div`

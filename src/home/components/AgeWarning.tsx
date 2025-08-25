@@ -1,8 +1,23 @@
-import { ContentSection, Dialog } from '../../common';
+import { ContentSection } from '../../common';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBan, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useHomeValue } from '../HomeProvider';
+import { WaDialog } from '@awesome.me/webawesome/dist/react';
+
+const StyledAgeWarningDialog = styled(WaDialog)`
+  &::part(dialog) {
+    box-shadow: none;
+  }
+
+  &::part(dialog)::backdrop {
+    backdrop-filter: blur(20px);
+  }
+
+  &::part(close-button) {
+    display: none;
+  }
+`;
 
 const StyledAgeWarning = styled.div`
   font-size: 1rem;
@@ -45,38 +60,34 @@ export const AgeWarning = () => {
   const [ageCheckConfirm, setAgeCheckConfirm] = useHomeValue('ageCheckConfirm');
 
   return (
-    <Dialog
+    <StyledAgeWarningDialog
       open={!ageCheckConfirm}
-      onOpenChange={setAgeCheckConfirm}
-      closable={false}
-      title={'Age Warning'}
-      barrierColor='var(--card-background)'
-      content={
-        <StyledAgeWarning>
-          <ContentSection style={{ margin: 0 }}>
-            <p>
-              This app is meant for adults only, and should not be used by
-              anyone under the age of 18.
-            </p>
-            <StyledAgeWarningChoice>
-              <StyledAgeWarningButton
-                onClick={() => {
-                  window.location.href = 'https://www.google.com';
-                }}
-              >
-                <p>I am not 18</p>
-                <FontAwesomeIcon icon={faBan} />
-              </StyledAgeWarningButton>
-              <StyledAgeWarningButton onClick={() => setAgeCheckConfirm(true)}>
-                <p>I am 18 or older</p>
-                <FontAwesomeIcon icon={faCheck} />
-              </StyledAgeWarningButton>
-            </StyledAgeWarningChoice>
-          </ContentSection>
-        </StyledAgeWarning>
-      }
+      onWaHide={() => setAgeCheckConfirm(true)}
+      className='dialog-deny-close'
+      label={'Age Warning'}
     >
-      <div style={{ display: 'none' }} />
-    </Dialog>
+      <StyledAgeWarning>
+        <ContentSection style={{ margin: 0 }}>
+          <p>
+            This app is meant for adults only, and should not be used by anyone
+            under the age of 18.
+          </p>
+          <StyledAgeWarningChoice>
+            <StyledAgeWarningButton
+              onClick={() => {
+                window.location.href = 'https://www.google.com';
+              }}
+            >
+              <p>I am not 18</p>
+              <FontAwesomeIcon icon={faBan} />
+            </StyledAgeWarningButton>
+            <StyledAgeWarningButton onClick={() => setAgeCheckConfirm(true)}>
+              <p>I am 18 or older</p>
+              <FontAwesomeIcon icon={faCheck} />
+            </StyledAgeWarningButton>
+          </StyledAgeWarningChoice>
+        </ContentSection>
+      </StyledAgeWarning>
+    </StyledAgeWarningDialog>
   );
 };

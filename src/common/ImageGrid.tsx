@@ -1,9 +1,9 @@
 import styled from 'styled-components';
-import { ImageItem } from '../types';
+import { ImageItem, ImageSize } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState } from 'react';
 import { faCheck, faImage } from '@fortawesome/free-solid-svg-icons';
-import { Image, ImageSize } from './Image';
+import { Image } from './Image';
 import {
   autoUpdate,
   flip,

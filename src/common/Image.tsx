@@ -1,17 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
 
 import styled from 'styled-components';
-import { ImageItem } from '../types';
+import { ImageItem, ImageSize } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useRef, useState } from 'react';
 import { useLocalImages } from '../local/LocalProvider';
-
-export enum ImageSize {
-  thumbnail = 'thumbnail',
-  preview = 'preview',
-  full = 'full',
-}
 
 export interface ImageProps
   extends Omit<
@@ -109,7 +103,7 @@ export const Image: React.FC<ImageProps> = ({
         loop
         muted={!loud}
         playsInline
-        onLoadedMetadata={event => {
+        onLoadedMetadata={(event: React.SyntheticEvent<HTMLVideoElement>) => {
           if (randomStart) {
             const video = videoRef.current;
             if (video) {

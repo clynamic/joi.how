@@ -27,45 +27,27 @@
   color-scheme: dark;
 }
 
-* {
-  box-sizing: border-box;
+:root {
+  --wa-color-surface-default: var(--background);
+  --wa-color-surface-raised: var(--card-background);
+  --wa-color-surface-lowered: var(--section-background);
+  --wa-color-text-normal: var(--text-color);
+  --wa-color-text-quiet: var(--card-color);
+  --wa-color-text-link: var(--primary);
+
+  --wa-color-overlay-modal: var(--overlay-background);
+
+  --wa-color-brand-fill-normal: var(--primary);
+  --wa-color-brand-on-normal: var(--text-color);
+  --wa-color-brand-border-normal: var(--primary);
+
+  --wa-color-neutral-fill-quiet: var(--button-background);
+  --wa-color-neutral-on-quiet: var(--button-color);
+
+  --wa-font-family-body: 'Helvetica Neue', Helvetica, sans-serif;
+  --wa-font-family-heading: var(--wa-font-family-body);
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  height: 100dvh;
-
-  font-family: 'Helvetica Neue', 'Helvetica', sans-serif;
-  background: var(--background);
-  color: var(--text-color);
-}
-
-#root {
-  height: 100%;
-  width: 100%;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin: 0;
-  padding: 0;
-}
-
-p {
-  margin: 0;
-  padding: 0;
-}
-
-a {
-  color: inherit;
-}
-
-button {
-  border: unset;
+wa-card {
+  border: none;
 }

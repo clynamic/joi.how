@@ -8,8 +8,7 @@ import {
   useRef,
 } from 'react';
 import { openDB, IDBPDatabase } from 'idb';
-import { ImageSize } from '../common';
-import { ImageType } from '../types';
+import { ImageSize, ImageType } from '../types';
 import { generateLowResImage, LowResImageSize } from './resize';
 import SparkMD5 from 'spark-md5';
 import { LocalImage } from './files';

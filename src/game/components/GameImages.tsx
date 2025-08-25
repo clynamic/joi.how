@@ -2,9 +2,10 @@ import styled from 'styled-components';
 import { useImages, useSetting } from '../../settings';
 import { useGameValue } from '../GameProvider';
 import { motion } from 'framer-motion';
-import { useCallback, useEffect, useMemo } from 'react';
-import { ImageSize, StackedImage } from '../../common';
+import { StackedImage } from '../../common';
 import { useAutoRef, useImagePreloader, useLooping } from '../../utils';
+import { ImageSize } from '../../types';
+import { useCallback, useMemo, useEffect } from 'react';
 
 const StyledGameImages = styled.div`
   position: absolute;

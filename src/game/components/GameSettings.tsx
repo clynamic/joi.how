@@ -46,7 +46,7 @@ const StyledGameSettingsDialog = styled.div`
 const GameSettingsDialog: React.FC<GameSettingsDialogProps> = props => {
   return (
     <Dialog
-      dismissable
+      dismissible
       {...props}
       title={'Game Settings'}
       content={

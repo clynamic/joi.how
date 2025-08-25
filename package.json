@@ -19,6 +19,7 @@
     ]
   },
   "dependencies": {
+    "@awesome.me/webawesome": "^3.0.0-beta.4",
     "@floating-ui/react": "^0.26.13",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-brands-svg-icons": "^6.5.2",

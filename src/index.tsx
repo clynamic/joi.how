@@ -7,6 +7,8 @@ import { E621Provider } from './e621';
 import { VibratorProvider } from './utils';
 import { LocalImageProvider } from './local/LocalProvider.tsx';
 
+import '@awesome.me/webawesome/dist/styles/webawesome.css';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SettingsProvider>

@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { ImageSize } from '../common';
-import { ImageItem, ImageType } from '../types';
+import { ImageItem, ImageSize, ImageType } from '../types';
 import { useLocalImages } from '../local/LocalProvider';
 
 interface PreloadItem {
