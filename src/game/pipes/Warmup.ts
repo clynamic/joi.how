@@ -17,14 +17,17 @@ export const warmupPipe: Pipe = Composer.pipe(
       Composer.bind<WarmupState>(
         ['state', PLUGIN_NAMESPACE],
         (state = { initialized: false }) =>
-          Composer.when(currentPhase === GamePhase.warmup, frame =>
-            frame
-              .when(settings.warmupDuration === 0, f =>
-                f.pipe(setPhase(GamePhase.active))
-              )
-              .when(settings.warmupDuration > 0 && !state.initialized, f =>
-                f.pipe(
-                  Composer.set<WarmupState>(PLUGIN_NAMESPACE, {
+          Composer.when(
+            currentPhase === GamePhase.warmup,
+            Composer.pipe(
+              Composer.when(
+                settings.warmupDuration === 0,
+                setPhase(GamePhase.active)
+              ),
+              Composer.when(
+                settings.warmupDuration > 0 && !state.initialized,
+                Composer.pipe(
+                  Composer.set<WarmupState>(['state', PLUGIN_NAMESPACE], {
                     initialized: true,
                   }),
                   Messages.send({
@@ -48,6 +51,7 @@ export const warmupPipe: Pipe = Composer.pipe(
                   })
                 )
               )
+            )
           )
       )
     )
