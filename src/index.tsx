@@ -6,8 +6,9 @@ import { SettingsProvider, ImageProvider } from './settings';
 import { E621Provider } from './e621';
 import { VibratorProvider } from './utils';
 import { LocalImageProvider } from './local/LocalProvider.tsx';
+import { registerServiceWorker } from './utils/serviceWorker.ts';
 
-import '@awesome.me/webawesome/dist/styles/webawesome.css';
+registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
