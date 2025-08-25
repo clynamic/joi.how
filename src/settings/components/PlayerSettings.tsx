@@ -3,7 +3,7 @@ import {
   Fields,
   SettingsDescription,
   SettingsDivider,
-  ToggleTile,
+  JoiToggleTile,
 } from '../../common';
 import {
   PlayerBody,
@@ -30,7 +30,7 @@ export const PlayerSettings = () => {
       {Object.keys(PlayerGender).map(key => {
         const current = PlayerGender[key as keyof typeof PlayerGender];
         return (
-          <ToggleTile
+          <JoiToggleTile
             key={current}
             value={gender === current}
             onClick={() => setGender(current)}
@@ -52,7 +52,7 @@ export const PlayerSettings = () => {
                 })()}
               />
             </p>
-          </ToggleTile>
+          </JoiToggleTile>
         );
       })}
       <SettingsDivider />
@@ -60,7 +60,7 @@ export const PlayerSettings = () => {
       {Object.keys(PlayerBody).map(key => {
         const current = PlayerBody[key as keyof typeof PlayerBody];
         return (
-          <ToggleTile
+          <JoiToggleTile
             key={current}
             value={body === current}
             onClick={() => setBody(current)}
@@ -79,7 +79,7 @@ export const PlayerSettings = () => {
                 }
               })()}
             </p>
-          </ToggleTile>
+          </JoiToggleTile>
         );
       })}
     </Fields>

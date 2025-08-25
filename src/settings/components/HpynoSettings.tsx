@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Fields, SettingsDescription, ToggleTile } from '../../common';
+import { Fields, SettingsDescription, JoiToggleTile } from '../../common';
 import {
   GameHypnoType,
   GameHypnoDescriptions,
@@ -23,7 +23,7 @@ export const HypnoSettings = () => {
       {Object.keys(GameHypnoType).map(key => {
         const current = GameHypnoType[key as keyof typeof GameHypnoType];
         return (
-          <ToggleTile
+          <JoiToggleTile
             key={current}
             value={hypno === current}
             onChange={() => setHypno(current)}
@@ -47,7 +47,7 @@ export const HypnoSettings = () => {
                 }
               })()}
             </span>
-          </ToggleTile>
+          </JoiToggleTile>
         );
       })}
     </Fields>

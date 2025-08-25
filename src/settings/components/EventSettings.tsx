@@ -1,6 +1,6 @@
 import { GameEvent, GameEventDescriptions, GameEventLabels } from '../../types';
 import { useCallback } from 'react';
-import { Fields, SettingsDescription, ToggleTile } from '../../common';
+import { Fields, JoiToggleTile, SettingsDescription } from '../../common';
 import { useSetting } from '../SettingsProvider';
 
 export const EventSettings = () => {
@@ -25,7 +25,7 @@ export const EventSettings = () => {
       {Object.keys(GameEvent).map(key => {
         const event = GameEvent[key as keyof typeof GameEvent];
         return (
-          <ToggleTile
+          <JoiToggleTile
             key={event}
             value={events.includes(event)}
             onClick={() => toggleEvent(event)}
@@ -33,7 +33,7 @@ export const EventSettings = () => {
           >
             <h6 className='subtitle'>{GameEventLabels[event]}</h6>
             <p className='caption'>{GameEventDescriptions[event]}</p>
-          </ToggleTile>
+          </JoiToggleTile>
         );
       })}
     </Fields>

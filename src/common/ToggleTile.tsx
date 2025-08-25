@@ -5,10 +5,10 @@ import { customElement, property } from 'lit/decorators.js';
 import React from 'react';
 import { createComponent, type EventName } from '@lit/react';
 
-export type ToggleTileType = 'none' | 'check' | 'radio';
+export type JoiToggleTileType = 'none' | 'check' | 'radio';
 
-@customElement('toggle-tile')
-export class ToggleTileElement extends LitElement {
+@customElement('joi-toggle-tile')
+export class JoiToggleTileElement extends LitElement {
   static styles = css`
     :host {
       display: block;
@@ -77,7 +77,7 @@ export class ToggleTileElement extends LitElement {
   accessor value = true;
 
   @property({ type: String, reflect: true })
-  accessor type: ToggleTileType = 'none';
+  accessor type: JoiToggleTileType = 'none';
 
   @property({ type: Boolean, reflect: true })
   accessor disabled = false;
@@ -136,9 +136,9 @@ export class ToggleTileElement extends LitElement {
   }
 }
 
-export const ToggleTile = createComponent({
-  tagName: 'toggle-tile',
-  elementClass: ToggleTileElement,
+export const JoiToggleTile = createComponent({
+  tagName: 'joi-toggle-tile',
+  elementClass: JoiToggleTileElement,
   react: React,
   events: {
     onChange: 'change' as EventName<CustomEvent<{ value: boolean }>>,

@@ -1,11 +1,10 @@
-import '@awesome.me/webawesome/dist/components/card/card.js';
-import { ToggleTile } from './ToggleTile';
+import { JoiToggleTile } from './ToggleTile';
 import { useCallback, useEffect, useState } from 'react';
 import { ImageItem, ImageSize } from '../types';
 import { StackedImage } from './StackedImage';
 import { useLocalImages } from '../local/LocalProvider';
 import styled from 'styled-components';
-import { WaDialog, WaCard } from '@awesome.me/webawesome/dist/react';
+import { WaDialog, WaCard, WaIcon } from '@awesome.me/webawesome/dist/react';
 
 export interface ImageDialogProps {
   image?: ImageItem;
@@ -26,18 +25,6 @@ const StyledImageDialog = styled(WaDialog)`
   wa-card::part(body) {
     padding: var(--wa-space-xs);
   }
-`;
-
-const StyledTitle = styled.h4`
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-`;
-
-const StyledCaption = styled.p`
-  margin: 0;
-  font-size: 0.75rem;
-  opacity: 0.7;
 `;
 
 export const ImageDialog: React.FC<ImageDialogProps> = ({
@@ -84,34 +71,43 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
             style={{ maxHeight: 400, objectFit: 'contain' }}
           />
           <WaCard appearance='filled'>
-            <ToggleTile
-              onClick={async () =>
+            <JoiToggleTile
+              onChange={async () =>
                 window.open(await resolveUrl(current.source), '_blank')
               }
             >
-              <StyledTitle>Browse</StyledTitle>
-              <StyledCaption>Open source in new tab</StyledCaption>
-            </ToggleTile>
+              <h6 className='subtitle'>Browse</h6>
+              <p className='caption'>Open source in new tab</p>
+              <span slot='trailing'>
+                <WaIcon name='open-in-new' />
+              </span>
+            </JoiToggleTile>
 
-            <ToggleTile
-              onClick={() => {
+            <JoiToggleTile
+              onChange={() => {
                 onSelect?.();
                 onClose?.();
               }}
             >
-              <StyledTitle>Select</StyledTitle>
-              <StyledCaption>Start multi-select here</StyledCaption>
-            </ToggleTile>
+              <h6 className='subtitle'>Select</h6>
+              <p className='caption'>Start multi-select here</p>
+              <span slot='trailing'>
+                <WaIcon name='check-box' />
+              </span>
+            </JoiToggleTile>
 
-            <ToggleTile
-              onClick={() => {
+            <JoiToggleTile
+              onChange={() => {
                 onDelete?.();
                 onClose?.();
               }}
             >
-              <StyledTitle>Delete</StyledTitle>
-              <StyledCaption>Remove from library</StyledCaption>
-            </ToggleTile>
+              <h6 className='subtitle'>Delete</h6>
+              <p className='caption'>Remove from library</p>
+              <span slot='trailing'>
+                <WaIcon name='trash' />
+              </span>
+            </JoiToggleTile>
           </WaCard>
         </div>
       )}

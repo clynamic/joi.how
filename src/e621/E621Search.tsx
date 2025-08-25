@@ -6,7 +6,6 @@ import {
   SettingsLabel,
   Slider,
   Space,
-  ToggleTile,
   SettingsInfo,
   Spinner,
   Button,
@@ -15,6 +14,7 @@ import {
   TextInput,
   TextArea,
   Surrounded,
+  JoiToggleTile,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
@@ -148,7 +148,7 @@ export const E621Search = () => {
         <Measure value={minScore ?? -1} chars={3} unit='votes' />
       )}
       <Space size='medium' />
-      <ToggleTile
+      <JoiToggleTile
         style={{ opacity: 1 }}
         type={'check'}
         value={!!credentials || addingCredentials}
@@ -158,7 +158,7 @@ export const E621Search = () => {
         <p className='caption'>
           Use your e621 account to access restricted content
         </p>
-      </ToggleTile>
+      </JoiToggleTile>
       <AnimatePresence>
         {/* 
         Toggling this rapidly will lead to it being stuck open. 
@@ -202,7 +202,7 @@ export const E621Search = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <ToggleTile
+      <JoiToggleTile
         style={{ opacity: 1 }}
         type={'check'}
         value={enableBlacklist}
@@ -210,7 +210,7 @@ export const E621Search = () => {
       >
         <h6 className='subtitle'>Enable blacklist</h6>
         <p className='caption'>Hide posts with specific tags</p>
-      </ToggleTile>
+      </JoiToggleTile>
       <AnimatePresence>
         {enableBlacklist && (
           <motion.div
