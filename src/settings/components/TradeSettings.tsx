@@ -1,15 +1,9 @@
-import styled from 'styled-components';
-import {
-  Button,
-  Fields,
-  SettingsDescription,
-  Space,
-  VerticalDivider,
-} from '../../common';
+import { Fields, JoiStack, SettingsDescription } from '../../common';
 import { Settings, useSettings } from '../SettingsProvider';
 import { ImageItem, ImageServiceType } from '../../types';
 import { useImages } from '../ImageProvider';
 import { ChangeEvent } from 'react';
+import { WaButton, WaDivider } from '@awesome.me/webawesome/dist/react';
 
 interface TradeFormat {
   name: string;
@@ -17,13 +11,6 @@ interface TradeFormat {
   settings: Settings;
   images: ImageItem[];
 }
-
-const StyledTradeButtons = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 8px;
-`;
 
 export const TradeSettings = () => {
   const [settings, setSettings] = useSettings();
@@ -76,12 +63,20 @@ export const TradeSettings = () => {
       <SettingsDescription>
         Export or import your settings and images
       </SettingsDescription>
-      <StyledTradeButtons>
-        <Button onClick={onExport}>Export</Button>
-        <VerticalDivider />
-        <Button onClick={onImport}>Import</Button>
-      </StyledTradeButtons>
-      <Space />
+      <JoiStack
+        direction='row'
+        spacing={2}
+        justifyContent='center'
+        alignItems='center'
+      >
+        <WaButton variant='brand' onClick={onExport}>
+          Export
+        </WaButton>
+        <WaDivider orientation='vertical' />
+        <WaButton variant='brand' onClick={onImport}>
+          Import
+        </WaButton>
+      </JoiStack>
     </Fields>
   );
 };

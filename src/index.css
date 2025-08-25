@@ -48,4 +48,35 @@
   --wa-font-family-heading: var(--wa-font-family-body);
 
   --wa-border-radius-scale: 0.6;
+
+  --wa-color-brand: var(--primary);
+
+  --wa-color-brand-95: color-mix(in oklch, white 95%, var(--wa-color-brand));
+  --wa-color-brand-90: color-mix(in oklch, white 90%, var(--wa-color-brand));
+  --wa-color-brand-85: color-mix(in oklch, white 85%, var(--wa-color-brand));
+  --wa-color-brand-80: color-mix(in oklch, white 80%, var(--wa-color-brand));
+  --wa-color-brand-75: color-mix(in oklch, white 75%, var(--wa-color-brand));
+  --wa-color-brand-70: color-mix(in oklch, white 70%, var(--wa-color-brand));
+  --wa-color-brand-65: color-mix(in oklch, white 65%, var(--wa-color-brand));
+  --wa-color-brand-60: color-mix(in oklch, white 60%, var(--wa-color-brand));
+  --wa-color-brand-55: color-mix(in oklch, white 55%, var(--wa-color-brand));
+  --wa-color-brand-50: var(--wa-color-brand);
+  --wa-color-brand-45: color-mix(in oklch, black 10%, var(--wa-color-brand));
+  --wa-color-brand-40: color-mix(in oklch, black 20%, var(--wa-color-brand));
+  --wa-color-brand-35: color-mix(in oklch, black 30%, var(--wa-color-brand));
+  --wa-color-brand-30: color-mix(in oklch, black 40%, var(--wa-color-brand));
+  --wa-color-brand-25: color-mix(in oklch, black 50%, var(--wa-color-brand));
+  --wa-color-brand-20: color-mix(in oklch, black 60%, var(--wa-color-brand));
+  --wa-color-brand-15: color-mix(in oklch, black 70%, var(--wa-color-brand));
+  --wa-color-brand-10: color-mix(in oklch, black 80%, var(--wa-color-brand));
+  --wa-color-brand-05: color-mix(in oklch, black 90%, var(--wa-color-brand));
+}
+
+wa-button::part(base) {
+  background: var(--wa-color-neutral-fill-quiet);
+  transition: background var(--wa-transition-normal);
+}
+
+wa-button::part(base):hover {
+  background: var(--wa-color-brand);
 }

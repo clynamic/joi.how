@@ -34,7 +34,7 @@ export class ToggleTileElement extends LitElement {
     }
 
     .action:hover {
-      background: var(--wa-color-text-link);
+      background: var(--wa-color-brand);
     }
 
     .content {

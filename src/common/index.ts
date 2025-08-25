@@ -6,6 +6,7 @@ export * from './IconButton';
 export * from './Image';
 export * from './ImageDialog';
 export * from './ImageGrid';
+export * from './JoiStack';
 export * from './Measure';
 export * from './ProgressBar';
 export * from './SettingsDescription';
