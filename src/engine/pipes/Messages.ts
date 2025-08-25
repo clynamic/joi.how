@@ -1,7 +1,7 @@
 import { Pipe, PipeTransformer } from '../State';
 import { Composer } from '../Composer';
 import { getEventKey, GameEvent, Events } from './Events';
-import { Scheduler } from './Scheduler';
+import { getScheduleKey, Scheduler } from './Scheduler';
 
 export interface GameMessagePrompt {
   title: string;
@@ -67,24 +67,34 @@ export const messagesPipe: Pipe = Composer.pipe(
         }
       ),
 
-      Composer.bind<MessageState>(
-        ['state', PLUGIN_NAMESPACE],
-        ({ messages = [] }) => {
-          const messageId = (event.payload as GameMessage).id;
-          const updated = messages.find(m => m.id === messageId);
-          const scheduleId = `${PLUGIN_NAMESPACE}.message.${messageId}`;
-          return updated?.duration !== undefined
-            ? Scheduler.schedule({
-                id: scheduleId,
-                duration: updated!.duration!,
-                event: {
-                  type: getEventKey(PLUGIN_NAMESPACE, 'expireMessage'),
-                  payload: updated.id,
-                },
-              })
-            : Scheduler.cancel(scheduleId);
+      Composer.chain(c => {
+        const { messages = [] } = c.get<MessageState>([
+          'state',
+          PLUGIN_NAMESPACE,
+        ]);
+        const messageId = (event.payload as GameMessage).id;
+        const updated = messages.find(m => m.id === messageId);
+        const scheduleId = getScheduleKey(
+          PLUGIN_NAMESPACE,
+          `message/${messageId}`
+        );
+
+        if (updated?.duration !== undefined) {
+          const eventType = getEventKey(PLUGIN_NAMESPACE, 'expireMessage');
+          return c.pipe(
+            Scheduler.schedule({
+              id: scheduleId,
+              duration: updated.duration,
+              event: {
+                type: eventType,
+                payload: updated.id,
+              },
+            })
+          );
+        } else {
+          return c.pipe(Scheduler.cancel(scheduleId));
         }
-      )
+      })
     )
   ),
 

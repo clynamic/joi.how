@@ -28,14 +28,19 @@ export const setPhase: PipeTransformer<[GamePhase]> = phase =>
   Composer.set<GamePhase>(['state', PLUGIN_NAMESPACE, 'current'], phase);
 
 export const phasePipe: Pipe = Composer.pipe(
-  Composer.zoom<GameState>('state', state =>
-    state.unless(state.get(PLUGIN_NAMESPACE) != null, state =>
-      state.set<PhaseState>(PLUGIN_NAMESPACE, {
-        current: GamePhase.warmup,
-      })
+  Composer.zoom<GameState>(
+    'state',
+    Composer.bind<PhaseState>(PLUGIN_NAMESPACE, state =>
+      Composer.when(
+        state == null,
+        Composer.set<PhaseState>(PLUGIN_NAMESPACE, {
+          current: GamePhase.warmup,
+        })
+      )
     )
   ),
-  Composer.zoom<GameContext>('context', context =>
-    context.set(PLUGIN_NAMESPACE, { setPhase })
+  Composer.zoom<GameContext>(
+    'context',
+    Composer.set(PLUGIN_NAMESPACE, { setPhase })
   )
 );
