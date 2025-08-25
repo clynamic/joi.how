@@ -3,11 +3,42 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { motion } from 'framer-motion';
 import { marked } from 'marked';
 import { useEffect, useState } from 'react';
-import { Section } from '../../common';
-import { Card, Typography, Button, Box, Stack } from '@mui/material';
+import styled from 'styled-components';
+import { ContentSection } from '../../common';
+
+const StyledExpandButton = styled.button`
+  display: flex;
+  justify-content: space-between;
+
+  width: 100%;
+
+  border-radius: var(--border-radius);
+  background: transparent;
+  color: var(--button-color);
+
+  transition: var(--hover-transition);
+
+  cursor: pointer;
+
+  padding: 15px;
+
+  &:hover {
+    background: var(--button-background);
+  }
+
+  &[aria-expanded='true'] {
+    background: var(--button-background);
+  }
+`;
+
+const StyledReleaseNotesBody = styled.div`
+  padding: 20px;
+  background: var(--button-background);
+  border-radius: var(--border-radius);
+`;
 
 export const ReleaseNotes = () => {
-  const [changelog, setChangelog] = useState<string | null>(null);
+  const [changelog, setChangelog] = useState(null as string | null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -19,39 +50,16 @@ export const ReleaseNotes = () => {
   const toggleOpen = () => setOpen(!open);
 
   return (
-    <Section>
-      <Button
-        onClick={toggleOpen}
-        aria-expanded={open}
-        variant='contained'
-        sx={{
-          width: '100%',
-          color: 'var(--button-color)',
-          padding: '15px',
-          backgroundColor: 'transparent',
-          transition: 'var(--hover-transition)',
-          '&:hover': {
-            backgroundColor: 'var(--button-background)',
-          },
-          '&[aria-expanded="true"]': {
-            backgroundColor: 'var(--button-background)',
-          },
-        }}
-      >
-        <Stack direction='row' justifyContent='space-between' width='100%'>
-          <Typography variant='h2' fontSize='1.2rem' fontWeight='bold'>
-            Release Notes
-          </Typography>
-          <motion.div
-            animate={{ rotate: open ? 180 : 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            <Typography variant='h2' fontSize='1.2rem' fontWeight='bold'>
-              <FontAwesomeIcon icon={faAngleDown} />
-            </Typography>
-          </motion.div>
-        </Stack>
-      </Button>
+    <ContentSection>
+      <StyledExpandButton onClick={toggleOpen} aria-expanded={open}>
+        <h2>Release Notes</h2>
+        <motion.h2
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <FontAwesomeIcon icon={faAngleDown} />
+        </motion.h2>
+      </StyledExpandButton>
       <motion.div
         initial={{ opacity: 0, height: 0 }}
         animate={{
@@ -65,33 +73,14 @@ export const ReleaseNotes = () => {
           ease: [0.19, 1, 0.22, 1],
         }}
       >
-        <Card
-          sx={{
-            padding: '20px',
-            backgroundColor: 'var(--button-background)',
-            color: 'var(--card-color)',
-            fontSize: '0.9rem',
-            ul: {
-              margin: '0',
-            },
-          }}
-        >
+        <StyledReleaseNotesBody>
           {changelog ? (
-            <Box
-              sx={{
-                'h1, h2, h3, h4, h5, h6': {
-                  margin: '0',
-                  marginTop: '10px',
-                  color: 'inherit',
-                },
-              }}
-              dangerouslySetInnerHTML={{ __html: changelog }}
-            />
+            <div dangerouslySetInnerHTML={{ __html: changelog }} />
           ) : (
             'Loading...'
           )}
-        </Card>
+        </StyledReleaseNotesBody>
       </motion.div>
-    </Section>
+    </ContentSection>
   );
 };

@@ -1,15 +1,14 @@
 import { useMemo } from 'react';
 import {
+  Divider,
   Measure,
   SettingsLabel,
-  Fields,
+  SettingsTile,
   SettingsDescription,
-  SettingsRow,
-  SettingsDivider,
+  Slider,
 } from '../../common';
 import { SettingsInfo } from '../../common/SettingsInfo';
 import { useSetting } from '../SettingsProvider';
-import { Slider } from '@mui/material';
 
 export const ClimaxSettings = () => {
   const [climaxChance, setClimaxChance] = useSetting('climaxChance');
@@ -40,34 +39,30 @@ export const ClimaxSettings = () => {
   }, [ruinChance]);
 
   return (
-    <Fields label={'Climax'}>
+    <SettingsTile grid label={'Climax'}>
       <SettingsDescription>At the game's climax...</SettingsDescription>
       <SettingsInfo>{climaxText}</SettingsInfo>
-      <SettingsRow>
-        <SettingsLabel htmlFor='climax-chance'>Orgasm</SettingsLabel>
-        <Slider
-          id='climax-chance'
-          value={climaxChance}
-          min={0}
-          max={100}
-          onChange={(_, value) => setClimaxChance(value as number)}
-        />
-        <Measure value={climaxChance} chars={3} unit='%' />
-      </SettingsRow>
-      <SettingsDivider />
+      <SettingsLabel htmlFor='climax-chance'>Orgasm</SettingsLabel>
+      <Slider
+        id='climax-chance'
+        value={climaxChance}
+        min={0}
+        max={100}
+        onChange={setClimaxChance}
+      />
+      <Measure value={climaxChance} chars={3} unit='%' />
+      <Divider />
       <SettingsDescription>Given an orgasm occurs...</SettingsDescription>
       <SettingsInfo>{ruinText}</SettingsInfo>
-      <SettingsRow>
-        <SettingsLabel htmlFor='ruin-chance'>Ruin</SettingsLabel>
-        <Slider
-          id='ruin-chance'
-          value={ruinChance}
-          min={0}
-          max={100}
-          onChange={(_, value) => setRuinChance(value as number)}
-        />
-        <Measure value={ruinChance} chars={3} unit='%' />
-      </SettingsRow>
-    </Fields>
+      <SettingsLabel htmlFor='ruin-chance'>Ruin</SettingsLabel>
+      <Slider
+        id='ruin-chance'
+        value={ruinChance}
+        min={0}
+        max={100}
+        onChange={setRuinChance}
+      />
+      <Measure value={ruinChance} chars={3} unit='%' />
+    </SettingsTile>
   );
 };

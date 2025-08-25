@@ -1,3 +1,4 @@
+import styled from 'styled-components';
 import {
   ClimaxSettings,
   DurationSettings,
@@ -11,16 +12,16 @@ import {
   VibratorSettings,
   TradeSettings,
 } from './components';
-import { Section } from '../common';
+import { ContentSection } from '../common';
+
+const StyledSettingsSection = styled(ContentSection)`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+`;
 
 export const SettingsSection = () => {
   return (
-    <Section
-      sx={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
-      }}
-    >
+    <StyledSettingsSection>
       <PaceSettings />
       <DurationSettings />
       <PlayerSettings />
@@ -32,6 +33,6 @@ export const SettingsSection = () => {
       <ImageSettings />
       <VibratorSettings />
       <TradeSettings />
-    </Section>
+    </StyledSettingsSection>
   );
 };

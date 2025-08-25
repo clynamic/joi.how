@@ -1,7 +1,6 @@
-import React from 'react';
-import { Box } from '@mui/material';
+import styled from 'styled-components';
 import {
-  AppTitle,
+  HomeTitle,
   WallTakerAd,
   ReleaseNotes,
   AgeWarning,
@@ -13,25 +12,25 @@ import {
 import { SettingsSection } from '../settings';
 import { HomeProvider } from './HomeProvider';
 
-export const HomePage: React.FC = () => {
-  return (
-    <Box
-      component='main'
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        margin: 0,
-        padding: 2,
+const StyledHomePage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-        '& > *': {
-          maxWidth: 920,
-          width: '100%',
-        },
-      }}
-    >
-      <HomeProvider>
-        <AppTitle />
+  margin: 0;
+  padding: 16px;
+
+  & > * {
+    max-width: 920px;
+    width: 100%;
+  }
+`;
+
+export const HomePage = () => {
+  return (
+    <HomeProvider>
+      <StyledHomePage>
+        <HomeTitle />
         <AgeWarning />
         <Introduction />
         <SettingsSection />
@@ -40,7 +39,7 @@ export const HomePage: React.FC = () => {
         <ReleaseNotes />
         <Instructions />
         <StartButton />
-      </HomeProvider>
-    </Box>
+      </StyledHomePage>
+    </HomeProvider>
   );
 };

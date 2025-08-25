@@ -1,12 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
+import {
+  faArrowUpRightFromSquare,
+  faTrash,
+  faCheckSquare,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
 import { ImageItem } from '../types';
 import { Dialog } from './Dialog';
 import { ImageSize } from './Image';
-import { ToggleCard } from './ToggleCard';
+import { ToggleTile } from './ToggleTile';
+import { Surrounded } from './Trailing';
+import styled from 'styled-components';
 import { StackedImage } from './StackedImage';
 import { useLocalImages } from '../local/LocalProvider';
-import { Typography, Box } from '@mui/material';
-import { CheckBox, Delete, OpenInNew } from '@mui/icons-material';
 
 export interface ImageDialogProps {
   image?: ImageItem;
@@ -16,12 +22,34 @@ export interface ImageDialogProps {
   loud?: boolean;
 }
 
-export const ImageDialog: React.FC<ImageDialogProps> = ({
+const StyledImageDialogContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+`;
+
+const StyledImageDialogImage = styled(StackedImage)`
+  max-height: 400px;
+  object-fit: contain;
+`;
+
+const StyledImageDialogActions = styled.div`
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: 8px;
+  margin-top: 8px;
+`;
+
+export const ImageDialog: React.FC<PropsWithChildren<ImageDialogProps>> = ({
   image,
   onClose,
   onSelect,
   onDelete,
   loud,
+  children,
 }) => {
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState<ImageItem | null>(null);
@@ -53,69 +81,53 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
       onOpenChange={value => value || onClose?.()}
       content={
         current && (
-          <Box
-            display='flex'
-            flexDirection='column'
-            width={400}
-            maxWidth='100%'
-            maxHeight='100%'
-            overflow='auto'
-          >
-            <StackedImage
+          <StyledImageDialogContent>
+            <StyledImageDialogImage
               item={current}
               size={ImageSize.full}
               playable
               loud={loud}
-              style={{
-                maxHeight: 400,
-                objectFit: 'contain',
-              }}
             />
-            <Box
-              sx={{
-                background: 'var(--card-background)',
-                borderRadius: 'var(--border-radius)',
-                p: 1,
-                mt: 1,
-              }}
-            >
-              <ToggleCard
+            <StyledImageDialogActions>
+              <ToggleTile
                 onClick={async () =>
                   window.open(await resolveUrl(current.source), '_blank')
                 }
-                trailing={<OpenInNew />}
               >
-                <Typography variant='subtitle2'>Browse</Typography>
-                <Typography variant='caption'>
-                  Open source in new tab
-                </Typography>
-              </ToggleCard>
-              <ToggleCard
+                <Surrounded
+                  trailing={<FontAwesomeIcon icon={faArrowUpRightFromSquare} />}
+                >
+                  <strong>Browse</strong>
+                  <p>Open source in new tab</p>
+                </Surrounded>
+              </ToggleTile>
+              <ToggleTile
                 onClick={() => {
                   onSelect?.();
                   onClose?.();
                 }}
-                trailing={<CheckBox />}
               >
-                <Typography variant='subtitle2'>Select</Typography>
-                <Typography variant='caption'>
-                  Start multi-select here
-                </Typography>
-              </ToggleCard>
-              <ToggleCard
+                <Surrounded trailing={<FontAwesomeIcon icon={faCheckSquare} />}>
+                  <strong>Select</strong>
+                  <p>Start multi-select here</p>
+                </Surrounded>
+              </ToggleTile>
+              <ToggleTile
                 onClick={() => {
                   onDelete?.();
                   onClose?.();
                 }}
-                trailing={<Delete />}
               >
-                <Typography variant='subtitle2'>Delete</Typography>
-                <Typography variant='caption'>Remove from library</Typography>
-              </ToggleCard>
-            </Box>
-          </Box>
+                <Surrounded trailing={<FontAwesomeIcon icon={faTrash} />}>
+                  <strong>Delete</strong>
+                  <p>Remove from library</p>
+                </Surrounded>
+              </ToggleTile>
+            </StyledImageDialogActions>
+          </StyledImageDialogContent>
         )
       }
+      children={children}
     />
   );
 };

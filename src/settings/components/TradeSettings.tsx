@@ -1,9 +1,15 @@
-import { Fields, SettingsDescription } from '../../common';
+import styled from 'styled-components';
+import {
+  Button,
+  SettingsTile,
+  SettingsDescription,
+  Space,
+  VerticalDivider,
+} from '../../common';
 import { Settings, useSettings } from '../SettingsProvider';
 import { ImageItem, ImageServiceType } from '../../types';
 import { useImages } from '../ImageProvider';
 import { ChangeEvent } from 'react';
-import { Button, Divider, Stack } from '@mui/material';
 
 interface TradeFormat {
   name: string;
@@ -11,6 +17,13 @@ interface TradeFormat {
   settings: Settings;
   images: ImageItem[];
 }
+
+const StyledTradeButtons = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 8px;
+`;
 
 export const TradeSettings = () => {
   const [settings, setSettings] = useSettings();
@@ -59,19 +72,16 @@ export const TradeSettings = () => {
   };
 
   return (
-    <Fields label='Trade'>
+    <SettingsTile label={'Trade'}>
       <SettingsDescription>
         Export or import your settings and images
       </SettingsDescription>
-      <Stack direction='row' spacing={2} justifyContent='center'>
-        <Button variant='contained' onClick={onExport}>
-          Export
-        </Button>
-        <Divider orientation='vertical' flexItem />
-        <Button variant='contained' onClick={onImport}>
-          Import
-        </Button>
-      </Stack>
-    </Fields>
+      <StyledTradeButtons>
+        <Button onClick={onExport}>Export</Button>
+        <VerticalDivider />
+        <Button onClick={onImport}>Import</Button>
+      </StyledTradeButtons>
+      <Space />
+    </SettingsTile>
   );
 };

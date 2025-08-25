@@ -1,59 +1,44 @@
-import { Box, Typography, useTheme } from '@mui/material';
-import { Section } from '../../common';
+import styled from 'styled-components';
+import { ContentSection } from '../../common';
 
-export const AppTitle = () => {
-  const theme = useTheme();
+const StyledTitle = styled(ContentSection)`
+  background: transparent;
+  color: var(--text-color);
 
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+
+  & h1 {
+    font-size: 3rem;
+    margin-bottom: 32px;
+  }
+
+  & img {
+    padding: 40px 0 30px 0;
+    width: 200px;
+    aspect-ratio: 1;
+  }
+
+  & abbr {
+    text-decoration: none;
+    background: rgba(70, 87, 105, 0.4);
+    padding: 5px 20px;
+    margin: 0 10px;
+  }
+`;
+
+export const HomeTitle = () => {
   return (
-    <Section
-      sx={{
-        background: 'transparent',
-        boxShadow: 'none',
-        color: 'var(--text-color)',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        width: '100%',
-      }}
-    >
-      <Box
-        component='img'
-        src='/logo.svg'
-        alt='JOI.how'
-        sx={{
-          padding: `${theme.spacing(5)} 0 ${theme.spacing(4)} 0`,
-          width: '200px',
-          aspectRatio: '1',
-        }}
-      />
-      <Typography
-        variant='h1'
-        fontSize='3rem'
-        fontWeight='bold'
-        sx={{
-          marginBottom: '32px',
-        }}
-      >
-        <Typography
-          fontSize='inherit'
-          component='abbr'
-          title='Jack Off Instructions'
-          fontWeight='inherit'
-          sx={{
-            textDecoration: 'none',
-            background: 'rgba(70, 87, 105, 0.4)',
-            padding: '5px 20px',
-            margin: '0 10px',
-          }}
-        >
-          JOI
-        </Typography>
-        <Typography fontSize='80%' fontWeight='inherit' component='sup'>
-          .how
-        </Typography>
-      </Typography>
-    </Section>
+    <StyledTitle>
+      <img src={'/logo.svg'} alt='JOI.how' />
+      <h1>
+        <abbr title='Jack Off Instructions'>JOI</abbr>
+        <sup>.how</sup>
+      </h1>
+    </StyledTitle>
   );
 };

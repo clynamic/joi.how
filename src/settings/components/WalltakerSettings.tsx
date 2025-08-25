@@ -1,10 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Fields } from '../../common';
+import { SettingsTile } from '../../common';
 import { faPersonDigging } from '@fortawesome/free-solid-svg-icons';
 
 export const WalltakerSettings = () => {
   return (
-    <Fields label={'Walltalker'} style={{ opacity: 0.5 }}>
+    <SettingsTile label={'Walltalker'} style={{ opacity: 0.5 }}>
       <div
         style={{
           gridColumn: '1 / -1',
@@ -20,6 +20,6 @@ export const WalltakerSettings = () => {
         </h1>
         <p>There is nothing here yet :3</p>
       </div>
-    </Fields>
+    </SettingsTile>
   );
 };

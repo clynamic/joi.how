@@ -98,11 +98,9 @@ export class Blacklist {
   }
 
   static entriesParse(blacklistedTags: string[]): BlacklistEntry[] {
-    return blacklistedTags
-      .filter(tags => !tags.trim().startsWith('#'))
-      .map(tags =>
-        this.entryParse(tags.replace(/(rating:[qes])\w+/gi, '$1').toLowerCase())
-      );
+    return blacklistedTags.map(tags =>
+      this.entryParse(tags.replace(/(rating:[qes])\w+/gi, '$1').toLowerCase())
+    );
   }
 
   static postMatch(post: E621Post, entry: BlacklistEntry): boolean {

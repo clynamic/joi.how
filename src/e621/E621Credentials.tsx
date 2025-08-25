@@ -1,14 +1,14 @@
-import {
-  Box,
-  Typography,
-  TextField,
-  CircularProgress,
-  Button,
-} from '@mui/material';
-import { useState, useCallback, useMemo } from 'react';
-import { E621Credentials } from './E621Provider';
+import styled from 'styled-components';
 import { E621Service } from './E621Service';
-import { SettingsGrid, SettingsInfo, SettingsRow } from '../common';
+import { useCallback, useMemo, useState } from 'react';
+import {
+  SettingsInfo,
+  SettingsLabel,
+  Space,
+  Spinner,
+  TextInput,
+} from '../common';
+import { E621Credentials } from './E621Provider';
 
 export interface E621CredentialsInputProps {
   service: E621Service;
@@ -16,6 +16,34 @@ export interface E621CredentialsInputProps {
   onSaved?: (credentials: E621Credentials) => void;
   disabled?: boolean;
 }
+
+const StyledE621CredentialsInput = styled.div`
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+`;
+
+const StyledE621SaveCredentials = styled.div`
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+`;
+
+const StyledE621SaveCredentialsButton = styled.button`
+  background: var(--button-background);
+  color: var(--button-color);
+  border-radius: var(--border-radius);
+  padding: 4px 8px;
+  transition:
+    background 0.2s,
+    opacity 0.2s;
+  cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
+  &:hover {
+    background: var(--primary);
+  }
+  opacity: ${props => (props.disabled ? 0.5 : 1)};
+`;
 
 export const E621CredentialsInput = ({
   service,
@@ -36,7 +64,6 @@ export const E621CredentialsInput = ({
     if (valid) {
       onSaved?.(input as E621Credentials);
     }
-    setLoading(false);
   }, [input, onSaved, service]);
 
   const hasData = useMemo(
@@ -47,62 +74,56 @@ export const E621CredentialsInput = ({
   const locked = useMemo(() => loading || disabled, [loading, disabled]);
 
   return (
-    <SettingsGrid>
+    <StyledE621CredentialsInput>
       <SettingsInfo>
-        <Typography variant='caption'>
-          Access your API key from{' '}
-          <a
-            href='https://e621.net/users/home'
-            target='_blank'
-            rel='noreferrer'
-          >
-            your profile
-          </a>
-          .
-        </Typography>
+        Access your API key from{' '}
+        <a href='https://e621.net/users/home' target='_blank' rel='noreferrer'>
+          your profile
+        </a>
+        .
       </SettingsInfo>
-      <SettingsRow>
-        <Typography variant='body2'>Username</Typography>
-        <TextField
-          variant='outlined'
-          size='small'
-          fullWidth
-          value={input?.username}
-          onChange={e => setInput({ ...input, username: e.target.value })}
-          placeholder='Username'
-          autoComplete='username'
-          disabled={locked}
-          sx={{ gridColumn: '2 / -1' }}
-        />
-      </SettingsRow>
-      <Box height={8} />
-      <SettingsRow>
-        <Typography variant='body2'>API Key</Typography>
-        <TextField
-          variant='outlined'
-          size='small'
-          type='password'
-          fullWidth
-          value={input?.apiKey}
-          onChange={e => setInput({ ...input, apiKey: e.target.value })}
-          placeholder='API Key'
-          autoComplete='current-password'
-          disabled={locked}
-          sx={{ gridColumn: '2 / -1' }}
-        />
-      </SettingsRow>
-      <Box height={8} gridColumn='1 / -1' />
-      <Box display='flex' alignItems='center' justifyContent='flex-end' gap={1}>
-        {loading && <CircularProgress size={20} />}
-        <Button
-          size='small'
-          variant='contained'
+      <Space size='small' />
+      <SettingsLabel>Username</SettingsLabel>
+      <TextInput
+        style={{ gridColumn: '2 / -1' }}
+        value={input?.username}
+        onChange={username =>
+          setInput({
+            ...input,
+            username,
+          })
+        }
+        placeholder='Username'
+        autoComplete='username'
+        disabled={locked}
+      />
+      <Space size='small' />
+      <SettingsLabel>API Key</SettingsLabel>
+      <TextInput
+        style={{ gridColumn: '2 / -1' }}
+        value={input?.apiKey}
+        onChange={apiKey =>
+          setInput({
+            ...input,
+            apiKey,
+          })
+        }
+        placeholder='API Key'
+        type='password'
+        autoComplete='current-password'
+        disabled={locked}
+      />
+      <Space size='small' />
+      <StyledE621SaveCredentials>
+        {loading && <Spinner />}
+        <Space size='small' />
+        <StyledE621SaveCredentialsButton
           onClick={!loading ? onSave : undefined}
           disabled={!hasData || locked}
         >
           Save
-        </Button>
-      </Box>
-    </SettingsGrid>
+        </StyledE621SaveCredentialsButton>
+      </StyledE621SaveCredentials>
+    </StyledE621CredentialsInput>
   );
 };

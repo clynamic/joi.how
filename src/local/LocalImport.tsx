@@ -1,12 +1,32 @@
 import { useState } from 'react';
-import { SettingsDescription, SettingsInfo, Spinner } from '../common';
+import styled from 'styled-components';
+import {
+  SettingsDescription,
+  Space,
+  Button,
+  SettingsInfo,
+  Spinner,
+} from '../common';
 import { useImages } from '../settings';
 import { AnimatePresence } from 'framer-motion';
 import { discoverImageFiles, imageTypeFromExtension } from './files';
 import { LocalImageRequest, useLocalImages } from './LocalProvider';
 import { ImageServiceType } from '../types';
 import { chunk } from 'lodash';
-import { Stack, Button } from '@mui/material';
+
+const StyledLocalImport = styled.div`
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+`;
+
+const StyledLoadingHint = styled(SettingsInfo)`
+  grid-column: 1 / -1;
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+`;
 
 export const LocalImport = () => {
   const [loading, setLoading] = useState(false);
@@ -65,48 +85,38 @@ export const LocalImport = () => {
   };
 
   return (
-    <Stack direction='column'>
+    <StyledLocalImport>
       <SettingsDescription>Add images from your device</SettingsDescription>
-      <Stack direction='column' alignItems='center' gap={2}>
-        <input
-          type='file'
-          multiple
-          accept='image/*'
-          style={{ display: 'none' }}
-          id='filePicker'
-          onChange={select}
-        />
-        <Button
-          variant='contained'
-          color='primary'
-          onClick={() => document.getElementById('filePicker')?.click()}
-          disabled={loading}
-        >
-          Select Files
-        </Button>
-
-        <AnimatePresence>
-          {files && (
-            <SettingsInfo
-              sx={{
-                gridColumn: '1 / -1',
-                justifySelf: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 1,
-              }}
-            >
-              <Spinner />
-              <p>
-                {progress !== undefined
-                  ? `${progress} / ${files.length} processed`
-                  : `${files.length} discovered`}
-              </p>
-            </SettingsInfo>
-          )}
-        </AnimatePresence>
-      </Stack>
-    </Stack>
+      <Space size='medium' />
+      <input
+        type='file'
+        multiple
+        accept='image/*'
+        style={{ display: 'none' }}
+        id='filePicker'
+        onChange={select}
+      />
+      <Button
+        style={{ gridColumn: '1 / -1', justifySelf: 'center' }}
+        onClick={() => document.getElementById('filePicker')?.click()}
+        disabled={loading}
+      >
+        Select Files
+      </Button>
+      <Space size='small' />
+      <AnimatePresence>
+        {files && (
+          <StyledLoadingHint>
+            <Spinner />
+            <p>
+              {progress !== undefined
+                ? `${progress} / ${files.length} processed`
+                : `${files.length} discovered`}
+            </p>
+          </StyledLoadingHint>
+        )}
+      </AnimatePresence>
+      <Space size='small' />
+    </StyledLocalImport>
   );
 };

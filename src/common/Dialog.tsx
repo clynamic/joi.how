@@ -1,6 +1,18 @@
-import { Box, Modal, Fade, IconButton } from '@mui/material';
+import {
+  FloatingFocusManager,
+  FloatingOverlay,
+  FloatingPortal,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions,
+  useRole,
+  useTransitionStyles,
+} from '@floating-ui/react';
 import { faClose } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import styled, { CSSProperties } from 'styled-components';
+import { IconButton } from './IconButton';
 import { useEffect } from 'react';
 
 export interface DialogProps {
@@ -9,11 +21,49 @@ export interface DialogProps {
   onVisibleChange?: (visible: boolean) => void;
   closable?: boolean;
   dismissable?: boolean;
-  barrierColor?: string;
-  background?: string;
+  barrierColor?: CSSProperties['backgroundColor'];
+  background?: CSSProperties['backgroundColor'];
   title?: React.ReactNode;
   content: React.ReactNode;
 }
+
+const StyledDialog = styled.div``;
+
+const StyledDialogChildren = styled.div``;
+
+const StyledDialogContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  height: 100%;
+  width: 100%;
+
+  padding: 16px;
+`;
+
+const StyledDialogContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  max-height: 100%;
+  max-width: 100%;
+
+  background: var(--card-background);
+  color: var(--card-color);
+  border-radius: var(--border-radius);
+
+  padding: 8px;
+`;
+
+const StyledDialogTitle = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 8px;
+`;
 
 export const Dialog = ({
   open,
@@ -25,74 +75,79 @@ export const Dialog = ({
   dismissable = false,
   barrierColor = 'var(--overlay-background)',
   background = 'var(--card-background)',
-}: DialogProps) => {
+  children,
+}: React.PropsWithChildren<DialogProps>) => {
+  const { refs, context } = useFloating({
+    open: open,
+    onOpenChange: onOpenChange,
+  });
+
+  const { isMounted, styles } = useTransitionStyles(context, {
+    duration: 200,
+  });
+
+  const click = useClick(context);
+  const dismiss = useDismiss(context, {
+    outsidePressEvent: 'mousedown',
+  });
+  const role = useRole(context);
+
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss,
+    role,
+  ]);
+
   useEffect(() => {
-    onVisibleChange?.(open);
-  }, [open, onVisibleChange]);
+    onVisibleChange?.(isMounted);
+  }, [isMounted, onVisibleChange]);
 
   return (
-    <Modal
-      open={open}
-      onClose={() => dismissable && onOpenChange(false)}
-      closeAfterTransition
-      slotProps={{
-        backdrop: {
-          timeout: 200,
-          sx: {
-            backgroundColor: barrierColor,
-          },
-        },
-      }}
-    >
-      <Fade in={open} timeout={200}>
-        <Box
-          onClick={() => dismissable && onOpenChange(false)}
-          sx={{
-            height: '100%',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            p: 2,
-          }}
-        >
-          <Box
-            onClick={e => e.stopPropagation()}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              maxHeight: '100%',
-              maxWidth: '100%',
-              background,
-              color: 'var(--card-color)',
-              borderRadius: 'var(--border-radius)',
-              p: 1,
+    <StyledDialog>
+      <StyledDialogChildren ref={refs.setReference} {...getReferenceProps()}>
+        {children}
+      </StyledDialogChildren>
+      {isMounted && (
+        <FloatingPortal>
+          <FloatingOverlay
+            lockScroll
+            style={{
+              background: barrierColor,
+              ...styles,
+              zIndex: 1000,
             }}
+            onClick={() => dismissable && onOpenChange(false)}
           >
-            {(title || closable) && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  p: 1,
-                }}
+            <FloatingFocusManager context={context}>
+              <StyledDialogContent
+                ref={refs.setFloating}
+                {...getFloatingProps()}
               >
-                {title || <Box />}
-                {closable && (
-                  <IconButton
-                    aria-label='Close dialog'
-                    onClick={() => onOpenChange(false)}
-                  >
-                    <FontAwesomeIcon icon={faClose} />
-                  </IconButton>
-                )}
-              </Box>
-            )}
-            {content}
-          </Box>
-        </Box>
-      </Fade>
-    </Modal>
+                <StyledDialogContentWrapper
+                  onClick={event => event.stopPropagation()}
+                  style={{
+                    background: background,
+                  }}
+                >
+                  {(title || closable) && (
+                    <StyledDialogTitle>
+                      {title || <div />}
+                      {closable && (
+                        <IconButton
+                          aria-label='Close dialog'
+                          onClick={() => onOpenChange(false)}
+                          icon={<FontAwesomeIcon icon={faClose} />}
+                        />
+                      )}
+                    </StyledDialogTitle>
+                  )}
+                  {content}
+                </StyledDialogContentWrapper>
+              </StyledDialogContent>
+            </FloatingFocusManager>
+          </FloatingOverlay>
+        </FloatingPortal>
+      )}
+    </StyledDialog>
   );
 };

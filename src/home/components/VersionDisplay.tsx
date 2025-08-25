@@ -1,10 +1,16 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Section } from '../../common';
+import { ContentSection, IconButton } from '../../common';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
+import styled from 'styled-components';
 import { version } from '../../../package.json';
 import { faDollar } from '@fortawesome/free-solid-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { Stack, Typography, IconButton, Tooltip } from '@mui/material';
+
+const StyledVersionDisplay = styled(ContentSection)`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
 
 interface AppLink {
   url: string;
@@ -30,34 +36,26 @@ const appLinks: Record<string, AppLink> = {
   },
 };
 
+const StyledAppLink = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
 export const VersionDisplay = () => {
   return (
-    <Section>
-      <Stack
-        direction='row'
-        spacing={2}
-        justifyContent='space-between'
-        alignItems='center'
-      >
-        <Typography variant='body2'>Version {version}</Typography>
-        <Stack direction='row' gap={0.5}>
-          {Object.keys(appLinks).map(key => (
-            <Tooltip key={key} arrow title={appLinks[key].text}>
-              <IconButton
-                href={appLinks[key].url}
-                target='_blank'
-                sx={{
-                  padding: 0.5,
-                  aspectRatio: 1,
-                  fontSize: '1.4rem',
-                  width: '2rem',
-                }}
-                children={<FontAwesomeIcon icon={appLinks[key].icon} />}
-              />
-            </Tooltip>
-          ))}
-        </Stack>
-      </Stack>
-    </Section>
+    <StyledVersionDisplay>
+      <p>Version {version}</p>
+      <StyledAppLink style={{ display: 'flex' }}>
+        {Object.keys(appLinks).map(key => (
+          <IconButton
+            key={key}
+            tooltip={appLinks[key].text}
+            onClick={() => window.open(appLinks[key].url, '_blank')}
+            icon={<FontAwesomeIcon icon={appLinks[key].icon} />}
+          />
+        ))}
+      </StyledAppLink>
+    </StyledVersionDisplay>
   );
 };
