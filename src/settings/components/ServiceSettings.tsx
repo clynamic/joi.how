@@ -1,9 +1,10 @@
-import styled from 'styled-components';
-import { Fields, TabBar } from '../../common';
 import { E621Search } from '../../e621';
 import { useState } from 'react';
 import { WalltakerSearch } from '../../walltaker';
 import { LocalImport } from '../../local';
+import { WaTabGroup, WaTab } from '@awesome.me/webawesome/dist/react';
+import styled from 'styled-components';
+import { Fields } from '../../common';
 
 const tabs: Record<string, React.ReactNode> = {
   e621: <E621Search />,
@@ -13,10 +14,25 @@ const tabs: Record<string, React.ReactNode> = {
 
 type Tab = keyof typeof tabs;
 
-const TabBarFields = styled(Fields)`
-  & > legend {
-    background: var(--card-background);
+const StyledServiceFields = styled(Fields)`
+  & legend {
     padding: 0;
+  }
+`;
+
+const StyledServiceSettingsTabs = styled.div`
+  wa-tab::part(base) {
+    padding: var(--wa-space-2xs) var(--wa-space-xs);
+  }
+
+  wa-tab {
+    background: var(--section-background);
+    transition: background var(--wa-transition-normal);
+  }
+
+  wa-tab[active] {
+    background: var(--legend-background);
+    color: var(--wa-color-foreground);
   }
 `;
 
@@ -24,20 +40,22 @@ export const ServiceSettings = () => {
   const [activeTab, setActiveTab] = useState<Tab>('e621');
 
   return (
-    <TabBarFields
+    <StyledServiceFields
       label={
-        <TabBar
-          tabs={[
-            { id: 'e621', content: 'e621' },
-            // { id: 'walltaker', content: 'Walltaker' },
-            { id: 'local', content: 'Device' },
-          ]}
-          current={activeTab}
-          onChange={setActiveTab}
-        />
+        <StyledServiceSettingsTabs>
+          <WaTabGroup onWaTabShow={event => setActiveTab(event.detail.name)}>
+            {Object.keys(tabs)
+              .filter(key => key !== 'walltaker') // not ready
+              .map(tab => (
+                <WaTab key={tab} panel={tab} active={activeTab === tab}>
+                  {tab}
+                </WaTab>
+              ))}
+          </WaTabGroup>
+        </StyledServiceSettingsTabs>
       }
     >
       {tabs[activeTab]}
-    </TabBarFields>
+    </StyledServiceFields>
   );
 };
