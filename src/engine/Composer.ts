@@ -66,6 +66,13 @@ export class Composer<T extends object> {
   }
 
   /**
+   * Shorthand for getting a value at the specified path from an object.
+   */
+  static get<A = unknown>(path: Path) {
+    return <T extends object>(obj: T): A => lensFromPath<T, A>(path).get(obj);
+  }
+
+  /**
    * Replaces the current object with a new value.
    */
   set(value: T): this;

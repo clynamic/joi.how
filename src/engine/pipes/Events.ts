@@ -56,23 +56,38 @@ export const handleEvent: PipeTransformer<
     )
   );
 
+export class Events {
+  static dispatch(event: GameEvent): Pipe {
+    return Composer.bind<EventContext>(
+      ['context', PLUGIN_NAMESPACE],
+      ({ dispatch }) => dispatch(event)
+    );
+  }
+
+  static handle(type: string, fn: (event: GameEvent) => Pipe): Pipe {
+    return Composer.bind<EventContext>(
+      ['context', PLUGIN_NAMESPACE],
+      ({ handle }) => handle(type, fn)
+    );
+  }
+}
+
 /**
  * Moves events from pending to current.
  * This prevents events from being processed during the same frame they are created.
  * This is important because pipes later in the pipeline may add new events.
  */
-export const eventPipe: Pipe = Composer.chain(frame =>
-  frame
-    .zoom<GameState>('state', state =>
-      state.over<EventState>(PLUGIN_NAMESPACE, ({ pending = [] }) => ({
-        pending: [],
-        current: pending,
-      }))
-    )
-    .zoom<GameContext>('context', context =>
-      context.set<EventContext>(PLUGIN_NAMESPACE, {
-        dispatch: dispatchEvent,
-        handle: handleEvent,
-      })
-    )
+export const eventPipe: Pipe = Composer.pipe(
+  Composer.zoom<GameState>('state', state =>
+    state.over<EventState>(PLUGIN_NAMESPACE, ({ pending = [] }) => ({
+      pending: [],
+      current: pending,
+    }))
+  ),
+  Composer.zoom<GameContext>('context', context =>
+    context.set<EventContext>(PLUGIN_NAMESPACE, {
+      dispatch: dispatchEvent,
+      handle: handleEvent,
+    })
+  )
 );
