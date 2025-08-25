@@ -34,7 +34,10 @@ export const PlayerSettings = () => {
             key={current}
             value={gender === current}
             onClick={() => setGender(current)}
-            trailing={
+          >
+            <h6 className='subtitle'>{PlayerGenderLabels[current]}</h6>
+            <p className='caption'>{PlayerGenderDescriptions[current]}</p>
+            <p slot='trailing'>
               <FontAwesomeIcon
                 style={{ aspectRatio: 1 }}
                 icon={(() => {
@@ -48,10 +51,7 @@ export const PlayerSettings = () => {
                   }
                 })()}
               />
-            }
-          >
-            <strong>{PlayerGenderLabels[current]}</strong>
-            <p>{PlayerGenderDescriptions[current]}</p>
+            </p>
           </ToggleTile>
         );
       })}
@@ -64,19 +64,21 @@ export const PlayerSettings = () => {
             key={current}
             value={body === current}
             onClick={() => setBody(current)}
-            trailing={(() => {
-              switch (current) {
-                case PlayerBody.penis:
-                  return '🍆';
-                case PlayerBody.vagina:
-                  return '🍑';
-                case PlayerBody.neuter:
-                  return '🥝';
-              }
-            })()}
           >
-            <strong>{PlayerBodyLabels[current]}</strong>
-            <p>{PlayerBodyDescriptions[current]}</p>
+            <h6 className='subtitle2'>{PlayerBodyLabels[current]}</h6>
+            <p className='caption'>{PlayerBodyDescriptions[current]}</p>
+            <p slot='trailing'>
+              {(() => {
+                switch (current) {
+                  case PlayerBody.penis:
+                    return '🍆';
+                  case PlayerBody.vagina:
+                    return '🍑';
+                  case PlayerBody.neuter:
+                    return '🥝';
+                }
+              })()}
+            </p>
           </ToggleTile>
         );
       })}

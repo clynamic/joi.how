@@ -6,16 +6,15 @@ import {
   SettingsLabel,
   Slider,
   Space,
-  TextInput,
-  Surrounded,
   ToggleTile,
-  ToggleTileType,
-  TextArea,
   SettingsInfo,
   Spinner,
   Button,
   StyledMeasure,
   SettingsDescription,
+  TextInput,
+  TextArea,
+  Surrounded,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
@@ -151,12 +150,14 @@ export const E621Search = () => {
       <Space size='medium' />
       <ToggleTile
         style={{ opacity: 1 }}
-        type={ToggleTileType.check}
+        type={'check'}
         value={!!credentials || addingCredentials}
         onClick={onToggleCredentials}
       >
-        <strong>Credentials</strong>
-        <p>Use your e621 account to access restricted content</p>
+        <h6 className='subtitle'>Credentials</h6>
+        <p className='caption'>
+          Use your e621 account to access restricted content
+        </p>
       </ToggleTile>
       <AnimatePresence>
         {/* 
@@ -203,12 +204,12 @@ export const E621Search = () => {
       </AnimatePresence>
       <ToggleTile
         style={{ opacity: 1 }}
-        type={ToggleTileType.check}
+        type={'check'}
         value={enableBlacklist}
         onClick={() => setEnableBlacklist(!enableBlacklist)}
       >
-        <strong>Enable blacklist</strong>
-        <p>Hide posts with specific tags</p>
+        <h6 className='subtitle'>Enable blacklist</h6>
+        <p className='caption'>Hide posts with specific tags</p>
       </ToggleTile>
       <AnimatePresence>
         {enableBlacklist && (

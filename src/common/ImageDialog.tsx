@@ -1,10 +1,10 @@
 import '@awesome.me/webawesome/dist/components/card/card.js';
+import { ToggleTile } from './ToggleTile';
 import { useCallback, useEffect, useState } from 'react';
 import { ImageItem, ImageSize } from '../types';
 import { StackedImage } from './StackedImage';
 import { useLocalImages } from '../local/LocalProvider';
 import styled from 'styled-components';
-import { ToggleTile } from './ToggleTile';
 import { WaDialog, WaCard } from '@awesome.me/webawesome/dist/react';
 
 export interface ImageDialogProps {

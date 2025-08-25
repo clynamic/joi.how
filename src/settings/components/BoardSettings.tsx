@@ -10,23 +10,17 @@ export const BoardSettings = () => {
   return (
     <Fields label='Board'>
       <SettingsDescription>How the board is rendered</SettingsDescription>
-      <ToggleTile
-        value={highRes}
-        onClick={() => setHighRes(!highRes)}
-        trailing={highRes ? '🦄' : '🐴'}
-      >
-        <strong>High resolution</strong>
-        <p>Use high resolution images/videos</p>
+      <ToggleTile value={highRes} onClick={() => setHighRes(!highRes)}>
+        <h6 className='subtitle'>High resolution</h6>
+        <p className='caption'>Use high resolution images/videos</p>
+        <span slot='trailing'>{highRes ? '🦄' : '🐴'}</span>
       </ToggleTile>
-      <ToggleTile
-        value={videoSound}
-        onClick={() => setVideoSound(!videoSound)}
-        trailing={
+      <ToggleTile value={videoSound} onClick={() => setVideoSound(!videoSound)}>
+        <h6 className='subtitle'>Video sound</h6>
+        <p className='caption'>Enable sound for videos</p>
+        <span slot='trailing'>
           <FontAwesomeIcon icon={videoSound ? faVolumeUp : faVolumeMute} />
-        }
-      >
-        <strong>Video sound</strong>
-        <p>Enable sound for videos</p>
+        </span>
       </ToggleTile>
     </Fields>
   );

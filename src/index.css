@@ -32,7 +32,7 @@
   --wa-color-surface-raised: var(--card-background);
   --wa-color-surface-lowered: var(--section-background);
   --wa-color-text-normal: var(--text-color);
-  --wa-color-text-quiet: var(--card-color);
+  --wa-color-text-quiet: #b9bad6;
   --wa-color-text-link: var(--primary);
 
   --wa-color-overlay-modal: var(--overlay-background);
@@ -46,8 +46,6 @@
 
   --wa-font-family-body: 'Helvetica Neue', Helvetica, sans-serif;
   --wa-font-family-heading: var(--wa-font-family-body);
-}
 
-wa-card {
-  border: none;
+  --wa-border-radius-scale: 0.6;
 }

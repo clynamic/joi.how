@@ -1,11 +1,6 @@
 import { GameEvent, GameEventDescriptions, GameEventLabels } from '../../types';
 import { useCallback } from 'react';
-import {
-  Fields,
-  SettingsDescription,
-  ToggleTile,
-  ToggleTileType,
-} from '../../common';
+import { Fields, SettingsDescription, ToggleTile } from '../../common';
 import { useSetting } from '../SettingsProvider';
 
 export const EventSettings = () => {
@@ -34,10 +29,10 @@ export const EventSettings = () => {
             key={event}
             value={events.includes(event)}
             onClick={() => toggleEvent(event)}
-            type={ToggleTileType.check}
+            type={'check'}
           >
-            <strong>{GameEventLabels[event]}</strong>
-            <p>{GameEventDescriptions[event]}</p>
+            <h6 className='subtitle'>{GameEventLabels[event]}</h6>
+            <p className='caption'>{GameEventDescriptions[event]}</p>
           </ToggleTile>
         );
       })}
