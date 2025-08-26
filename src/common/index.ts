@@ -15,6 +15,5 @@ export * from './SettingsRow';
 export * from './Space';
 export * from './Spinner';
 export * from './StackedImage';
-export * from './TabBar';
 export * from './ToggleTile';
 export * from './Trailing';
