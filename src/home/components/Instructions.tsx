@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { ContentSection } from '../../common';
 
-const StyledRulesTitle = styled.h2`
+const StyledRulesTitle = styled.h3`
   padding: 4px 16px;
 `;
 

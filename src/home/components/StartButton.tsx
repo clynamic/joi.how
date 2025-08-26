@@ -1,7 +1,8 @@
 import styled from 'styled-components';
-import { Button, ContentSection } from '../../common';
+import { ContentSection } from '../../common';
 import { useImages } from '../../settings';
 import { useNavigate } from 'react-router-dom';
+import { WaButton } from '@awesome.me/webawesome/dist/react';
 
 const StyledStartSection = styled(ContentSection)`
   background: transparent;
@@ -16,10 +17,16 @@ const StyledStartWarning = styled.p`
   margin-bottom: 1rem;
 `;
 
-const StyledStartButton = styled(Button)`
-  font-size: 1.5rem;
-  padding: 15px 20px;
-  text-transform: uppercase;
+const StyledStartButton = styled(WaButton)`
+  &::part(base) {
+    height: fit-content;
+    padding: 15px 20px;
+  }
+
+  &::part(label) {
+    font-size: 1.5rem;
+    text-transform: uppercase;
+  }
 `;
 
 export const StartButton = () => {
