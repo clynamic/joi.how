@@ -18,4 +18,3 @@ export * from './StackedImage';
 export * from './TabBar';
 export * from './ToggleTile';
 export * from './Trailing';
-export * from './VerticalDivider';

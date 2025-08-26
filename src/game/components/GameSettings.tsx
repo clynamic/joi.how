@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { VerticalDivider } from '../../common';
 import { useCallback, useState } from 'react';
 import {
   BoardSettings,
@@ -14,7 +13,12 @@ import {
 } from '../../settings';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useFullscreen, useLooping } from '../../utils';
-import { WaButton, WaDialog, WaIcon } from '@awesome.me/webawesome/dist/react';
+import {
+  WaButton,
+  WaDialog,
+  WaDivider,
+  WaIcon,
+} from '@awesome.me/webawesome/dist/react';
 
 const StyledGameSettings = styled.div`
   display: flex;
@@ -93,7 +97,7 @@ export const GameSettings = () => {
       <WaButton aria-label='Settings' onClick={() => onOpen(true)}>
         <WaIcon name='gear' />
       </WaButton>
-      <VerticalDivider />
+      <WaDivider orientation='vertical' />
       <WaButton
         aria-label='Fullscreen'
         onClick={() => setFullscreen(fullscreen => !fullscreen)}

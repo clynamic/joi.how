@@ -11,7 +11,8 @@ import {
 import { useSetting } from '../../settings';
 import { useMemo } from 'react';
 import { GameEvent } from '../../types';
-import { ProgressBar, VerticalDivider } from '../../common';
+import { ProgressBar } from '../../common';
+import { WaDivider } from '@awesome.me/webawesome/dist/react';
 
 const StyledGameInstructions = styled.div`
   display: flex;
@@ -92,7 +93,7 @@ export const GameInstructions = () => {
       </StyledPaceIcons>
       {useRandomGrip && (
         <>
-          <VerticalDivider />
+          <WaDivider orientation='vertical' style={{ alignSelf: 'center' }} />
           <StyledGripIcons>
             <StyledActiveIcon $active={paws === 'left' || paws === 'both'}>
               <FontAwesomeIcon
