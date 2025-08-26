@@ -173,7 +173,7 @@ export const VibratorSettings = () => {
         </>
       )}
       <WaButton onClick={onConnect} loading={loading} size='small'>
-        <p>{connection ? 'Disconnect' : 'Connect'}</p>
+        <span>{connection ? 'Disconnect' : 'Connect'}</span>
         <WaIcon slot='end' name='satellite-dish' />
       </WaButton>
       {error && (

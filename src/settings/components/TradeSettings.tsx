@@ -71,12 +71,12 @@ export const TradeSettings = () => {
         alignItems='center'
       >
         <WaButton onClick={onExport}>
-          <p>Export</p>
+          <span>Export</span>
           <WaIcon slot='end' name='file-export' />
         </WaButton>
         <WaDivider orientation='vertical' />
         <WaButton onClick={onImport}>
-          <p>Import</p>
+          <span>Import</span>
           <WaIcon slot='end' name='file-import' />
         </WaButton>
       </JoiStack>

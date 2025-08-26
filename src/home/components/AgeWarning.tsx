@@ -34,11 +34,11 @@ export const AgeWarning = () => {
       <Space size='large' />
       <JoiStack direction='row' justifyContent='flex-end' spacing={2}>
         <WaButton href='https://www.google.com' variant='danger'>
-          <p>I am not an adult</p>
+          <span>I am not an adult</span>
           <WaIcon slot='end' name={'ban'} />
         </WaButton>
         <WaButton onClick={() => setAgeCheckConfirm(true)}>
-          <p>I am an adult</p>
+          <span>I am an adult</span>
           <WaIcon slot='end' name={'check'} />
         </WaButton>
       </JoiStack>

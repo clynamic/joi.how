@@ -102,7 +102,7 @@ export const E621CredentialsInput = ({
           loading={loading}
           size='small'
         >
-          <p>Save</p>
+          <span>Save</span>
           <WaIcon slot='end' name='save' />
         </WaButton>
       </JoiStack>
