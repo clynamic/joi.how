@@ -16,6 +16,7 @@ const StyledFields = styled.fieldset`
 
   border: unset;
   border-left: 2px solid var(--legend-background);
+  border-radius: unset;
 
   margin: 15px;
   padding: 5px 15px;
