@@ -85,6 +85,20 @@
   --wa-color-focus: color-mix(in oklch, white 40%, var(--wa-color-brand));
 }
 
+/* #region root sizing */
+
+body {
+  height: 100vh;
+  height: 100dvh;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+/* #endregion */
+
 /* #region utility classes */
 
 .joi-wide {
