@@ -78,9 +78,7 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
             >
               <h6 className='subtitle'>Browse</h6>
               <p className='caption'>Open source in new tab</p>
-              <span slot='trailing'>
-                <WaIcon name='open-in-new' />
-              </span>
+              <WaIcon slot='trailing' name='arrow-up-right-from-square' />
             </JoiToggleTile>
 
             <JoiToggleTile
@@ -92,7 +90,7 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
               <h6 className='subtitle'>Select</h6>
               <p className='caption'>Start multi-select here</p>
               <span slot='trailing'>
-                <WaIcon name='check-box' />
+                <WaIcon name='square-check' />
               </span>
             </JoiToggleTile>
 

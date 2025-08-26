@@ -76,13 +76,13 @@ export const ImageSettings = () => {
         }}
         loud={videoSound}
       />
+      <Space size='small' />
       <ImageGrid
         images={images}
         selected={selected}
         onSelectedChange={setSelected}
         onClickTile={setClicked}
       />
-      <Space size='medium' />
     </Fields>
   );
 };
