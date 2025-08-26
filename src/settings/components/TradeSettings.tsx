@@ -72,12 +72,12 @@ export const TradeSettings = () => {
       >
         <WaButton onClick={onExport}>
           <p>Export</p>
-          <WaIcon slot='end' name='download' />
+          <WaIcon slot='end' name='file-export' />
         </WaButton>
         <WaDivider orientation='vertical' />
         <WaButton onClick={onImport}>
           <p>Import</p>
-          <WaIcon slot='end' name='upload' />
+          <WaIcon slot='end' name='file-import' />
         </WaButton>
       </JoiStack>
     </Fields>

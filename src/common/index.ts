@@ -1,4 +1,3 @@
-export * from './Button';
 export * from './ContentSection';
 export * from './Fields';
 export * from './Image';

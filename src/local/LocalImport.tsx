@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import {
   SettingsDescription,
   Space,
-  Button,
   SettingsInfo,
   Spinner,
   SettingsGrid,
@@ -14,6 +13,7 @@ import { discoverImageFiles, imageTypeFromExtension } from './files';
 import { LocalImageRequest, useLocalImages } from './LocalProvider';
 import { ImageServiceType } from '../types';
 import { chunk } from 'lodash';
+import { WaButton, WaIcon } from '@awesome.me/webawesome/dist/react';
 
 const StyledLoadingHint = styled(SettingsInfo)`
   justify-self: center;
@@ -91,13 +91,14 @@ export const LocalImport = () => {
         id='filePicker'
         onChange={select}
       />
-      <Button
+      <WaButton
         style={{ justifySelf: 'center' }}
         onClick={() => document.getElementById('filePicker')?.click()}
         disabled={loading}
       >
-        Select Files
-      </Button>
+        <span>Select Files</span>
+        <WaIcon slot='end' name='upload' />
+      </WaButton>
       <Space size='small' />
       <AnimatePresence>
         {files && (
