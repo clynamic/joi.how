@@ -1,45 +1,60 @@
-import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { motion } from 'framer-motion';
 import { marked } from 'marked';
 import { useEffect, useState } from 'react';
+import { WaDetails, WaSpinner } from '@awesome.me/webawesome/dist/react';
 import styled from 'styled-components';
 import { ContentSection } from '../../common';
 
-const StyledExpandButton = styled.button`
-  display: flex;
-  justify-content: space-between;
+const StyledWaDetails = styled(WaDetails)`
+  &::part(header) {
+    transition: background var(--wa-transition-normal);
+    border-radius: var(--wa-form-control-border-radius);
+  }
 
-  width: 100%;
-
-  border-radius: var(--border-radius);
-  background: transparent;
-  color: var(--button-color);
-
-  transition: var(--hover-transition);
-
-  cursor: pointer;
-
-  padding: 15px;
-
-  &:hover {
+  &::part(header):hover {
     background: var(--button-background);
   }
 
-  &[aria-expanded='true'] {
+  &[open]::part(header) {
     background: var(--button-background);
+  }
+
+  &::part(content) {
+    background: var(--button-background);
+    border-radius: var(--wa-form-control-border-radius);
+    margin-top: var(--wa-space-s);
   }
 `;
 
 const StyledReleaseNotesBody = styled.div`
   padding: 20px;
-  background: var(--button-background);
-  border-radius: var(--border-radius);
+  max-height: 500px;
+  overflow-y: auto;
+
+  h1 {
+    font-size: 1.75rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+  }
+  h3 {
+    font-size: 1.25rem;
+  }
+  h4 {
+    font-size: 1rem;
+  }
+  h5 {
+    font-size: 0.875rem;
+  }
+  h6 {
+    font-size: 0.75rem;
+  }
+  p {
+    line-height: 1.5;
+  }
 `;
 
 export const ReleaseNotes = () => {
   const [changelog, setChangelog] = useState(null as string | null);
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     fetch('/CHANGELOG.md')
@@ -47,40 +62,18 @@ export const ReleaseNotes = () => {
       .then(async text => setChangelog(await marked(text)));
   }, []);
 
-  const toggleOpen = () => setOpen(!open);
-
   return (
     <ContentSection>
-      <StyledExpandButton onClick={toggleOpen} aria-expanded={open}>
-        <h2>Release Notes</h2>
-        <motion.h2
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <FontAwesomeIcon icon={faAngleDown} />
-        </motion.h2>
-      </StyledExpandButton>
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{
-          marginTop: open ? '10px' : 0,
-          opacity: open ? 1 : 0,
-          height: open ? '500px' : 0,
-          overflowY: 'auto',
-        }}
-        transition={{
-          duration: 0.4,
-          ease: [0.19, 1, 0.22, 1],
-        }}
-      >
+      <StyledWaDetails appearance='plain'>
+        <h4 slot='summary'>Release Notes</h4>
         <StyledReleaseNotesBody>
           {changelog ? (
             <div dangerouslySetInnerHTML={{ __html: changelog }} />
           ) : (
-            'Loading...'
+            <WaSpinner style={{ fontSize: '2.4rem' }} />
           )}
         </StyledReleaseNotesBody>
-      </motion.div>
+      </StyledWaDetails>
     </ContentSection>
   );
 };
