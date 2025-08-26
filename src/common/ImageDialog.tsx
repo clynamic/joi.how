@@ -44,8 +44,7 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
   }, [image]);
 
   const handleOpenChange = useCallback(
-    (event: any) => {
-      const isOpen = event.target.open;
+    (isOpen: boolean) => {
       setVisible(isOpen);
       if (!isOpen) {
         setCurrent(null);
@@ -59,7 +58,7 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
     <StyledImageDialog
       open={visible}
       lightDismiss
-      onWaAfterHide={handleOpenChange}
+      onWaAfterHide={() => handleOpenChange(false)}
     >
       {current && (
         <div className='wa-stack'>
