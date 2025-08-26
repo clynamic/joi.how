@@ -6,9 +6,9 @@ import {
   Fields,
   SettingsRow,
   SettingsDivider,
-  Slider,
 } from '../../common';
 import { useSetting } from '../SettingsProvider';
+import { WaSlider } from '@awesome.me/webawesome/dist/react';
 
 export const DurationSettings = () => {
   const [warmupDuration, setWarmupDuration] = useSetting('warmupDuration');
@@ -20,13 +20,16 @@ export const DurationSettings = () => {
       <SettingsInfo>Warmup period has no beats</SettingsInfo>
       <SettingsRow>
         <SettingsLabel htmlFor='warmupDuration'>Warmup duration</SettingsLabel>
-        <Slider
+        <WaSlider
           id='warmupDuration'
-          min='0'
-          max='300'
-          step='60'
+          min={0}
+          max={300}
+          step={60}
           value={warmupDuration}
-          onChange={setWarmupDuration}
+          onInput={e =>
+            setWarmupDuration(parseFloat(e.currentTarget.value.toString()))
+          }
+          style={{ width: '100%' }}
         />
         <Measure value={Math.ceil(warmupDuration / 60)} chars={2} unit='min' />
       </SettingsRow>
@@ -36,13 +39,16 @@ export const DurationSettings = () => {
       </SettingsInfo>
       <SettingsRow>
         <SettingsLabel htmlFor='gameDuration'>Session duration</SettingsLabel>
-        <Slider
+        <WaSlider
           id='gameDuration'
-          min='180'
-          max='1800'
-          step='60'
+          min={180}
+          max={1800}
+          step={60}
           value={gameDuration}
-          onChange={setGameDuration}
+          onInput={e =>
+            setGameDuration(parseFloat(e.currentTarget.value.toString()))
+          }
+          style={{ width: '100%' }}
         />
         <Measure value={Math.ceil(gameDuration / 60)} chars={2} unit='min' />
       </SettingsRow>

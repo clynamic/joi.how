@@ -6,10 +6,10 @@ import {
   SettingsRow,
   SettingsDivider,
   SettingsDescription,
-  Slider,
 } from '../../common';
 import { SettingsInfo } from '../../common/SettingsInfo';
 import { useSetting } from '../SettingsProvider';
+import { WaSlider } from '@awesome.me/webawesome/dist/react';
 
 export const ClimaxSettings = () => {
   const [climaxChance, setClimaxChance] = useSetting('climaxChance');
@@ -45,12 +45,13 @@ export const ClimaxSettings = () => {
       <SettingsInfo>{climaxText}</SettingsInfo>
       <SettingsRow>
         <SettingsLabel htmlFor='climax-chance'>Orgasm</SettingsLabel>
-        <Slider
+        <WaSlider
           id='climax-chance'
           value={climaxChance}
           min={0}
           max={100}
-          onChange={setClimaxChance}
+          onInput={e => setClimaxChance(e.currentTarget.value)}
+          style={{ width: '100%' }}
         />
         <Measure value={climaxChance} chars={3} unit='%' />
       </SettingsRow>
@@ -59,12 +60,13 @@ export const ClimaxSettings = () => {
       <SettingsInfo>{ruinText}</SettingsInfo>
       <SettingsRow>
         <SettingsLabel htmlFor='ruin-chance'>Ruin</SettingsLabel>
-        <Slider
+        <WaSlider
           id='ruin-chance'
           value={ruinChance}
           min={0}
           max={100}
-          onChange={setRuinChance}
+          onInput={e => setRuinChance(e.currentTarget.value)}
+          style={{ width: '100%' }}
         />
         <Measure value={ruinChance} chars={3} unit='%' />
       </SettingsRow>

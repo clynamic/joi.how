@@ -130,3 +130,16 @@ wa-button[size='small']:has(wa-icon:only-child) wa-icon {
 wa-button:has(wa-icon:only-child)::part(base):hover {
   background: var(--wa-color-brand);
 }
+
+wa-slider {
+  --thumb-width: 1.2em;
+  --thumb-height: 1.2em;
+}
+
+wa-slider::part(track) {
+  background: var(--wa-color-surface-default);
+}
+
+wa-slider::part(thumb) {
+  border: none;
+}

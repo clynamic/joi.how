@@ -2,7 +2,6 @@ import {
   Dropdown,
   Measure,
   SettingsLabel,
-  Slider,
   Space,
   SettingsInfo,
   Spinner,
@@ -29,7 +28,12 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { E621CredentialsInput } from './E621Credentials';
 import { defaultTransition } from '../utils';
-import { WaButton, WaIcon, WaTooltip } from '@awesome.me/webawesome/dist/react';
+import {
+  WaButton,
+  WaIcon,
+  WaTooltip,
+  WaSlider,
+} from '@awesome.me/webawesome/dist/react';
 
 export const E621Search = () => {
   const [loading, setLoading] = useState(false);
@@ -114,28 +118,31 @@ export const E621Search = () => {
       <Space size='medium' />
       <SettingsRow>
         <SettingsLabel htmlFor='limit'>Count</SettingsLabel>
-        <Slider
+        <WaSlider
           id='limit'
           value={limit}
-          onChange={setLimit}
+          onInput={e => setLimit(parseFloat(e.currentTarget.value.toString()))}
           min={1}
           max={200}
           step={1}
+          style={{ width: '100%' }}
         />
         <Measure value={limit} chars={3} unit='posts' />
       </SettingsRow>
       <Space size='medium' />
       <SettingsRow>
         <SettingsLabel htmlFor='minScore'>Score</SettingsLabel>
-        <Slider
+        <WaSlider
           id='minScore'
           value={minScore ?? -1}
-          onChange={value => {
+          onInput={e => {
+            const value = parseFloat(e.currentTarget.value.toString());
             setMinScore(value === -1 ? undefined : value);
           }}
           min={-1}
           max={50}
           step={1}
+          style={{ width: '100%' }}
         />
         {minScore == undefined || minScore === -1 ? (
           <StyledMeasure>

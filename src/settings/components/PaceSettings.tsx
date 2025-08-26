@@ -3,7 +3,6 @@ import { ResponsiveContainer, XAxis, YAxis, AreaChart, Area } from 'recharts';
 import { paceGraphPoint } from '../../utils';
 import {
   Measure,
-  Slider,
   SettingsInfo,
   SettingsLabel,
   Fields,
@@ -13,6 +12,7 @@ import {
   SettingsDescription,
 } from '../../common';
 import { useSetting } from '../SettingsProvider';
+import { WaSlider } from '@awesome.me/webawesome/dist/react';
 
 const settingsMinPace = 0.25;
 const settingsMaxPace = 10;
@@ -40,25 +40,31 @@ export const PaceSettings = () => {
       <SettingsInfo>The game will run in beats per second (b/s)</SettingsInfo>
       <SettingsRow>
         <SettingsLabel htmlFor='minPace'>Minimum</SettingsLabel>
-        <Slider
+        <WaSlider
           id='minPace'
           min={settingsMinPace}
           max={settingsMaxPace}
           step={0.05}
           value={minPace}
-          onChange={setMinPace}
+          onInput={e =>
+            setMinPace(parseFloat(e.currentTarget.value.toString()))
+          }
+          style={{ width: '100%' }}
         />
         <Measure value={minPace} chars={4} unit='b/s' />
       </SettingsRow>
       <SettingsRow>
         <SettingsLabel htmlFor='maxPace'>Maximum</SettingsLabel>
-        <Slider
+        <WaSlider
           id='maxPace'
           min={settingsMinPace}
           max={settingsMaxPace}
           step={0.05}
           value={maxPace}
-          onChange={setMaxPace}
+          onInput={e =>
+            setMaxPace(parseFloat(e.currentTarget.value.toString()))
+          }
+          style={{ width: '100%' }}
         />
         <Measure value={maxPace} chars={4} unit='b/s' />
       </SettingsRow>
@@ -68,25 +74,31 @@ export const PaceSettings = () => {
       </SettingsInfo>
       <SettingsRow>
         <SettingsLabel htmlFor='steepness'>Steepness</SettingsLabel>
-        <Slider
+        <WaSlider
           id='steepness'
           min={0}
           max={1}
           step={0.05}
           value={steepness}
-          onChange={setSteepness}
+          onInput={e =>
+            setSteepness(parseFloat(e.currentTarget.value.toString()))
+          }
+          style={{ width: '100%' }}
         />
         <Measure value={Math.floor(steepness * 100)} chars={3} unit='%' />
       </SettingsRow>
       <SettingsRow>
         <SettingsLabel htmlFor='timeshift'>Timeshift</SettingsLabel>
-        <Slider
+        <WaSlider
           id='timeshift'
           min={0}
           max={1}
           step={0.05}
           value={timeshift}
-          onChange={setTimeshift}
+          onInput={e =>
+            setTimeshift(parseFloat(e.currentTarget.value.toString()))
+          }
+          style={{ width: '100%' }}
         />
         <Measure value={Math.floor(timeshift * 100)} chars={3} unit='%' />
       </SettingsRow>

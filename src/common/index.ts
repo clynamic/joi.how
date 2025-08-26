@@ -14,7 +14,6 @@ export * from './SettingsGrid';
 export * from './SettingsInfo';
 export * from './SettingsLabel';
 export * from './SettingsRow';
-export * from './Slider';
 export * from './Space';
 export * from './Spinner';
 export * from './StackedImage';
