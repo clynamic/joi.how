@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { SettingsTile, SettingsDescription, ToggleTile } from '../../common';
+import { Fields, SettingsDescription, ToggleTile } from '../../common';
 import { useSetting } from '../SettingsProvider';
 import { faVolumeMute, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
 
@@ -8,7 +8,7 @@ export const BoardSettings = () => {
   const [videoSound, setVideoSound] = useSetting('videoSound');
 
   return (
-    <SettingsTile label='Board'>
+    <Fields label='Board'>
       <SettingsDescription>How the board is rendered</SettingsDescription>
       <ToggleTile
         value={highRes}
@@ -28,6 +28,6 @@ export const BoardSettings = () => {
         <strong>Video sound</strong>
         <p>Enable sound for videos</p>
       </ToggleTile>
-    </SettingsTile>
+    </Fields>
   );
 };

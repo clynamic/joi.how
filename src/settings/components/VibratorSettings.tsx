@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import {
   Button,
   SettingsInfo,
-  SettingsTile,
   SettingsDescription,
   Space,
   Surrounded,
@@ -10,6 +9,7 @@ import {
   TextInput,
   SettingsLabel,
   Spinner,
+  Fields,
 } from '../../common';
 import { defaultTransition, useVibratorValue, Vibrator } from '../../utils';
 import {
@@ -95,7 +95,7 @@ export const VibratorSettings = () => {
   }, [client, connection, host, port, setConnection, setDevices, setError]);
 
   return (
-    <SettingsTile label={'Vibrator'}>
+    <Fields label={'Vibrator'}>
       <Surrounded
         trailing={
           <IconButton
@@ -202,6 +202,6 @@ export const VibratorSettings = () => {
         </>
       )}
       <Space size='small' />
-    </SettingsTile>
+    </Fields>
   );
 };

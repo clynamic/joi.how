@@ -3,8 +3,8 @@ import {
   IconButton,
   ImageGrid,
   ImageDialog,
-  SettingsTile,
   Space,
+  Fields,
 } from '../../common';
 import { useImages, useSetting } from '../../settings';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -43,7 +43,7 @@ export const ImageSettings = () => {
   const [videoSound] = useSetting('videoSound');
 
   return (
-    <SettingsTile label='Images' style={{ gridColumn: '1 / -1' }}>
+    <Fields label='Images' style={{ gridColumn: '1 / -1' }}>
       <StyledImageActions>
         <p>{`You have loaded ${images.length} images`}</p>
         <StyledImageButtons>
@@ -115,6 +115,6 @@ export const ImageSettings = () => {
         />
       </ImageDialog>
       <Space size='medium' />
-    </SettingsTile>
+    </Fields>
   );
 };

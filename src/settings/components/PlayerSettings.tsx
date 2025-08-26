@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  Divider,
-  SettingsTile,
+  Fields,
   SettingsDescription,
+  SettingsDivider,
   ToggleTile,
 } from '../../common';
 import {
@@ -25,7 +25,7 @@ export const PlayerSettings = () => {
   const [body, setBody] = useSetting('body');
 
   return (
-    <SettingsTile label={'Player'}>
+    <Fields label={'Player'}>
       <SettingsDescription>Select your gender</SettingsDescription>
       {Object.keys(PlayerGender).map(key => {
         const current = PlayerGender[key as keyof typeof PlayerGender];
@@ -55,7 +55,7 @@ export const PlayerSettings = () => {
           </ToggleTile>
         );
       })}
-      <Divider />
+      <SettingsDivider />
       <SettingsDescription>Select your body</SettingsDescription>
       {Object.keys(PlayerBody).map(key => {
         const current = PlayerBody[key as keyof typeof PlayerBody];
@@ -80,6 +80,6 @@ export const PlayerSettings = () => {
           </ToggleTile>
         );
       })}
-    </SettingsTile>
+    </Fields>
   );
 };

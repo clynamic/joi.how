@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import {
-  Divider,
   Measure,
   SettingsLabel,
-  SettingsTile,
+  Fields,
+  SettingsRow,
+  SettingsDivider,
   SettingsDescription,
   Slider,
 } from '../../common';
@@ -39,30 +40,34 @@ export const ClimaxSettings = () => {
   }, [ruinChance]);
 
   return (
-    <SettingsTile grid label={'Climax'}>
+    <Fields label={'Climax'}>
       <SettingsDescription>At the game's climax...</SettingsDescription>
       <SettingsInfo>{climaxText}</SettingsInfo>
-      <SettingsLabel htmlFor='climax-chance'>Orgasm</SettingsLabel>
-      <Slider
-        id='climax-chance'
-        value={climaxChance}
-        min={0}
-        max={100}
-        onChange={setClimaxChance}
-      />
-      <Measure value={climaxChance} chars={3} unit='%' />
-      <Divider />
+      <SettingsRow>
+        <SettingsLabel htmlFor='climax-chance'>Orgasm</SettingsLabel>
+        <Slider
+          id='climax-chance'
+          value={climaxChance}
+          min={0}
+          max={100}
+          onChange={setClimaxChance}
+        />
+        <Measure value={climaxChance} chars={3} unit='%' />
+      </SettingsRow>
+      <SettingsDivider />
       <SettingsDescription>Given an orgasm occurs...</SettingsDescription>
       <SettingsInfo>{ruinText}</SettingsInfo>
-      <SettingsLabel htmlFor='ruin-chance'>Ruin</SettingsLabel>
-      <Slider
-        id='ruin-chance'
-        value={ruinChance}
-        min={0}
-        max={100}
-        onChange={setRuinChance}
-      />
-      <Measure value={ruinChance} chars={3} unit='%' />
-    </SettingsTile>
+      <SettingsRow>
+        <SettingsLabel htmlFor='ruin-chance'>Ruin</SettingsLabel>
+        <Slider
+          id='ruin-chance'
+          value={ruinChance}
+          min={0}
+          max={100}
+          onChange={setRuinChance}
+        />
+        <Measure value={ruinChance} chars={3} unit='%' />
+      </SettingsRow>
+    </Fields>
   );
 };

@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  SettingsTile,
+  Fields,
   SettingsDescription,
   ToggleTile,
   ToggleTileType,
@@ -23,7 +23,7 @@ export const HypnoSettings = () => {
   const [hypno, setHypno] = useSetting('hypno');
 
   return (
-    <SettingsTile label={'Hypno'} role='radiogroup'>
+    <Fields label={'Hypno'} role='radiogroup'>
       <SettingsDescription>Choose a hypno text set</SettingsDescription>
       {Object.keys(GameHypnoType).map(key => {
         const current = GameHypnoType[key as keyof typeof GameHypnoType];
@@ -53,6 +53,6 @@ export const HypnoSettings = () => {
           </ToggleTile>
         );
       })}
-    </SettingsTile>
+    </Fields>
   );
 };

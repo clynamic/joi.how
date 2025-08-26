@@ -1,7 +1,7 @@
 import { GameEvent, GameEventDescriptions, GameEventLabels } from '../../types';
 import { useCallback } from 'react';
 import {
-  SettingsTile,
+  Fields,
   SettingsDescription,
   ToggleTile,
   ToggleTileType,
@@ -23,7 +23,7 @@ export const EventSettings = () => {
   );
 
   return (
-    <SettingsTile label={'Events'}>
+    <Fields label={'Events'}>
       <SettingsDescription>
         Check the events you want to occur during the game
       </SettingsDescription>
@@ -41,6 +41,6 @@ export const EventSettings = () => {
           </ToggleTile>
         );
       })}
-    </SettingsTile>
+    </Fields>
   );
 };

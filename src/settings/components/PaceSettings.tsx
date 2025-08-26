@@ -3,11 +3,12 @@ import { ResponsiveContainer, XAxis, YAxis, AreaChart, Area } from 'recharts';
 import { paceGraphPoint } from '../../utils';
 import {
   Measure,
-  Divider,
   Slider,
   SettingsInfo,
   SettingsLabel,
-  SettingsTile,
+  Fields,
+  SettingsRow,
+  SettingsDivider,
   Space,
   SettingsDescription,
 } from '../../common';
@@ -34,83 +35,93 @@ export const PaceSettings = () => {
   }, [steepness, timeshift]);
 
   return (
-    <SettingsTile grid label='Pace'>
+    <Fields label='Pace'>
       <SettingsDescription>Choose beat speed</SettingsDescription>
       <SettingsInfo>The game will run in beats per second (b/s)</SettingsInfo>
-      <SettingsLabel htmlFor='minPace'>Minimum</SettingsLabel>
-      <Slider
-        id='minPace'
-        min={settingsMinPace}
-        max={settingsMaxPace}
-        step={0.05}
-        value={minPace}
-        onChange={setMinPace}
-      />
-      <Measure value={minPace} chars={4} unit='b/s' />
-      <SettingsLabel htmlFor='maxPace'>Maximum</SettingsLabel>
-      <Slider
-        id='maxPace'
-        min={settingsMinPace}
-        max={settingsMaxPace}
-        step={0.05}
-        value={maxPace}
-        onChange={setMaxPace}
-      />
-      <Measure value={maxPace} chars={4} unit='b/s' />
-      <Divider />
+      <SettingsRow>
+        <SettingsLabel htmlFor='minPace'>Minimum</SettingsLabel>
+        <Slider
+          id='minPace'
+          min={settingsMinPace}
+          max={settingsMaxPace}
+          step={0.05}
+          value={minPace}
+          onChange={setMinPace}
+        />
+        <Measure value={minPace} chars={4} unit='b/s' />
+      </SettingsRow>
+      <SettingsRow>
+        <SettingsLabel htmlFor='maxPace'>Maximum</SettingsLabel>
+        <Slider
+          id='maxPace'
+          min={settingsMinPace}
+          max={settingsMaxPace}
+          step={0.05}
+          value={maxPace}
+          onChange={setMaxPace}
+        />
+        <Measure value={maxPace} chars={4} unit='b/s' />
+      </SettingsRow>
+      <SettingsDivider />
       <SettingsInfo>
         The random pace event will pick a pace from this curve
       </SettingsInfo>
-      <SettingsLabel htmlFor='steepness'>Steepness</SettingsLabel>
-      <Slider
-        id='steepness'
-        min={0}
-        max={1}
-        step={0.05}
-        value={steepness}
-        onChange={setSteepness}
-      />
-      <Measure value={Math.floor(steepness * 100)} chars={3} unit='%' />
-      <SettingsLabel htmlFor='timeshift'>Timeshift</SettingsLabel>
-      <Slider
-        id='timeshift'
-        min={0}
-        max={1}
-        step={0.05}
-        value={timeshift}
-        onChange={setTimeshift}
-      />
-      <Measure value={Math.floor(timeshift * 100)} chars={3} unit='%' />
+      <SettingsRow>
+        <SettingsLabel htmlFor='steepness'>Steepness</SettingsLabel>
+        <Slider
+          id='steepness'
+          min={0}
+          max={1}
+          step={0.05}
+          value={steepness}
+          onChange={setSteepness}
+        />
+        <Measure value={Math.floor(steepness * 100)} chars={3} unit='%' />
+      </SettingsRow>
+      <SettingsRow>
+        <SettingsLabel htmlFor='timeshift'>Timeshift</SettingsLabel>
+        <Slider
+          id='timeshift'
+          min={0}
+          max={1}
+          step={0.05}
+          value={timeshift}
+          onChange={setTimeshift}
+        />
+        <Measure value={Math.floor(timeshift * 100)} chars={3} unit='%' />
+      </SettingsRow>
       <Space size='medium' />
-      <SettingsLabel style={{ alignSelf: 'flex-end' }}>start</SettingsLabel>
-      <div
-        style={{
-          height: '100px',
-        }}
-      >
-        <ResponsiveContainer width='100%' height='100%'>
-          <AreaChart data={chartData.map(([x, y]) => ({ x, y }))}>
-            <XAxis type='number' dataKey='x' hide />
-            <YAxis type='number' dataKey='y' hide />
-            <Area
-              animationDuration={0}
-              type='monotone'
-              dataKey='y'
-              stroke='var(--primary)'
-              fill='var(--primary)'
-              fillOpacity={0.3}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-      <SettingsLabel
-        style={{
-          textAlign: 'right',
-          alignSelf: 'flex-start',
-        }}
-      >
-        end
-      </SettingsLabel>
-    </SettingsTile>
+      <SettingsRow>
+        <SettingsLabel style={{ alignSelf: 'flex-end' }}>start</SettingsLabel>
+        <div
+          style={{
+            height: '100px',
+          }}
+        >
+          <ResponsiveContainer width='100%' height='100%'>
+            <AreaChart data={chartData.map(([x, y]) => ({ x, y }))}>
+              <XAxis type='number' dataKey='x' hide />
+              <YAxis type='number' dataKey='y' hide />
+              <Area
+                animationDuration={0}
+                type='monotone'
+                dataKey='y'
+                stroke='var(--primary)'
+                fill='var(--primary)'
+                fillOpacity={0.3}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+        <SettingsLabel
+          style={{
+            textAlign: 'right',
+            alignSelf: 'flex-start',
+          }}
+        >
+          end
+        </SettingsLabel>
+      </SettingsRow>
+    </Fields>
   );
 };

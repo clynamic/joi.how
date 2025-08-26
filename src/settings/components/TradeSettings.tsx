@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import {
   Button,
-  SettingsTile,
+  Fields,
   SettingsDescription,
   Space,
   VerticalDivider,
@@ -72,7 +72,7 @@ export const TradeSettings = () => {
   };
 
   return (
-    <SettingsTile label={'Trade'}>
+    <Fields label={'Trade'}>
       <SettingsDescription>
         Export or import your settings and images
       </SettingsDescription>
@@ -82,6 +82,6 @@ export const TradeSettings = () => {
         <Button onClick={onImport}>Import</Button>
       </StyledTradeButtons>
       <Space />
-    </SettingsTile>
+    </Fields>
   );
 };

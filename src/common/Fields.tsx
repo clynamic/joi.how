@@ -1,22 +1,18 @@
 import { PropsWithChildren } from 'react';
 import styled from 'styled-components';
+import { SettingsGrid } from './SettingsGrid';
 
-export interface SettingsTileProps
+export interface FieldsProps
   extends PropsWithChildren<React.HTMLAttributes<HTMLFieldSetElement>> {
-  label: React.ReactNode;
-  grid?: boolean;
+  label?: React.ReactNode;
 }
 
-const StyledSettingsTile = styled.fieldset<{ $grid?: boolean }>`
-  display: ${({ $grid }) => ($grid ? 'grid' : 'flex')};
+const StyledFields = styled.fieldset`
+  display: flex;
   flex-direction: column;
-  grid-template-columns: auto 1fr auto;
-  grid-auto-rows: min-content;
 
   background: var(--section-background);
   color: #b9bad6;
-
-  font-size: 0.8rem;
 
   border: unset;
   border-left: 2px solid var(--legend-background);
@@ -27,7 +23,7 @@ const StyledSettingsTile = styled.fieldset<{ $grid?: boolean }>`
   position: relative;
 `;
 
-const StyledSettingsLabel = styled.legend`
+const StyledFieldsLegend = styled.legend`
   width: fit-content;
   padding: 4px 8px;
   background: var(--legend-background);
@@ -36,16 +32,15 @@ const StyledSettingsLabel = styled.legend`
   font-size: 1rem;
 `;
 
-export const SettingsTile: React.FC<SettingsTileProps> = ({
-  label,
+export const Fields: React.FC<FieldsProps> = ({
+  label: legend,
   children,
-  grid,
   ...props
 }) => {
   return (
-    <StyledSettingsTile $grid={grid} {...props}>
-      <StyledSettingsLabel>{label}</StyledSettingsLabel>
-      {children}
-    </StyledSettingsTile>
+    <StyledFields {...props}>
+      {legend && <StyledFieldsLegend>{legend}</StyledFieldsLegend>}
+      <SettingsGrid>{children}</SettingsGrid>
+    </StyledFields>
   );
 };
