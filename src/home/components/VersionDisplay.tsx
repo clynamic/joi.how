@@ -1,61 +1,65 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ContentSection, IconButton } from '../../common';
-import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
-import styled from 'styled-components';
+import { ContentSection, JoiStack } from '../../common';
 import { version } from '../../../package.json';
-import { faDollar } from '@fortawesome/free-solid-svg-icons';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
-
-const StyledVersionDisplay = styled(ContentSection)`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
+import { WaButton, WaIcon, WaTooltip } from '@awesome.me/webawesome/dist/react';
+import { Fragment } from 'react/jsx-runtime';
 
 interface AppLink {
   url: string;
   text: string;
-  icon: IconProp;
+  icon: { name: string; family?: string };
 }
 
 const appLinks: Record<string, AppLink> = {
   donations: {
     url: 'https://ko-fi.com/binaryfloof',
     text: 'Support us on Ko-fi',
-    icon: faDollar,
+    icon: { name: 'dollar' },
   },
   discord: {
     url: 'https://discord.clynamic.net',
     text: 'Join our Discord',
-    icon: faDiscord,
+    icon: { name: 'discord', family: 'brands' },
   },
   github: {
     url: 'https://github.com/clynamic/joi.how',
     text: 'View on GitHub',
-    icon: faGithub,
+    icon: { name: 'github', family: 'brands' },
   },
 };
 
-const StyledAppLink = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-`;
-
 export const VersionDisplay = () => {
   return (
-    <StyledVersionDisplay>
-      <p>Version {version}</p>
-      <StyledAppLink style={{ display: 'flex' }}>
-        {Object.keys(appLinks).map(key => (
-          <IconButton
-            key={key}
-            tooltip={appLinks[key].text}
-            onClick={() => window.open(appLinks[key].url, '_blank')}
-            icon={<FontAwesomeIcon icon={appLinks[key].icon} />}
-          />
-        ))}
-      </StyledAppLink>
-    </StyledVersionDisplay>
+    <ContentSection>
+      <JoiStack
+        direction='row'
+        justifyContent='space-between'
+        alignItems='center'
+      >
+        <h6>Version {version}</h6>
+        <JoiStack direction='row' alignItems='center' spacing={1}>
+          {Object.keys(appLinks).map(key => (
+            <Fragment key={key}>
+              <WaTooltip for={`app-link-${key}`}>
+                {appLinks[key].text}
+              </WaTooltip>
+              <WaButton
+                id={`app-link-${key}`}
+                href={appLinks[key].url}
+                target='_blank'
+                size='small'
+              >
+                <WaIcon
+                  name={appLinks[key].icon.name}
+                  family={appLinks[key].icon.family}
+                  style={{
+                    fontSize: 'var(--wa-font-size-l)',
+                  }}
+                />
+              </WaButton>
+            </Fragment>
+          ))}
+        </JoiStack>
+      </JoiStack>
+    </ContentSection>
   );
 };

@@ -10,7 +10,7 @@ const StyledSettingsGrid = styled.div`
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  column-gap: 2rem;
+  column-gap: 1rem;
 
   & > :not([data-settings-row='true']) {
     grid-column: 1 / -1;

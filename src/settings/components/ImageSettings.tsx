@@ -1,39 +1,9 @@
-import styled from 'styled-components';
-import {
-  IconButton,
-  ImageGrid,
-  ImageDialog,
-  Space,
-  Fields,
-} from '../../common';
+import { ImageGrid, ImageDialog, Space, Fields, JoiStack } from '../../common';
 import { useImages, useSetting } from '../../settings';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCheckSquare,
-  faMinusSquare,
-  faSquare,
-} from '@fortawesome/free-regular-svg-icons';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { ImageItem } from '../../types';
 import { useLocalImages } from '../../local/LocalProvider';
-
-const StyledImageActions = styled.div`
-  display: flex;
-  justify-content: space-between;
-  grid-column: 1 / -1;
-
-  margin-bottom: 8px;
-`;
-
-const StyledImageButtons = styled.div`
-  display: flex;
-`;
-
-const SmallActionButton = styled(IconButton)`
-  font-size: 1rem;
-  color: var(--color-text);
-`;
+import { WaButton, WaIcon, WaTooltip } from '@awesome.me/webawesome/dist/react';
 
 export const ImageSettings = () => {
   const [images, setImages] = useImages();
@@ -44,55 +14,54 @@ export const ImageSettings = () => {
 
   return (
     <Fields label='Images' style={{ gridColumn: '1 / -1' }}>
-      <StyledImageActions>
+      <JoiStack direction='row' justifyContent='space-between'>
         <p>{`You have loaded ${images.length} images`}</p>
-        <StyledImageButtons>
-          <SmallActionButton
-            onClick={
-              selected.length > 0
-                ? () => {
-                    removeImage(selected.map(image => image.id));
-                    setImages(
-                      images.filter(image => !selected.includes(image))
-                    );
-                    setSelected([]);
-                  }
-                : undefined
-            }
-            icon={<FontAwesomeIcon icon={faTrash} />}
-            tooltip='Delete selected images'
-          />
-          <SmallActionButton
-            onClick={
-              images.length > 0
-                ? () => {
-                    if (selected.length > 0) {
-                      setSelected([]);
-                    } else {
-                      setSelected(images);
-                    }
-                  }
-                : undefined
-            }
-            icon={
-              <FontAwesomeIcon
-                icon={(() => {
-                  if (images.length > 0 && selected.length === images.length) {
-                    return faCheckSquare;
-                  } else if (selected.length > 0) {
-                    return faMinusSquare;
-                  } else {
-                    return faSquare;
-                  }
-                })()}
-              />
-            }
-            tooltip={
-              selected.length > 0 ? 'Deselect all images' : 'Select all images'
-            }
-          />
-        </StyledImageButtons>
-      </StyledImageActions>
+        <JoiStack direction='row'>
+          <WaTooltip for='delete-selected-images'>
+            Delete selected images
+          </WaTooltip>
+          <WaButton
+            id='delete-selected-images'
+            size='small'
+            disabled={selected.length === 0}
+            onClick={() => {
+              removeImage(selected.map(image => image.id));
+              setImages(images.filter(image => !selected.includes(image)));
+              setSelected([]);
+            }}
+          >
+            <WaIcon name='trash' />
+          </WaButton>
+          <WaTooltip for='select-deselect-all-images'>
+            {selected.length > 0 ? 'Deselect all images' : 'Select all images'}
+          </WaTooltip>
+          <WaButton
+            id='select-deselect-all-images'
+            size='small'
+            disabled={images.length === 0}
+            onClick={() => {
+              if (selected.length > 0) {
+                setSelected([]);
+              } else {
+                setSelected(images);
+              }
+            }}
+          >
+            <WaIcon
+              name={(() => {
+                if (images.length > 0 && selected.length === images.length) {
+                  return 'check-square';
+                } else if (selected.length > 0) {
+                  return 'minus-square';
+                } else {
+                  return 'square';
+                }
+              })()}
+              variant='regular'
+            />
+          </WaButton>
+        </JoiStack>
+      </JoiStack>
       <ImageDialog
         image={clicked}
         onClose={() => setClicked(undefined)}
@@ -106,14 +75,13 @@ export const ImageSettings = () => {
           setImages(images.filter(image => image !== clicked));
         }}
         loud={videoSound}
-      >
-        <ImageGrid
-          images={images}
-          selected={selected}
-          onSelectedChange={setSelected}
-          onClickTile={setClicked}
-        />
-      </ImageDialog>
+      />
+      <ImageGrid
+        images={images}
+        selected={selected}
+        onSelectedChange={setSelected}
+        onClickTile={setClicked}
+      />
       <Space size='medium' />
     </Fields>
   );

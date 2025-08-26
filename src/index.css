@@ -70,13 +70,63 @@
   --wa-color-brand-15: color-mix(in oklch, black 70%, var(--wa-color-brand));
   --wa-color-brand-10: color-mix(in oklch, black 80%, var(--wa-color-brand));
   --wa-color-brand-05: color-mix(in oklch, black 90%, var(--wa-color-brand));
+
+  --wa-tooltip-background-color: var(--overlay-background);
+  --wa-tooltip-content-color: var(--wa-color-text-normal);
+
+  --wa-color-neutral-fill-loud: var(--button-background);
+  --wa-color-fill-loud: var(--wa-color-neutral-fill-loud);
 }
 
+@layer overrides {
+  address,
+  audio,
+  blockquote,
+  dd,
+  details,
+  dl,
+  fieldset,
+  figure,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  hr,
+  iframe,
+  ol,
+  p,
+  pre,
+  table,
+  ul,
+  video {
+    margin-block-end: unset;
+  }
+}
+
+@layer wa-native, overrides;
+
 wa-button::part(base) {
-  background: var(--wa-color-neutral-fill-quiet);
   transition: background var(--wa-transition-normal);
 }
 
 wa-button::part(base):hover {
+  background: var(--wa-color-brand);
+}
+
+wa-button:has(wa-icon:only-child)::part(base) {
+  background: transparent;
+}
+
+wa-button[size='small']:has(wa-icon:only-child)::part(base) {
+  font-size: var(--wa-font-size-xs);
+}
+
+wa-button[size='small']:has(wa-icon:only-child) wa-icon {
+  font-size: var(--wa-font-size-m);
+}
+
+wa-button:has(wa-icon:only-child)::part(base):hover {
   background: var(--wa-color-brand);
 }

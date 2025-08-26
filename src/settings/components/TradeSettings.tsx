@@ -69,13 +69,9 @@ export const TradeSettings = () => {
         justifyContent='center'
         alignItems='center'
       >
-        <WaButton variant='brand' onClick={onExport}>
-          Export
-        </WaButton>
+        <WaButton onClick={onExport}>Export</WaButton>
         <WaDivider orientation='vertical' />
-        <WaButton variant='brand' onClick={onImport}>
-          Import
-        </WaButton>
+        <WaButton onClick={onImport}>Import</WaButton>
       </JoiStack>
     </Fields>
   );

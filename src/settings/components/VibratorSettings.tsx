@@ -1,15 +1,14 @@
 import { useCallback, useState } from 'react';
 import {
-  Button,
   SettingsInfo,
   SettingsDescription,
   Space,
-  Surrounded,
-  IconButton,
   TextInput,
   SettingsLabel,
-  Spinner,
   Fields,
+  SettingsRow,
+  SettingsGrid,
+  JoiStack,
 } from '../../common';
 import { defaultTransition, useVibratorValue, Vibrator } from '../../utils';
 import {
@@ -17,26 +16,13 @@ import {
   ButtplugClientDevice,
 } from 'buttplug';
 import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { WaButton, WaIcon, WaTooltip } from '@awesome.me/webawesome/dist/react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const StyledDeviceList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
-`;
-
-const StyledUrlFields = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr 56px;
-  grid-gap: 8px;
-
-  align-items: center;
-
-  input {
-    grid-column: unset;
-  }
 `;
 
 export const VibratorSettings = () => {
@@ -96,71 +82,74 @@ export const VibratorSettings = () => {
 
   return (
     <Fields label={'Vibrator'}>
-      <Surrounded
-        trailing={
-          <IconButton
-            style={{
-              fontSize: '1rem',
-            }}
-            tooltip='Settings'
-            icon={<FontAwesomeIcon icon={faGear} />}
-            onClick={() => setExpanded(!expanded)}
-            disabled={loading}
-          />
-        }
+      <JoiStack
+        direction='row'
+        justifyContent='space-between'
+        alignItems='center'
       >
-        <SettingsDescription>
-          Use compatible device during your game
-        </SettingsDescription>
-        <SettingsInfo
-          style={{
-            margin: 0,
-          }}
+        <JoiStack>
+          <SettingsDescription>
+            Use compatible device during your game
+          </SettingsDescription>
+          <SettingsInfo
+            style={{
+              margin: 0,
+            }}
+          >
+            {connection ? (
+              <p>
+                Connected to <strong>{connection}</strong>
+              </p>
+            ) : (
+              <p>
+                This requires you to install{' '}
+                <a
+                  href='https://intiface.com/central/'
+                  target={'_blank'}
+                  rel='noreferrer'
+                >
+                  Intiface® Central
+                </a>
+              </p>
+            )}
+          </SettingsInfo>
+        </JoiStack>
+        <WaTooltip for='vibrator-settings-toggle'>Settings</WaTooltip>
+        <WaButton
+          id='vibrator-settings-toggle'
+          onClick={() => setExpanded(!expanded)}
+          disabled={loading}
         >
-          {connection ? (
-            <p>
-              Connected to <strong>{connection}</strong>
-            </p>
-          ) : (
-            <p>
-              This requires you to install{' '}
-              <a
-                href='https://intiface.com/central/'
-                target={'_blank'}
-                rel='noreferrer'
-              >
-                Intiface® Central
-              </a>
-            </p>
-          )}
-        </SettingsInfo>
-      </Surrounded>
+          <WaIcon name='gear' />
+        </WaButton>
+      </JoiStack>
       <AnimatePresence>
         {expanded && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ gridColumn: '1 / -1' }}
             transition={defaultTransition}
           >
             <Space size='medium' />
-            <StyledUrlFields>
-              <SettingsLabel>Server</SettingsLabel>
-              <TextInput
-                placeholder='Host'
-                value={host}
-                onChange={setHost}
-                disabled={loading}
-              />
-              <TextInput
-                placeholder='Port'
-                value={port.toString()}
-                onChange={e => setPort(Number(e))}
-                disabled={loading}
-              />
-            </StyledUrlFields>
-            <Space size='small' />
+            <SettingsGrid>
+              <SettingsRow>
+                <SettingsLabel>Server</SettingsLabel>
+                <TextInput
+                  placeholder='Host'
+                  value={host}
+                  onChange={setHost}
+                  disabled={loading}
+                />
+                <TextInput
+                  placeholder='Port'
+                  value={port.toString()}
+                  onChange={e => setPort(Number(e))}
+                  disabled={loading}
+                  style={{ width: '56px' }}
+                />
+              </SettingsRow>
+            </SettingsGrid>
           </motion.div>
         )}
       </AnimatePresence>
@@ -177,31 +166,28 @@ export const VibratorSettings = () => {
           <Space size='medium' />
         </>
       )}
-      <Button
-        style={{
-          width: 'fit-content',
-          alignSelf: 'center',
-        }}
+      <WaButton
         onClick={onConnect}
         disabled={loading}
+        loading={loading}
+        size='small'
       >
-        {loading ? (
-          <Spinner />
-        ) : connection ? (
-          <strong>Disconnect</strong>
-        ) : (
-          <strong>Connect</strong>
-        )}
-      </Button>
+        <p>{connection ? 'Disconnect' : 'Connect'}</p>
+        <WaIcon slot='end' name='satellite-dish' />
+      </WaButton>
       {error && (
         <>
           <Space size='small' />
-          <SettingsInfo style={{ color: 'red', textAlign: 'center' }}>
+          <SettingsInfo
+            style={{
+              color: 'var(--wa-color-danger-fill-loud)',
+              textAlign: 'center',
+            }}
+          >
             {error}
           </SettingsInfo>
         </>
       )}
-      <Space size='small' />
     </Fields>
   );
 };

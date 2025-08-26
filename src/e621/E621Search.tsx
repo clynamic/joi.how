@@ -1,6 +1,5 @@
 import {
   Dropdown,
-  IconButton,
   Measure,
   SettingsLabel,
   Slider,
@@ -20,11 +19,7 @@ import {
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faInfoCircle,
-  faSync,
-  faUser,
-} from '@fortawesome/free-solid-svg-icons';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { useImages } from '../settings';
 import {
   E621SortOrder,
@@ -34,6 +29,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { E621CredentialsInput } from './E621Credentials';
 import { defaultTransition } from '../utils';
+import { WaButton, WaIcon, WaTooltip } from '@awesome.me/webawesome/dist/react';
 
 export const E621Search = () => {
   const [loading, setLoading] = useState(false);
@@ -219,30 +215,31 @@ export const E621Search = () => {
             exit={{ opacity: 0, height: 0 }}
             transition={defaultTransition}
           >
+            <WaTooltip for='blacklist-info'>View blacklist help</WaTooltip>
+            <WaTooltip for='blacklist-refresh'>
+              Download blacklist from e621
+            </WaTooltip>
             <Surrounded
               trailing={
                 <>
-                  <IconButton
-                    style={{ fontSize: '1rem' }}
-                    tooltip='View blacklist help'
+                  <WaButton
+                    id='blacklist-info'
+                    href='https://e621.net/help/blacklist'
+                    target='_blank'
+                    size='small'
+                  >
+                    <WaIcon name='info-circle' />
+                  </WaButton>
+                  <WaButton
+                    id='blacklist-refresh'
+                    size='small'
+                    disabled={!credentials}
                     onClick={() =>
-                      window.open('https://e621.net/help/blacklist')
+                      e621Service.getBlacklist(credentials!).then(setBlacklist)
                     }
-                    icon={<FontAwesomeIcon icon={faInfoCircle} />}
-                  />
-                  <IconButton
-                    style={{ fontSize: '1rem' }}
-                    tooltip='Download blacklist from e621'
-                    onClick={
-                      credentials
-                        ? () =>
-                            e621Service
-                              .getBlacklist(credentials)
-                              .then(setBlacklist)
-                        : undefined
-                    }
-                    icon={<FontAwesomeIcon icon={faSync} />}
-                  />
+                  >
+                    <WaIcon name='sync' />
+                  </WaButton>
                 </>
               }
             >

@@ -18,8 +18,8 @@ const StyledFields = styled.fieldset`
   border-left: 2px solid var(--legend-background);
   border-radius: unset;
 
-  margin: 15px;
-  padding: 5px 15px;
+  margin: var(--wa-space-m);
+  padding: var(--wa-space-s);
 
   position: relative;
 `;
