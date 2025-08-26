@@ -1,7 +1,5 @@
 import styled from 'styled-components';
-import { Dialog, IconButton, VerticalDivider } from '../../common';
-import { faCog, faCompress, faExpand } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { VerticalDivider } from '../../common';
 import { useCallback, useState } from 'react';
 import {
   BoardSettings,
@@ -16,6 +14,7 @@ import {
 } from '../../settings';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useFullscreen, useLooping } from '../../utils';
+import { WaButton, WaDialog, WaIcon } from '@awesome.me/webawesome/dist/react';
 
 const StyledGameSettings = styled.div`
   display: flex;
@@ -31,40 +30,12 @@ const StyledGameSettings = styled.div`
   padding: 8px;
 `;
 
-interface GameSettingsDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
 const StyledGameSettingsDialog = styled.div`
   overflow: auto;
   max-width: 920px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
 `;
-
-const GameSettingsDialog: React.FC<GameSettingsDialogProps> = props => {
-  return (
-    <Dialog
-      dismissible
-      {...props}
-      title={'Game Settings'}
-      content={
-        <StyledGameSettingsDialog>
-          <PaceSettings />
-          <DurationSettings />
-          <PlayerSettings />
-          <EventSettings />
-          <HypnoSettings />
-          <ClimaxSettings />
-          <BoardSettings />
-          <VibratorSettings />
-          <ImageSettings />
-        </StyledGameSettingsDialog>
-      }
-    />
-  );
-};
 
 export const GameSettings = () => {
   const [open, setOpen] = useState(false);
@@ -119,18 +90,37 @@ export const GameSettings = () => {
 
   return (
     <StyledGameSettings>
-      <IconButton
-        aria-label='Settings'
-        onClick={() => onOpen(true)}
-        icon={<FontAwesomeIcon icon={faCog} />}
-      />
+      <WaButton aria-label='Settings' onClick={() => onOpen(true)}>
+        <WaIcon name='gear' />
+      </WaButton>
       <VerticalDivider />
-      <IconButton
+      <WaButton
         aria-label='Fullscreen'
         onClick={() => setFullscreen(fullscreen => !fullscreen)}
-        icon={<FontAwesomeIcon icon={fullscreen ? faCompress : faExpand} />}
-      />
-      <GameSettingsDialog open={open} onOpenChange={onOpen} />
+      >
+        <WaIcon name={fullscreen ? 'compress' : 'expand'} />
+      </WaButton>
+      <WaDialog
+        lightDismiss
+        open={open}
+        onWaAfterHide={() => onOpen(false)}
+        label={'Game Settings'}
+        style={{
+          '--width': '920px',
+        }}
+      >
+        <StyledGameSettingsDialog>
+          <PaceSettings />
+          <DurationSettings />
+          <PlayerSettings />
+          <EventSettings />
+          <HypnoSettings />
+          <ClimaxSettings />
+          <BoardSettings />
+          <VibratorSettings />
+          <ImageSettings />
+        </StyledGameSettingsDialog>
+      </WaDialog>
     </StyledGameSettings>
   );
 };
