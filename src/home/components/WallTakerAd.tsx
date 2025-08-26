@@ -24,8 +24,11 @@ const StyledWallTakerAd = styled(ContentSection)`
     transform: scale(1.05);
   }
 
-  & a {
-    text-decoration: none;
+  @layer overrides {
+    & a {
+      text-decoration: none;
+      color: inherit;
+    }
   }
 `;
 
