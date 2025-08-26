@@ -6,6 +6,7 @@ import {
   Button,
   SettingsInfo,
   Spinner,
+  SettingsGrid,
 } from '../common';
 import { useImages } from '../settings';
 import { AnimatePresence } from 'framer-motion';
@@ -14,13 +15,7 @@ import { LocalImageRequest, useLocalImages } from './LocalProvider';
 import { ImageServiceType } from '../types';
 import { chunk } from 'lodash';
 
-const StyledLocalImport = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-`;
-
 const StyledLoadingHint = styled(SettingsInfo)`
-  grid-column: 1 / -1;
   justify-self: center;
   display: flex;
   flex-direction: column;
@@ -85,7 +80,7 @@ export const LocalImport = () => {
   };
 
   return (
-    <StyledLocalImport>
+    <SettingsGrid>
       <SettingsDescription>Add images from your device</SettingsDescription>
       <Space size='medium' />
       <input
@@ -97,7 +92,7 @@ export const LocalImport = () => {
         onChange={select}
       />
       <Button
-        style={{ gridColumn: '1 / -1', justifySelf: 'center' }}
+        style={{ justifySelf: 'center' }}
         onClick={() => document.getElementById('filePicker')?.click()}
         disabled={loading}
       >
@@ -117,6 +112,6 @@ export const LocalImport = () => {
         )}
       </AnimatePresence>
       <Space size='small' />
-    </StyledLocalImport>
+    </SettingsGrid>
   );
 };

@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import {
   Dropdown,
   IconButton,
@@ -15,6 +14,8 @@ import {
   TextArea,
   Surrounded,
   JoiToggleTile,
+  SettingsRow,
+  SettingsGrid,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
@@ -33,11 +34,6 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { E621CredentialsInput } from './E621Credentials';
 import { defaultTransition } from '../utils';
-
-const StyledE621Search = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-`;
 
 export const E621Search = () => {
   const [loading, setLoading] = useState(false);
@@ -92,61 +88,67 @@ export const E621Search = () => {
   }, [credentials, setCredentials, addingCredentials, setAddingCredentials]);
 
   return (
-    <StyledE621Search>
+    <SettingsGrid>
       <SettingsDescription>Add images from e621</SettingsDescription>
-      <SettingsLabel htmlFor='tags'>Tags</SettingsLabel>
-      <TextInput
-        id='tags'
-        value={tags}
-        onChange={setTags}
-        onSubmit={runSearch}
-        placeholder='Enter tags...'
-        style={{ gridColumn: '2 / -1' }}
-        disabled={loading}
-      />
+      <SettingsRow>
+        <SettingsLabel htmlFor='tags'>Tags</SettingsLabel>
+        <TextInput
+          id='tags'
+          value={tags}
+          onChange={setTags}
+          onSubmit={runSearch}
+          placeholder='Enter tags...'
+          disabled={loading}
+        />
+      </SettingsRow>
       <Space size='medium' />
-      <SettingsLabel htmlFor='order'>Order</SettingsLabel>
-      <Dropdown
-        id='order'
-        value={order}
-        onChange={(value: string) => setOrder(value as E621SortOrder)}
-        options={Object.values(E621SortOrder).map(value => ({
-          value,
-          label: e621SortOrderLabels[value],
-        }))}
-        style={{ gridColumn: '2 / -1' }}
-        disabled={loading}
-      />
+      <SettingsRow>
+        <SettingsLabel htmlFor='order'>Order</SettingsLabel>
+        <Dropdown
+          id='order'
+          value={order}
+          onChange={(value: string) => setOrder(value as E621SortOrder)}
+          options={Object.values(E621SortOrder).map(value => ({
+            value,
+            label: e621SortOrderLabels[value],
+          }))}
+          disabled={loading}
+        />
+      </SettingsRow>
       <Space size='medium' />
-      <SettingsLabel htmlFor='limit'>Count</SettingsLabel>
-      <Slider
-        id='limit'
-        value={limit}
-        onChange={setLimit}
-        min={1}
-        max={200}
-        step={1}
-      />
-      <Measure value={limit} chars={3} unit='posts' />
+      <SettingsRow>
+        <SettingsLabel htmlFor='limit'>Count</SettingsLabel>
+        <Slider
+          id='limit'
+          value={limit}
+          onChange={setLimit}
+          min={1}
+          max={200}
+          step={1}
+        />
+        <Measure value={limit} chars={3} unit='posts' />
+      </SettingsRow>
       <Space size='medium' />
-      <SettingsLabel htmlFor='minScore'>Score</SettingsLabel>
-      <Slider
-        id='minScore'
-        value={minScore ?? -1}
-        onChange={value => {
-          setMinScore(value === -1 ? undefined : value);
-        }}
-        min={-1}
-        max={50}
-        step={1}
-      />
-      {minScore == undefined || minScore === -1 ? (
-        <StyledMeasure>
-          <strong>any</strong>
-        </StyledMeasure>
-      ) : (
-        <Measure value={minScore ?? -1} chars={3} unit='votes' />
-      )}
+      <SettingsRow>
+        <SettingsLabel htmlFor='minScore'>Score</SettingsLabel>
+        <Slider
+          id='minScore'
+          value={minScore ?? -1}
+          onChange={value => {
+            setMinScore(value === -1 ? undefined : value);
+          }}
+          min={-1}
+          max={50}
+          step={1}
+        />
+        {minScore == undefined || minScore === -1 ? (
+          <StyledMeasure>
+            <strong>any</strong>
+          </StyledMeasure>
+        ) : (
+          <Measure value={minScore ?? -1} chars={3} unit='votes' />
+        )}
+      </SettingsRow>
       <Space size='medium' />
       <JoiToggleTile
         style={{ opacity: 1 }}
@@ -169,7 +171,6 @@ export const E621Search = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ gridColumn: '1 / -1' }}
             transition={defaultTransition}
           >
             <E621CredentialsInput
@@ -190,7 +191,6 @@ export const E621Search = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ gridColumn: '1 / -1' }}
             transition={defaultTransition}
           >
             <SettingsInfo>
@@ -217,7 +217,6 @@ export const E621Search = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ gridColumn: '1 / -1' }}
             transition={defaultTransition}
           >
             <Surrounded
@@ -270,13 +269,12 @@ export const E621Search = () => {
         onClick={runSearch}
         disabled={loading}
         style={{
-          gridColumn: '1 / -1',
           justifySelf: 'center',
         }}
       >
         {loading ? <Spinner /> : <strong>Search & Add</strong>}
       </Button>
       <Space size='medium' />
-    </StyledE621Search>
+    </SettingsGrid>
   );
 };
