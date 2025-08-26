@@ -3,7 +3,6 @@ import {
   SettingsInfo,
   SettingsDescription,
   Space,
-  TextInput,
   SettingsLabel,
   Fields,
   SettingsRow,
@@ -16,7 +15,12 @@ import {
   ButtplugClientDevice,
 } from 'buttplug';
 import styled from 'styled-components';
-import { WaButton, WaIcon, WaTooltip } from '@awesome.me/webawesome/dist/react';
+import {
+  WaButton,
+  WaIcon,
+  WaInput,
+  WaTooltip,
+} from '@awesome.me/webawesome/dist/react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const StyledDeviceList = styled.ul`
@@ -135,18 +139,20 @@ export const VibratorSettings = () => {
             <SettingsGrid>
               <SettingsRow>
                 <SettingsLabel>Server</SettingsLabel>
-                <TextInput
+                <WaInput
+                  className='joi-wide'
                   placeholder='Host'
                   value={host}
-                  onChange={setHost}
+                  onInput={e => setHost(e.currentTarget.value || '')}
                   disabled={loading}
                 />
-                <TextInput
+                <WaInput
+                  className='joi-wide'
                   placeholder='Port'
                   value={port.toString()}
-                  onChange={e => setPort(Number(e))}
+                  onInput={e => setPort(Number(e.currentTarget.value))}
                   disabled={loading}
-                  style={{ width: '56px' }}
+                  style={{ width: '4em' }}
                 />
               </SettingsRow>
             </SettingsGrid>
@@ -166,12 +172,7 @@ export const VibratorSettings = () => {
           <Space size='medium' />
         </>
       )}
-      <WaButton
-        onClick={onConnect}
-        disabled={loading}
-        loading={loading}
-        size='small'
-      >
+      <WaButton onClick={onConnect} loading={loading} size='small'>
         <p>{connection ? 'Disconnect' : 'Connect'}</p>
         <WaIcon slot='end' name='satellite-dish' />
       </WaButton>

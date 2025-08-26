@@ -76,7 +76,24 @@
 
   --wa-color-neutral-fill-loud: var(--button-background);
   --wa-color-fill-loud: var(--wa-color-neutral-fill-loud);
+
+  --wa-form-control-border-color: var(--wa-color-brand);
+  --wa-form-control-height: 2rem;
+  --wa-form-control-padding-inline: var(--wa-space-xs);
+
+  --wa-focus-ring-width: 1px;
+  --wa-color-focus: color-mix(in oklch, white 40%, var(--wa-color-brand));
 }
+
+/* #region utility classes */
+
+.joi-wide {
+  width: 100%;
+}
+
+/* #endregion */
+
+/* #region overrides */
 
 @layer overrides {
   address,
@@ -107,6 +124,10 @@
 
 @layer wa-native, overrides;
 
+/* #endregion */
+
+/* #region button */
+
 wa-button::part(base) {
   transition: background var(--wa-transition-normal);
 }
@@ -131,6 +152,10 @@ wa-button:has(wa-icon:only-child)::part(base):hover {
   background: var(--wa-color-brand);
 }
 
+/* #endregion */
+
+/* #region slider */
+
 wa-slider {
   --thumb-width: 1.2em;
   --thumb-height: 1.2em;
@@ -143,3 +168,5 @@ wa-slider::part(track) {
 wa-slider::part(thumb) {
   border: none;
 }
+
+/* #endregion */

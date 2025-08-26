@@ -1,14 +1,14 @@
-import styled from 'styled-components';
 import { E621Service } from './E621Service';
 import { useCallback, useMemo, useState } from 'react';
 import {
-  SettingsInfo,
+  JoiStack,
+  SettingsGrid,
   SettingsLabel,
+  SettingsRow,
   Space,
-  Spinner,
-  TextInput,
 } from '../common';
 import { E621Credentials } from './E621Provider';
+import { WaButton, WaIcon, WaInput } from '@awesome.me/webawesome/dist/react';
 
 export interface E621CredentialsInputProps {
   service: E621Service;
@@ -17,41 +17,13 @@ export interface E621CredentialsInputProps {
   disabled?: boolean;
 }
 
-const StyledE621CredentialsInput = styled.div`
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-`;
-
-const StyledE621SaveCredentials = styled.div`
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-`;
-
-const StyledE621SaveCredentialsButton = styled.button`
-  background: var(--button-background);
-  color: var(--button-color);
-  border-radius: var(--border-radius);
-  padding: 4px 8px;
-  transition:
-    background 0.2s,
-    opacity 0.2s;
-  cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
-  &:hover {
-    background: var(--primary);
-  }
-  opacity: ${props => (props.disabled ? 0.5 : 1)};
-`;
-
 export const E621CredentialsInput = ({
   service,
   initialValue,
   onSaved,
   disabled,
 }: E621CredentialsInputProps) => {
-  const [input, setInput] = useState<Partial<E621Credentials>>({
+  const [input, setInput] = useState<E621Credentials>({
     ...initialValue,
     username: '',
     apiKey: '',
@@ -74,56 +46,67 @@ export const E621CredentialsInput = ({
   const locked = useMemo(() => loading || disabled, [loading, disabled]);
 
   return (
-    <StyledE621CredentialsInput>
-      <SettingsInfo>
-        Access your API key from{' '}
-        <a href='https://e621.net/users/home' target='_blank' rel='noreferrer'>
-          your profile
-        </a>
-        .
-      </SettingsInfo>
+    <SettingsGrid>
       <Space size='small' />
-      <SettingsLabel>Username</SettingsLabel>
-      <TextInput
-        style={{ gridColumn: '2 / -1' }}
-        value={input?.username}
-        onChange={username =>
-          setInput({
-            ...input,
-            username,
-          })
-        }
-        placeholder='Username'
-        autoComplete='username'
-        disabled={locked}
-      />
+      <SettingsRow>
+        <SettingsLabel>Username</SettingsLabel>
+        <WaInput
+          className='joi-wide'
+          value={input?.username}
+          onInput={e =>
+            setInput({
+              ...input,
+              username: e.currentTarget.value || '',
+            })
+          }
+          placeholder='e.g. eggplant_enjoyer'
+          autocomplete='username'
+          disabled={locked}
+        />
+      </SettingsRow>
       <Space size='small' />
-      <SettingsLabel>API Key</SettingsLabel>
-      <TextInput
-        style={{ gridColumn: '2 / -1' }}
-        value={input?.apiKey}
-        onChange={apiKey =>
-          setInput({
-            ...input,
-            apiKey,
-          })
-        }
-        placeholder='API Key'
-        type='password'
-        autoComplete='current-password'
-        disabled={locked}
-      />
-      <Space size='small' />
-      <StyledE621SaveCredentials>
-        {loading && <Spinner />}
-        <Space size='small' />
-        <StyledE621SaveCredentialsButton
-          onClick={!loading ? onSave : undefined}
-          disabled={!hasData || locked}
+      <SettingsRow>
+        <SettingsLabel>API Key</SettingsLabel>
+        <WaInput
+          className='joi-wide'
+          value={input?.apiKey}
+          onInput={e =>
+            setInput({
+              ...input,
+              apiKey: e.currentTarget.value || '',
+            })
+          }
+          placeholder='pws gimmi ur keys :3'
+          type='password'
+          autocomplete='current-password'
+          disabled={locked}
         >
-          Save
-        </StyledE621SaveCredentialsButton>
-      </StyledE621SaveCredentials>
-    </StyledE621CredentialsInput>
+          <p slot='hint'>
+            Access your API key{' '}
+            <a
+              href='https://e621.net/users/you/api_key'
+              target='_blank'
+              rel='noreferrer'
+            >
+              here
+            </a>
+            .
+          </p>
+        </WaInput>
+      </SettingsRow>
+      <Space size='medium' />
+      <JoiStack direction='row' justifyContent='flex-end'>
+        <WaButton
+          onClick={onSave}
+          disabled={!hasData}
+          loading={loading}
+          size='small'
+        >
+          <p>Save</p>
+          <WaIcon slot='end' name='save' />
+        </WaButton>
+      </JoiStack>
+      <Space size='small' />
+    </SettingsGrid>
   );
 };

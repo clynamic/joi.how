@@ -1,15 +1,10 @@
 import {
-  Dropdown,
   Measure,
   SettingsLabel,
   Space,
   SettingsInfo,
-  Spinner,
-  Button,
   StyledMeasure,
   SettingsDescription,
-  TextInput,
-  TextArea,
   Surrounded,
   JoiToggleTile,
   SettingsRow,
@@ -33,6 +28,10 @@ import {
   WaIcon,
   WaTooltip,
   WaSlider,
+  WaInput,
+  WaSelect,
+  WaOption,
+  WaTextarea,
 } from '@awesome.me/webawesome/dist/react';
 
 export const E621Search = () => {
@@ -92,28 +91,32 @@ export const E621Search = () => {
       <SettingsDescription>Add images from e621</SettingsDescription>
       <SettingsRow>
         <SettingsLabel htmlFor='tags'>Tags</SettingsLabel>
-        <TextInput
+        <WaInput
           id='tags'
+          className='joi-wide'
           value={tags}
-          onChange={setTags}
+          onInput={e => setTags(e.currentTarget.value || '')}
           onSubmit={runSearch}
-          placeholder='Enter tags...'
+          placeholder='e.g. dragon huge_penis'
           disabled={loading}
         />
       </SettingsRow>
       <Space size='medium' />
       <SettingsRow>
         <SettingsLabel htmlFor='order'>Order</SettingsLabel>
-        <Dropdown
+        <WaSelect
           id='order'
+          className='joi-wide'
           value={order}
-          onChange={(value: string) => setOrder(value as E621SortOrder)}
-          options={Object.values(E621SortOrder).map(value => ({
-            value,
-            label: e621SortOrderLabels[value],
-          }))}
+          onInput={e => setOrder(e.currentTarget.value as E621SortOrder)}
           disabled={loading}
-        />
+        >
+          {Object.values(E621SortOrder).map(value => (
+            <WaOption key={value} value={value}>
+              {e621SortOrderLabels[value]}
+            </WaOption>
+          ))}
+        </WaSelect>
       </SettingsRow>
       <Space size='medium' />
       <SettingsRow>
@@ -252,12 +255,12 @@ export const E621Search = () => {
             >
               <SettingsInfo>Blacklist</SettingsInfo>
             </Surrounded>
-            <TextArea
+            <WaTextarea
               style={{ resize: 'vertical' }}
               value={blacklist?.join('\n') ?? ''}
-              onChange={(value: string) =>
+              onInput={e =>
                 setBlacklist(
-                  value
+                  (e.currentTarget.value || '')
                     .split('\n')
                     .map(tag => tag.trim())
                     .filter(tag => tag)
@@ -269,15 +272,16 @@ export const E621Search = () => {
         )}
       </AnimatePresence>
       <Space size='medium' />
-      <Button
+      <WaButton
         onClick={runSearch}
-        disabled={loading}
         style={{
           justifySelf: 'center',
         }}
+        loading={loading}
       >
-        {loading ? <Spinner /> : <strong>Search & Add</strong>}
-      </Button>
+        <p>Search & Add</p>
+        <WaIcon slot='end' name='search' />
+      </WaButton>
       <Space size='medium' />
     </SettingsGrid>
   );

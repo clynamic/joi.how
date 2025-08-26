@@ -1,6 +1,5 @@
 export * from './Button';
 export * from './ContentSection';
-export * from './Dropdown';
 export * from './Fields';
 export * from './Image';
 export * from './ImageDialog';
@@ -18,8 +17,6 @@ export * from './Space';
 export * from './Spinner';
 export * from './StackedImage';
 export * from './TabBar';
-export * from './TextArea';
-export * from './TextInput';
 export * from './ToggleTile';
 export * from './Trailing';
 export * from './VerticalDivider';
