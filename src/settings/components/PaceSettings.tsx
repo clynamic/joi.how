@@ -108,6 +108,7 @@ export const PaceSettings = () => {
         <div
           style={{
             height: '100px',
+            width: '100%',
           }}
         >
           <ResponsiveContainer width='100%' height='100%'>
