@@ -5,10 +5,10 @@ import {
   SettingsInfo,
   StyledMeasure,
   SettingsDescription,
-  Surrounded,
   JoiToggleTile,
   SettingsRow,
   SettingsGrid,
+  JoiStack,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
@@ -229,32 +229,29 @@ export const E621Search = () => {
             <WaTooltip for='blacklist-refresh'>
               Download blacklist from e621
             </WaTooltip>
-            <Surrounded
-              trailing={
-                <>
-                  <WaButton
-                    id='blacklist-info'
-                    href='https://e621.net/help/blacklist'
-                    target='_blank'
-                    size='small'
-                  >
-                    <WaIcon name='info-circle' />
-                  </WaButton>
-                  <WaButton
-                    id='blacklist-refresh'
-                    size='small'
-                    disabled={!credentials}
-                    onClick={() =>
-                      e621Service.getBlacklist(credentials!).then(setBlacklist)
-                    }
-                  >
-                    <WaIcon name='sync' />
-                  </WaButton>
-                </>
-              }
-            >
+            <JoiStack direction='row' justifyContent='space-between'>
               <SettingsInfo>Blacklist</SettingsInfo>
-            </Surrounded>
+              <JoiStack direction='row'>
+                <WaButton
+                  id='blacklist-info'
+                  href='https://e621.net/help/blacklist'
+                  target='_blank'
+                  size='small'
+                >
+                  <WaIcon name='info-circle' />
+                </WaButton>
+                <WaButton
+                  id='blacklist-refresh'
+                  size='small'
+                  disabled={!credentials}
+                  onClick={() =>
+                    e621Service.getBlacklist(credentials!).then(setBlacklist)
+                  }
+                >
+                  <WaIcon name='sync' />
+                </WaButton>
+              </JoiStack>
+            </JoiStack>
             <WaTextarea
               style={{ resize: 'vertical' }}
               value={blacklist?.join('\n') ?? ''}

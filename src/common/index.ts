@@ -15,4 +15,3 @@ export * from './SettingsRow';
 export * from './Space';
 export * from './StackedImage';
 export * from './ToggleTile';
-export * from './Trailing';
