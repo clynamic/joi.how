@@ -31,7 +31,7 @@ const StyledGameSettings = styled.div`
   background: var(--overlay-background);
   color: var(--overlay-color);
 
-  padding: 8px;
+  padding: var(--wa-space-2xs);
 `;
 
 const StyledGameSettingsDialog = styled.div`
@@ -94,12 +94,18 @@ export const GameSettings = () => {
 
   return (
     <StyledGameSettings>
-      <WaButton aria-label='Settings' onClick={() => onOpen(true)}>
+      <WaButton aria-label='Settings' size='large' onClick={() => onOpen(true)}>
         <WaIcon name='gear' />
       </WaButton>
-      <WaDivider orientation='vertical' />
+      <WaDivider
+        orientation='vertical'
+        style={{
+          '--spacing': 'var(--wa-space-xs)',
+        }}
+      />
       <WaButton
         aria-label='Fullscreen'
+        size='large'
         onClick={() => setFullscreen(fullscreen => !fullscreen)}
       >
         <WaIcon name={fullscreen ? 'compress' : 'expand'} />

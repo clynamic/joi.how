@@ -38,6 +38,8 @@ const StyledGameMessageButton = motion(styled.button`
   background: var(--button-background);
   color: var(--button-color);
 
+  height: 100%;
+
   font-size: 1rem;
   padding: 20px;
   cursor: pointer;
