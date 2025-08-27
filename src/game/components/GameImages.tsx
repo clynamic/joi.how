@@ -2,9 +2,9 @@ import styled from 'styled-components';
 import { useImages, useSetting } from '../../settings';
 import { useGameValue } from '../GameProvider';
 import { motion } from 'framer-motion';
-import { StackedImage } from '../../common';
+import { JoiImage } from '../../common';
 import { useAutoRef, useImagePreloader, useLooping } from '../../utils';
-import { ImageSize } from '../../types';
+import { ImageSize, ImageType } from '../../types';
 import { useCallback, useMemo, useEffect } from 'react';
 
 const StyledGameImages = styled.div`
@@ -110,18 +110,26 @@ export const GameImages = () => {
               repeat: Infinity,
             }}
           >
-            <StackedImage item={currentImage} size={ImageSize.preview} />
+            <JoiImage
+              thumb={currentImage.thumbnail}
+              preview={currentImage.preview}
+              full=''
+              kind={currentImage.type === ImageType.video ? 'video' : 'image'}
+              objectFit='cover'
+            />
           </StyledBackgroundImage>
           <StyledForegroundImage>
-            <StackedImage
-              style={{
-                objectFit: 'contain',
-              }}
-              item={currentImage}
-              size={highRes ? ImageSize.full : ImageSize.preview}
-              playable
-              randomStart
+            <JoiImage
+              thumb={currentImage.thumbnail}
+              preview={currentImage.preview}
+              full={currentImage.full}
+              // We remove this for now.
+              // full={highRes ? currentImage.full : ''}
+              kind={currentImage.type === ImageType.video ? 'video' : 'image'}
+              playable={currentImage.type === ImageType.video}
               loud={videoSound}
+              randomStart={true}
+              objectFit='contain'
             />
           </StyledForegroundImage>
         </>

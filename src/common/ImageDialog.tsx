@@ -1,10 +1,11 @@
 import { JoiToggleTile } from './ToggleTile';
 import { useCallback, useEffect, useState } from 'react';
-import { ImageItem, ImageSize } from '../types';
-import { StackedImage } from './StackedImage';
+import { ImageItem, ImageType } from '../types';
+import { JoiImage } from './JoiImage';
 import { useLocalImages } from '../local/LocalProvider';
 import styled from 'styled-components';
 import { WaDialog, WaCard, WaIcon } from '@awesome.me/webawesome/dist/react';
+import { JoiStack } from './JoiStack';
 
 export interface ImageDialogProps {
   image?: ImageItem;
@@ -32,7 +33,7 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
   onClose,
   onSelect,
   onDelete,
-  loud,
+  loud = false,
 }) => {
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState<ImageItem | null>(null);
@@ -61,13 +62,17 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
       onWaAfterHide={() => handleOpenChange(false)}
     >
       {current && (
-        <div className='wa-stack'>
-          <StackedImage
-            item={current}
-            size={ImageSize.full}
-            playable
+        <JoiStack>
+          <JoiImage
+            thumb={current.thumbnail}
+            preview={current.preview}
+            full={current.full}
+            kind={current.type === ImageType.video ? 'video' : 'image'}
+            playable={current.type === ImageType.video}
             loud={loud}
-            style={{ maxHeight: 400, objectFit: 'contain' }}
+            objectFit='contain'
+            style={{ height: 400 }}
+            alt={`file #${current.id}`}
           />
           <WaCard appearance='filled'>
             <JoiToggleTile
@@ -106,7 +111,7 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
               </span>
             </JoiToggleTile>
           </WaCard>
-        </div>
+        </JoiStack>
       )}
     </StyledImageDialog>
   );

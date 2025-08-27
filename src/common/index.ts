@@ -1,8 +1,8 @@
 export * from './ContentSection';
 export * from './Fields';
-export * from './Image';
 export * from './ImageDialog';
 export * from './ImageGrid';
+export * from './JoiImage';
 export * from './JoiStack';
 export * from './Measure';
 export * from './ProgressBar';
@@ -13,5 +13,4 @@ export * from './SettingsInfo';
 export * from './SettingsLabel';
 export * from './SettingsRow';
 export * from './Space';
-export * from './StackedImage';
 export * from './ToggleTile';

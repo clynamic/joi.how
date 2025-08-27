@@ -1,9 +1,8 @@
 import styled from 'styled-components';
-import { ImageItem, ImageSize } from '../types';
+import { ImageItem, ImageType } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState } from 'react';
 import { faCheck, faImage } from '@fortawesome/free-solid-svg-icons';
-import { Image } from './Image';
 import {
   autoUpdate,
   flip,
@@ -17,7 +16,7 @@ import {
   useTransitionStyles,
 } from '@floating-ui/react';
 import { motion } from 'framer-motion';
-import { StackedImage } from './StackedImage';
+import { JoiImage } from './JoiImage';
 
 interface ImageThumbnailTileProps {
   item: ImageItem;
@@ -52,7 +51,12 @@ const ImageThumbnailTile: React.FC<ImageThumbnailTileProps> = ({
             cursor: onClick ? 'pointer' : 'default',
           }}
         >
-          <Image item={item} size={ImageSize.thumbnail} />
+          <JoiImage
+            thumb={item.thumbnail}
+            kind={item.type === ImageType.video ? 'video' : 'image'}
+            objectFit='cover'
+            alt={`thumbnail #${item.id}`}
+          />
         </StyledImageThumbnailTileImage>
       </ImageMiniView>
       <SelectionOverlay
@@ -117,10 +121,7 @@ const StyledImageMiniView = styled.div``;
 const StyledImageMiniViewContent = motion(styled.div``);
 
 const StyledImageMiniViewImage = styled.div`
-  width: 160px;
-
-  box-shadow: 0 0 10px var(--overlay-background);
-  border: 1px solid var(--button-color);
+  width: 300px;
 
   z-index: 20;
   pointer-events: none;
@@ -184,8 +185,16 @@ const ImageMiniView: React.FC<ImageMiniViewProps> = ({ item, children }) => {
           {...getFloatingProps()}
           style={{ ...floatingStyles, ...styles }}
         >
-          {/* could also be full */}
-          <StackedImage item={item} size={ImageSize.preview} playable />
+          <JoiImage
+            thumb={item.thumbnail}
+            preview={item.preview}
+            full=''
+            kind={item.type === ImageType.video ? 'video' : 'image'}
+            playable={item.type === ImageType.video}
+            objectFit='contain'
+            ratio={1}
+            alt={`preview #${item.id}`}
+          />
         </StyledImageMiniViewImage>
       )}
     </StyledImageMiniView>
