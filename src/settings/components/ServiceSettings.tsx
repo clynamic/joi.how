@@ -6,10 +6,25 @@ import { WaTabGroup, WaTab } from '@awesome.me/webawesome/dist/react';
 import styled from 'styled-components';
 import { Fields } from '../../common';
 
-const tabs: Record<string, React.ReactNode> = {
-  e621: <E621Search />,
-  walltaker: <WalltakerSearch />,
-  local: <LocalImport />,
+const tabs: Record<
+  string,
+  {
+    label: string;
+    component: React.ReactNode;
+  }
+> = {
+  e621: {
+    label: 'e621',
+    component: <E621Search />,
+  },
+  walltaker: {
+    label: 'Walltaker',
+    component: <WalltakerSearch />,
+  },
+  local: {
+    label: 'Device',
+    component: <LocalImport />,
+  },
 };
 
 type Tab = keyof typeof tabs;
@@ -48,14 +63,14 @@ export const ServiceSettings = () => {
               .filter(key => key !== 'walltaker') // not ready
               .map(tab => (
                 <WaTab key={tab} panel={tab} active={activeTab === tab}>
-                  {tab}
+                  {tabs[tab].label}
                 </WaTab>
               ))}
           </WaTabGroup>
         </StyledServiceSettingsTabs>
       }
     >
-      {tabs[activeTab]}
+      {tabs[activeTab].component}
     </StyledServiceFields>
   );
 };
