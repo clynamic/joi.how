@@ -1,3 +1,13 @@
+## 2.5.0 - 2025-08-27
+
+### Added
+
+- option for static image duration
+
+### Changed
+
+- updated ui
+
 ## 2.4.1 - 2024-10-10
 
 ### Added
