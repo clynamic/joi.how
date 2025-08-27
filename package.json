@@ -5,8 +5,8 @@
   "description": "jack-off-instruction stroke-to-the-beat slideshow",
   "type": "module",
   "scripts": {
-    "build": "tsc && vite build",
     "dev": "vite",
+    "build": "tsc && vite build",
     "format": "prettier --write .",
     "lint": "eslint . --ext ts,tsx --max-warnings 0",
     "preview": "vite preview",
