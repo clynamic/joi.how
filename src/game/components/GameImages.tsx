@@ -51,6 +51,8 @@ export const GameImages = () => {
   const [intensity] = useGameValue('intensity');
   const [videoSound] = useSetting('videoSound');
   const [highRes] = useSetting('highRes');
+  const [imageDuration] = useSetting('imageDuration');
+  const [intenseImages] = useSetting('intenseImages');
 
   useImagePreloader(nextImages, highRes ? ImageSize.full : ImageSize.preview);
 
@@ -90,8 +92,12 @@ export const GameImages = () => {
   }, [imagesTracker]);
 
   const switchDuration = useMemo(() => {
-    return Math.max((100 - intensity) * 80, 2000);
-  }, [intensity]);
+    if (intenseImages) {
+      const scaleFactor = Math.max((100 - intensity) / 100, 0.1);
+      return Math.max(imageDuration * scaleFactor * 1000, 1000);
+    }
+    return imageDuration * 1000;
+  }, [imageDuration, intenseImages, intensity]);
 
   useEffect(() => switchImage(), [switchImage]);
 

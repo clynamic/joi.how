@@ -19,6 +19,8 @@ export interface Settings {
   highRes: boolean;
   videoSound: boolean;
   vibrations: VibrationMode;
+  imageDuration: number;
+  intenseImages: boolean;
 }
 
 export const defaultSettings: Settings = {
@@ -37,6 +39,8 @@ export const defaultSettings: Settings = {
   highRes: false,
   videoSound: false,
   vibrations: VibrationMode.thump,
+  imageDuration: 20,
+  intenseImages: true,
 };
 
 const settingsStorageKey = 'settings';
