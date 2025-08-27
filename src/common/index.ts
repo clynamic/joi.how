@@ -13,7 +13,6 @@ export * from './SettingsInfo';
 export * from './SettingsLabel';
 export * from './SettingsRow';
 export * from './Space';
-export * from './Spinner';
 export * from './StackedImage';
 export * from './ToggleTile';
 export * from './Trailing';

@@ -1,27 +1,16 @@
 import { useState } from 'react';
-import styled from 'styled-components';
-import {
-  SettingsDescription,
-  Space,
-  SettingsInfo,
-  Spinner,
-  SettingsGrid,
-} from '../common';
+import { SettingsDescription, Space, SettingsGrid, JoiStack } from '../common';
 import { useImages } from '../settings';
 import { AnimatePresence } from 'framer-motion';
 import { discoverImageFiles, imageTypeFromExtension } from './files';
 import { LocalImageRequest, useLocalImages } from './LocalProvider';
 import { ImageServiceType } from '../types';
 import { chunk } from 'lodash';
-import { WaButton, WaIcon } from '@awesome.me/webawesome/dist/react';
-
-const StyledLoadingHint = styled(SettingsInfo)`
-  justify-self: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-`;
+import {
+  WaButton,
+  WaIcon,
+  WaProgressBar,
+} from '@awesome.me/webawesome/dist/react';
 
 export const LocalImport = () => {
   const [loading, setLoading] = useState(false);
@@ -102,14 +91,10 @@ export const LocalImport = () => {
       <Space size='small' />
       <AnimatePresence>
         {files && (
-          <StyledLoadingHint>
-            <Spinner />
-            <p>
-              {progress !== undefined
-                ? `${progress} / ${files.length} processed`
-                : `${files.length} discovered`}
-            </p>
-          </StyledLoadingHint>
+          <JoiStack direction='column'>
+            <span>{`${progress ?? 0} / ${files.length} files processed`}</span>
+            <WaProgressBar value={((progress ?? 1) / files.length) * 100} />
+          </JoiStack>
         )}
       </AnimatePresence>
       <Space size='small' />
