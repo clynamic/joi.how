@@ -13,6 +13,7 @@ export class JoiToggleTileElement extends LitElement {
     :host {
       display: block;
       --wa-content-spacing: 0;
+      --tile-inactive-opacity: 0.3;
     }
 
     .action {
@@ -21,6 +22,7 @@ export class JoiToggleTileElement extends LitElement {
       cursor: pointer;
 
       background: var(--wa-color-neutral-fill-quiet);
+      opacity: var(--tile-inactive-opacity);
 
       border: none;
       border-radius: var(--wa-border-radius-m);
@@ -31,6 +33,10 @@ export class JoiToggleTileElement extends LitElement {
       transition:
         opacity var(--wa-transition-normal),
         background var(--wa-transition-normal);
+    }
+
+    :host([value]) .action {
+      opacity: 1;
     }
 
     .action:hover {
@@ -90,15 +96,6 @@ export class JoiToggleTileElement extends LitElement {
       new CustomEvent('change', { detail: { value: this.value } })
     );
   };
-
-  updated() {
-    const actionButton = this.shadowRoot?.querySelector(
-      '.action'
-    ) as HTMLElement;
-    if (actionButton) {
-      actionButton.style.opacity = this.value ? '1' : '0.3';
-    }
-  }
 
   renderTrailing() {
     if (this.type === 'check') {

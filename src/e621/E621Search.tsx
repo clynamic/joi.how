@@ -157,7 +157,7 @@ export const E621Search = () => {
       </SettingsRow>
       <Space size='medium' />
       <JoiToggleTile
-        style={{ opacity: 1 }}
+        style={{ '--tile-inactive-opacity': 1 } as React.CSSProperties}
         type={'check'}
         value={!!credentials || addingCredentials}
         onClick={onToggleCredentials}
@@ -209,7 +209,7 @@ export const E621Search = () => {
         )}
       </AnimatePresence>
       <JoiToggleTile
-        style={{ opacity: 1 }}
+        style={{ '--tile-inactive-opacity': 1 } as React.CSSProperties}
         type={'check'}
         value={enableBlacklist}
         onClick={() => setEnableBlacklist(!enableBlacklist)}
