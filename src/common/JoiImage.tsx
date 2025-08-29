@@ -3,6 +3,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import React from 'react';
 import { createComponent, type EventName } from '@lit/react';
+import { localImageService } from '../local/LocalImageService';
 
 @customElement('joi-image')
 export class JoiImageElement extends LitElement {
@@ -71,6 +72,9 @@ export class JoiImageElement extends LitElement {
   @state() accessor previewReady = false;
   @state() accessor fullReady = false;
   @state() accessor inView = false;
+  @state() accessor resolvedThumb = '';
+  @state() accessor resolvedPreview = '';
+  @state() accessor resolvedFull = '';
 
   private io?: IntersectionObserver;
 
@@ -86,13 +90,17 @@ export class JoiImageElement extends LitElement {
             this.inView = true;
             this.io?.disconnect();
             this.io = undefined;
+            this.resolveUrls();
           }
         }
       },
       { rootMargin: '200px' }
     );
     if (!this.eager) this.io.observe(this);
-    else this.inView = true;
+    else {
+      this.inView = true;
+      this.resolveUrls();
+    }
   }
 
   disconnectedCallback() {
@@ -109,6 +117,10 @@ export class JoiImageElement extends LitElement {
       changed.has('playable')
     ) {
       this.thumbReady = this.previewReady = this.fullReady = false;
+      this.resolvedThumb = this.resolvedPreview = this.resolvedFull = '';
+      if (this.inView) {
+        this.resolveUrls();
+      }
     }
     if (changed.has('objectFit'))
       this.style.setProperty('--joi-prog-fit', this.objectFit);
@@ -129,6 +141,35 @@ export class JoiImageElement extends LitElement {
       this.dispatchEvent(
         new CustomEvent('ready', { detail: { stage: 'thumb' } })
       );
+  }
+
+  private async resolveUrls() {
+    if (this.thumb) {
+      try {
+        this.resolvedThumb = await localImageService.resolveUrl(this.thumb);
+      } catch (error) {
+        console.warn('Failed to resolve thumb URL:', error);
+        this.resolvedThumb = this.thumb;
+      }
+    }
+
+    if (this.preview) {
+      try {
+        this.resolvedPreview = await localImageService.resolveUrl(this.preview);
+      } catch (error) {
+        console.warn('Failed to resolve preview URL:', error);
+        this.resolvedPreview = this.preview;
+      }
+    }
+
+    if (this.full) {
+      try {
+        this.resolvedFull = await localImageService.resolveUrl(this.full);
+      } catch (error) {
+        console.warn('Failed to resolve full URL:', error);
+        this.resolvedFull = this.full;
+      }
+    }
   }
 
   private onThumbLoad = () => {
@@ -156,18 +197,21 @@ export class JoiImageElement extends LitElement {
   };
 
   render() {
-    const wantsVideo = this.kind === 'video' && this.playable && !!this.full;
-    const showThumb = !!this.thumb && !this.previewReady && !this.fullReady;
-    const showPreview = !!this.preview && this.previewReady && !this.fullReady;
-    const showFull = !!this.full && this.fullReady;
+    const wantsVideo =
+      this.kind === 'video' && this.playable && !!this.resolvedFull;
+    const showThumb =
+      !!this.resolvedThumb && !this.previewReady && !this.fullReady;
+    const showPreview =
+      !!this.resolvedPreview && this.previewReady && !this.fullReady;
+    const showFull = !!this.resolvedFull && this.fullReady;
 
     return html`
       ${this.alt ? html`<span class="sr-only">${this.alt}</span>` : ''}
 
       <div class="layer" ?visible=${showThumb}>
-        ${this.inView && this.thumb
+        ${this.inView && this.resolvedThumb
           ? html`<img
-              src=${this.thumb}
+              src=${this.resolvedThumb}
               decoding="async"
               loading="eager"
               @load=${this.onThumbLoad}
@@ -175,7 +219,7 @@ export class JoiImageElement extends LitElement {
           : null}
       </div>
 
-      ${this.preview
+      ${this.resolvedPreview
         ? html`<div
             class="layer"
             ?visible=${showPreview ||
@@ -183,7 +227,7 @@ export class JoiImageElement extends LitElement {
           >
             ${this.inView
               ? html`<img
-                  src=${this.preview}
+                  src=${this.resolvedPreview}
                   decoding="async"
                   loading="eager"
                   @load=${this.onPreviewLoad}
@@ -191,12 +235,12 @@ export class JoiImageElement extends LitElement {
               : null}
           </div>`
         : null}
-      ${this.full
+      ${this.resolvedFull
         ? html`<div class="layer" ?visible=${showFull}>
             ${this.inView
               ? wantsVideo
                 ? html`<video
-                    src=${this.full}
+                    src=${this.resolvedFull}
                     autoplay
                     loop
                     ?muted=${!this.loud}
@@ -204,7 +248,7 @@ export class JoiImageElement extends LitElement {
                     @loadedmetadata=${this.onFullVideoMeta}
                   ></video>`
                 : html`<img
-                    src=${this.full}
+                    src=${this.resolvedFull}
                     decoding="async"
                     fetchpriority="high"
                     @load=${this.onFullImgLoad}
