@@ -1,3 +1,14 @@
+## 2.6.0 - 2025-08-29
+
+### Added
+
+- Local videos
+
+### Fixed
+
+- Local images
+- Secure websockets
+
 ## 2.5.0 - 2025-08-27
 
 ### Added
