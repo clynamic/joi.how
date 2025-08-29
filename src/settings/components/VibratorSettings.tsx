@@ -59,7 +59,10 @@ export const VibratorSettings = () => {
     }
 
     try {
-      const url = `ws://${host}:${port}`;
+      const isLocalhost =
+        host === 'localhost' || host === '127.0.0.1' || host === '::1';
+      const protocol = isLocalhost ? 'ws' : 'wss';
+      const url = `${protocol}://${host}:${port}`;
       await client.connect(new ButtplugBrowserWebsocketClientConnector(url));
       await client.startScanning();
       client.devices.forEach(e =>
