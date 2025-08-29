@@ -3,6 +3,7 @@ export * from './Fields';
 export * from './ImageDialog';
 export * from './ImageGrid';
 export * from './JoiImage';
+export * from './JoiRes';
 export * from './JoiStack';
 export * from './Measure';
 export * from './ProgressBar';
