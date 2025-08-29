@@ -3,7 +3,7 @@ import { SettingsDescription, Space, SettingsGrid, JoiStack } from '../common';
 import { useImages } from '../settings';
 import { AnimatePresence } from 'framer-motion';
 import { discoverImageFiles, imageTypeFromExtension } from './files';
-import { LocalImageRequest, useLocalImages } from './LocalProvider';
+import { useLocalImages } from './LocalProvider';
 import { ImageServiceType } from '../types';
 import { chunk } from 'lodash';
 import {
@@ -11,6 +11,7 @@ import {
   WaIcon,
   WaProgressBar,
 } from '@awesome.me/webawesome/dist/react';
+import { LocalImageRequest } from './LocalImageService';
 
 export const LocalImport = () => {
   const [loading, setLoading] = useState(false);
@@ -75,7 +76,7 @@ export const LocalImport = () => {
       <input
         type='file'
         multiple
-        accept='image/*'
+        accept='image/*,video/*'
         style={{ display: 'none' }}
         id='filePicker'
         onChange={select}
