@@ -52,7 +52,7 @@ export const useLooping = (...options: LoopingOptions) => {
     return () => {
       effectId.current += 1;
       setTimer(timer => {
-        if (timer) clearInterval(timer);
+        if (timer) clearTimeout(timer);
         return null;
       });
     };
