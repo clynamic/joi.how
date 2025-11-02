@@ -26,6 +26,7 @@ export function lensFromPath<S = any, A = any>(path: Path): Lens<S, A> {
   if (parts.length === 0 || (parts.length === 1 && parts[0] === '')) {
     return {
       get: (source: S) => source as unknown as A,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       set: (value: A) => (_source: S) => value as unknown as S,
       over: (fn: (a: A) => A) => (source: S) =>
         fn(source as unknown as A) as unknown as S,
