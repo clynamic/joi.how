@@ -3,7 +3,6 @@ import {
   ClimaxSettings,
   DurationSettings,
   EventSettings,
-  HypnoSettings,
   PaceSettings,
   PlayerSettings,
   ServiceSettings,
@@ -26,7 +25,6 @@ export const SettingsSection = () => {
       <DurationSettings />
       <PlayerSettings />
       <EventSettings />
-      <HypnoSettings />
       <ClimaxSettings />
       <BoardSettings />
       <ServiceSettings />

@@ -5,7 +5,7 @@ import {
   ClimaxSettings,
   DurationSettings,
   EventSettings,
-  HypnoSettings,
+  HypnoSettingsContent,
   ImageSettings,
   PaceSettings,
   PlayerSettings,
@@ -124,11 +124,11 @@ export const GameSettings = () => {
           <DurationSettings />
           <PlayerSettings />
           <EventSettings />
-          <HypnoSettings />
           <ClimaxSettings />
           <BoardSettings />
           <VibratorSettings />
           <ImageSettings />
+          <HypnoSettingsContent />
         </StyledGameSettingsDialog>
       </WaDialog>
     </StyledGameSettings>

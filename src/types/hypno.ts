@@ -4,6 +4,7 @@ export enum GameHypnoType {
   breeding = 'breeding',
   maledom = 'maledom',
   femdom = 'femdom',
+  custom = 'custom',
 }
 
 export const GameHypnoLabels: Record<GameHypnoType, string> = {
@@ -12,6 +13,7 @@ export const GameHypnoLabels: Record<GameHypnoType, string> = {
   breeding: 'Breeding',
   maledom: 'Maledom Pet',
   femdom: 'Femdom Pet',
+  custom: 'Custom',
 };
 
 export const GameHypnoDescriptions: Record<GameHypnoType, string> = {
@@ -20,6 +22,7 @@ export const GameHypnoDescriptions: Record<GameHypnoType, string> = {
   breeding: 'Focus on breeding and primal urge',
   maledom: "Good pets get master's treats",
   femdom: "Good pets get mistress' treats",
+  custom: "Create your own on-screen text",
 };
 
 export const HypnoPhrases: Record<GameHypnoType, string[]> = {
@@ -126,4 +129,5 @@ export const HypnoPhrases: Record<GameHypnoType, string[]> = {
     "mistress' $part",
     "mistress' cum",
   ],
+  custom: [],
 };

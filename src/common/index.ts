@@ -1,5 +1,6 @@
 export * from './ContentSection';
 export * from './Fields';
+export * from './ColorPicker';
 export * from './ImageDialog';
 export * from './ImageGrid';
 export * from './JoiImage';

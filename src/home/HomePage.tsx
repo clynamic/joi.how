@@ -10,6 +10,7 @@ import {
   StartButton,
 } from './components';
 import { SettingsSection } from '../settings';
+import { HypnoSettingsSection } from '../settings/hypno';
 import { HomeProvider } from './HomeProvider';
 
 const StyledHomePage = styled.div`
@@ -34,6 +35,7 @@ export const HomePage = () => {
         <AgeWarning />
         <Introduction />
         <SettingsSection />
+        <HypnoSettingsSection />
         <WallTakerAd />
         <VersionDisplay />
         <ReleaseNotes />
