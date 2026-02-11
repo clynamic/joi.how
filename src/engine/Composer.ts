@@ -197,13 +197,31 @@ export class Composer<T extends object> {
     fn: (scope: ComposerScope<T>) => void
   ): (obj: T) => T {
     return Composer.chain<T>(c => {
+      let sealed = false;
       const scope = {} as ComposerScope<T>;
       for (const key of Object.getOwnPropertyNames(Composer.prototype)) {
         if (key !== 'constructor' && typeof (c as any)[key] === 'function') {
-          (scope as any)[key] = (c as any)[key].bind(c);
+          const bound = (c as any)[key].bind(c);
+          if (import.meta.env.DEV) {
+            (scope as any)[key] = (...args: any[]) => {
+              if (sealed)
+                throw new Error(
+                  'Composer.do() scope used after block completed'
+                );
+              return bound(...args);
+            };
+          } else {
+            (scope as any)[key] = bound;
+          }
         }
       }
-      fn(scope);
+      const result: unknown = fn(scope);
+      if (import.meta.env.DEV) {
+        if (result && typeof (result as any).then === 'function') {
+          throw new Error('Composer.do() callback must not be async');
+        }
+        sealed = true;
+      }
       return c;
     });
   }

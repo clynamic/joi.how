@@ -349,6 +349,25 @@ describe('Composer', () => {
         const result = fn({ user: { profile: { score: 50 } } });
         expect(result.user.profile.score).toBe(150);
       });
+
+      it('should throw if callback is async', () => {
+        expect(() => {
+          const fn = Composer.do<{ x: number }>((async (scope: any) => {
+            scope.set('x', 1);
+          }) as any);
+          fn({ x: 0 });
+        }).toThrow('must not be async');
+      });
+
+      it('should throw if scope is used after block completes', () => {
+        let leaked: any;
+        const fn = Composer.do<{ x: number }>(scope => {
+          leaked = scope;
+        });
+        fn({ x: 0 });
+
+        expect(() => leaked.set('x', 99)).toThrow('after block completed');
+      });
     });
   });
 });
