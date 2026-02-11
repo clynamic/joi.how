@@ -277,5 +277,78 @@ describe('Composer', () => {
         expect(result.value).toBe(10);
       });
     });
+
+    describe('Composer.do', () => {
+      it('should expose get and set imperatively', () => {
+        const fn = Composer.do<{ x: number; y: number }>(({ get, set }) => {
+          const x = get<number>('x');
+          set('y', x * 3);
+        });
+
+        const result = fn({ x: 7, y: 0 });
+        expect(result.y).toBe(21);
+        expect(result.x).toBe(7);
+      });
+
+      it('should expose over imperatively', () => {
+        const fn = Composer.do<{ count: number }>(({ over }) => {
+          over<number>('count', c => c + 10);
+        });
+
+        const result = fn({ count: 5 });
+        expect(result.count).toBe(15);
+      });
+
+      it('should see mutations from earlier in the same block', () => {
+        const fn = Composer.do<{ a: number; b: number }>(({ get, set }) => {
+          set('a', 99);
+          const a = get<number>('a');
+          set('b', a + 1);
+        });
+
+        const result = fn({ a: 0, b: 0 });
+        expect(result.a).toBe(99);
+        expect(result.b).toBe(100);
+      });
+
+      it('should interop with functional pipes via pipe()', () => {
+        const double = Composer.over<number>('value', v => v * 2);
+        const addTen = Composer.over<number>('value', v => v + 10);
+
+        const fn = Composer.do<{ value: number }>(({ pipe }) => {
+          pipe(double, addTen);
+        });
+
+        const result = fn({ value: 5 });
+        expect(result.value).toBe(20);
+      });
+
+      it('should support if/else instead of when/unless', () => {
+        const make = (flag: boolean) =>
+          Composer.do<{ value: number }>(({ get, set }) => {
+            const v = get<number>('value');
+            if (flag) {
+              set('value', v * 2);
+            } else {
+              set('value', v + 1);
+            }
+          });
+
+        expect(make(true)({ value: 5 }).value).toBe(10);
+        expect(make(false)({ value: 5 }).value).toBe(6);
+      });
+
+      it('should work with nested paths', () => {
+        type State = { user: { profile: { score: number } } };
+
+        const fn = Composer.do<State>(({ get, set }) => {
+          const score = get<number>('user.profile.score');
+          set('user.profile.score', score + 100);
+        });
+
+        const result = fn({ user: { profile: { score: 50 } } });
+        expect(result.user.profile.score).toBe(150);
+      });
+    });
   });
 });

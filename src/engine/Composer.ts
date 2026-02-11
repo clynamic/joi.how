@@ -12,6 +12,12 @@ export type Compositor<T extends object> = (
   composer: Composer<T>
 ) => Composer<T>;
 
+export type ComposerScope<T extends object> = {
+  [K in keyof Composer<T> as Composer<T>[K] extends (...args: any[]) => any
+    ? K
+    : never]: Composer<T>[K];
+};
+
 /**
  * A generalized object manipulation utility
  * in a functional chaining style.
@@ -185,5 +191,20 @@ export class Composer<T extends object> {
     fn: (obj: T) => T
   ): (obj: T) => T {
     return Composer.when<T>(!condition, fn);
+  }
+
+  static do<T extends object>(
+    fn: (scope: ComposerScope<T>) => void
+  ): (obj: T) => T {
+    return Composer.chain<T>(c => {
+      const scope = {} as ComposerScope<T>;
+      for (const key of Object.getOwnPropertyNames(Composer.prototype)) {
+        if (key !== 'constructor' && typeof (c as any)[key] === 'function') {
+          (scope as any)[key] = (c as any)[key].bind(c);
+        }
+      }
+      fn(scope);
+      return c;
+    });
   }
 }
