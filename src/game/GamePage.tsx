@@ -1,16 +1,17 @@
 import styled from 'styled-components';
 import { GameEngineProvider } from './GameProvider';
-import { FpsDisplay } from './components/FpsDisplay';
 import { messagesPipe } from '../engine/pipes/Messages';
 import { GameMessages } from './components/GameMessages';
 import { PauseButton } from './components/Pause';
-import { fpsPipe } from '../engine/pipes/Fps';
 import { useSettingsPipe, warmupPipe, pacePipe } from './pipes';
 import { GameIntensity } from './components/GameIntensity';
 import { intensityPipe } from './pipes/Intensity';
 import { imagePipe, randomImagesPipe } from './pipes';
 import { GameImages } from './components/GameImages';
 import { phasePipe } from './pipes/Phase';
+import { pluginInstallerPipe } from '../engine/plugins/PluginInstaller';
+import { pluginManagerPipe } from '../engine/plugins/PluginManager';
+import { registerPlugins } from './plugins';
 
 const StyledGamePage = styled.div`
   position: relative;
@@ -78,7 +79,6 @@ export const GamePage = () => {
   return (
     <GameEngineProvider
       pipes={[
-        fpsPipe,
         messagesPipe,
         settingsPipe,
         phasePipe,
@@ -87,14 +87,15 @@ export const GamePage = () => {
         imagePipe,
         randomImagesPipe,
         warmupPipe,
-        // messageTestPipe,
+        pluginManagerPipe,
+        pluginInstallerPipe,
+        registerPlugins,
       ]}
     >
-      <StyledGamePage>
+      <StyledGamePage className='game-page'>
         <GameImages />
         <StyledTopBar>
           <GameIntensity />
-          <FpsDisplay />
           <GameMessages />
         </StyledTopBar>
         <StyledCenter></StyledCenter>
