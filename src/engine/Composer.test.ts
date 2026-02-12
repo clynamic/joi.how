@@ -120,6 +120,32 @@ describe('Composer', () => {
 
         expect(result.value).toBe(5);
       });
+
+      it('should apply else when condition is false', () => {
+        const obj = { value: 5 };
+        const result = new Composer(obj)
+          .when(
+            false,
+            c => c.set('value', 10),
+            c => c.set('value', 99)
+          )
+          .get();
+
+        expect(result.value).toBe(99);
+      });
+
+      it('should not apply else when condition is true', () => {
+        const obj = { value: 5 };
+        const result = new Composer(obj)
+          .when(
+            true,
+            c => c.set('value', 10),
+            c => c.set('value', 99)
+          )
+          .get();
+
+        expect(result.value).toBe(10);
+      });
     });
 
     describe('unless', () => {
@@ -253,6 +279,28 @@ describe('Composer', () => {
 
         const result = fn({ value: 5 });
         expect(result.value).toBe(5);
+      });
+
+      it('should apply else function when false', () => {
+        const fn = Composer.when<{ value: number }>(
+          false,
+          o => ({ ...o, value: o.value * 2 }),
+          o => ({ ...o, value: o.value + 1 })
+        );
+
+        const result = fn({ value: 5 });
+        expect(result.value).toBe(6);
+      });
+
+      it('should skip else function when true', () => {
+        const fn = Composer.when<{ value: number }>(
+          true,
+          o => ({ ...o, value: o.value * 2 }),
+          o => ({ ...o, value: o.value + 1 })
+        );
+
+        const result = fn({ value: 5 });
+        expect(result.value).toBe(10);
       });
     });
 

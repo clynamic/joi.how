@@ -162,8 +162,13 @@ export class Composer<T extends object> {
   /**
    * Runs a composer function when the condition is true.
    */
-  when(condition: boolean, fn: (c: this) => this): this {
-    return condition ? fn(this) : this;
+  when(
+    condition: boolean,
+    fn: (c: this) => this,
+    elseFn?: (c: this) => this
+  ): this {
+    if (condition) return fn(this);
+    return elseFn ? elseFn(this) : this;
   }
 
   /**
@@ -171,9 +176,16 @@ export class Composer<T extends object> {
    */
   static when<T extends object>(
     condition: boolean,
-    fn: (obj: T) => T
+    fn: (obj: T) => T,
+    elseFn?: (obj: T) => T
   ): (obj: T) => T {
-    return Composer.chain<T>(c => c.when(condition, c => c.pipe(fn)));
+    return Composer.chain<T>(c =>
+      c.when(
+        condition,
+        c => c.pipe(fn),
+        elseFn ? c => c.pipe(elseFn) : undefined
+      )
+    );
   }
 
   /**
