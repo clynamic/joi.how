@@ -65,8 +65,8 @@ export class Composer<T extends object> {
   /**
    * Gets a value at the specified path in the object.
    */
-  get<A = unknown>(path: Path): A;
-  get<A = unknown>(path?: Path): A | T {
+  get<A = unknown>(path: Path<A>): A;
+  get<A = unknown>(path?: Path<A>): A | T {
     if (path === undefined) return this.obj;
     return lensFromPath<T, A>(path).get(this.obj);
   }
@@ -74,7 +74,7 @@ export class Composer<T extends object> {
   /**
    * Shorthand for getting a value at the specified path from an object.
    */
-  static get<A = unknown>(path: Path) {
+  static get<A = unknown>(path: Path<A>) {
     return <T extends object>(obj: T): A => lensFromPath<T, A>(path).get(obj);
   }
 
@@ -85,7 +85,7 @@ export class Composer<T extends object> {
   /**
    * Sets a value at the specified path in the object.
    */
-  set<A>(path: Path, value: A): this;
+  set<A>(path: Path<A>, value: A): this;
 
   set(pathOrValue: Path | T, maybeValue?: unknown): this {
     if (maybeValue === undefined) {
@@ -101,7 +101,7 @@ export class Composer<T extends object> {
   /**
    * Shorthand for building a composer that sets a path.
    */
-  static set<A>(path: Path, value: A) {
+  static set<A>(path: Path<A>, value: A) {
     return <T extends object>(obj: T): T =>
       Composer.chain<T>(c => c.set<A>(path, value))(obj);
   }
@@ -129,7 +129,7 @@ export class Composer<T extends object> {
   /**
    * Updates the value at the specified path with the mapping function.
    */
-  over<A>(path: Path, fn: (a: A) => A): this {
+  over<A>(path: Path<A>, fn: (a: A) => A): this {
     this.obj = lensFromPath<T, A>(path).over(fn)(this.obj);
     return this;
   }
@@ -137,7 +137,7 @@ export class Composer<T extends object> {
   /**
    * Shorthand for building a composer that updates a path.
    */
-  static over<A>(path: Path, fn: (a: A) => A) {
+  static over<A>(path: Path<A>, fn: (a: A) => A) {
     return <T extends object>(obj: T): T =>
       Composer.chain<T>(c => c.over<A>(path, fn))(obj);
   }
@@ -145,7 +145,7 @@ export class Composer<T extends object> {
   /**
    * Runs a composer function with the value at the specified path.
    */
-  bind<A>(path: Path, fn: Transformer<[A], T>): this {
+  bind<A>(path: Path<A>, fn: Transformer<[A], T>): this {
     const value = lensFromPath<T, A>(path).get(this.obj);
     this.obj = fn(value)(this.obj);
     return this;
@@ -154,7 +154,7 @@ export class Composer<T extends object> {
   /**
    * Shorthand for building a composer that reads a value at a path and applies a transformer.
    */
-  static bind<A>(path: Path, fn: Transformer<[A], any>) {
+  static bind<A>(path: Path<A>, fn: Transformer<[A], any>) {
     return <T extends object>(obj: T): T =>
       Composer.chain<T>(c => c.bind<A>(path, fn))(obj);
   }
@@ -205,36 +205,57 @@ export class Composer<T extends object> {
     return Composer.when<T>(!condition, fn);
   }
 
+  /**
+   * Runs an imperative block with destructured scope methods (get, set, over, pipe, bind).
+   */
   static do<T extends object>(
     fn: (scope: ComposerScope<T>) => void
   ): (obj: T) => T {
-    return Composer.chain<T>(c => {
-      let sealed = false;
+    return (obj: T): T => {
+      const c = new Composer(obj);
       const scope = {} as ComposerScope<T>;
+
+      // bind all composer methods to the scope object
       for (const key of Object.getOwnPropertyNames(Composer.prototype)) {
-        if (key !== 'constructor' && typeof (c as any)[key] === 'function') {
-          const bound = (c as any)[key].bind(c);
-          if (import.meta.env.DEV) {
-            (scope as any)[key] = (...args: any[]) => {
-              if (sealed)
-                throw new Error(
-                  'Composer.do() scope used after block completed'
-                );
-              return bound(...args);
-            };
-          } else {
-            (scope as any)[key] = bound;
-          }
-        }
+        if (key === 'constructor' || typeof (c as any)[key] !== 'function')
+          continue;
+        (scope as any)[key] = (c as any)[key].bind(c);
       }
-      const result: unknown = fn(scope);
+
       if (import.meta.env.DEV) {
+        let sealed = false;
+
+        // throw if scope is used after block returns (leaked references)
+        for (const key of Object.keys(scope)) {
+          const method = (scope as any)[key];
+          (scope as any)[key] = (...args: any[]) => {
+            if (sealed)
+              throw new Error('Composer.do() scope used after block completed');
+            return method(...args);
+          };
+        }
+
+        // shallow-freeze get() results to catch accidental mutation
+        const rawGet = (scope as any).get;
+        (scope as any).get = (...args: any[]) => {
+          const val = rawGet(...args);
+          return val !== null && typeof val === 'object'
+            ? Object.freeze(val)
+            : val;
+        };
+
+        const result: unknown = fn(scope);
+
+        // catch async callbacks that would silently lose writes
         if (result && typeof (result as any).then === 'function') {
           throw new Error('Composer.do() callback must not be async');
         }
         sealed = true;
+      } else {
+        fn(scope);
       }
-      return c;
-    });
+
+      return c.get();
+    };
   }
 }

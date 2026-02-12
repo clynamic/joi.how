@@ -6,7 +6,28 @@ export type Lens<S, A> = {
   over: (fn: (a: A) => A) => (source: S) => S;
 };
 
-export type Path = (string | number | symbol)[] | string;
+export type StringPath = (string | number | symbol)[] | string;
+
+export type TypedPath<T> = (string | number | symbol)[] & {
+  readonly __type?: T;
+} & (T extends object
+    ? { readonly [K in keyof T]-?: TypedPath<T[K]> }
+    : unknown);
+
+export type Path<T = unknown> = StringPath | TypedPath<T>;
+
+export function typedPath<T>(
+  segments: (string | number | symbol)[]
+): TypedPath<T> {
+  return new Proxy(segments, {
+    get(target, prop, receiver) {
+      if (prop in target || typeof prop === 'symbol') {
+        return Reflect.get(target, prop, receiver);
+      }
+      return typedPath([...target, prop as string]);
+    },
+  }) as unknown as TypedPath<T>;
+}
 
 export function normalizePath(path: Path): (string | number | symbol)[] {
   if (Array.isArray(path)) {
