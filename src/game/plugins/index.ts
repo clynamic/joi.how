@@ -2,11 +2,27 @@ import { PluginManager } from '../../engine/plugins/PluginManager';
 import { Composer } from '../../engine/Composer';
 import { Pipe } from '../../engine/State';
 import Fps from './fps';
+import Intensity from './intensity';
 import Pause from './pause';
+import Phase from './phase';
+import Pace from './pace';
 import PerfOverlay from './perf';
+import Image from './image';
+import RandomImages from './randomImages';
+import Warmup from './warmup';
 
-const plugins = [Pause.plugin, Fps.plugin, PerfOverlay.plugin];
+const plugins = [
+  Pause,
+  Phase,
+  Pace,
+  Intensity,
+  Image,
+  RandomImages,
+  Warmup,
+  Fps,
+  PerfOverlay,
+];
 
 export const registerPlugins: Pipe = Composer.pipe(
-  ...plugins.map(p => PluginManager.register(p))
+  ...plugins.map(PluginManager.register)
 );

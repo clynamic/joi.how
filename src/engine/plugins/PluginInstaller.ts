@@ -3,19 +3,14 @@ import { Pipe, GameFrame } from '../State';
 import { Storage } from '../pipes/Storage';
 import { sdk } from '../sdk';
 import { PluginManager } from './PluginManager';
-import { pluginPaths, type PluginId, type Plugin } from './Plugins';
+import { pluginPaths, type PluginId, type PluginClass } from './Plugins';
 
 const PLUGIN_NAMESPACE = 'core.plugin_installer';
 
 type PluginLoad = {
-  promise: Promise<PluginLoadResult>;
-  result?: PluginLoadResult;
+  promise: Promise<PluginClass>;
+  result?: PluginClass;
   error?: Error;
-};
-
-type PluginLoadResult = {
-  plugin: Plugin;
-  exported: any;
 };
 
 type InstallerState = {
@@ -33,7 +28,7 @@ const storageKey = {
   code: (id: PluginId) => `${PLUGIN_NAMESPACE}.code/${id}`,
 };
 
-async function load(code: string): Promise<PluginLoadResult> {
+async function load(code: string): Promise<PluginClass> {
   (globalThis as any).sdk = sdk;
 
   const blob = new Blob([code], { type: 'text/javascript' });
@@ -41,15 +36,15 @@ async function load(code: string): Promise<PluginLoadResult> {
 
   try {
     const module = await import(/* @vite-ignore */ url);
-    const exported = module.default;
+    const cls = module.default;
 
-    if (!exported?.plugin?.id) {
+    if (!cls?.plugin?.id) {
       throw new Error(
         'Plugin must export a default class with a static plugin field'
       );
     }
 
-    return { plugin: exported.plugin, exported };
+    return cls;
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -100,13 +95,12 @@ const resolvePipe: Pipe = Composer.do<GameFrame>(({ get, set, over, pipe }) => {
   const pending = get(ins.context.pending);
   if (!pending?.size) return;
 
-  const resolved: Plugin[] = [];
+  const resolved: PluginClass[] = [];
   const remaining = new Map<PluginId, PluginLoad>();
 
   for (const [id, entry] of pending) {
     if (entry.result) {
-      (sdk as any)[entry.result.exported.name] = entry.result.exported;
-      resolved.push(entry.result.plugin);
+      resolved.push(entry.result);
     } else if (entry.error) {
       // TODO: provide state for failed plugins
       console.error(
@@ -122,7 +116,7 @@ const resolvePipe: Pipe = Composer.do<GameFrame>(({ get, set, over, pipe }) => {
     pipe(...resolved.map(PluginManager.register));
     over(ins.state.installed, (ids = []) => [
       ...(Array.isArray(ids) ? ids : []),
-      ...resolved.map(p => p.id),
+      ...resolved.map(cls => cls.plugin.id),
     ]);
   }
 

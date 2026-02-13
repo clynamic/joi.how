@@ -5,7 +5,7 @@ import { JoiImage } from '../../common';
 import { useImagePreloader } from '../../utils';
 import { ImageSize, ImageType } from '../../types';
 import { useGameState } from '../hooks';
-import { ImageState } from '../pipes';
+import { ImageState } from '../plugins/image';
 
 const StyledGameImages = styled.div`
   position: absolute;

@@ -1,9 +1,9 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
+import { Pipe, PipeTransformer } from '../../engine/State';
 import { sdk } from '../../engine/sdk';
-import { Composer } from '../../engine/Composer';
-import { GameFrame, Pipe, PipeTransformer } from '../../engine/State';
-import { Events, getEventKey } from '../../engine/pipes/Events';
-import { pluginPaths } from '../../engine/plugins/Plugins';
+import { getEventKey } from '../../engine/pipes/Events';
+
+const { Composer, Events, pluginPaths } = sdk;
 
 declare module '../../engine/sdk' {
   interface PluginSDK {
@@ -32,23 +32,21 @@ const eventType = {
 
 export default class Pause {
   static setPaused(val: boolean): Pipe {
-    return Composer.set<boolean>(pause.state.paused, val);
+    return Composer.call(pause.context.setPaused, val);
   }
 
   static get togglePause(): Pipe {
-    return Composer.bind<PauseState>(pause.state, state =>
-      Pause.setPaused(!state?.paused)
-    );
+    return Composer.bind(pause.context.togglePause, fn => fn);
   }
 
   static whenPaused(pipe: Pipe): Pipe {
-    return Composer.bind<PauseState>(pause.state, state =>
+    return Composer.bind(pause.state, state =>
       Composer.when(!!state?.paused, pipe)
     );
   }
 
   static whenPlaying(pipe: Pipe): Pipe {
-    return Composer.bind<PauseState>(pause.state, state =>
+    return Composer.bind(pause.state, state =>
       Composer.when(!state?.paused, pipe)
     );
   }
@@ -65,21 +63,19 @@ export default class Pause {
     id: PLUGIN_ID,
     meta: {
       name: 'Pause',
-      version: '0.1.0',
     },
 
-    activate: frame => {
-      sdk.Pause = Pause;
-      return Composer.pipe(
-        Composer.set(pause.state, { paused: false, prev: false }),
-        Composer.set<PauseContext>(pause.context, {
-          setPaused: val => Pause.setPaused(val),
-          togglePause: Pause.togglePause,
-        })
-      )(frame);
-    },
+    activate: Composer.do(({ set }) => {
+      set(pause.state, { paused: false, prev: false });
+      set(pause.context, {
+        setPaused: val => Composer.set(pause.state.paused, val),
+        togglePause: Composer.bind(pause.state, state =>
+          Composer.set(pause.state.paused, !state?.paused)
+        ),
+      });
+    }),
 
-    update: Composer.do<GameFrame>(({ get, set, pipe }) => {
+    update: Composer.do(({ get, set, pipe }) => {
       const { paused, prev } = get(pause.state);
       if (paused === prev) return;
       set(pause.state.prev, paused);

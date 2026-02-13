@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Plugin, EnabledMap } from './Plugins';
+import { Plugin, PluginClass, EnabledMap } from './Plugins';
 import { PluginManager, pluginManagerPipe } from './PluginManager';
 import { eventPipe } from '../pipes/Events';
 import { Composer } from '../Composer';
@@ -31,9 +31,14 @@ const getLoadedIds = (frame: GameFrame): string[] =>
 const getLoadedRefs = (frame: GameFrame): Record<string, Plugin> =>
   (frame.context as any)?.core?.plugin_manager?.loadedRefs ?? {};
 
+const makePluginClass = (plugin: Plugin): PluginClass => ({
+  plugin,
+  name: plugin.id,
+});
+
 function bootstrap(plugin: Plugin): GameFrame {
   const frame0 = gamePipe(makeFrame());
-  const frame1 = PluginManager.register(plugin)(frame0);
+  const frame1 = PluginManager.register(makePluginClass(plugin))(frame0);
   return gamePipe(tick(frame1));
 }
 

@@ -1,7 +1,5 @@
+import { Composer, GameContext, pluginPaths, typedPath } from '../../engine';
 import type { Plugin } from '../../engine/plugins/Plugins';
-import { sdk } from '../../engine/sdk';
-
-const { Composer, pluginPaths } = sdk;
 
 const PLUGIN_ID = 'core.fps';
 const ELEMENT_ATTR = 'data-plugin-id';
@@ -14,13 +12,13 @@ type FpsContext = {
 };
 
 const fps = pluginPaths<never, FpsContext>(PLUGIN_ID);
+const gameContext = typedPath<GameContext>(['context']);
 
 export default class Fps {
   static plugin: Plugin = {
     id: PLUGIN_ID,
     meta: {
       name: 'FPS Counter',
-      version: '0.1.0',
     },
 
     activate: frame => {
@@ -56,7 +54,7 @@ export default class Fps {
     },
 
     update: Composer.do(({ get, set }) => {
-      const delta = get<number>(['context', 'deltaTime']);
+      const delta = get(gameContext.deltaTime);
       const ctx = get(fps.context);
       if (!ctx) return;
 

@@ -41,7 +41,6 @@ export default class PerfOverlay {
     id: PLUGIN_ID,
     meta: {
       name: 'Performance Overlay',
-      version: '0.1.0',
     },
 
     activate: frame => {

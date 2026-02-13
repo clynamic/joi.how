@@ -27,5 +27,10 @@ export type Plugin = {
   deactivate?: Pipe;
 };
 
-export type PluginRegistry = Record<PluginId, Plugin>;
+export type PluginClass = {
+  plugin: Plugin;
+  name: string;
+};
+
+export type PluginRegistry = Record<PluginId, PluginClass>;
 export type EnabledMap = Record<PluginId, boolean>;

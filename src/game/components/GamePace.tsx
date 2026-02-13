@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useGameContext } from '../hooks';
 import { useSetting } from '../../settings';
-import { PaceContext } from '../pipes/Pace';
+import { PaceContext } from '../plugins/pace';
 
 export const GamePace = () => {
   const [minPace] = useSetting('minPace');
