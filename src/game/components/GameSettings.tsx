@@ -120,15 +120,19 @@ export const GameSettings = () => {
         }}
       >
         <StyledGameSettingsDialog>
-          <PaceSettings />
-          <DurationSettings />
-          <PlayerSettings />
-          <EventSettings />
-          <HypnoSettings />
-          <ClimaxSettings />
-          <BoardSettings />
-          <VibratorSettings />
-          <ImageSettings />
+          {open && (
+            <>
+              <PaceSettings />
+              <DurationSettings />
+              <PlayerSettings />
+              <EventSettings />
+              <HypnoSettings />
+              <ClimaxSettings />
+              <BoardSettings />
+              <VibratorSettings />
+              <ImageSettings />
+            </>
+          )}
         </StyledGameSettingsDialog>
       </WaDialog>
     </StyledGameSettings>

@@ -8,7 +8,7 @@ const StyledGameMeter = styled.div`
   pointer-events: none;
 `;
 
-const StyledGameMeterCircle = motion(styled.div`
+const StyledGameMeterCircle = motion.create(styled.div`
   aspect-ratio: 1;
   width: 250px;
   border-radius: 100%;

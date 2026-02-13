@@ -26,7 +26,6 @@ export class JoiImageElement extends LitElement {
       inset: 0;
       opacity: 0;
       transition: opacity var(--img-transition);
-      will-change: opacity;
       contain: paint;
     }
     .layer[visible] {

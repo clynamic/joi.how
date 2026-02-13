@@ -11,11 +11,11 @@ const StyledGameMessages = styled.div`
   align-items: flex-end;
 `;
 
-const StyledGameMessage = motion(styled.div`
+const StyledGameMessage = motion.create(styled.div`
   display: flex;
 `);
 
-const StyledGameMessageTitle = motion(styled.div`
+const StyledGameMessageTitle = motion.create(styled.div`
   background: var(--overlay-background);
   color: var(--overlay-color);
 
@@ -23,7 +23,7 @@ const StyledGameMessageTitle = motion(styled.div`
   padding: 20px;
 `);
 
-const StyledGameMessageDescription = motion(styled.p`
+const StyledGameMessageDescription = motion.create(styled.p`
   background: var(--overlay-background);
   color: var(--overlay-color);
 
@@ -34,7 +34,7 @@ const StyledGameMessageDescription = motion(styled.p`
   margin-left: 1px;
 `);
 
-const StyledGameMessageButton = motion(styled.button`
+const StyledGameMessageButton = motion.create(styled.button`
   background: var(--button-background);
   color: var(--button-color);
 

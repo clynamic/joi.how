@@ -26,7 +26,7 @@ const StyledForegroundImage = styled.div`
   user-select: none;
 `;
 
-const StyledBackgroundImage = motion(styled.div`
+const StyledBackgroundImage = motion.create(styled.div`
   position: absolute;
   top: 0;
   left: 0;
