@@ -87,19 +87,19 @@ export default class PerfOverlay {
 
       const { plugins, config } = ctx;
       const lines: string[] = [];
+      const phaseOrder: PluginHookPhase[] = [
+        'activate',
+        'update',
+        'deactivate',
+      ];
 
-      for (const [id, phases] of Object.entries(plugins as PerfMetrics)) {
-        if (id === PLUGIN_ID) continue;
-        for (const [phase, entry] of Object.entries(phases)) {
+      for (const phase of phaseOrder) {
+        for (const [id, phases] of Object.entries(plugins as PerfMetrics)) {
+          if (id === PLUGIN_ID) continue;
+          const entry = phases[phase];
           if (!entry) continue;
           lines.push(
-            formatLine(
-              id,
-              phase as PluginHookPhase,
-              entry.last,
-              entry.avg,
-              config.pluginBudget
-            )
+            formatLine(id, phase, entry.last, entry.avg, config.pluginBudget)
           );
         }
       }

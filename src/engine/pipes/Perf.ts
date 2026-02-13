@@ -1,7 +1,8 @@
 import { Composer } from '../Composer';
-import { GameFrame, Pipe } from '../State';
+import { GameContext, GameFrame, Pipe } from '../State';
 import { Events, getEventKey, GameEvent } from './Events';
 import { pluginPaths, PluginId } from '../plugins/Plugins';
+import { typedPath } from '../Lens';
 
 export type PluginHookPhase = 'activate' | 'update' | 'deactivate';
 
@@ -10,6 +11,7 @@ export type PluginPerfEntry = {
   avg: number;
   max: number;
   samples: number[];
+  lastTick: number;
 };
 
 export type PerfMetrics = Record<
@@ -27,7 +29,8 @@ export type PerfContext = {
 };
 
 const PLUGIN_NAMESPACE = 'core.perf';
-const WINDOW_SIZE = 60;
+const SAMPLE_SIZE = 60;
+const EXPIRY_TICKS = 900;
 
 const DEFAULT_CONFIG: PerfConfig = {
   pluginBudget: 4,
@@ -39,6 +42,7 @@ const eventType = {
 };
 
 const perf = pluginPaths<never, PerfContext>(PLUGIN_NAMESPACE);
+const gameContext = typedPath<GameContext>(['context']);
 
 export function withTiming(
   id: PluginId,
@@ -51,12 +55,13 @@ export function withTiming(
     const after = performance.now();
     const duration = after - before;
 
+    const tick = get(gameContext.tick) ?? 0;
     const ctx = get(perf.context) ?? { plugins: {}, config: DEFAULT_CONFIG };
     const pluginMetrics = ctx.plugins[id] ?? {};
     const entry = pluginMetrics[phase];
 
     const samples = entry
-      ? [...entry.samples, duration].slice(-WINDOW_SIZE)
+      ? [...entry.samples, duration].slice(-SAMPLE_SIZE)
       : [duration];
 
     const avg =
@@ -66,7 +71,13 @@ export function withTiming(
 
     const max = entry ? Math.max(entry.max, duration) : duration;
 
-    const newEntry: PluginPerfEntry = { last: duration, avg, max, samples };
+    const newEntry: PluginPerfEntry = {
+      last: duration,
+      avg,
+      max,
+      samples,
+      lastTick: tick,
+    };
 
     set(perf.context, {
       ...ctx,
@@ -120,6 +131,36 @@ export const perfPipe: Pipe = Composer.pipe(
       config: ctx.config ?? DEFAULT_CONFIG,
     })
   ),
+
+  Composer.do<GameFrame>(({ get, set }) => {
+    const tick = get(gameContext.tick) ?? 0;
+    const ctx = get(perf.context);
+    if (!ctx) return;
+
+    let dirty = false;
+    const pruned: PerfMetrics = {};
+
+    for (const [id, phases] of Object.entries(ctx.plugins)) {
+      const kept: Partial<Record<PluginHookPhase, PluginPerfEntry>> = {};
+      for (const [phase, entry] of Object.entries(phases)) {
+        if (entry && tick - entry.lastTick <= EXPIRY_TICKS) {
+          kept[phase as PluginHookPhase] = entry;
+        } else {
+          dirty = true;
+        }
+      }
+      if (Object.keys(kept).length > 0) {
+        pruned[id] = kept;
+      } else {
+        dirty = true;
+      }
+    }
+
+    if (dirty) {
+      set(perf.context, { ...ctx, plugins: pruned });
+    }
+  }),
+
   Events.handle(eventType.configure, event =>
     Composer.over<PerfContext>(perf.context, ctx => ({
       ...ctx,
