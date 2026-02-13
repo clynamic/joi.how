@@ -14,26 +14,39 @@ type PerfOverlayContext = {
 
 const po = pluginPaths<never, PerfOverlayContext>(PLUGIN_ID);
 
+const COLOR_OK = [0x4a, 0xde, 0x80] as const;
+const COLOR_WARN = [0xfa, 0xcc, 0x15] as const;
+const COLOR_OVER = [0xf8, 0x71, 0x71] as const;
+
+function lerpRgb(
+  a: readonly number[],
+  b: readonly number[],
+  t: number
+): string {
+  const r = Math.round(a[0] + (b[0] - a[0]) * t);
+  const g = Math.round(a[1] + (b[1] - a[1]) * t);
+  const bl = Math.round(a[2] + (b[2] - a[2]) * t);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${bl.toString(16).padStart(2, '0')}`;
+}
+
 function budgetColor(duration: number, budget: number): string {
   const ratio = duration / budget;
-  if (ratio < 0.5) return '#4ade80';
-  if (ratio < 1.0) return '#facc15';
-  return '#f87171';
+  if (ratio <= 0) return lerpRgb(COLOR_OK, COLOR_OK, 0);
+  if (ratio < 1) return lerpRgb(COLOR_OK, COLOR_WARN, ratio);
+  return lerpRgb(COLOR_WARN, COLOR_OVER, Math.min(ratio - 1, 1));
 }
 
 function formatLine(
   id: string,
   phase: PluginHookPhase,
-  last: number,
   avg: number,
   budget: number
 ): string {
   const name = id.padEnd(24);
   const ph = phase.padEnd(11);
-  const l = `${last.toFixed(2)}ms`.padStart(8);
-  const a = `avg ${avg.toFixed(2)}ms`.padStart(12);
+  const a = `${avg.toFixed(2)}ms`.padStart(8);
   const color = budgetColor(avg, budget);
-  return `<span style="color:${color}">${name}${ph}${l}${a}</span>`;
+  return `<span style="color:${color}">${name}${ph}${a}</span>`;
 }
 
 export default class PerfOverlay {
@@ -93,15 +106,27 @@ export default class PerfOverlay {
         'deactivate',
       ];
 
+      let totalAvg = 0;
+
       for (const phase of phaseOrder) {
         for (const [id, phases] of Object.entries(plugins as PerfMetrics)) {
           if (id === PLUGIN_ID) continue;
           const entry = phases[phase];
           if (!entry) continue;
-          lines.push(
-            formatLine(id, phase, entry.last, entry.avg, config.pluginBudget)
-          );
+          totalAvg += entry.avg;
+          lines.push(formatLine(id, phase, entry.avg, config.pluginBudget));
         }
+      }
+
+      if (lines.length > 0) {
+        const totalColor = budgetColor(
+          totalAvg,
+          config.pluginBudget * lines.length
+        );
+        lines.push('');
+        lines.push(
+          `<span style="color:${totalColor}">${'frame'.padEnd(35)}${`${totalAvg.toFixed(2)}ms`.padStart(8)}</span>`
+        );
       }
 
       el.innerHTML =

@@ -33,7 +33,7 @@ const SAMPLE_SIZE = 60;
 const EXPIRY_TICKS = 900;
 
 const DEFAULT_CONFIG: PerfConfig = {
-  pluginBudget: 4,
+  pluginBudget: 1,
 };
 
 const eventType = {
