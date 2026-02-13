@@ -5,18 +5,15 @@ const { Composer, pluginPaths } = sdk;
 
 const PLUGIN_ID = 'core.fps';
 const ELEMENT_ATTR = 'data-plugin-id';
+const STYLE_ID = `${PLUGIN_ID}-styles`;
 const HISTORY_SIZE = 30;
-
-export type FpsState = {
-  value: number;
-  history: number[];
-};
 
 type FpsContext = {
   el: HTMLElement;
+  history: number[];
 };
 
-const fps = pluginPaths<FpsState, FpsContext>(PLUGIN_ID);
+const fps = pluginPaths<never, FpsContext>(PLUGIN_ID);
 
 export default class Fps {
   static plugin: Plugin = {
@@ -27,6 +24,25 @@ export default class Fps {
     },
 
     activate: frame => {
+      const style =
+        document.getElementById(STYLE_ID) ?? document.createElement('style');
+      style.id = STYLE_ID;
+      style.textContent = `
+        [${ELEMENT_ATTR}="${PLUGIN_ID}"] {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: black;
+          color: white;
+          padding: 4px 8px;
+          font-family: monospace;
+          font-size: 12px;
+          z-index: 9999;
+          pointer-events: none;
+        }
+      `;
+      if (!style.parentNode) document.head.appendChild(style);
+
       const existing = document.querySelector(
         `[${ELEMENT_ATTR}="${PLUGIN_ID}"]`
       );
@@ -34,47 +50,31 @@ export default class Fps {
 
       const el = document.createElement('div');
       el.setAttribute(ELEMENT_ATTR, PLUGIN_ID);
-      Object.assign(el.style, {
-        position: 'absolute',
-        top: '8px',
-        right: '8px',
-        background: 'black',
-        color: 'white',
-        padding: '4px 8px',
-        fontFamily: 'monospace',
-        fontSize: '12px',
-        zIndex: '9999',
-        pointerEvents: 'none',
-      });
       document.querySelector('.game-page')?.appendChild(el);
 
-      return Composer.pipe(
-        Composer.set(fps.state, { value: 0, history: [] }),
-        Composer.set(fps.context, { el })
-      )(frame);
+      return Composer.set(fps.context, { el, history: [] })(frame);
     },
 
     update: Composer.do(({ get, set }) => {
       const delta = get<number>(['context', 'deltaTime']);
-      const s = get(fps.state);
-      const el = get(fps.context)?.el;
+      const ctx = get(fps.context);
+      if (!ctx) return;
 
       const current = delta > 0 ? 1000 / delta : 0;
-      const history = [...s.history, current].slice(-HISTORY_SIZE);
+      const history = [...ctx.history, current].slice(-HISTORY_SIZE);
       const avg =
         history.length > 0
           ? history.reduce((sum, v) => sum + v, 0) / history.length
           : current;
 
-      if (el) el.textContent = `${Math.round(avg)} FPS`;
+      if (ctx.el) ctx.el.textContent = `${Math.round(avg)} FPS`;
 
-      set(fps.state, { value: current, history });
+      set(fps.context, { ...ctx, history });
     }),
 
     deactivate: Composer.do(({ get, set }) => {
       const el = get(fps.context)?.el;
       if (el) el.remove();
-      set(fps.state, undefined);
       set(fps.context, undefined);
     }),
   };

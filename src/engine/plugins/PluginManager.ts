@@ -14,6 +14,7 @@ import {
   type PluginRegistry,
   type EnabledMap,
 } from './Plugins';
+import { withTiming } from '../pipes/Perf';
 
 const PLUGIN_NAMESPACE = 'core.plugin_manager';
 
@@ -190,11 +191,17 @@ const lifecyclePipe: Pipe = Composer.do<GameFrame>(({ get, pipe }) => {
   const registry = get(pm.context.registry) ?? {};
 
   const deactivates = toUnload
-    .map(id => (loadedRefs[id] ?? registry[id])?.deactivate)
+    .map(id => {
+      const p = (loadedRefs[id] ?? registry[id])?.deactivate;
+      return p ? withTiming(id, 'deactivate', p) : undefined;
+    })
     .filter(Boolean) as Pipe[];
 
   const activates = toLoad
-    .map(id => registry[id]?.activate)
+    .map(id => {
+      const p = registry[id]?.activate;
+      return p ? withTiming(id, 'activate', p) : undefined;
+    })
     .filter(Boolean) as Pipe[];
 
   const activeIds = [
@@ -203,7 +210,10 @@ const lifecyclePipe: Pipe = Composer.do<GameFrame>(({ get, pipe }) => {
   ];
 
   const updates = activeIds
-    .map(id => (loadedRefs[id] ?? registry[id])?.update)
+    .map(id => {
+      const p = (loadedRefs[id] ?? registry[id])?.update;
+      return p ? withTiming(id, 'update', p) : undefined;
+    })
     .filter(Boolean) as Pipe[];
 
   const pipes = [...deactivates, ...activates, ...updates];

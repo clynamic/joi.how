@@ -70,21 +70,21 @@ export default class Pause {
 
     activate: frame => {
       sdk.Pause = Pause;
-      return Composer.set(pause.state, { paused: false, prev: false })(frame);
+      return Composer.pipe(
+        Composer.set(pause.state, { paused: false, prev: false }),
+        Composer.set<PauseContext>(pause.context, {
+          setPaused: val => Pause.setPaused(val),
+          togglePause: Pause.togglePause,
+        })
+      )(frame);
     },
 
-    update: Composer.pipe(
-      Composer.set<PauseContext>(pause.context, {
-        setPaused: val => Pause.setPaused(val),
-        togglePause: Pause.togglePause,
-      }),
-      Composer.do<GameFrame>(({ get, set, pipe }) => {
-        const { paused, prev } = get(pause.state);
-        if (paused === prev) return;
-        set(pause.state.prev, paused);
-        pipe(Events.dispatch({ type: paused ? eventType.on : eventType.off }));
-      })
-    ),
+    update: Composer.do<GameFrame>(({ get, set, pipe }) => {
+      const { paused, prev } = get(pause.state);
+      if (paused === prev) return;
+      set(pause.state.prev, paused);
+      pipe(Events.dispatch({ type: paused ? eventType.on : eventType.off }));
+    }),
 
     deactivate: Composer.pipe(
       Composer.set(pause.state, undefined),
