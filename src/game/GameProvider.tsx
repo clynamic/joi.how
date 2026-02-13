@@ -15,23 +15,12 @@ type GameEngineContextValue = {
    */
   context: GameContext | null;
   /**
-   * Hard pause the game engine, stopping all updates and rendering.
-   */
-  pause: () => void;
-  /**
-   * Resume the game engine after a pause.
-   */
-  resume: () => void;
-  /**
-   * Whether the game engine is currently running.
-   */
-  isRunning: boolean;
-  /**
    * Queue a one-shot pipe to run in the next tick only.
    */
   injectImpulse: (pipe: Pipe) => void;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const GameEngineContext = createContext<
   GameEngineContextValue | undefined
 >(undefined);
@@ -43,19 +32,13 @@ type Props = {
 
 export function GameEngineProvider({ children, pipes = [] }: Props) {
   const engineRef = useRef<GameEngine | null>(null);
-  const runningRef = useRef(true);
   const lastTimeRef = useRef<number | null>(null);
 
   const [state, setState] = useState<GameState | null>(null);
   const [context, setContext] = useState<GameContext | null>(null);
-  const [isRunning, setIsRunning] = useState(runningRef.current);
 
   const pendingImpulseRef = useRef<Pipe[]>([]);
   const activeImpulseRef = useRef<Pipe[]>([]);
-
-  useEffect(() => {
-    runningRef.current = isRunning;
-  }, [isRunning]);
 
   useEffect(() => {
     // To inject one-shot pipes (impulses) into the engine,
@@ -74,9 +57,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
     const loop = (time: number) => {
       if (!engineRef.current) return;
 
-      // When paused, we advance time but do not tick.
-      // This prevents incorrectly accumulating delta time during pauses.
-      if (lastTimeRef.current == null || !runningRef.current) {
+      if (lastTimeRef.current == null) {
         lastTimeRef.current = time;
         frameId = requestAnimationFrame(loop);
         return;
@@ -85,7 +66,6 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
       const deltaTime = time - lastTimeRef.current;
       lastTimeRef.current = time;
 
-      // activate pending impulses
       activeImpulseRef.current = pendingImpulseRef.current;
       pendingImpulseRef.current = [];
 
@@ -108,18 +88,12 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
     };
   }, [pipes]);
 
-  const pause = () => setIsRunning(false);
-
-  const resume = () => setIsRunning(true);
-
   const injectImpulse = (pipe: Pipe) => {
     pendingImpulseRef.current.push(pipe);
   };
 
   return (
-    <GameEngineContext.Provider
-      value={{ state, context, pause, resume, isRunning, injectImpulse }}
-    >
+    <GameEngineContext.Provider value={{ state, context, injectImpulse }}>
       {children}
     </GameEngineContext.Provider>
   );

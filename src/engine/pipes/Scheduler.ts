@@ -12,6 +12,7 @@ export type ScheduledEvent = {
   id?: string;
   duration: number;
   event: GameEvent;
+  held?: boolean;
 };
 
 type SchedulerState = {
@@ -22,6 +23,8 @@ type SchedulerState = {
 export type SchedulerContext = {
   schedule: PipeTransformer<[ScheduledEvent]>;
   cancel: PipeTransformer<[string]>;
+  hold: PipeTransformer<[string]>;
+  release: PipeTransformer<[string]>;
 };
 
 export class Scheduler {
@@ -38,6 +41,20 @@ export class Scheduler {
       ({ cancel }) => cancel(id)
     );
   }
+
+  static hold(id: string): Pipe {
+    return Composer.bind<SchedulerContext>(
+      ['context', PLUGIN_NAMESPACE],
+      ({ hold }) => hold(id)
+    );
+  }
+
+  static release(id: string): Pipe {
+    return Composer.bind<SchedulerContext>(
+      ['context', PLUGIN_NAMESPACE],
+      ({ release }) => release(id)
+    );
+  }
 }
 
 export const schedulerPipe: Pipe = Composer.pipe(
@@ -49,6 +66,10 @@ export const schedulerPipe: Pipe = Composer.pipe(
         const current: GameEvent[] = [];
 
         for (const entry of scheduled) {
+          if (entry.held) {
+            remaining.push(entry);
+            continue;
+          }
           const time = entry.duration - delta;
           if (time <= 0) {
             current.push(entry.event);
@@ -78,6 +99,18 @@ export const schedulerPipe: Pipe = Composer.pipe(
         type: getEventKey(PLUGIN_NAMESPACE, 'cancel'),
         payload: id,
       }),
+
+    hold: (id: string) =>
+      Events.dispatch({
+        type: getEventKey(PLUGIN_NAMESPACE, 'hold'),
+        payload: id,
+      }),
+
+    release: (id: string) =>
+      Events.dispatch({
+        type: getEventKey(PLUGIN_NAMESPACE, 'release'),
+        payload: id,
+      }),
   }),
 
   Events.handle(getEventKey(PLUGIN_NAMESPACE, 'schedule'), event =>
@@ -94,6 +127,22 @@ export const schedulerPipe: Pipe = Composer.pipe(
     Composer.over<ScheduledEvent[]>(
       ['state', PLUGIN_NAMESPACE, 'scheduled'],
       (list = []) => list.filter(s => s.id !== event.payload)
+    )
+  ),
+
+  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'hold'), event =>
+    Composer.over<ScheduledEvent[]>(
+      ['state', PLUGIN_NAMESPACE, 'scheduled'],
+      (list = []) =>
+        list.map(s => (s.id === event.payload ? { ...s, held: true } : s))
+    )
+  ),
+
+  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'release'), event =>
+    Composer.over<ScheduledEvent[]>(
+      ['state', PLUGIN_NAMESPACE, 'scheduled'],
+      (list = []) =>
+        list.map(s => (s.id === event.payload ? { ...s, held: false } : s))
     )
   )
 );
