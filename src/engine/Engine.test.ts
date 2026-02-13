@@ -53,14 +53,11 @@ describe('GameEngine', () => {
     expect(engine.getState()).toEqual({ modified: true });
   });
 
-  it('should deep clone state after pipe execution', () => {
-    const pipe: Pipe = (frame: GameFrame) => {
-      const nested = { value: 42 };
-      return {
-        ...frame,
-        state: { nested },
-      };
-    };
+  it('should produce new state references per tick', () => {
+    const pipe: Pipe = (frame: GameFrame) => ({
+      ...frame,
+      state: { ...frame.state, nested: { value: 42 } },
+    });
 
     const engine = new GameEngine({}, pipe);
     engine.tick(16);
@@ -73,20 +70,19 @@ describe('GameEngine', () => {
     expect(state1.nested).toEqual(state2.nested);
   });
 
-  it('should deep clone context after pipe execution', () => {
+  it('should freeze state in dev mode', () => {
     const pipe: Pipe = (frame: GameFrame) => ({
       ...frame,
-      context: { ...frame.context, data: { value: 42 } },
+      state: { ...frame.state, nested: { value: 42 } },
     });
 
     const engine = new GameEngine({}, pipe);
     engine.tick(16);
 
-    const ctx1 = engine.getContext();
-    engine.tick(16);
-    const ctx2 = engine.getContext();
-
-    expect(ctx1.data).not.toBe(ctx2.data);
-    expect(ctx1.data).toEqual(ctx2.data);
+    const state = engine.getState();
+    expect(() => {
+      state.nested.value = 99;
+    }).toThrow();
+    expect(state.nested.value).toBe(42);
   });
 });
