@@ -11,7 +11,7 @@ export const GameEmergencyStop = () => {
 
   const onStop = useCallback(() => {
     injectImpulse(
-      dispatchEvent({ type: getEventKey('core.dice', 'emergencyStop') })
+      dispatchEvent({ type: getEventKey('core.emergencyStop', 'stop') })
     );
   }, [injectImpulse]);
 

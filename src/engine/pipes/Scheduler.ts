@@ -25,6 +25,9 @@ export type SchedulerContext = {
   cancel: PipeTransformer<[string]>;
   hold: PipeTransformer<[string]>;
   release: PipeTransformer<[string]>;
+  holdByPrefix: PipeTransformer<[string]>;
+  releaseByPrefix: PipeTransformer<[string]>;
+  cancelByPrefix: PipeTransformer<[string]>;
 };
 
 export class Scheduler {
@@ -53,6 +56,27 @@ export class Scheduler {
     return Composer.bind<SchedulerContext>(
       ['context', PLUGIN_NAMESPACE],
       ({ release }) => release(id)
+    );
+  }
+
+  static holdByPrefix(prefix: string): Pipe {
+    return Composer.bind<SchedulerContext>(
+      ['context', PLUGIN_NAMESPACE],
+      ({ holdByPrefix }) => holdByPrefix(prefix)
+    );
+  }
+
+  static releaseByPrefix(prefix: string): Pipe {
+    return Composer.bind<SchedulerContext>(
+      ['context', PLUGIN_NAMESPACE],
+      ({ releaseByPrefix }) => releaseByPrefix(prefix)
+    );
+  }
+
+  static cancelByPrefix(prefix: string): Pipe {
+    return Composer.bind<SchedulerContext>(
+      ['context', PLUGIN_NAMESPACE],
+      ({ cancelByPrefix }) => cancelByPrefix(prefix)
     );
   }
 }
@@ -111,6 +135,24 @@ export const schedulerPipe: Pipe = Composer.pipe(
         type: getEventKey(PLUGIN_NAMESPACE, 'release'),
         payload: id,
       }),
+
+    holdByPrefix: (prefix: string) =>
+      Events.dispatch({
+        type: getEventKey(PLUGIN_NAMESPACE, 'holdByPrefix'),
+        payload: prefix,
+      }),
+
+    releaseByPrefix: (prefix: string) =>
+      Events.dispatch({
+        type: getEventKey(PLUGIN_NAMESPACE, 'releaseByPrefix'),
+        payload: prefix,
+      }),
+
+    cancelByPrefix: (prefix: string) =>
+      Events.dispatch({
+        type: getEventKey(PLUGIN_NAMESPACE, 'cancelByPrefix'),
+        payload: prefix,
+      }),
   }),
 
   Events.handle(getEventKey(PLUGIN_NAMESPACE, 'schedule'), event =>
@@ -143,6 +185,33 @@ export const schedulerPipe: Pipe = Composer.pipe(
       ['state', PLUGIN_NAMESPACE, 'scheduled'],
       (list = []) =>
         list.map(s => (s.id === event.payload ? { ...s, held: false } : s))
+    )
+  ),
+
+  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'holdByPrefix'), event =>
+    Composer.over<ScheduledEvent[]>(
+      ['state', PLUGIN_NAMESPACE, 'scheduled'],
+      (list = []) =>
+        list.map(s =>
+          s.id?.startsWith(event.payload) ? { ...s, held: true } : s
+        )
+    )
+  ),
+
+  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'releaseByPrefix'), event =>
+    Composer.over<ScheduledEvent[]>(
+      ['state', PLUGIN_NAMESPACE, 'scheduled'],
+      (list = []) =>
+        list.map(s =>
+          s.id?.startsWith(event.payload) ? { ...s, held: false } : s
+        )
+    )
+  ),
+
+  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'cancelByPrefix'), event =>
+    Composer.over<ScheduledEvent[]>(
+      ['state', PLUGIN_NAMESPACE, 'scheduled'],
+      (list = []) => list.filter(s => !s.id?.startsWith(event.payload))
     )
   )
 );

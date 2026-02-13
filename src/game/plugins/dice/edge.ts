@@ -1,47 +1,40 @@
 import { Composer } from '../../../engine/Composer';
-import { Events, getEventKey } from '../../../engine/pipes/Events';
-import { Messages } from '../../../engine/pipes/Messages';
-import { Scheduler, getScheduleKey } from '../../../engine/pipes/Scheduler';
+import { typedPath } from '../../../engine/Lens';
+import { Sequence } from '../../Sequence';
 import Pace from '../pace';
 import { GameEvent as GameEventType } from '../../../types';
-import { PLUGIN_ID, dice, settings, setBusy, DiceOutcome } from './types';
+import {
+  PLUGIN_ID,
+  intensityState,
+  settings,
+  setBusy,
+  DiceOutcome,
+} from './types';
 
-const ev = {
-  edge: getEventKey(PLUGIN_ID, 'edge'),
-  done: getEventKey(PLUGIN_ID, 'edge.done'),
-};
+export const edged = typedPath<boolean>(['state', PLUGIN_ID, 'edged']);
 
-const sched = {
-  edge: getScheduleKey(PLUGIN_ID, 'edge'),
-};
+const seq = Sequence.for(PLUGIN_ID, 'edge');
 
 export const edgeOutcome: DiceOutcome = {
   id: GameEventType.edge,
-  check: (intensity, edged) => intensity >= 90 && !edged,
-  scheduleKeys: Object.values(sched),
-  pipes: Composer.pipe(
-    Events.handle(ev.edge, () =>
-      Composer.do(({ get, set, pipe }) => {
-        const s = get(settings);
-        if (!s) return;
-        set(dice.state.edged, true);
-        pipe(Pace.setPace(s.minPace));
-        pipe(
-          Messages.send({
-            id: GameEventType.edge,
+  check: frame => {
+    const i = (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100;
+    return i >= 90 && !Composer.get(edged)(frame);
+  },
+  update: Composer.pipe(
+    seq.on(() =>
+      Composer.bind(settings, s =>
+        Composer.pipe(
+          Composer.set(edged, true),
+          Pace.setPace(s.minPace),
+          seq.message({
             title: `You should be getting close to the edge. Don't cum yet.`,
             duration: 10000,
-          })
-        );
-        pipe(
-          Scheduler.schedule({
-            id: sched.edge,
-            duration: 10000,
-            event: { type: ev.done },
-          })
-        );
-      })
+          }),
+          seq.after(10000, 'done')
+        )
+      )
     ),
-    Events.handle(ev.done, () => setBusy(false))
+    seq.on('done', () => setBusy(false))
   ),
 };
