@@ -1,4 +1,5 @@
 import { lensFromPath, Path } from './Lens';
+import { deepFreeze } from './freeze';
 
 /**
  * A curried function that that maps an object from T to T,
@@ -68,7 +69,10 @@ export class Composer<T extends object> {
   get<A = unknown>(path: Path<A>): A;
   get<A = unknown>(path?: Path<A>): A | T {
     if (path === undefined) return this.obj;
-    return lensFromPath<T, A>(path).get(this.obj);
+    const val = lensFromPath<T, A>(path).get(this.obj);
+    // Modifying an object retrieved from the composer would cause bugs
+    if (import.meta.env.DEV) return deepFreeze(val);
+    return val;
   }
 
   /**
@@ -249,15 +253,6 @@ export class Composer<T extends object> {
             return method(...args);
           };
         }
-
-        // shallow-freeze get() results to catch accidental mutation
-        const rawGet = (scope as any).get;
-        (scope as any).get = (...args: any[]) => {
-          const val = rawGet(...args);
-          return val !== null && typeof val === 'object'
-            ? Object.freeze(val)
-            : val;
-        };
 
         const result: unknown = fn(scope);
 
