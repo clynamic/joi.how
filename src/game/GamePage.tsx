@@ -4,11 +4,17 @@ import { messagesPipe } from '../engine/pipes/Messages';
 import { GameMessages } from './components/GameMessages';
 import { PauseButton } from './components/Pause';
 import { useSettingsPipe } from './pipes';
-import { GameIntensity } from './components/GameIntensity';
 import { GameImages } from './components/GameImages';
 import { pluginInstallerPipe } from '../engine/plugins/PluginInstaller';
 import { pluginManagerPipe } from '../engine/plugins/PluginManager';
 import { registerPlugins } from './plugins';
+import { GameMeter } from './components/GameMeter';
+import { GameHypno } from './components/GameHypno';
+import { GameSound } from './components/GameSound';
+import { GameVibrator } from './components/GameVibrator';
+import { GameInstructions } from './components/GameInstructions';
+import { GameEmergencyStop } from './components/GameEmergencyStop';
+import { GameSettings } from './components/GameSettings';
 
 const StyledGamePage = styled.div`
   position: relative;
@@ -86,13 +92,20 @@ export const GamePage = () => {
       <StyledGamePage className='game-page'>
         <GameImages />
         <StyledTopBar>
-          <GameIntensity />
+          <GameInstructions />
           <GameMessages />
         </StyledTopBar>
-        <StyledCenter></StyledCenter>
+        <StyledCenter>
+          <GameMeter />
+          <GameHypno />
+        </StyledCenter>
         <StyledBottomBar>
+          <GameSettings />
+          <GameEmergencyStop />
           <PauseButton />
         </StyledBottomBar>
+        <GameSound />
+        <GameVibrator />
       </StyledGamePage>
     </GameEngineProvider>
   );

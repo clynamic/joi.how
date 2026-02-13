@@ -10,12 +10,18 @@ import PerfOverlay from './perf';
 import Image from './image';
 import RandomImages from './randomImages';
 import Warmup from './warmup';
+import Stroke from './stroke';
+import Dealer from './dealer';
+import Hypno from './hypno';
 
 const plugins = [
   Pause,
   Phase,
   Pace,
   Intensity,
+  Stroke,
+  Dealer,
+  Hypno,
   Image,
   RandomImages,
   Warmup,

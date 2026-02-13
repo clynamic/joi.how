@@ -1,12 +1,11 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
-import { sdk } from '../../engine/sdk';
+import { Composer } from '../../engine/Composer';
+import { pluginPaths } from '../../engine/plugins/Plugins';
 import { typedPath } from '../../engine/Lens';
 import { Settings } from '../../settings';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
 import { GameContext } from '../../engine';
-
-const { Composer, pluginPaths } = sdk;
 
 declare module '../../engine/sdk' {
   interface PluginSDK {
