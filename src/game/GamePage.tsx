@@ -80,6 +80,9 @@ export const GamePage = () => {
     <GameEngineProvider
       pipes={[
         messagesPipe,
+        pluginManagerPipe,
+        pluginInstallerPipe,
+        registerPlugins,
         settingsPipe,
         phasePipe,
         pacePipe,
@@ -87,9 +90,6 @@ export const GamePage = () => {
         imagePipe,
         randomImagesPipe,
         warmupPipe,
-        pluginManagerPipe,
-        pluginInstallerPipe,
-        registerPlugins,
       ]}
     >
       <StyledGamePage className='game-page'>

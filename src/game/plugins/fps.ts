@@ -1,8 +1,9 @@
-import { Plugin, pluginPaths } from '../../engine/plugins/Plugins';
-import { Composer } from '../../engine/Composer';
+import type { Plugin } from '../../engine/plugins/Plugins';
+import { sdk } from '../../engine/sdk';
+
+const { Composer, pluginPaths } = sdk;
 
 const PLUGIN_ID = 'core.fps';
-const PLUGIN_VERSION = '0.1.0';
 const ELEMENT_ATTR = 'data-plugin-id';
 const HISTORY_SIZE = 30;
 
@@ -17,12 +18,12 @@ type FpsContext = {
 
 const fps = pluginPaths<FpsState, FpsContext>(PLUGIN_ID);
 
-export function createFpsPlugin(): Plugin {
-  return {
+export default class Fps {
+  static plugin: Plugin = {
     id: PLUGIN_ID,
     meta: {
       name: 'FPS Counter',
-      version: PLUGIN_VERSION,
+      version: '0.1.0',
     },
 
     activate: frame => {

@@ -1,15 +1,21 @@
 import { Composer } from '../Composer';
 import { Pipe, GameFrame } from '../State';
 import { Storage } from '../pipes/Storage';
+import { sdk } from '../sdk';
 import { PluginManager } from './PluginManager';
 import { pluginPaths, type PluginId, type Plugin } from './Plugins';
 
 const PLUGIN_NAMESPACE = 'core.plugin_installer';
 
 type PluginLoad = {
-  promise: Promise<Plugin>;
-  result?: Plugin;
+  promise: Promise<PluginLoadResult>;
+  result?: PluginLoadResult;
   error?: Error;
+};
+
+type PluginLoadResult = {
+  plugin: Plugin;
+  exported: any;
 };
 
 type InstallerState = {
@@ -27,19 +33,23 @@ const storageKey = {
   code: (id: PluginId) => `${PLUGIN_NAMESPACE}.code/${id}`,
 };
 
-async function load(code: string): Promise<Plugin> {
+async function load(code: string): Promise<PluginLoadResult> {
+  (globalThis as any).sdk = sdk;
+
   const blob = new Blob([code], { type: 'text/javascript' });
   const url = URL.createObjectURL(blob);
 
   try {
     const module = await import(/* @vite-ignore */ url);
-    const plugin: Plugin = module.default || module.plugin;
+    const exported = module.default;
 
-    if (!plugin || !plugin.id) {
-      throw new Error('Plugin must export a Plugin object with an id');
+    if (!exported?.plugin?.id) {
+      throw new Error(
+        'Plugin must export a default class with a static plugin field'
+      );
     }
 
-    return plugin;
+    return { plugin: exported.plugin, exported };
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -95,7 +105,8 @@ const resolvePipe: Pipe = Composer.do<GameFrame>(({ get, set, over, pipe }) => {
 
   for (const [id, entry] of pending) {
     if (entry.result) {
-      resolved.push(entry.result);
+      (sdk as any)[entry.result.exported.name] = entry.result.exported;
+      resolved.push(entry.result.plugin);
     } else if (entry.error) {
       // TODO: provide state for failed plugins
       console.error(
@@ -110,7 +121,7 @@ const resolvePipe: Pipe = Composer.do<GameFrame>(({ get, set, over, pipe }) => {
   if (resolved.length > 0) {
     pipe(...resolved.map(PluginManager.register));
     over(ins.state.installed, (ids = []) => [
-      ...ids,
+      ...(Array.isArray(ids) ? ids : []),
       ...resolved.map(p => p.id),
     ]);
   }

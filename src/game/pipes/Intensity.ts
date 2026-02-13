@@ -1,7 +1,7 @@
 import { Composer, Pipe } from '../../engine';
 import { Settings } from '../../settings';
 import { GamePhase } from './Phase';
-import { Pause } from '../plugins/pause';
+import Pause from '../plugins/pause';
 
 const PLUGIN_NAMESPACE = 'core.intensity';
 
