@@ -1,6 +1,7 @@
 import { Composer, Pipe } from '../../engine';
 import { Settings } from '../../settings';
 import { GamePhase } from './Phase';
+import { Pause } from '../plugins/pause';
 
 const PLUGIN_NAMESPACE = 'core.intensity';
 
@@ -8,9 +9,8 @@ export type IntensityState = {
   intensity: number;
 };
 
-export const intensityPipe: Pipe = Composer.bind<GamePhase>(
-  ['state', 'core.phase', 'current'],
-  currentPhase =>
+export const intensityPipe: Pipe = Pause.whenPlaying(
+  Composer.bind<GamePhase>(['state', 'core.phase', 'current'], currentPhase =>
     Composer.when(
       currentPhase === GamePhase.active,
       Composer.bind<number>(['context', 'deltaTime'], delta =>
@@ -27,4 +27,5 @@ export const intensityPipe: Pipe = Composer.bind<GamePhase>(
         )
       )
     )
+  )
 );

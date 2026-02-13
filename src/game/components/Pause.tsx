@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { useGameEngine } from '../hooks/UseGameEngine';
+import { useGameState } from '../hooks/UseGameValue';
+import { Pause, PauseState } from '../plugins/pause';
 
 const PauseContainer = styled.div`
   position: absolute;
@@ -30,20 +31,12 @@ const PauseIconButton = styled.button`
 `;
 
 export const PauseButton = () => {
-  const { pause, resume, isRunning } = useGameEngine();
-  const [paused, setPaused] = useState(!isRunning);
-
-  useEffect(() => {
-    setPaused(!isRunning);
-  }, [isRunning]);
+  const { injectImpulse } = useGameEngine();
+  const pauseState = useGameState<PauseState>('core.pause');
+  const paused = pauseState?.paused ?? false;
 
   const togglePause = () => {
-    if (paused) {
-      resume();
-    } else {
-      pause();
-    }
-    setPaused(!paused);
+    injectImpulse(Pause.togglePause);
   };
 
   return (
