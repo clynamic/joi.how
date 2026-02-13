@@ -1,7 +1,15 @@
-import { Plugin, pluginPaths } from '../../engine/plugins/Plugins';
+import type { Plugin } from '../../engine/plugins/Plugins';
+import { sdk } from '../../engine/sdk';
 import { Composer } from '../../engine/Composer';
 import { GameFrame, Pipe, PipeTransformer } from '../../engine/State';
 import { Events, getEventKey } from '../../engine/pipes/Events';
+import { pluginPaths } from '../../engine/plugins/Plugins';
+
+declare module '../../engine/sdk' {
+  interface PluginSDK {
+    Pause: typeof Pause;
+  }
+}
 
 const PLUGIN_ID = 'core.pause';
 
@@ -15,33 +23,33 @@ type PauseContext = {
   togglePause: Pipe;
 };
 
-const paths = pluginPaths<PauseState, PauseContext>(PLUGIN_ID);
+const pause = pluginPaths<PauseState, PauseContext>(PLUGIN_ID);
 
 const eventType = {
   on: getEventKey(PLUGIN_ID, 'on'),
   off: getEventKey(PLUGIN_ID, 'off'),
 };
 
-export class Pause {
+export default class Pause {
   static setPaused(val: boolean): Pipe {
-    return Composer.set<boolean>(paths.state.paused, val);
+    return Composer.set<boolean>(pause.state.paused, val);
   }
 
   static get togglePause(): Pipe {
-    return Composer.bind<PauseState>(paths.state, ({ paused }) =>
-      Pause.setPaused(!paused)
+    return Composer.bind<PauseState>(pause.state, state =>
+      Pause.setPaused(!state?.paused)
     );
   }
 
   static whenPaused(pipe: Pipe): Pipe {
-    return Composer.bind<PauseState>(paths.state, ({ paused }) =>
-      Composer.when(paused, pipe)
+    return Composer.bind<PauseState>(pause.state, state =>
+      Composer.when(!!state?.paused, pipe)
     );
   }
 
   static whenPlaying(pipe: Pipe): Pipe {
-    return Composer.bind<PauseState>(paths.state, ({ paused }) =>
-      Composer.when(!paused, pipe)
+    return Composer.bind<PauseState>(pause.state, state =>
+      Composer.when(!state?.paused, pipe)
     );
   }
 
@@ -52,34 +60,35 @@ export class Pause {
   static onResume(fn: () => Pipe): Pipe {
     return Events.handle(eventType.off, fn);
   }
-}
 
-export function createPausePlugin(): Plugin {
-  return {
+  static plugin: Plugin = {
     id: PLUGIN_ID,
     meta: {
       name: 'Pause',
       version: '0.1.0',
     },
 
-    activate: Composer.set(paths.state, { paused: false, prev: false }),
+    activate: frame => {
+      sdk.Pause = Pause;
+      return Composer.set(pause.state, { paused: false, prev: false })(frame);
+    },
 
     update: Composer.pipe(
-      Composer.set<PauseContext>(paths.context, {
+      Composer.set<PauseContext>(pause.context, {
         setPaused: val => Pause.setPaused(val),
         togglePause: Pause.togglePause,
       }),
       Composer.do<GameFrame>(({ get, set, pipe }) => {
-        const { paused, prev } = get(paths.state);
+        const { paused, prev } = get(pause.state);
         if (paused === prev) return;
-        set(paths.state.prev, paused);
+        set(pause.state.prev, paused);
         pipe(Events.dispatch({ type: paused ? eventType.on : eventType.off }));
       })
     ),
 
     deactivate: Composer.pipe(
-      Composer.set(paths.state, undefined),
-      Composer.set(paths.context, undefined)
+      Composer.set(pause.state, undefined),
+      Composer.set(pause.context, undefined)
     ),
   };
 }

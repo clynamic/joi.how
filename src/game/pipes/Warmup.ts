@@ -4,7 +4,7 @@ import { Messages } from '../../engine/pipes/Messages';
 import { getScheduleKey, Scheduler } from '../../engine/pipes/Scheduler';
 import { GamePhase, setPhase } from './Phase';
 import { Settings } from '../../settings';
-import { Pause } from '../plugins/pause';
+import Pause from '../plugins/pause';
 
 const PLUGIN_NAMESPACE = 'core.warmup';
 const AUTOSTART_KEY = getScheduleKey(PLUGIN_NAMESPACE, 'autoStart');

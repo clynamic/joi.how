@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { useGameEngine } from '../hooks/UseGameEngine';
 import { useGameState } from '../hooks/UseGameValue';
-import { Pause, PauseState } from '../plugins/pause';
+import Pause, { type PauseState } from '../plugins/pause';
 
 const PauseContainer = styled.div`
   position: absolute;

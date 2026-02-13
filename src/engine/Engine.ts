@@ -15,8 +15,7 @@ export class GameEngine {
 
   /**
    * The state of the engine. This object should contain all information to run the game from a cold start.
-   *
-   * Pipes may add any additional fields.
+   * Pipes may add any additional fields. Must be serializable to JSON.
    */
   private state: GameState;
 
@@ -28,7 +27,7 @@ export class GameEngine {
   /**
    * The context of the engine. May contain any ephemeral information of any plugin, however it is to be noted;
    * Context may be discarded at any time, so it may not contain information necessary to restore the game state.
-   * As such, this object can contain inter-pipe communication, utility functions, or debugging information.
+   * It is not required to be serializable. As such, this object can contain inter-pipe communication, utility functions, or debugging information.
    */
   private context: GameContext;
 
@@ -72,6 +71,7 @@ export class GameEngine {
 
     const result = this.pipe(frame);
 
+    // TODO: this is (probably) expensive. We could make it debug only?
     this.state = cloneDeep(result.state);
     this.context = cloneDeep({
       ...result.context,
