@@ -1,5 +1,5 @@
 import { GameState, GameContext, Pipe, GameTiming, GameFrame } from './State';
-import cloneDeep from 'lodash/cloneDeep';
+import { deepFreeze } from './freeze';
 
 export class GameEngine {
   constructor(initial: GameState, pipe: Pipe) {
@@ -71,12 +71,13 @@ export class GameEngine {
 
     const result = this.pipe(frame);
 
-    // TODO: this is (probably) expensive. We could make it debug only?
-    this.state = cloneDeep(result.state);
-    this.context = cloneDeep({
+    this.state = result.state;
+    this.context = {
       ...result.context,
       ...this.timing,
-    });
+    };
+
+    if (import.meta.env.DEV) deepFreeze(this.state);
 
     return this.state;
   }

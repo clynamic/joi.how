@@ -1,5 +1,3 @@
-import { cloneDeep } from 'lodash';
-
 export type Lens<S, A> = {
   get: (source: S) => A;
   set: (value: A) => (source: S) => S;
@@ -54,7 +52,7 @@ export function lensFromPath<S = any, A = any>(path: Path): Lens<S, A> {
     };
   }
 
-  return {
+  const lens: Lens<S, A> = {
     get: (source: S): A => {
       return parts.reduce((acc: unknown, key: any) => {
         if (acc == null || typeof acc !== 'object') return undefined;
@@ -65,7 +63,7 @@ export function lensFromPath<S = any, A = any>(path: Path): Lens<S, A> {
     set:
       (value: A) =>
       (source: S): S => {
-        const root = cloneDeep(source) as any;
+        const root = { ...source } as any;
         let node = root;
 
         for (let i = 0; i < parts.length - 1; i++) {
@@ -81,8 +79,10 @@ export function lensFromPath<S = any, A = any>(path: Path): Lens<S, A> {
     over:
       (fn: (a: A) => A) =>
       (source: S): S => {
-        const current = lensFromPath<S, A>(parts).get(source) ?? ({} as A);
-        return lensFromPath<S, A>(parts).set(fn(current))(source);
+        const current = lens.get(source) ?? ({} as A);
+        return lens.set(fn(current))(source);
       },
   };
+
+  return lens;
 }
