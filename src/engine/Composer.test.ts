@@ -260,6 +260,43 @@ describe('Composer', () => {
       });
     });
 
+    describe('Composer.call', () => {
+      it('should read a function from path and call it with args', () => {
+        type State = {
+          value: number;
+          api: { setValue: (n: number) => (obj: any) => any };
+        };
+
+        const obj: State = {
+          value: 0,
+          api: { setValue: n => o => ({ ...o, value: n }) },
+        };
+
+        const result = Composer.call<State['api']['setValue']>(
+          'api.setValue',
+          42
+        )(obj);
+
+        expect(result.value).toBe(42);
+      });
+
+      it('should work with multiple arguments', () => {
+        type State = {
+          result: number;
+          api: { add: (a: number, b: number) => (obj: any) => any };
+        };
+
+        const obj: State = {
+          result: 0,
+          api: { add: (a, b) => o => ({ ...o, result: a + b }) },
+        };
+
+        const result = Composer.call<State['api']['add']>('api.add', 3, 7)(obj);
+
+        expect(result.result).toBe(10);
+      });
+    });
+
     describe('Composer.when', () => {
       it('should create a conditional function (true)', () => {
         const fn = Composer.when<{ value: number }>(true, o => ({

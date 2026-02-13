@@ -159,6 +159,21 @@ export class Composer<T extends object> {
       Composer.chain<T>(c => c.bind<A>(path, fn))(obj);
   }
 
+  call<A extends (...args: any[]) => (obj: any) => any>(
+    path: Path<A>,
+    ...args: Parameters<A>
+  ): this {
+    return this.bind(path, (fn: A) => fn(...args));
+  }
+
+  static call<A extends (...args: any[]) => (obj: any) => any>(
+    path: Path<A>,
+    ...args: Parameters<A>
+  ) {
+    return <T extends object>(obj: T): T =>
+      Composer.chain<T>(c => c.call<A>(path, ...args))(obj);
+  }
+
   /**
    * Runs a composer function when the condition is true.
    */

@@ -10,11 +10,12 @@ import { Events, getEventKey } from '../pipes/Events';
 import {
   pluginPaths,
   type PluginId,
-  type Plugin,
+  type PluginClass,
   type PluginRegistry,
   type EnabledMap,
 } from './Plugins';
 import { withTiming } from '../pipes/Perf';
+import { sdk } from '../sdk';
 
 const PLUGIN_NAMESPACE = 'core.plugin_manager';
 
@@ -34,7 +35,7 @@ type PluginManagerState = {
 };
 
 export type PluginManagerAPI = {
-  register: PipeTransformer<[Plugin]>;
+  register: PipeTransformer<[PluginClass]>;
   unregister: PipeTransformer<[PluginId]>;
   enable: PipeTransformer<[PluginId]>;
   disable: PipeTransformer<[PluginId]>;
@@ -42,7 +43,7 @@ export type PluginManagerAPI = {
 
 type PluginManagerContext = PluginManagerAPI & {
   registry: PluginRegistry;
-  loadedRefs: Record<PluginId, Plugin>;
+  loadedRefs: Record<PluginId, PluginClass>;
   toLoad: PluginId[];
   toUnload: PluginId[];
 };
@@ -52,9 +53,9 @@ const pm = pluginPaths<PluginManagerState, PluginManagerContext>(
 );
 
 export class PluginManager {
-  static register(plugin: Plugin): Pipe {
+  static register(pluginClass: PluginClass): Pipe {
     return Composer.bind<PluginManagerAPI>(pm.context, ({ register }) =>
-      register(plugin)
+      register(pluginClass)
     );
   }
 
@@ -128,10 +129,10 @@ const enableDisablePipe: Pipe = Composer.pipe(
 const reconcilePipe: Pipe = Composer.pipe(
   Events.handle(eventType.register, event =>
     Composer.do<GameFrame>(({ over }) => {
-      const plugin = event.payload as Plugin;
+      const cls = event.payload as PluginClass;
       over(pm.context.registry, registry => ({
         ...registry,
-        [plugin.id]: plugin,
+        [cls.plugin.id]: cls,
       }));
     })
   ),
@@ -190,16 +191,26 @@ const lifecyclePipe: Pipe = Composer.do<GameFrame>(({ get, pipe }) => {
   const loadedRefs = get(pm.context.loadedRefs) ?? {};
   const registry = get(pm.context.registry) ?? {};
 
+  for (const id of toUnload) {
+    const cls = loadedRefs[id] ?? registry[id];
+    if (cls) delete (sdk as any)[cls.name];
+  }
+
+  for (const id of toLoad) {
+    const cls = registry[id];
+    if (cls) (sdk as any)[cls.name] = cls;
+  }
+
   const deactivates = toUnload
     .map(id => {
-      const p = (loadedRefs[id] ?? registry[id])?.deactivate;
+      const p = (loadedRefs[id] ?? registry[id])?.plugin.deactivate;
       return p ? withTiming(id, 'deactivate', p) : undefined;
     })
     .filter(Boolean) as Pipe[];
 
   const activates = toLoad
     .map(id => {
-      const p = registry[id]?.activate;
+      const p = registry[id]?.plugin.activate;
       return p ? withTiming(id, 'activate', p) : undefined;
     })
     .filter(Boolean) as Pipe[];
@@ -211,7 +222,7 @@ const lifecyclePipe: Pipe = Composer.do<GameFrame>(({ get, pipe }) => {
 
   const updates = activeIds
     .map(id => {
-      const p = (loadedRefs[id] ?? registry[id])?.update;
+      const p = (loadedRefs[id] ?? registry[id])?.plugin.update;
       return p ? withTiming(id, 'update', p) : undefined;
     })
     .filter(Boolean) as Pipe[];

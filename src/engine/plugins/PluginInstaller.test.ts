@@ -5,7 +5,7 @@ import { eventPipe } from '../pipes/Events';
 import { Composer } from '../Composer';
 import { GameFrame, Pipe } from '../State';
 import { sdk } from '../sdk';
-import type { Plugin } from './Plugins';
+import type { Plugin, PluginClass } from './Plugins';
 
 const PLUGIN_NAMESPACE = 'core.plugin_installer';
 
@@ -41,10 +41,10 @@ const getLoadedIds = (frame: GameFrame): string[] =>
   (frame.state as any)?.core?.plugin_manager?.loaded ?? [];
 
 function makeLoadResult(plugin: Plugin, name: string) {
-  const exported = { plugin, name };
+  const cls = { plugin, name } as PluginClass;
   return {
-    promise: Promise.resolve({ plugin, exported }),
-    result: { plugin, exported },
+    promise: Promise.resolve(cls),
+    result: cls,
   };
 }
 
@@ -143,7 +143,8 @@ describe('Plugin Installer', () => {
       new Map([['user.sdk', makeLoadResult(testPlugin, 'TestPlugin')]])
     )(frame0);
 
-    fullPipe(tick(frame1));
+    const frame2 = fullPipe(tick(frame1));
+    fullPipe(tick(frame2));
 
     expect((sdk as any).TestPlugin).toBeDefined();
     expect((sdk as any).TestPlugin.plugin.id).toBe('user.sdk');

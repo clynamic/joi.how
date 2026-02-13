@@ -3,12 +3,9 @@ import { GameEngineProvider } from './GameProvider';
 import { messagesPipe } from '../engine/pipes/Messages';
 import { GameMessages } from './components/GameMessages';
 import { PauseButton } from './components/Pause';
-import { useSettingsPipe, warmupPipe, pacePipe } from './pipes';
+import { useSettingsPipe } from './pipes';
 import { GameIntensity } from './components/GameIntensity';
-import { intensityPipe } from './pipes/Intensity';
-import { imagePipe, randomImagesPipe } from './pipes';
 import { GameImages } from './components/GameImages';
-import { phasePipe } from './pipes/Phase';
 import { pluginInstallerPipe } from '../engine/plugins/PluginInstaller';
 import { pluginManagerPipe } from '../engine/plugins/PluginManager';
 import { registerPlugins } from './plugins';
@@ -84,12 +81,6 @@ export const GamePage = () => {
         pluginInstallerPipe,
         registerPlugins,
         settingsPipe,
-        phasePipe,
-        pacePipe,
-        intensityPipe,
-        imagePipe,
-        randomImagesPipe,
-        warmupPipe,
       ]}
     >
       <StyledGamePage className='game-page'>
