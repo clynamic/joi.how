@@ -1,7 +1,5 @@
 import { Composer } from '../../../engine/Composer';
-import { Events, getEventKey } from '../../../engine/pipes/Events';
-import { Messages } from '../../../engine/pipes/Messages';
-import { Scheduler, getScheduleKey } from '../../../engine/pipes/Scheduler';
+import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
 import Pace from '../pace';
 import { GameEvent as GameEventType } from '../../../types';
@@ -13,277 +11,150 @@ import {
   setBusy,
   DiceOutcome,
 } from './types';
+import { edged } from './edge';
 
-const ev = {
-  climax: getEventKey(PLUGIN_ID, 'climax'),
-  edging: getEventKey(PLUGIN_ID, 'climax.edging'),
-  cant: getEventKey(PLUGIN_ID, 'climax.cant'),
-  countdown3: getEventKey(PLUGIN_ID, 'climax.countdown3'),
-  countdown2: getEventKey(PLUGIN_ID, 'climax.countdown2'),
-  countdown1: getEventKey(PLUGIN_ID, 'climax.countdown1'),
-  resolve: getEventKey(PLUGIN_ID, 'climax.resolve'),
-  end: getEventKey(PLUGIN_ID, 'climax.end'),
-  cantResume: getEventKey(PLUGIN_ID, 'climax.cantResume'),
-  cantEnd: getEventKey(PLUGIN_ID, 'climax.cantEnd'),
-  leave: getEventKey(PLUGIN_ID, 'leave'),
-};
-
-const sched = {
-  countdown3: getScheduleKey(PLUGIN_ID, 'climax.countdown3'),
-  countdown2: getScheduleKey(PLUGIN_ID, 'climax.countdown2'),
-  countdown1: getScheduleKey(PLUGIN_ID, 'climax.countdown1'),
-  resolve: getScheduleKey(PLUGIN_ID, 'climax.resolve'),
-  end: getScheduleKey(PLUGIN_ID, 'climax.end'),
-  cantResume: getScheduleKey(PLUGIN_ID, 'climax.cantResume'),
-  cantEnd: getScheduleKey(PLUGIN_ID, 'climax.cantEnd'),
-};
+const seq = Sequence.for(PLUGIN_ID, 'climax');
 
 export const climaxOutcome: DiceOutcome = {
   id: GameEventType.climax,
-  check: (intensity, edged, events) =>
-    intensity >= 100 && (!events.includes(GameEventType.edge) || edged),
-  scheduleKeys: Object.values(sched),
-  pipes: Composer.pipe(
-    Events.handle(ev.climax, () =>
+  check: frame => {
+    const i = (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100;
+    const s = Composer.get(settings)(frame);
+    return (
+      i >= 100 &&
+      (!s?.events.includes(GameEventType.edge) || !!Composer.get(edged)(frame))
+    );
+  },
+  update: Composer.pipe(
+    seq.on(() =>
       Composer.pipe(
         Phase.setPhase(GamePhase.finale),
-        Messages.send({
-          id: GameEventType.climax,
+        seq.message({
           title: 'Are you edging?',
           prompts: [
-            {
-              title: "I'm edging, $master",
-              event: { type: ev.edging },
-            },
-            {
-              title: "I can't",
-              event: { type: ev.cant },
-            },
+            seq.prompt("I'm edging, $master", 'edging'),
+            seq.prompt("I can't", 'cant'),
           ],
         })
       )
     ),
 
-    Events.handle(ev.edging, () =>
-      Composer.do(({ get, pipe }) => {
-        const s = get(settings);
-        if (!s) return;
-        pipe(
-          Messages.send({
-            id: GameEventType.climax,
+    seq.on('edging', () =>
+      Composer.bind(settings, s =>
+        Composer.pipe(
+          seq.message({
             title: 'Stay on the edge, $player',
             prompts: undefined,
-          })
-        );
-        pipe(Pace.setPace(s.minPace));
-        pipe(
-          Scheduler.schedule({
-            id: sched.countdown3,
-            duration: 3000,
-            event: { type: ev.countdown3 },
-          })
-        );
-      })
-    ),
-
-    Events.handle(ev.countdown3, () =>
-      Composer.pipe(
-        Messages.send({ id: GameEventType.climax, description: '3...' }),
-        Scheduler.schedule({
-          id: sched.countdown2,
-          duration: 5000,
-          event: { type: ev.countdown2 },
-        })
+          }),
+          Pace.setPace(s.minPace),
+          seq.after(3000, 'countdown3')
+        )
       )
     ),
 
-    Events.handle(ev.countdown2, () =>
+    seq.on('countdown3', () =>
       Composer.pipe(
-        Messages.send({ id: GameEventType.climax, description: '2...' }),
-        Scheduler.schedule({
-          id: sched.countdown1,
-          duration: 5000,
-          event: { type: ev.countdown1 },
-        })
+        seq.message({ description: '3...' }),
+        seq.after(5000, 'countdown2')
       )
     ),
 
-    Events.handle(ev.countdown1, () =>
+    seq.on('countdown2', () =>
       Composer.pipe(
-        Messages.send({ id: GameEventType.climax, description: '1...' }),
-        Scheduler.schedule({
-          id: sched.resolve,
-          duration: 5000,
-          event: { type: ev.resolve },
-        })
+        seq.message({ description: '2...' }),
+        seq.after(5000, 'countdown1')
       )
     ),
 
-    Events.handle(ev.resolve, () =>
-      Composer.do(({ get, pipe }) => {
-        const s = get(settings);
-        if (!s) return;
+    seq.on('countdown1', () =>
+      Composer.pipe(
+        seq.message({ description: '1...' }),
+        seq.after(5000, 'resolve')
+      )
+    ),
 
+    seq.on('resolve', () =>
+      Composer.bind(settings, s => {
         if (Math.random() * 100 <= s.climaxChance) {
           const ruin = Math.random() * 100 <= s.ruinChance;
-          if (ruin) {
-            pipe(Phase.setPhase(GamePhase.break));
-            pipe(
-              Messages.send({
-                id: GameEventType.climax,
-                title: '$HANDS OFF! Ruin your orgasm!',
-                description: undefined,
-              })
-            );
-          } else {
-            pipe(Phase.setPhase(GamePhase.climax));
-            pipe(
-              Messages.send({
-                id: GameEventType.climax,
-                title: 'Cum!',
-                description: undefined,
-              })
-            );
-          }
-          pipe(
-            Scheduler.schedule({
-              id: sched.end,
-              duration: 3000,
-              event: {
-                type: ev.end,
-                payload: { countdown: 10, ruin },
-              },
-            })
-          );
-        } else {
-          pipe(Phase.setPhase(GamePhase.break));
-          pipe(
-            Messages.send({
-              id: GameEventType.climax,
-              title: '$HANDS OFF! Do not cum!',
+          return Composer.pipe(
+            Phase.setPhase(ruin ? GamePhase.break : GamePhase.climax),
+            seq.message({
+              title: ruin ? '$HANDS OFF! Ruin your orgasm!' : 'Cum!',
               description: undefined,
-            })
-          );
-          pipe(
-            Scheduler.schedule({
-              id: sched.end,
-              duration: 1000,
-              event: {
-                type: ev.end,
-                payload: { countdown: 5, denied: true },
-              },
-            })
+            }),
+            seq.after(3000, 'end', { countdown: 10, ruin })
           );
         }
-      })
-    ),
-
-    Events.handle(ev.end, event =>
-      Composer.do(({ pipe }) => {
-        const { countdown, denied, ruin } = event.payload;
-
-        pipe(
-          Composer.over(intensityState, (s: IntensityState) => ({
-            intensity: Math.max(0, s.intensity - (denied ? 0.2 : 0.1)),
-          }))
+        return Composer.pipe(
+          Phase.setPhase(GamePhase.break),
+          seq.message({
+            title: '$HANDS OFF! Do not cum!',
+            description: undefined,
+          }),
+          seq.after(1000, 'end', { countdown: 5, denied: true })
         );
-
-        if (countdown <= 1) {
-          if (denied) {
-            pipe(
-              Messages.send({
-                id: GameEventType.climax,
-                title: 'Good $player. Let yourself cool off',
-              })
-            );
-            pipe(
-              Scheduler.schedule({
-                id: sched.cantEnd,
-                duration: 5000,
-                event: { type: ev.cantEnd },
-              })
-            );
-          } else {
-            pipe(
-              Messages.send({
-                id: GameEventType.climax,
-                title: ruin ? 'Clench in desperation' : 'Good job, $player',
-                prompts: [
-                  {
-                    title: 'Leave',
-                    event: { type: ev.leave },
-                  },
-                ],
-              })
-            );
-          }
-        } else {
-          pipe(
-            Scheduler.schedule({
-              id: sched.end,
-              duration: 1000,
-              event: {
-                type: ev.end,
-                payload: { countdown: countdown - 1, denied, ruin },
-              },
-            })
-          );
-        }
       })
     ),
 
-    Events.handle(ev.cantEnd, () =>
-      Messages.send({
-        id: GameEventType.climax,
+    seq.on('end', event => {
+      const { countdown, denied, ruin } = event.payload;
+      const decay = Composer.over(intensityState, (s: IntensityState) => ({
+        intensity: Math.max(0, s.intensity - (denied ? 0.2 : 0.1)),
+      }));
+      if (countdown <= 1) {
+        if (denied) {
+          return Composer.pipe(
+            decay,
+            seq.message({ title: 'Good $player. Let yourself cool off' }),
+            seq.after(5000, 'cantEnd')
+          );
+        }
+        return Composer.pipe(
+          decay,
+          seq.message({
+            title: ruin ? 'Clench in desperation' : 'Good job, $player',
+            prompts: [seq.prompt('Leave', 'leave')],
+          })
+        );
+      }
+      return Composer.pipe(
+        decay,
+        seq.after(1000, 'end', { countdown: countdown - 1, denied, ruin })
+      );
+    }),
+
+    seq.on('cantEnd', () =>
+      seq.message({
         title: 'Leave now.',
-        prompts: [
-          {
-            title: 'Leave',
-            event: { type: ev.leave },
-          },
-        ],
+        prompts: [seq.prompt('Leave', 'leave')],
       })
     ),
 
-    Events.handle(ev.cant, () =>
-      Composer.do(({ pipe }) => {
-        pipe(
-          Messages.send({
-            id: GameEventType.climax,
-            title: "You're pathetic. Stop for a moment",
-            prompts: undefined,
-          })
-        );
-        pipe(Phase.setPhase(GamePhase.break));
-        pipe(Composer.set(intensityState.intensity, 0));
-        pipe(
-          Scheduler.schedule({
-            id: sched.cantResume,
-            duration: 20000,
-            event: { type: ev.cantResume },
-          })
-        );
-      })
+    seq.on('cant', () =>
+      Composer.pipe(
+        seq.message({
+          title: "You're pathetic. Stop for a moment",
+          prompts: undefined,
+        }),
+        Phase.setPhase(GamePhase.break),
+        Composer.set(intensityState.intensity, 0),
+        seq.after(20000, 'cantResume')
+      )
     ),
 
-    Events.handle(ev.cantResume, () =>
-      Composer.do(({ get, pipe }) => {
-        const s = get(settings);
-        if (!s) return;
-        pipe(
-          Messages.send({
-            id: GameEventType.climax,
-            title: 'Start to $stroke again',
-            duration: 5000,
-          })
-        );
-        pipe(Pace.setPace(s.minPace));
-        pipe(Phase.setPhase(GamePhase.active));
-        pipe(setBusy(false));
-      })
+    seq.on('cantResume', () =>
+      Composer.bind(settings, s =>
+        Composer.pipe(
+          seq.message({ title: 'Start to $stroke again', duration: 5000 }),
+          Pace.setPace(s.minPace),
+          Phase.setPhase(GamePhase.active),
+          setBusy(false)
+        )
+      )
     ),
 
-    Events.handle(ev.leave, () =>
+    seq.on('leave', () =>
       Composer.do(() => {
         window.location.href = '/';
       })

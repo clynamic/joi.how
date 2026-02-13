@@ -1,60 +1,49 @@
 import { Composer } from '../../../engine/Composer';
-import { Events, getEventKey } from '../../../engine/pipes/Events';
-import { Messages } from '../../../engine/pipes/Messages';
-import { Scheduler, getScheduleKey } from '../../../engine/pipes/Scheduler';
+import { typedPath } from '../../../engine/Lens';
+import { Sequence } from '../../Sequence';
 import { GameEvent as GameEventType } from '../../../types';
-import {
-  PLUGIN_ID,
-  dice,
-  Paws,
-  PawLabels,
-  setBusy,
-  DiceOutcome,
-} from './types';
+import { PLUGIN_ID, setBusy, DiceOutcome } from './types';
 
-const ev = {
-  randomGrip: getEventKey(PLUGIN_ID, 'randomGrip'),
-  done: getEventKey(PLUGIN_ID, 'randomGrip.done'),
+export enum Paws {
+  left = 'left',
+  right = 'right',
+  both = 'both',
+}
+
+export const PawLabels: Record<Paws, string> = {
+  left: 'Left',
+  right: 'Right',
+  both: 'Both',
 };
 
-const sched = {
-  done: getScheduleKey(PLUGIN_ID, 'randomGrip'),
+export const pawsPath = typedPath<Paws>(['state', PLUGIN_ID, 'paws']);
+
+const allPaws = Object.values(Paws);
+
+const randomPaw = (exclude?: Paws): Paws => {
+  const options = exclude ? allPaws.filter(p => p !== exclude) : allPaws;
+  return options[Math.floor(Math.random() * options.length)];
 };
+
+const seq = Sequence.for(PLUGIN_ID, 'randomGrip');
 
 export const randomGripOutcome: DiceOutcome = {
   id: GameEventType.randomGrip,
-  check: () => true,
-  scheduleKeys: Object.values(sched),
-  pipes: Composer.pipe(
-    Events.handle(ev.randomGrip, () =>
-      Composer.do(({ get, set, pipe }) => {
-        const state = get(dice.state);
-        if (!state) return;
-        const currentPaws = state.paws;
-        let newPaws: Paws;
-        const seed = Math.random();
-        if (seed < 0.33)
-          newPaws = currentPaws === Paws.both ? Paws.left : Paws.both;
-        else if (seed < 0.66)
-          newPaws = currentPaws === Paws.left ? Paws.right : Paws.left;
-        else newPaws = currentPaws === Paws.right ? Paws.both : Paws.right;
-        set(dice.state.paws, newPaws);
-        pipe(
-          Messages.send({
-            id: GameEventType.randomGrip,
+  activate: Composer.over(pawsPath, () => randomPaw()),
+  update: Composer.pipe(
+    seq.on(() =>
+      Composer.bind(pawsPath, currentPaws => {
+        const newPaws = randomPaw(currentPaws);
+        return Composer.pipe(
+          Composer.set(pawsPath, newPaws),
+          seq.message({
             title: `Grip changed to ${PawLabels[newPaws]}!`,
             duration: 5000,
-          })
-        );
-        pipe(
-          Scheduler.schedule({
-            id: sched.done,
-            duration: 10000,
-            event: { type: ev.done },
-          })
+          }),
+          seq.after(10000, 'done')
         );
       })
     ),
-    Events.handle(ev.done, () => setBusy(false))
+    seq.on('done', () => setBusy(false))
   ),
 };

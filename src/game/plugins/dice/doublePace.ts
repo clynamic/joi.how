@@ -1,84 +1,52 @@
 import { Composer } from '../../../engine/Composer';
-import { Events, getEventKey } from '../../../engine/pipes/Events';
-import { Messages } from '../../../engine/pipes/Messages';
-import { Scheduler, getScheduleKey } from '../../../engine/pipes/Scheduler';
+import { Sequence } from '../../Sequence';
 import Pace from '../pace';
 import { GameEvent as GameEventType } from '../../../types';
 import { round } from '../../../utils';
-import { PLUGIN_ID, paceState, settings, setBusy, DiceOutcome } from './types';
+import {
+  PLUGIN_ID,
+  paceState,
+  intensityState,
+  settings,
+  setBusy,
+  DiceOutcome,
+} from './types';
 import { doRandomPace } from './randomPace';
 
-const ev = {
-  doublePace: getEventKey(PLUGIN_ID, 'doublePace'),
-  step2: getEventKey(PLUGIN_ID, 'doublePace.2'),
-  step3: getEventKey(PLUGIN_ID, 'doublePace.3'),
-  done: getEventKey(PLUGIN_ID, 'doublePace.done'),
-};
-
-const sched = {
-  step2: getScheduleKey(PLUGIN_ID, 'doublePace.2'),
-  step3: getScheduleKey(PLUGIN_ID, 'doublePace.3'),
-  done: getScheduleKey(PLUGIN_ID, 'doublePace.done'),
-};
+const seq = Sequence.for(PLUGIN_ID, 'doublePace');
 
 export const doublePaceOutcome: DiceOutcome = {
   id: GameEventType.doublePace,
-  check: intensity => intensity >= 20,
-  scheduleKeys: Object.values(sched),
-  pipes: Composer.pipe(
-    Events.handle(ev.doublePace, () =>
-      Composer.do(({ get, pipe }) => {
-        const pace = get(paceState)?.pace ?? 1;
-        const s = get(settings);
-        if (!s) return;
-        const newPace = Math.min(round(pace * 2), s.maxPace);
-        pipe(Pace.setPace(newPace));
-        pipe(
-          Messages.send({
-            id: GameEventType.doublePace,
-            title: 'Double pace!',
-            description: '3...',
-          })
-        );
-        pipe(
-          Scheduler.schedule({
-            id: sched.step2,
-            duration: 3000,
-            event: { type: ev.step2 },
-          })
-        );
-      })
-    ),
-    Events.handle(ev.step2, () =>
-      Composer.pipe(
-        Messages.send({
-          id: GameEventType.doublePace,
-          description: '2...',
-        }),
-        Scheduler.schedule({
-          id: sched.step3,
-          duration: 3000,
-          event: { type: ev.step3 },
+  check: frame =>
+    (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100 >= 20,
+  update: Composer.pipe(
+    seq.on(() =>
+      Composer.bind(paceState, pace =>
+        Composer.bind(settings, s => {
+          const newPace = Math.min(round((pace?.pace ?? 1) * 2), s.maxPace);
+          return Composer.pipe(
+            Pace.setPace(newPace),
+            seq.message({ title: 'Double pace!', description: '3...' }),
+            seq.after(3000, 'step2')
+          );
         })
       )
     ),
-    Events.handle(ev.step3, () =>
+    seq.on('step2', () =>
       Composer.pipe(
-        Messages.send({
-          id: GameEventType.doublePace,
-          description: '1...',
-        }),
-        Scheduler.schedule({
-          id: sched.done,
-          duration: 3000,
-          event: { type: ev.done },
-        })
+        seq.message({ description: '2...' }),
+        seq.after(3000, 'step3')
       )
     ),
-    Events.handle(ev.done, () =>
+    seq.on('step3', () =>
       Composer.pipe(
-        Messages.send({
-          id: GameEventType.doublePace,
+        seq.message({ description: '1...' }),
+        seq.after(3000, 'done')
+      )
+    ),
+    seq.on('done', () =>
+      Composer.pipe(
+        seq.message({
           title: 'Done! Back to normal pace',
           description: undefined,
           duration: 5000,

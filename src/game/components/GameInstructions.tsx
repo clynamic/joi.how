@@ -15,7 +15,7 @@ import { WaDivider } from '@awesome.me/webawesome/dist/react';
 import { useGameState } from '../hooks';
 import { PaceState } from '../plugins/pace';
 import { IntensityState } from '../plugins/intensity';
-import { DiceState, Paws, PawLabels } from '../plugins/dealer';
+import { Paws, PawLabels } from '../plugins/dealer';
 
 const StyledGameInstructions = styled.div`
   display: flex;
@@ -67,7 +67,7 @@ export const GameInstructions = () => {
   const { pace = 0 } = useGameState<PaceState>(['core.pace']) ?? {};
   const { intensity = 0 } =
     useGameState<IntensityState>(['core.intensity']) ?? {};
-  const { paws = Paws.both } = useGameState<DiceState>(['core.dice']) ?? {};
+  const paws = useGameState<Paws>(['core.dice', 'paws']) ?? Paws.both;
   const [maxPace] = useSetting('maxPace');
   const paceSection = useMemo(() => maxPace / 3, [maxPace]);
 
