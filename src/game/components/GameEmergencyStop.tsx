@@ -1,52 +1,19 @@
-import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useCallback } from 'react';
-import { wait } from '../../utils';
-import { useSetting } from '../../settings';
 import { WaButton, WaIcon } from '@awesome.me/webawesome/dist/react';
+import { useGameEngine, useGameState } from '../hooks';
+import { GamePhase, PhaseState } from '../plugins/phase';
+import { dispatchEvent } from '../../engine/pipes/Events';
+import { getEventKey } from '../../engine/pipes/Events';
 
 export const GameEmergencyStop = () => {
-  const [phase, setPhase] = useGameValue('phase');
-  const [intensity, setIntensity] = useGameValue('intensity');
-  const [, setPace] = useGameValue('pace');
-  const [minPace] = useSetting('minPace');
-  const sendMessage = useSendMessage();
-  const messageId = 'emergency-stop';
+  const { current: phase } = useGameState<PhaseState>(['core.phase']) ?? {};
+  const { injectImpulse } = useGameEngine();
 
-  const onStop = useCallback(async () => {
-    const timeToCalmDown = Math.ceil((intensity * 500 + 10000) / 1000);
-
-    setPhase(GamePhase.break);
-
-    sendMessage({
-      id: messageId,
-      title: 'Calm down with your $hands off.',
-    });
-
-    // maybe percentage based reduction
-    setIntensity(intensity => Math.max(intensity - 30, 0));
-    setPace(minPace);
-
-    await wait(5000);
-
-    for (let i = 0; i < timeToCalmDown; i++) {
-      sendMessage({
-        id: messageId,
-        description: `${timeToCalmDown - i}...`,
-      });
-      await wait(1000);
-    }
-
-    sendMessage({
-      id: messageId,
-      title: 'Put your $hands back.',
-      description: undefined,
-      duration: 5000,
-    });
-
-    await wait(2000);
-
-    setPhase(GamePhase.active);
-  }, [intensity, minPace, sendMessage, setIntensity, setPace, setPhase]);
+  const onStop = useCallback(() => {
+    injectImpulse(
+      dispatchEvent({ type: getEventKey('core.dice', 'emergencyStop') })
+    );
+  }, [injectImpulse]);
 
   return (
     <>

@@ -1,8 +1,8 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
 import type { PerfMetrics, PluginHookPhase } from '../../engine/pipes/Perf';
-import { sdk } from '../../engine/sdk';
-
-const { Composer, Perf, pluginPaths } = sdk;
+import { Composer } from '../../engine/Composer';
+import { Perf } from '../../engine/pipes/Perf';
+import { pluginPaths } from '../../engine/plugins/Plugins';
 
 const PLUGIN_ID = 'core.perf_overlay';
 const ELEMENT_ATTR = 'data-plugin-id';

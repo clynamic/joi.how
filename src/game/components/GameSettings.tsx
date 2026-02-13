@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   BoardSettings,
   ClimaxSettings,
@@ -11,14 +11,18 @@ import {
   PlayerSettings,
   VibratorSettings,
 } from '../../settings';
-import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
-import { useFullscreen, useLooping } from '../../utils';
+import { useFullscreen } from '../../utils';
 import {
   WaButton,
   WaDialog,
   WaDivider,
   WaIcon,
 } from '@awesome.me/webawesome/dist/react';
+import { useGameEngine, useGameState } from '../hooks';
+import { GamePhase, PhaseState } from '../plugins/phase';
+import Pause from '../plugins/pause';
+import { Messages } from '../../engine/pipes/Messages';
+import { Composer } from '../../engine';
 
 const StyledGameSettings = styled.div`
   display: flex;
@@ -68,56 +72,77 @@ const GameSettingsDialogContent = memo(() => (
   </StyledGameSettingsDialog>
 ));
 
+const MESSAGE_ID = 'game-settings';
+
 export const GameSettings = () => {
   const [open, setOpen] = useState(false);
-  const [phase, setPhase] = useGameValue('phase');
-  const [timer, setTimer] = useState<number | undefined>(undefined);
+  const { current: phase } = useGameState<PhaseState>(['core.phase']) ?? {};
   const [fullscreen, setFullscreen] = useFullscreen();
-  const sendMessage = useSendMessage();
-  const messageId = 'game-settings';
+  const { injectImpulse } = useGameEngine();
+  const timerRef = useRef<number | undefined>(undefined);
+  const [countdown, setCountdown] = useState<number | undefined>(undefined);
+  const wasActiveRef = useRef(false);
 
   const onOpen = useCallback(
-    (open: boolean) => {
-      if (open) {
-        setTimer(undefined);
-        setPhase(phase => {
-          if (phase === GamePhase.active) {
-            return GamePhase.pause;
-          }
-          return phase;
-        });
+    (opening: boolean) => {
+      if (opening) {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = undefined;
+        }
+        setCountdown(undefined);
+        wasActiveRef.current = phase === GamePhase.active;
+        if (phase === GamePhase.active) {
+          injectImpulse(Pause.setPaused(true));
+        }
       } else {
-        setTimer(3000);
+        if (wasActiveRef.current) {
+          setCountdown(3000);
+        }
       }
-      setOpen(open);
+      setOpen(opening);
     },
-    [setPhase]
+    [injectImpulse, phase]
   );
 
-  useLooping(
-    () => {
-      if (timer === undefined) return;
-      if (timer > 0) {
-        sendMessage({
-          id: messageId,
-          title: 'Get ready to continue.',
-          description: `${timer * 0.001}...`,
-        });
-        setTimer(timer - 1000);
-      } else if (timer === 0) {
-        sendMessage({
-          id: messageId,
-          title: 'Continue.',
-          description: undefined,
-          duration: 1500,
-        });
-        setPhase(GamePhase.active);
-        setTimer(undefined);
+  useEffect(() => {
+    if (countdown === undefined || open) return;
+
+    if (countdown <= 0) {
+      injectImpulse(
+        Composer.pipe(
+          Messages.send({
+            id: MESSAGE_ID,
+            title: 'Continue.',
+            description: undefined,
+            duration: 1500,
+          }),
+          Pause.setPaused(false)
+        )
+      );
+      setCountdown(undefined);
+      return;
+    }
+
+    injectImpulse(
+      Messages.send({
+        id: MESSAGE_ID,
+        title: 'Get ready to continue.',
+        description: `${countdown * 0.001}...`,
+      })
+    );
+
+    timerRef.current = window.setTimeout(() => {
+      setCountdown(c => (c !== undefined ? c - 1000 : undefined));
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = undefined;
       }
-    },
-    1000,
-    !open && phase === GamePhase.pause && timer !== undefined
-  );
+    };
+  }, [countdown, open, injectImpulse]);
 
   return (
     <StyledGameSettings>

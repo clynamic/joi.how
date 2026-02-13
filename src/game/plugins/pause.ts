@@ -1,9 +1,8 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
 import { Pipe, PipeTransformer } from '../../engine/State';
-import { sdk } from '../../engine/sdk';
-import { getEventKey } from '../../engine/pipes/Events';
-
-const { Composer, Events, pluginPaths } = sdk;
+import { Composer } from '../../engine/Composer';
+import { Events, getEventKey } from '../../engine/pipes/Events';
+import { pluginPaths } from '../../engine/plugins/Plugins';
 
 declare module '../../engine/sdk' {
   interface PluginSDK {

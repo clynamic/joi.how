@@ -1,10 +1,11 @@
 import styled from 'styled-components';
 import { useSetting, useTranslate } from '../../settings';
 import { GameHypnoType, HypnoPhrases } from '../../types';
-import { useLooping } from '../../utils';
-import { GamePhase, useGameValue } from '../GameProvider';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useGameState } from '../hooks';
+import { IntensityState } from '../plugins/intensity';
+import { HypnoState } from '../plugins/hypno';
 
 const StyledGameHypno = motion.create(styled.div`
   pointer-events: none;
@@ -15,33 +16,25 @@ const StyledGameHypno = motion.create(styled.div`
 
 export const GameHypno = () => {
   const [hypno] = useSetting('hypno');
-  const [current, setCurrent] = useGameValue('currentHypno');
-  const [phase] = useGameValue('phase');
-  const [intensity] = useGameValue('intensity');
+  const { currentPhrase = 0 } = useGameState<HypnoState>(['core.hypno']) ?? {};
+  const { intensity = 0 } =
+    useGameState<IntensityState>(['core.intensity']) ?? {};
   const translate = useTranslate();
 
   const phrase = useMemo(() => {
+    if (hypno === GameHypnoType.off) return '';
     const phrases = HypnoPhrases[hypno];
     if (phrases.length <= 0) return '';
-    return translate(phrases[current % phrases.length]);
-  }, [current, hypno, translate]);
+    return translate(phrases[currentPhrase % phrases.length]);
+  }, [currentPhrase, hypno, translate]);
 
-  const onTick = useCallback(() => {
-    setCurrent(Math.floor(Math.random() * HypnoPhrases[hypno].length));
-  }, [hypno, setCurrent]);
+  const delay = useMemo(() => 3000 - intensity * 100 * 29, [intensity]);
 
-  const delay = useMemo(() => 3000 - intensity * 29, [intensity]);
-
-  const enabled = useMemo(
-    () => phase === GamePhase.active && hypno !== GameHypnoType.off,
-    [phase, hypno]
-  );
-
-  useLooping(onTick, delay, enabled);
+  if (hypno === GameHypnoType.off || !phrase) return null;
 
   return (
     <StyledGameHypno
-      key={phrase}
+      key={`${phrase}-${currentPhrase}`}
       initial={{ opacity: 0.3 }}
       animate={{ opacity: 0 }}
       exit={{ opacity: 0.3 }}
