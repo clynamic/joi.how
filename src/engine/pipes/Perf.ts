@@ -4,8 +4,6 @@ import { Events, GameEvent } from './Events';
 import { pluginPaths, PluginId } from '../plugins/Plugins';
 import { typedPath } from '../Lens';
 
-export type PluginHookPhase = 'activate' | 'update' | 'deactivate';
-
 export type PluginPerfEntry = {
   last: number;
   avg: number;
@@ -16,7 +14,7 @@ export type PluginPerfEntry = {
 
 export type PerfMetrics = Record<
   PluginId,
-  Partial<Record<PluginHookPhase, PluginPerfEntry>>
+  Record<string, PluginPerfEntry>
 >;
 
 export type PerfConfig = {
@@ -44,7 +42,7 @@ const gameContext = typedPath<GameContext>(['context']);
 export class Perf {
   static withTiming(
     id: PluginId,
-    phase: PluginHookPhase,
+    phase: string,
     pluginPipe: Pipe
   ): Pipe {
     return Composer.do(({ get, set, pipe }) => {
@@ -135,10 +133,10 @@ export class Perf {
       const pruned: PerfMetrics = {};
 
       for (const [id, phases] of Object.entries(ctx.plugins)) {
-        const kept: Partial<Record<PluginHookPhase, PluginPerfEntry>> = {};
+        const kept: Record<string, PluginPerfEntry> = {};
         for (const [phase, entry] of Object.entries(phases)) {
           if (entry && tick - entry.lastTick <= EXPIRY_TICKS) {
-            kept[phase as PluginHookPhase] = entry;
+            kept[phase] = entry;
           } else {
             dirty = true;
           }
