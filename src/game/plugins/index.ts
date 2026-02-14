@@ -1,6 +1,7 @@
 import { PluginManager } from '../../engine/plugins/PluginManager';
 import { Composer } from '../../engine/Composer';
 import { Pipe } from '../../engine/State';
+import Debug from './debug';
 import Fps from './fps';
 import Intensity from './intensity';
 import Pause from './pause';
@@ -29,6 +30,7 @@ const plugins = [
   Image,
   RandomImages,
   Warmup,
+  Debug,
   Fps,
   PerfOverlay,
 ];
