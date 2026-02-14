@@ -12,7 +12,11 @@ import {
 } from './types';
 import { doRandomPace } from './randomPace';
 
-type RisingPacePayload = { current: number; portion: number; remaining: number };
+type RisingPacePayload = {
+  current: number;
+  portion: number;
+  remaining: number;
+};
 
 const seq = Sequence.for(PLUGIN_ID, 'risingPace');
 

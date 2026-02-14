@@ -13,10 +13,7 @@ export type PluginPerfEntry = {
   lastTick: number;
 };
 
-export type PerfMetrics = Record<
-  PluginId,
-  Record<string, PluginPerfEntry>
->;
+export type PerfMetrics = Record<PluginId, Record<string, PluginPerfEntry>>;
 
 export type PerfConfig = {
   pluginBudget: number;
@@ -35,7 +32,12 @@ const DEFAULT_CONFIG: PerfConfig = {
   pluginBudget: 1,
 };
 
-type OverBudgetPayload = { id: string; phase: string; duration: number; budget: number };
+type OverBudgetPayload = {
+  id: string;
+  phase: string;
+  duration: number;
+  budget: number;
+};
 
 const eventType = Events.getKeys(PLUGIN_NAMESPACE, 'over_budget', 'configure');
 
@@ -43,11 +45,7 @@ const perf = pluginPaths<never, PerfContext>(PLUGIN_NAMESPACE);
 const gameContext = typedPath<GameContext>(['context']);
 
 export class Perf {
-  static withTiming(
-    id: PluginId,
-    phase: string,
-    pluginPipe: Pipe
-  ): Pipe {
+  static withTiming(id: PluginId, phase: string, pluginPipe: Pipe): Pipe {
     return Composer.do(({ get, set, pipe }) => {
       if (!sdk.debug) {
         pipe(pluginPipe);

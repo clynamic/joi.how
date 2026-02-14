@@ -1,10 +1,7 @@
 import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
-import {
-  DiceEvent,
-  CleanUpDescriptions,
-} from '../../../types';
+import { DiceEvent, CleanUpDescriptions } from '../../../types';
 import {
   PLUGIN_ID,
   intensityState,
