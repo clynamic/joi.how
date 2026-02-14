@@ -2,7 +2,7 @@ import { pluginPaths, type Plugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine';
 import { Events } from '../../engine/pipes/Events';
 import Messages from './messages';
-import { Scheduler, getScheduleKey } from '../../engine/pipes/Scheduler';
+import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { Settings } from '../../settings';
 import { GameContext } from '../../engine';
@@ -25,7 +25,7 @@ const warmup = pluginPaths<WarmupState>(PLUGIN_ID);
 const gameContext = typedPath<GameContext>(['context']);
 const settings = typedPath<Settings>(gameContext.settings);
 
-const AUTOSTART_KEY = getScheduleKey(PLUGIN_ID, 'autoStart');
+const AUTOSTART_KEY = Scheduler.getKey(PLUGIN_ID, 'autoStart');
 
 const eventType = Events.getKeys(PLUGIN_ID, 'start_game');
 

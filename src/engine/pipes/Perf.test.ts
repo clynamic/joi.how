@@ -3,8 +3,6 @@ import { Composer } from '../Composer';
 import { GameFrame, Pipe } from '../State';
 import { Events } from './Events';
 import {
-  perfPipe,
-  withTiming,
   Perf,
   type PerfContext,
   type PluginPerfEntry,
@@ -26,7 +24,7 @@ const tick = (frame: GameFrame): GameFrame => ({
   },
 });
 
-const basePipe: Pipe = Composer.pipe(Events.pipe, perfPipe);
+const basePipe: Pipe = Composer.pipe(Events.pipe, Perf.pipe);
 
 const getPerfCtx = (frame: GameFrame): PerfContext | undefined =>
   (frame.context as any)?.core?.perf;
@@ -39,12 +37,12 @@ const getEntry = (
   (getPerfCtx(frame)?.plugins as any)?.[pluginId]?.[phase];
 
 describe('Perf', () => {
-  describe('perfPipe', () => {
+  describe('Perf.pipe', () => {
     it('should preserve existing metrics across frames', () => {
       const frame0 = basePipe(makeFrame());
 
       const noop: Pipe = frame => frame;
-      const timed = withTiming('test.plugin', 'update', noop);
+      const timed = Perf.withTiming('test.plugin', 'update', noop);
       const frame1 = Composer.pipe(basePipe, timed)(tick(frame0));
 
       expect(getEntry(frame1, 'test.plugin', 'update')).toBeDefined();
@@ -59,7 +57,7 @@ describe('Perf', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
         basePipe,
-        withTiming('test.plugin', 'update', noop)
+        Perf.withTiming('test.plugin', 'update', noop)
       );
 
       const result = pipe(makeFrame());
@@ -76,7 +74,7 @@ describe('Perf', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
         basePipe,
-        withTiming('test.plugin', 'update', noop)
+        Perf.withTiming('test.plugin', 'update', noop)
       );
 
       let frame = makeFrame();
@@ -92,7 +90,7 @@ describe('Perf', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
         basePipe,
-        withTiming('test.plugin', 'update', noop)
+        Perf.withTiming('test.plugin', 'update', noop)
       );
 
       let frame = makeFrame();
@@ -117,7 +115,7 @@ describe('Perf', () => {
 
       const pipe = Composer.pipe(
         basePipe,
-        withTiming('test.plugin', 'update', sometimesSlow)
+        Perf.withTiming('test.plugin', 'update', sometimesSlow)
       );
 
       let frame = pipe(makeFrame());
@@ -133,8 +131,8 @@ describe('Perf', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
         basePipe,
-        withTiming('test.plugin', 'activate', noop),
-        withTiming('test.plugin', 'update', noop)
+        Perf.withTiming('test.plugin', 'activate', noop),
+        Perf.withTiming('test.plugin', 'update', noop)
       );
 
       const result = pipe(makeFrame());
@@ -147,8 +145,8 @@ describe('Perf', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
         basePipe,
-        withTiming('plugin.a', 'update', noop),
-        withTiming('plugin.b', 'update', noop)
+        Perf.withTiming('plugin.a', 'update', noop),
+        Perf.withTiming('plugin.b', 'update', noop)
       );
 
       const result = pipe(makeFrame());
@@ -157,11 +155,11 @@ describe('Perf', () => {
       expect(getEntry(result, 'plugin.b', 'update')).toBeDefined();
     });
 
-    it('should work without perfPipe (graceful fallback)', () => {
+    it('should work without Perf.pipe (graceful fallback)', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
         Events.pipe,
-        withTiming('test.plugin', 'update', noop)
+        Perf.withTiming('test.plugin', 'update', noop)
       );
 
       const result = pipe(makeFrame());
@@ -182,7 +180,7 @@ describe('Perf', () => {
 
       const pipe = Composer.pipe(
         basePipe,
-        withTiming('test.plugin', 'update', slow)
+        Perf.withTiming('test.plugin', 'update', slow)
       );
       const frame1 = pipe(makeFrame());
 
@@ -201,7 +199,7 @@ describe('Perf', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
         basePipe,
-        withTiming('test.plugin', 'update', noop)
+        Perf.withTiming('test.plugin', 'update', noop)
       );
       const frame1 = pipe(makeFrame());
 

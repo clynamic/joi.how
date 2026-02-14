@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { Composer } from '../../engine/Composer';
 import { Events } from '../../engine/pipes/Events';
 import {
-  schedulerPipe,
   Scheduler,
   ScheduledEvent,
 } from '../../engine/pipes/Scheduler';
@@ -32,7 +31,7 @@ const tick = (frame: GameFrame, dt = 16): GameFrame => ({
 
 const gamePipe: Pipe = Composer.pipe(
   Events.pipe,
-  schedulerPipe,
+  Scheduler.pipe,
   pluginManagerPipe
 );
 

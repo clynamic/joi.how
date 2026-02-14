@@ -1,5 +1,5 @@
 import { Pipe } from '../engine/State';
-import { Events, Scheduler, getScheduleKey } from '../engine/pipes';
+import { Events, Scheduler } from '../engine/pipes';
 import Messages from './plugins/messages';
 
 type EventHandler = Parameters<typeof Events.handle>[1];
@@ -24,7 +24,7 @@ export class Sequence {
   static for(namespace: string, name: string): SequenceScope {
     const rootKey = Events.getKey(namespace, name);
     const nodeKey = (n: string) => Events.getKey(namespace, `${name}.${n}`);
-    const schedKey = (n: string) => getScheduleKey(namespace, `${name}.${n}`);
+    const schedKey = (n: string) => Scheduler.getKey(namespace, `${name}.${n}`);
 
     return {
       messageId: name,
@@ -55,7 +55,7 @@ export class Sequence {
           type: rootKey,
           ...(payload !== undefined && { payload }),
         }),
-      cancel: () => Scheduler.cancelByPrefix(getScheduleKey(namespace, name)),
+      cancel: () => Scheduler.cancelByPrefix(Scheduler.getKey(namespace, name)),
       dispatch: (target, payload) =>
         Events.dispatch({
           type: target ? nodeKey(target) : rootKey,

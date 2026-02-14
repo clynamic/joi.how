@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, ReactNode, useCallback } from 'react';
 import { createContext } from 'use-context-selector';
 import { GameEngine, GameState, Pipe, GameContext } from '../engine';
 import { Events } from '../engine/pipes/Events';
-import { schedulerPipe } from '../engine/pipes/Scheduler';
-import { perfPipe } from '../engine/pipes/Perf';
+import { Scheduler } from '../engine/pipes/Scheduler';
+import { Perf } from '../engine/pipes/Perf';
 import { Piper } from '../engine/Piper';
 import { Composer } from '../engine/Composer';
 
@@ -51,7 +51,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
 
     engineRef.current = new GameEngine(
       {},
-      Piper([impulsePipe, Events.pipe, schedulerPipe, perfPipe, ...pipes])
+      Piper([impulsePipe, Events.pipe, Scheduler.pipe, Perf.pipe, ...pipes])
     );
 
     let frameId: number;

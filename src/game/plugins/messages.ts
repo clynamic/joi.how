@@ -3,7 +3,7 @@ import { pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
 import { Events, GameEvent } from '../../engine/pipes/Events';
-import { getScheduleKey, Scheduler } from '../../engine/pipes/Scheduler';
+import { Scheduler } from '../../engine/pipes/Scheduler';
 
 declare module '../../engine/sdk' {
   interface PluginSDK {
@@ -75,7 +75,7 @@ export default class Messages {
             const { messages = [] } = get(paths.state);
             const messageId = (event.payload as GameMessage).id;
             const updated = messages.find(m => m.id === messageId);
-            const scheduleId = getScheduleKey(
+            const scheduleId = Scheduler.getKey(
               PLUGIN_ID,
               `message/${messageId}`
             );
