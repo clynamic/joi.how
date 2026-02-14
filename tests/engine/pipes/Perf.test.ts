@@ -2,7 +2,11 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import { Events } from '../../../src/engine/pipes/Events';
-import { Perf, type PerfContext, type PluginPerfEntry } from '../../../src/engine/pipes/Perf';
+import {
+  Perf,
+  type PerfContext,
+  type PluginPerfEntry,
+} from '../../../src/engine/pipes/Perf';
 import { sdk } from '../../../src/engine/sdk';
 import { makeFrame, tick } from '../../utils';
 
