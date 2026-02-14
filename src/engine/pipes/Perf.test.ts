@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Composer } from '../Composer';
 import { GameFrame, Pipe } from '../State';
 import { Events } from './Events';
 import { Perf, type PerfContext, type PluginPerfEntry } from './Perf';
+import { sdk } from '../sdk';
 
 const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
   state: {},
@@ -33,6 +34,12 @@ const getEntry = (
   (getPerfCtx(frame)?.plugins as any)?.[pluginId]?.[phase];
 
 describe('Perf', () => {
+  beforeEach(() => {
+    sdk.debug = true;
+  });
+  afterEach(() => {
+    sdk.debug = false;
+  });
   describe('Perf.pipe', () => {
     it('should preserve existing metrics across frames', () => {
       const frame0 = basePipe(makeFrame());

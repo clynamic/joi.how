@@ -1,5 +1,6 @@
 import { Composer, GameContext, pluginPaths, typedPath } from '../../engine';
 import type { Plugin } from '../../engine/plugins/Plugins';
+import Debug from './debug';
 
 const PLUGIN_ID = 'core.fps';
 const ELEMENT_ATTR = 'data-plugin-id';
@@ -21,7 +22,7 @@ export default class Fps {
       name: 'FPS Counter',
     },
 
-    activate: frame => {
+    activate: Composer.do(({ get, set }) => {
       const style =
         document.getElementById(STYLE_ID) ?? document.createElement('style');
       style.id = STYLE_ID;
@@ -48,16 +49,23 @@ export default class Fps {
 
       const el = document.createElement('div');
       el.setAttribute(ELEMENT_ATTR, PLUGIN_ID);
-      document.querySelector('.game-page')?.appendChild(el);
 
-      return Composer.set(fps.context, { el, history: [] })(frame);
-    },
+      const visible = get(Debug.paths.state.visible);
+      el.style.display = visible ? '' : 'none';
+
+      document.querySelector('.game-page')?.appendChild(el);
+      set(fps.context, { el, history: [] });
+    }),
 
     update: Composer.do(({ get, set }) => {
-      const delta = get(gameContext.deltaTime);
       const ctx = get(fps.context);
       if (!ctx) return;
 
+      const visible = get(Debug.paths.state.visible);
+      if (ctx.el) ctx.el.style.display = visible ? '' : 'none';
+      if (!visible) return;
+
+      const delta = get(gameContext.deltaTime);
       const current = delta > 0 ? 1000 / delta : 0;
       const history = [...ctx.history, current].slice(-HISTORY_SIZE);
       const avg =

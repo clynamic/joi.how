@@ -3,6 +3,7 @@ import type { PerfMetrics } from '../../engine/pipes/Perf';
 import { Composer } from '../../engine/Composer';
 import { Perf } from '../../engine/pipes/Perf';
 import { pluginPaths } from '../../engine/plugins/Plugins';
+import Debug from './debug';
 
 const PLUGIN_ID = 'core.perf_overlay';
 const ELEMENT_ATTR = 'data-plugin-id';
@@ -56,7 +57,7 @@ export default class PerfOverlay {
       name: 'Performance Overlay',
     },
 
-    activate: frame => {
+    activate: Composer.do(({ get, set }) => {
       const style =
         document.getElementById(STYLE_ID) ?? document.createElement('style');
       style.id = STYLE_ID;
@@ -86,14 +87,21 @@ export default class PerfOverlay {
 
       const el = document.createElement('div');
       el.setAttribute(ELEMENT_ATTR, PLUGIN_ID);
-      document.querySelector('.game-page')?.appendChild(el);
 
-      return Composer.set(po.context, { el })(frame);
-    },
+      const visible = get(Debug.paths.state.visible);
+      el.style.display = visible ? '' : 'none';
+
+      document.querySelector('.game-page')?.appendChild(el);
+      set(po.context, { el });
+    }),
 
     update: Composer.do(({ get }) => {
       const el = get(po.context)?.el;
       if (!el) return;
+
+      const visible = get(Debug.paths.state.visible);
+      el.style.display = visible ? '' : 'none';
+      if (!visible) return;
 
       const ctx = get(Perf.paths.context);
       if (!ctx) return;

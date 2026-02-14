@@ -3,6 +3,7 @@ import { GameContext, Pipe } from '../State';
 import { Events, GameEvent } from './Events';
 import { pluginPaths, PluginId } from '../plugins/Plugins';
 import { typedPath } from '../Lens';
+import { sdk } from '../sdk';
 
 export type PluginPerfEntry = {
   last: number;
@@ -46,6 +47,11 @@ export class Perf {
     pluginPipe: Pipe
   ): Pipe {
     return Composer.do(({ get, set, pipe }) => {
+      if (!sdk.debug) {
+        pipe(pluginPipe);
+        return;
+      }
+
       const before = performance.now();
       pipe(pluginPipe);
       const after = performance.now();
@@ -88,7 +94,7 @@ export class Perf {
 
       const budget = ctx.config.pluginBudget;
       if (duration > budget) {
-        if (import.meta.env.DEV) {
+        if (sdk.debug) {
           console.warn(
             `[perf] ${id} ${phase} took ${duration.toFixed(2)}ms (budget: ${budget}ms)`
           );

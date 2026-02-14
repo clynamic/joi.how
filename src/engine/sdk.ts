@@ -11,6 +11,7 @@ import { Perf } from './pipes/Perf';
 export interface PluginSDK {}
 
 export interface SDK extends PluginSDK {
+  debug: boolean;
   Composer: typeof Composer;
   Events: typeof Events;
   Scheduler: typeof Scheduler;
@@ -22,6 +23,7 @@ export interface SDK extends PluginSDK {
 }
 
 export const sdk: SDK = {
+  debug: false,
   Composer,
   Events,
   Scheduler,
