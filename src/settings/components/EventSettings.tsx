@@ -1,4 +1,4 @@
-import { GameEvent, GameEventDescriptions, GameEventLabels } from '../../types';
+import { DiceEvent, DiceEventDescriptions, DiceEventLabels } from '../../types';
 import { useCallback } from 'react';
 import { Fields, JoiToggleTile, SettingsDescription } from '../../common';
 import { useSetting } from '../SettingsProvider';
@@ -7,7 +7,7 @@ export const EventSettings = () => {
   const [events, setEvents] = useSetting('events');
 
   const toggleEvent = useCallback(
-    (event: GameEvent) => {
+    (event: DiceEvent) => {
       if (events.includes(event)) {
         setEvents(events.filter(e => e !== event));
       } else {
@@ -22,8 +22,8 @@ export const EventSettings = () => {
       <SettingsDescription>
         Check the events you want to occur during the game
       </SettingsDescription>
-      {Object.keys(GameEvent).map(key => {
-        const event = GameEvent[key as keyof typeof GameEvent];
+      {Object.keys(DiceEvent).map(key => {
+        const event = DiceEvent[key as keyof typeof DiceEvent];
         return (
           <JoiToggleTile
             key={event}
@@ -31,8 +31,8 @@ export const EventSettings = () => {
             onClick={() => toggleEvent(event)}
             type={'check'}
           >
-            <h6 className='subtitle'>{GameEventLabels[event]}</h6>
-            <p className='caption'>{GameEventDescriptions[event]}</p>
+            <h6 className='subtitle'>{DiceEventLabels[event]}</h6>
+            <p className='caption'>{DiceEventDescriptions[event]}</p>
           </JoiToggleTile>
         );
       })}

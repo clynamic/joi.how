@@ -1,6 +1,6 @@
 import { PlayerBody } from './body';
 
-export enum GameEvent {
+export enum DiceEvent {
   randomPace = 'randomPace',
   halfPace = 'halfPace',
   doublePace = 'doublePace',
@@ -12,7 +12,7 @@ export enum GameEvent {
   cleanUp = 'cleanUp',
 }
 
-export const GameEventLabels: Record<GameEvent, string> = {
+export const DiceEventLabels: Record<DiceEvent, string> = {
   randomPace: 'Random Pace',
   halfPace: 'Half Pace',
   doublePace: 'Double Pace',
@@ -24,7 +24,7 @@ export const GameEventLabels: Record<GameEvent, string> = {
   cleanUp: 'Clean Up Mess',
 };
 
-export const GameEventDescriptions: Record<GameEvent, string> = {
+export const DiceEventDescriptions: Record<DiceEvent, string> = {
   randomPace: 'Randomly select a new pace',
   halfPace: 'Paw at half the current pace for a few seconds',
   doublePace: 'Paw at twice the current pace for a few seconds',

@@ -2,7 +2,7 @@ import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import { Pipe } from '../../../engine/State';
 import Pace from '../pace';
-import { GameEvent as GameEventType } from '../../../types';
+import { DiceEvent } from '../../../types';
 import { intensityToPaceRange, round } from '../../../utils';
 import {
   PLUGIN_ID,
@@ -36,7 +36,7 @@ export const doRandomPace = (): Pipe =>
   );
 
 export const randomPaceOutcome: DiceOutcome = {
-  id: GameEventType.randomPace,
+  id: DiceEvent.randomPace,
   update: Composer.pipe(
     seq.on(() => Composer.pipe(doRandomPace(), seq.after(9000, 'done'))),
     seq.on('done', () => outcomeDone())

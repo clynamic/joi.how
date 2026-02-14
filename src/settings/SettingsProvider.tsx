@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { GameEvent, GameHypnoType, PlayerBody, PlayerGender } from '../types';
-import { createLocalStorageProvider } from '../utils';
+import { DiceEvent, GameHypnoType, PlayerBody, PlayerGender } from '../types';
+import { createLocalStorageProvider, VibrationMode } from '../utils';
 import { interpolateWith } from '../utils/translate';
 
 export interface Settings {
@@ -12,12 +12,13 @@ export interface Settings {
   maxPace: number;
   steepness: number;
   timeshift: number;
-  events: GameEvent[];
+  events: DiceEvent[];
   hypno: GameHypnoType;
   gender: PlayerGender;
   body: PlayerBody;
   highRes: boolean;
   videoSound: boolean;
+  vibrations: VibrationMode;
   imageDuration: number;
   intenseImages: boolean;
 }
@@ -31,12 +32,13 @@ export const defaultSettings: Settings = {
   maxPace: 5,
   steepness: 0.5,
   timeshift: 0.5,
-  events: Object.values(GameEvent),
+  events: Object.values(DiceEvent),
   hypno: GameHypnoType.joi,
   gender: PlayerGender.male,
   body: PlayerBody.penis,
   highRes: false,
   videoSound: false,
+  vibrations: VibrationMode.thump,
   imageDuration: 20,
   intenseImages: true,
 };

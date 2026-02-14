@@ -2,7 +2,7 @@ import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
 import {
-  GameEvent as GameEventType,
+  DiceEvent,
   CleanUpDescriptions,
 } from '../../../types';
 import {
@@ -16,7 +16,7 @@ import {
 const seq = Sequence.for(PLUGIN_ID, 'cleanUp');
 
 export const cleanUpOutcome: DiceOutcome = {
-  id: GameEventType.cleanUp,
+  id: DiceEvent.cleanUp,
   check: frame =>
     (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100 >= 75,
   update: Composer.pipe(

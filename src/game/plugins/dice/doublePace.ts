@@ -1,7 +1,7 @@
 import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import Pace from '../pace';
-import { GameEvent as GameEventType } from '../../../types';
+import { DiceEvent } from '../../../types';
 import { round } from '../../../utils';
 import {
   PLUGIN_ID,
@@ -16,7 +16,7 @@ import { doRandomPace } from './randomPace';
 const seq = Sequence.for(PLUGIN_ID, 'doublePace');
 
 export const doublePaceOutcome: DiceOutcome = {
-  id: GameEventType.doublePace,
+  id: DiceEvent.doublePace,
   check: frame =>
     (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100 >= 20,
   update: Composer.pipe(

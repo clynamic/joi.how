@@ -53,7 +53,7 @@ export default class Image {
     }),
 
     update: Composer.pipe(
-      Events.handle(eventType.pushNext, event =>
+      Events.handle<ImageItem>(eventType.pushNext, event =>
         Composer.over(
           image.state,
           ({ currentImage, seenImages = [], nextImages = [] }) => {
@@ -85,14 +85,14 @@ export default class Image {
         )
       ),
 
-      Events.handle(eventType.setNextImages, event =>
+      Events.handle<ImageItem[]>(eventType.setNextImages, event =>
         Composer.over(image.state, state => ({
           ...state,
           nextImages: event.payload,
         }))
       ),
 
-      Events.handle(eventType.setImage, event =>
+      Events.handle<ImageItem | undefined>(eventType.setImage, event =>
         Composer.over(image.state, state => ({
           ...state,
           currentImage: event.payload,

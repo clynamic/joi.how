@@ -22,6 +22,8 @@ const pause = pluginPaths<PauseState>(PLUGIN_ID);
 
 const eventType = Events.getKeys(PLUGIN_ID, 'on', 'off');
 
+type CountdownPayload = { remaining: number };
+
 const resume = Sequence.for(PLUGIN_ID, 'resume');
 
 export default class Pause {
@@ -83,7 +85,7 @@ export default class Pause {
         )
       ),
 
-      resume.on('countdown', event =>
+      resume.on<CountdownPayload>('countdown', event =>
         Composer.when(
           event.payload.remaining <= 0,
           Composer.pipe(

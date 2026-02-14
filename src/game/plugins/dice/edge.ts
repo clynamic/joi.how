@@ -2,7 +2,7 @@ import { Composer } from '../../../engine/Composer';
 import { typedPath } from '../../../engine/Lens';
 import { Sequence } from '../../Sequence';
 import Pace from '../pace';
-import { GameEvent as GameEventType } from '../../../types';
+import { DiceEvent } from '../../../types';
 import {
   PLUGIN_ID,
   intensityState,
@@ -16,7 +16,7 @@ export const edged = typedPath<boolean>(['state', PLUGIN_ID, 'edged']);
 const seq = Sequence.for(PLUGIN_ID, 'edge');
 
 export const edgeOutcome: DiceOutcome = {
-  id: GameEventType.edge,
+  id: DiceEvent.edge,
   check: frame => {
     const i = (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100;
     return i >= 90 && !Composer.get(edged)(frame);

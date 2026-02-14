@@ -1,7 +1,7 @@
 import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import Pace from '../pace';
-import { GameEvent as GameEventType } from '../../../types';
+import { DiceEvent } from '../../../types';
 import { intensityToPaceRange, round } from '../../../utils';
 import {
   PLUGIN_ID,
@@ -12,10 +12,12 @@ import {
 } from './types';
 import { doRandomPace } from './randomPace';
 
+type RisingPacePayload = { current: number; portion: number; remaining: number };
+
 const seq = Sequence.for(PLUGIN_ID, 'risingPace');
 
 export const risingPaceOutcome: DiceOutcome = {
-  id: GameEventType.risingPace,
+  id: DiceEvent.risingPace,
   check: frame =>
     (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100 >= 30,
   update: Composer.pipe(
@@ -41,7 +43,7 @@ export const risingPaceOutcome: DiceOutcome = {
         })
       )
     ),
-    seq.on('step', event => {
+    seq.on<RisingPacePayload>('step', event => {
       const { current, portion, remaining } = event.payload;
       const newPace = round(current + portion);
       return Composer.pipe(

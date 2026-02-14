@@ -9,7 +9,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useSetting } from '../../settings';
 import { useMemo } from 'react';
-import { GameEvent as GameEventType } from '../../types';
+import { DiceEvent } from '../../types';
 import { ProgressBar } from '../../common';
 import { WaDivider } from '@awesome.me/webawesome/dist/react';
 import { useGameState } from '../hooks';
@@ -127,7 +127,7 @@ const IntensityDisplay = () => {
 export const GameInstructions = () => {
   const [events] = useSetting('events');
   const useRandomGrip = useMemo(
-    () => events.includes(GameEventType.randomGrip),
+    () => events.includes(DiceEvent.randomGrip),
     [events]
   );
 

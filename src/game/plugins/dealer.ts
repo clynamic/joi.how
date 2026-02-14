@@ -5,7 +5,7 @@ import { Scheduler } from '../../engine/pipes/Scheduler';
 import { Sequence } from '../Sequence';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
-import { GameEvent as GameEventType } from '../../types';
+import { DiceEvent } from '../../types';
 import {
   PLUGIN_ID,
   dice,
@@ -42,16 +42,16 @@ const outcomes: DiceOutcome[] = [
 ];
 
 const rollChances: Record<string, number> = {
-  [GameEventType.randomPace]: 10,
-  [GameEventType.cleanUp]: 25,
-  [GameEventType.randomGrip]: 50,
-  [GameEventType.doublePace]: 50,
-  [GameEventType.halfPace]: 50,
-  [GameEventType.pause]: 50,
-  [GameEventType.risingPace]: 30,
+  [DiceEvent.randomPace]: 10,
+  [DiceEvent.cleanUp]: 25,
+  [DiceEvent.randomGrip]: 50,
+  [DiceEvent.doublePace]: 50,
+  [DiceEvent.halfPace]: 50,
+  [DiceEvent.pause]: 50,
+  [DiceEvent.risingPace]: 30,
 };
 
-const eventKeyForOutcome = (id: GameEventType): string =>
+const eventKeyForOutcome = (id: DiceEvent): string =>
   Events.getKey(PLUGIN_ID, id);
 
 const roll = Sequence.for(PLUGIN_ID, 'roll');
