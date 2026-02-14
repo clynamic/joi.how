@@ -9,7 +9,7 @@ const PLUGIN_NAMESPACE = 'core.plugin_manager';
 
 const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
   state: {},
-  context: { tick: 0, deltaTime: 16, elapsedTime: 0 },
+  context: { tick: 0, step: 16, time: 0 },
   ...overrides,
 });
 
@@ -18,8 +18,8 @@ const tick = (frame: GameFrame, n = 1): GameFrame => ({
   context: {
     ...frame.context,
     tick: frame.context.tick + n,
-    deltaTime: 16,
-    elapsedTime: frame.context.elapsedTime + 16 * n,
+    step: 16,
+    time: frame.context.time + 16 * n,
   },
 });
 

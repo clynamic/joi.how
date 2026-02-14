@@ -34,7 +34,6 @@ type Props = {
 
 export function GameEngineProvider({ children, pipes = [] }: Props) {
   const engineRef = useRef<GameEngine | null>(null);
-  const lastTimeRef = useRef<number | null>(null);
 
   const [state, setState] = useState<GameState | null>(null);
   const [context, setContext] = useState<GameContext | null>(null);
@@ -54,33 +53,49 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
       Piper([impulsePipe, Events.pipe, Scheduler.pipe, Perf.pipe, ...pipes])
     );
 
+    const STEP = 16;
+    const MAX_TICKS_PER_FRAME = 4;
+    let accumulator = 0;
+    let lastWallTime: number | null = null;
     let frameId: number;
 
-    const loop = (time: number) => {
+    const loop = () => {
       if (!engineRef.current) return;
 
-      if (document.hidden) {
-        lastTimeRef.current = null;
+      const now = performance.now();
+
+      if (document.hidden || lastWallTime === null) {
+        lastWallTime = now;
         frameId = requestAnimationFrame(loop);
         return;
       }
 
-      if (lastTimeRef.current == null) {
-        lastTimeRef.current = time;
-        frameId = requestAnimationFrame(loop);
-        return;
+      accumulator += now - lastWallTime;
+      lastWallTime = now;
+
+      let ticked = false;
+      let ticks = 0;
+
+      while (accumulator >= STEP && ticks < MAX_TICKS_PER_FRAME) {
+        if (!ticked) {
+          activeImpulseRef.current = pendingImpulseRef.current;
+          pendingImpulseRef.current = [];
+          ticked = true;
+        }
+
+        engineRef.current.tick();
+        accumulator -= STEP;
+        ticks++;
       }
 
-      const deltaTime = time - lastTimeRef.current;
-      lastTimeRef.current = time;
+      if (ticks >= MAX_TICKS_PER_FRAME) {
+        accumulator = 0;
+      }
 
-      activeImpulseRef.current = pendingImpulseRef.current;
-      pendingImpulseRef.current = [];
-
-      engineRef.current.tick(deltaTime);
-
-      setState(engineRef.current.getState());
-      setContext(engineRef.current.getContext());
+      if (ticked) {
+        setState(engineRef.current.getState());
+        setContext(engineRef.current.getContext());
+      }
 
       frameId = requestAnimationFrame(loop);
     };
@@ -89,7 +104,6 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
 
     return () => {
       cancelAnimationFrame(frameId);
-      lastTimeRef.current = null;
       engineRef.current = null;
       pendingImpulseRef.current = [];
       activeImpulseRef.current = [];

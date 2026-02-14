@@ -6,7 +6,7 @@
  *
  * Architecture:
  * - Settings are loaded on-demand from localStorage
- * - Cached in context with expiry time (measured in deltaTime)
+ * - Cached in context with expiry time (measured in game time)
  * - Hot cache expires after inactivity to save memory
  * - Writes are immediate to localStorage and update cache
  */
@@ -17,7 +17,7 @@ import { pluginPaths } from '../plugins/Plugins';
 import { GameTiming, Pipe } from '../State';
 
 export const STORAGE_NAMESPACE = 'how.joi.storage';
-const CACHE_TTL = 30000; // 30 seconds of game time (deltaTime sum)
+const CACHE_TTL = 30000; // 30 seconds of game time
 
 export type CacheEntry = {
   value: any;
@@ -68,7 +68,7 @@ export class Storage {
 
       // Cache it (will be set with expiry in the next pipe)
       return Composer.pipe(
-        Composer.bind(timing.elapsedTime, elapsedTime =>
+        Composer.bind(timing.time, elapsedTime =>
           Composer.over(storage.context, ctx => ({
             cache: {
               ...(ctx?.cache || {}),
@@ -97,7 +97,7 @@ export class Storage {
       }
 
       // Update cache
-      return Composer.bind(timing.elapsedTime, elapsedTime =>
+      return Composer.bind(timing.time, elapsedTime =>
         Composer.over(storage.context, ctx => ({
           cache: {
             ...(ctx?.cache || {}),
@@ -133,10 +133,10 @@ export class Storage {
   }
 
   /**
-   * Storage pipe - updates cache expiry based on deltaTime
+   * Storage pipe - evicts expired cache entries
    */
   static pipe: Pipe = Composer.pipe(
-    Composer.bind(timing.elapsedTime, elapsedTime =>
+    Composer.bind(timing.time, elapsedTime =>
       Composer.over(storage.context, ctx => {
         const newCache: { [key: string]: CacheEntry } = {};
 

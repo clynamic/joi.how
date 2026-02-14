@@ -1,14 +1,19 @@
 import { GameState, GameContext, Pipe, GameTiming, GameFrame } from './State';
 import { deepFreeze } from './freeze';
 
+export type GameEngineOptions = {
+  step?: number;
+};
+
 export class GameEngine {
-  constructor(initial: GameState, pipe: Pipe) {
+  constructor(initial: GameState, pipe: Pipe, options?: GameEngineOptions) {
     this.state = { ...initial };
     this.pipe = pipe;
+    this.step = options?.step ?? 16;
     this.timing = {
       tick: 0,
-      deltaTime: 0,
-      elapsedTime: 0,
+      step: this.step,
+      time: 0,
     };
     this.context = this.timing;
   }
@@ -23,6 +28,11 @@ export class GameEngine {
    * The pipe is a function that produces a new game frame based on the current game frame.
    */
   private pipe: Pipe;
+
+  /**
+   * The fixed time step per tick in milliseconds.
+   */
+  private step: number;
 
   /**
    * The context of the engine. May contain any ephemeral information of any plugin, however it is to be noted;
@@ -54,12 +64,11 @@ export class GameEngine {
   }
 
   /**
-   * Runs the game engine for a single tick, passing the delta time since the last tick.
+   * Runs the game engine for a single fixed-step tick.
    */
-  public tick(deltaTime: number): GameState {
+  public tick(): GameState {
     this.timing.tick += 1;
-    this.timing.deltaTime = deltaTime;
-    this.timing.elapsedTime += deltaTime;
+    this.timing.time += this.step;
 
     const frame: GameFrame = {
       state: this.state,

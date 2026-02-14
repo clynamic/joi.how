@@ -50,7 +50,7 @@ export default class Stroke {
         const pace = get(paceState)?.pace;
         if (!pace || pace <= 0) return;
 
-        const delta = get(gameContext.deltaTime);
+        const delta = get(gameContext.step);
         const state = get(stroke.state);
         if (!state) return;
 

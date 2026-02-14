@@ -21,7 +21,7 @@ describe('Storage', () => {
 
       const frame: GameFrame = {
         state: {},
-        context: { tick: 0, deltaTime: 0, elapsedTime: 0 },
+        context: { tick: 0, step: 0, time: 0 },
       };
 
       pipe(frame);
@@ -37,7 +37,7 @@ describe('Storage', () => {
 
       const frame: GameFrame = {
         state: {},
-        context: { tick: 0, deltaTime: 0, elapsedTime: 0 },
+        context: { tick: 0, step: 0, time: 0 },
       };
 
       pipe(frame);
@@ -53,7 +53,7 @@ describe('Storage', () => {
 
       let frame1: GameFrame = {
         state: {},
-        context: { tick: 0, deltaTime: 0, elapsedTime: 1000 },
+        context: { tick: 0, step: 0, time: 1000 },
       };
 
       frame1 = Composer.over<Partial<StorageContext>>(
@@ -69,7 +69,7 @@ describe('Storage', () => {
 
       let frame2: GameFrame = {
         state: {},
-        context: { tick: 1, deltaTime: 16, elapsedTime: 1016 },
+        context: { tick: 1, step: 16, time: 1016 },
       };
 
       frame2 = Composer.over<Partial<StorageContext>>(
@@ -96,7 +96,7 @@ describe('Storage', () => {
 
       const frame: GameFrame = {
         state: {},
-        context: { tick: 0, deltaTime: 0, elapsedTime: 0 },
+        context: { tick: 0, step: 0, time: 0 },
       };
 
       pipe(frame);
@@ -110,7 +110,7 @@ describe('Storage', () => {
 
       let frame: GameFrame = {
         state: {},
-        context: { tick: 0, deltaTime: 0, elapsedTime: 1000 },
+        context: { tick: 0, step: 0, time: 1000 },
       };
 
       frame = Composer.over<Partial<StorageContext>>(
@@ -137,7 +137,7 @@ describe('Storage', () => {
 
       const frame: GameFrame = {
         state: {},
-        context: { tick: 0, deltaTime: 0, elapsedTime: 0 },
+        context: { tick: 0, step: 0, time: 0 },
       };
 
       pipe(frame);
@@ -150,7 +150,7 @@ describe('Storage', () => {
 
       let frame: GameFrame = {
         state: {},
-        context: { tick: 0, deltaTime: 0, elapsedTime: 0 },
+        context: { tick: 0, step: 0, time: 0 },
       };
 
       frame = Composer.over<Partial<StorageContext>>(
@@ -174,7 +174,7 @@ describe('Storage', () => {
     it('should clean up expired cache entries', () => {
       let frame: GameFrame = {
         state: {},
-        context: { tick: 0, deltaTime: 0, elapsedTime: 20000 },
+        context: { tick: 0, step: 0, time: 20000 },
       };
 
       frame = Composer.over<Partial<StorageContext>>(

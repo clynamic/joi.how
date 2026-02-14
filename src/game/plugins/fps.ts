@@ -9,7 +9,9 @@ const HISTORY_SIZE = 30;
 
 type FpsContext = {
   el: HTMLElement;
-  history: number[];
+  fpsHistory: number[];
+  tpsHistory: number[];
+  lastWallTime: number;
 };
 
 const fps = pluginPaths<never, FpsContext>(PLUGIN_ID);
@@ -54,7 +56,7 @@ export default class Fps {
       el.style.display = visible ? '' : 'none';
 
       document.querySelector('.game-page')?.appendChild(el);
-      set(fps.context, { el, history: [] });
+      set(fps.context, { el, fpsHistory: [], tpsHistory: [], lastWallTime: performance.now() });
     }),
 
     update: Composer.do(({ get, set }) => {
@@ -65,17 +67,27 @@ export default class Fps {
       if (ctx.el) ctx.el.style.display = visible ? '' : 'none';
       if (!visible) return;
 
-      const delta = get(gameContext.deltaTime);
-      const current = delta > 0 ? 1000 / delta : 0;
-      const history = [...ctx.history, current].slice(-HISTORY_SIZE);
-      const avg =
-        history.length > 0
-          ? history.reduce((sum, v) => sum + v, 0) / history.length
-          : current;
+      const now = performance.now();
+      const wallDelta = now - ctx.lastWallTime;
 
-      if (ctx.el) ctx.el.textContent = `${Math.round(avg)} FPS`;
+      const currentFps = wallDelta > 0 ? 1000 / wallDelta : 0;
+      const fpsHistory = [...ctx.fpsHistory, currentFps].slice(-HISTORY_SIZE);
+      const avgFps =
+        fpsHistory.length > 0
+          ? fpsHistory.reduce((sum, v) => sum + v, 0) / fpsHistory.length
+          : currentFps;
 
-      set(fps.context, { ...ctx, history });
+      const step = get(gameContext.step);
+      const currentTps = step > 0 ? 1000 / step : 0;
+      const tpsHistory = [...ctx.tpsHistory, currentTps].slice(-HISTORY_SIZE);
+      const avgTps =
+        tpsHistory.length > 0
+          ? tpsHistory.reduce((sum, v) => sum + v, 0) / tpsHistory.length
+          : currentTps;
+
+      if (ctx.el) ctx.el.textContent = `${Math.round(avgFps)} FPS / ${Math.round(avgTps)} TPS`;
+
+      set(fps.context, { ...ctx, fpsHistory, tpsHistory, lastWallTime: now });
     }),
 
     deactivate: Composer.do(({ get, set }) => {
