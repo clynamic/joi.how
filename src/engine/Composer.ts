@@ -19,6 +19,30 @@ export type ComposerScope<T extends object> = {
     : never]: Composer<T>[K];
 };
 
+function _pipe<T>(obj: T, pipes: ((t: T) => T)[]): T {
+  let result = obj;
+  for (const p of pipes) result = p(result);
+  return result;
+}
+
+function _set<T, A>(obj: T, path: Path<A>, value: A): T {
+  return lensFromPath<T, A>(path).set(value)(obj);
+}
+
+function _over<T, A>(obj: T, path: Path<A>, fn: (a: A) => A): T {
+  return lensFromPath<T, A>(path).over(fn)(obj);
+}
+
+function _bind<T, A>(obj: T, path: Path<A>, fn: Transformer<[A], T>): T {
+  const value = lensFromPath<T, A>(path).get(obj);
+  return fn(value)(obj);
+}
+
+function _zoom<T, A extends object>(obj: T, path: Path, fn: (a: A) => A): T {
+  const lens = lensFromPath<T, A>(path);
+  return lens.set(fn(lens.get(obj)))(obj);
+}
+
 /**
  * A generalized object manipulation utility
  * in a functional chaining style.
@@ -48,7 +72,7 @@ export class Composer<T extends object> {
    * Applies a series of mapping functions to the current object.
    */
   pipe(...pipes: ((t: T) => T)[]): this {
-    for (const p of pipes) this.obj = p(this.obj);
+    this.obj = _pipe(this.obj, pipes);
     return this;
   }
 
@@ -56,7 +80,7 @@ export class Composer<T extends object> {
    * Shorthand for building a composer that applies a series of mapping functions to the current object.
    */
   static pipe<T extends object>(...pipes: ((t: T) => T)[]): (obj: T) => T {
-    return Composer.chain<T>(composer => composer.pipe(...pipes));
+    return (obj: T): T => _pipe(obj, pipes);
   }
 
   /**
@@ -95,9 +119,7 @@ export class Composer<T extends object> {
     if (maybeValue === undefined) {
       this.obj = pathOrValue as T;
     } else {
-      this.obj = lensFromPath<T, unknown>(pathOrValue as Path).set(maybeValue)(
-        this.obj
-      );
+      this.obj = _set(this.obj, pathOrValue as Path, maybeValue);
     }
     return this;
   }
@@ -106,8 +128,7 @@ export class Composer<T extends object> {
    * Shorthand for building a composer that sets a path.
    */
   static set<A>(path: Path<A>, value: A) {
-    return <T extends object>(obj: T): T =>
-      Composer.chain<T>(c => c.set<A>(path, value))(obj);
+    return <T extends object>(obj: T): T => _set(obj, path, value);
   }
 
   /**
@@ -126,15 +147,14 @@ export class Composer<T extends object> {
    * Shorthand for building a composer that zooms into a path
    */
   static zoom<A extends object>(path: Path, fn: (a: A) => A) {
-    return <T extends object>(obj: T): T =>
-      Composer.chain<T>(c => c.zoom<A>(path, c => c.pipe(fn)))(obj);
+    return <T extends object>(obj: T): T => _zoom<T, A>(obj, path, fn);
   }
 
   /**
    * Updates the value at the specified path with the mapping function.
    */
   over<A>(path: Path<A>, fn: (a: A) => A): this {
-    this.obj = lensFromPath<T, A>(path).over(fn)(this.obj);
+    this.obj = _over(this.obj, path, fn);
     return this;
   }
 
@@ -142,16 +162,14 @@ export class Composer<T extends object> {
    * Shorthand for building a composer that updates a path.
    */
   static over<A>(path: Path<A>, fn: (a: A) => A) {
-    return <T extends object>(obj: T): T =>
-      Composer.chain<T>(c => c.over<A>(path, fn))(obj);
+    return <T extends object>(obj: T): T => _over(obj, path, fn);
   }
 
   /**
    * Runs a composer function with the value at the specified path.
    */
   bind<A>(path: Path<A>, fn: Transformer<[A], T>): this {
-    const value = lensFromPath<T, A>(path).get(this.obj);
-    this.obj = fn(value)(this.obj);
+    this.obj = _bind(this.obj, path, fn);
     return this;
   }
 
@@ -159,15 +177,15 @@ export class Composer<T extends object> {
    * Shorthand for building a composer that reads a value at a path and applies a transformer.
    */
   static bind<A>(path: Path<A>, fn: Transformer<[A], any>) {
-    return <T extends object>(obj: T): T =>
-      Composer.chain<T>(c => c.bind<A>(path, fn))(obj);
+    return <T extends object>(obj: T): T => _bind(obj, path, fn);
   }
 
   call<A extends (...args: any[]) => (obj: any) => any>(
     path: Path<A>,
     ...args: Parameters<A>
   ): this {
-    return this.bind(path, (fn: A) => fn(...args));
+    this.obj = _bind(this.obj, path, (fn: A) => fn(...args));
+    return this;
   }
 
   static call<A extends (...args: any[]) => (obj: any) => any>(
@@ -175,7 +193,7 @@ export class Composer<T extends object> {
     ...args: Parameters<A>
   ) {
     return <T extends object>(obj: T): T =>
-      Composer.chain<T>(c => c.call<A>(path, ...args))(obj);
+      _bind(obj, path, (fn: A) => fn(...args));
   }
 
   /**
@@ -198,13 +216,8 @@ export class Composer<T extends object> {
     fn: (obj: T) => T,
     elseFn?: (obj: T) => T
   ): (obj: T) => T {
-    return Composer.chain<T>(c =>
-      c.when(
-        condition,
-        c => c.pipe(fn),
-        elseFn ? c => c.pipe(elseFn) : undefined
-      )
-    );
+    if (condition) return fn;
+    return elseFn ?? ((obj: T) => obj);
   }
 
   /**
