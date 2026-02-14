@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import {
   BoardSettings,
   ClimaxSettings,
@@ -40,6 +40,20 @@ const StyledGameSettingsDialog = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
 `;
+
+const GameSettingsDialogContent = memo(() => (
+  <StyledGameSettingsDialog>
+    <PaceSettings />
+    <DurationSettings />
+    <PlayerSettings />
+    <EventSettings />
+    <HypnoSettings />
+    <ClimaxSettings />
+    <BoardSettings />
+    <VibratorSettings />
+    <ImageSettings />
+  </StyledGameSettingsDialog>
+));
 
 export const GameSettings = () => {
   const [open, setOpen] = useState(false);
@@ -119,21 +133,7 @@ export const GameSettings = () => {
           '--width': '920px',
         }}
       >
-        <StyledGameSettingsDialog>
-          {open && (
-            <>
-              <PaceSettings />
-              <DurationSettings />
-              <PlayerSettings />
-              <EventSettings />
-              <HypnoSettings />
-              <ClimaxSettings />
-              <BoardSettings />
-              <VibratorSettings />
-              <ImageSettings />
-            </>
-          )}
-        </StyledGameSettingsDialog>
+        {open && <GameSettingsDialogContent />}
       </WaDialog>
     </StyledGameSettings>
   );
