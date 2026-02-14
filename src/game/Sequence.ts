@@ -18,6 +18,8 @@ export type SequenceScope = {
   message(msg: MessageInput): Pipe;
   after(duration: number, target: string, payload?: any): Pipe;
   prompt(title: string, target: string, payload?: any): MessagePrompt;
+  start(payload?: any): Pipe;
+  cancel(): Pipe;
   dispatch(target: string, payload?: any): Pipe;
   eventKey(target: string): string;
   scheduleKey(target: string): string;
@@ -53,6 +55,12 @@ export class Sequence {
           ...(payload !== undefined && { payload }),
         },
       }),
+      start: payload =>
+        Events.dispatch({
+          type: rootKey,
+          ...(payload !== undefined && { payload }),
+        }),
+      cancel: () => Scheduler.cancelByPrefix(getScheduleKey(namespace, name)),
       dispatch: (target, payload) =>
         Events.dispatch({
           type: target ? nodeKey(target) : rootKey,

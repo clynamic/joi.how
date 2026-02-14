@@ -3,6 +3,7 @@ import { Pipe, PipeTransformer } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
 import { Events, getEventKey } from '../../engine/pipes/Events';
 import { pluginPaths } from '../../engine/plugins/Plugins';
+import { Sequence } from '../Sequence';
 
 declare module '../../engine/sdk' {
   interface PluginSDK {
@@ -28,6 +29,8 @@ const eventType = {
   on: getEventKey(PLUGIN_ID, 'on'),
   off: getEventKey(PLUGIN_ID, 'off'),
 };
+
+const resume = Sequence.for(PLUGIN_ID, 'resume');
 
 export default class Pause {
   static setPaused(val: boolean): Pipe {
@@ -67,19 +70,59 @@ export default class Pause {
     activate: Composer.do(({ set }) => {
       set(pause.state, { paused: false, prev: false });
       set(pause.context, {
-        setPaused: val => Composer.set(pause.state.paused, val),
+        setPaused: val =>
+          Composer.when(
+            val,
+            Composer.pipe(
+              resume.cancel(),
+              Composer.set(pause.state.paused, true)
+            ),
+            resume.start()
+          ),
         togglePause: Composer.bind(pause.state, state =>
-          Composer.set(pause.state.paused, !state?.paused)
+          Pause.setPaused(!state?.paused)
         ),
       });
     }),
 
-    update: Composer.do(({ get, set, pipe }) => {
-      const { paused, prev } = get(pause.state);
-      if (paused === prev) return;
-      set(pause.state.prev, paused);
-      pipe(Events.dispatch({ type: paused ? eventType.on : eventType.off }));
-    }),
+    update: Composer.pipe(
+      Composer.do(({ get, set, pipe }) => {
+        const { paused, prev } = get(pause.state);
+        if (paused === prev) return;
+        set(pause.state.prev, paused);
+        pipe(Events.dispatch({ type: paused ? eventType.on : eventType.off }));
+      }),
+
+      resume.on(() =>
+        Composer.pipe(
+          resume.message({
+            title: 'Get ready to continue.',
+            description: '3...',
+          }),
+          resume.after(1000, 'countdown', { remaining: 2 })
+        )
+      ),
+
+      resume.on('countdown', event =>
+        Composer.when(
+          event.payload.remaining <= 0,
+          Composer.pipe(
+            resume.message({
+              title: 'Continue.',
+              description: undefined,
+              duration: 1500,
+            }),
+            Composer.set(pause.state.paused, false)
+          ),
+          Composer.pipe(
+            resume.message({ description: `${event.payload.remaining}...` }),
+            resume.after(1000, 'countdown', {
+              remaining: event.payload.remaining - 1,
+            })
+          )
+        )
+      )
+    ),
 
     deactivate: Composer.pipe(
       Composer.set(pause.state, undefined),

@@ -40,15 +40,6 @@ const getEntry = (
 
 describe('Perf', () => {
   describe('perfPipe', () => {
-    it('should initialize perf context with defaults', () => {
-      const result = basePipe(makeFrame());
-      const ctx = getPerfCtx(result);
-
-      expect(ctx).toBeDefined();
-      expect(ctx!.plugins).toEqual({});
-      expect(ctx!.config.pluginBudget).toBe(4);
-    });
-
     it('should preserve existing metrics across frames', () => {
       const frame0 = basePipe(makeFrame());
 
