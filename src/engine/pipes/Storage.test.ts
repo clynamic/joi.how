@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  Storage,
-  STORAGE_NAMESPACE,
-  StorageContext,
-} from './Storage';
+import { Storage, STORAGE_NAMESPACE, StorageContext } from './Storage';
 import { GameFrame } from '../State';
 import { Composer } from '../Composer';
 

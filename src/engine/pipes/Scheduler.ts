@@ -58,7 +58,10 @@ export class Scheduler {
   }
 
   static releaseByPrefix(prefix: string): Pipe {
-    return Events.dispatch({ type: eventType.releaseByPrefix, payload: prefix });
+    return Events.dispatch({
+      type: eventType.releaseByPrefix,
+      payload: prefix,
+    });
   }
 
   static cancelByPrefix(prefix: string): Pipe {

@@ -2,11 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Composer } from '../Composer';
 import { GameFrame, Pipe } from '../State';
 import { Events } from './Events';
-import {
-  Perf,
-  type PerfContext,
-  type PluginPerfEntry,
-} from './Perf';
+import { Perf, type PerfContext, type PluginPerfEntry } from './Perf';
 
 const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
   state: {},

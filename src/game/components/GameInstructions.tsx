@@ -73,9 +73,7 @@ const PaceDisplay = () => {
       <StyledActiveIcon $active={pace <= paceSection}>
         <FontAwesomeIcon icon={faPerson} />
       </StyledActiveIcon>
-      <StyledActiveIcon
-        $active={pace > paceSection && pace <= paceSection * 2}
-      >
+      <StyledActiveIcon $active={pace > paceSection && pace <= paceSection * 2}>
         <FontAwesomeIcon icon={faPersonWalking} />
       </StyledActiveIcon>
       <StyledActiveIcon $active={pace > paceSection * 2}>
@@ -94,10 +92,7 @@ const GripDisplay = () => {
   return (
     <StyledGripIcons>
       <StyledActiveIcon $active={paws === Paws.left || paws === Paws.both}>
-        <FontAwesomeIcon
-          style={{ transform: 'scaleX(-1)' }}
-          icon={faHand}
-        />
+        <FontAwesomeIcon style={{ transform: 'scaleX(-1)' }} icon={faHand} />
       </StyledActiveIcon>
       <StyledActiveIcon $active={paws === Paws.right || paws === Paws.both}>
         <FontAwesomeIcon icon={faHand} />
@@ -110,8 +105,7 @@ const GripDisplay = () => {
 };
 
 const IntensityDisplay = () => {
-  const { intensity = 0 } =
-    useGameState(Intensity.paths.state) ?? {};
+  const { intensity = 0 } = useGameState(Intensity.paths.state) ?? {};
   const intensityPct = Math.round(intensity * 100);
 
   return (

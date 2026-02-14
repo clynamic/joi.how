@@ -117,7 +117,9 @@ export class Perf {
   }
 
   static pipe: Pipe = Composer.pipe(
-    Composer.over(perf.context, (ctx = { plugins: {}, config: DEFAULT_CONFIG }) => ({
+    Composer.over(
+      perf.context,
+      (ctx = { plugins: {}, config: DEFAULT_CONFIG }) => ({
         ...ctx,
         plugins: ctx.plugins ?? {},
         config: ctx.config ?? DEFAULT_CONFIG,

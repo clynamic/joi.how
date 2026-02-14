@@ -54,40 +54,34 @@ export class Storage {
    * Gets a value, using cache or loading from localStorage
    */
   static bind<T = any>(key: string, fn: (value: T | undefined) => Pipe): Pipe {
-    return Composer.bind(
-      storage.context,
-      ctx => {
-        const cache = ctx?.cache || {};
-        const cached = cache[key];
+    return Composer.bind(storage.context, ctx => {
+      const cache = ctx?.cache || {};
+      const cached = cache[key];
 
-        // Return cached value if available and not expired
-        if (cached) {
-          return fn(cached.value as T | undefined);
-        }
-
-        // Load from localStorage
-        const value = Storage.load<T>(key);
-
-        // Cache it (will be set with expiry in the next pipe)
-        return Composer.pipe(
-          Composer.bind(timing.elapsedTime, elapsedTime =>
-            Composer.over(
-              storage.context,
-              ctx => ({
-                cache: {
-                  ...(ctx?.cache || {}),
-                  [key]: {
-                    value,
-                    expiry: elapsedTime + CACHE_TTL,
-                  },
-                },
-              })
-            )
-          ),
-          fn(value)
-        );
+      // Return cached value if available and not expired
+      if (cached) {
+        return fn(cached.value as T | undefined);
       }
-    );
+
+      // Load from localStorage
+      const value = Storage.load<T>(key);
+
+      // Cache it (will be set with expiry in the next pipe)
+      return Composer.pipe(
+        Composer.bind(timing.elapsedTime, elapsedTime =>
+          Composer.over(storage.context, ctx => ({
+            cache: {
+              ...(ctx?.cache || {}),
+              [key]: {
+                value,
+                expiry: elapsedTime + CACHE_TTL,
+              },
+            },
+          }))
+        ),
+        fn(value)
+      );
+    });
   }
 
   /**
@@ -130,14 +124,11 @@ export class Storage {
       }
 
       // Remove from cache
-      return Composer.over(
-        storage.context,
-        ctx => {
-          const newCache = { ...(ctx?.cache || {}) };
-          delete newCache[key];
-          return { cache: newCache };
-        }
-      )(frame);
+      return Composer.over(storage.context, ctx => {
+        const newCache = { ...(ctx?.cache || {}) };
+        delete newCache[key];
+        return { cache: newCache };
+      })(frame);
     };
   }
 

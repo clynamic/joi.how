@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Composer } from '../../engine/Composer';
 import { Events } from '../../engine/pipes/Events';
-import {
-  Scheduler,
-  ScheduledEvent,
-} from '../../engine/pipes/Scheduler';
+import { Scheduler, ScheduledEvent } from '../../engine/pipes/Scheduler';
 import {
   pluginManagerPipe,
   PluginManager,
