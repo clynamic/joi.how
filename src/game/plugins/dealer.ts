@@ -5,6 +5,7 @@ import { Scheduler } from '../../engine/pipes/Scheduler';
 import { Sequence } from '../Sequence';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
+import Rand from './rand';
 import { DiceEvent } from '../../types';
 import {
   PLUGIN_ID,
@@ -42,6 +43,8 @@ const outcomes: DiceOutcome[] = [
 ];
 
 const rollChances: Record<string, number> = {
+  [DiceEvent.climax]: 1,
+  [DiceEvent.edge]: 1,
   [DiceEvent.randomPace]: 10,
   [DiceEvent.cleanUp]: 25,
   [DiceEvent.randomGrip]: 50,
@@ -80,7 +83,7 @@ export default class Dealer {
         Composer.pipe(
           Phase.whenPhase(
             GamePhase.active,
-            Composer.do(({ get, set, pipe }) => {
+            Composer.do(({ get, pipe }) => {
               const state = get(dice.state);
               if (!state || state.busy) return;
 
@@ -89,18 +92,39 @@ export default class Dealer {
 
               const frame = get();
 
-              for (const outcome of outcomes) {
-                if (!s.events.includes(outcome.id)) continue;
-                if (outcome.check && !outcome.check(frame)) continue;
+              const eligible = outcomes.filter(o => {
+                if (!s.events.includes(o.id)) return false;
+                if (!rollChances[o.id]) return false;
+                if (o.check && !o.check(frame)) return false;
+                return true;
+              });
 
-                const chance = rollChances[outcome.id];
-                if (chance && Math.floor(Math.random() * chance) !== 0)
-                  continue;
-
-                set(dice.state.busy, true);
-                pipe(Events.dispatch({ type: eventKeyForOutcome(outcome.id) }));
+              const guaranteed = eligible.find(o => rollChances[o.id] === 1);
+              if (guaranteed) {
+                pipe(
+                  Composer.set(dice.state.busy, true),
+                  Events.dispatch({ type: eventKeyForOutcome(guaranteed.id) })
+                );
                 return;
               }
+
+              pipe(
+                Rand.next(roll => {
+                  let cumulative = 0;
+                  for (const outcome of eligible) {
+                    cumulative += 1 / rollChances[outcome.id];
+                    if (roll < cumulative) {
+                      return Composer.pipe(
+                        Composer.set(dice.state.busy, true),
+                        Events.dispatch({
+                          type: eventKeyForOutcome(outcome.id),
+                        })
+                      );
+                    }
+                  }
+                  return Composer.pipe();
+                })
+              );
             })
           ),
           roll.after(1000, 'check')

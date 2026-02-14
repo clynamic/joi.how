@@ -6,6 +6,7 @@ import { typedPath } from '../../engine/Lens';
 import { ImageItem } from '../../types';
 import Image, { ImageState } from './image';
 import { IntensityState } from './intensity';
+import Rand from './rand';
 
 declare module '../../engine/sdk' {
   interface PluginSDK {
@@ -38,13 +39,15 @@ export default class RandomImages {
       const imgs = get(images);
       if (!imgs || imgs.length === 0) return;
 
-      const shuffled = [...imgs].sort(() => Math.random() - 0.5);
-      const initial = shuffled.slice(0, Math.min(3, imgs.length));
-
-      for (const img of initial) {
-        pipe(Image.pushNextImage(img));
-      }
-      pipe(Events.dispatch({ type: eventType.scheduleNext }));
+      pipe(
+        Rand.shuffle(imgs, shuffled => {
+          const initial = shuffled.slice(0, Math.min(3, imgs.length));
+          return Composer.pipe(
+            ...initial.map(img => Image.pushNextImage(img)),
+            Events.dispatch({ type: eventType.scheduleNext })
+          );
+        })
+      );
     }),
 
     update: Events.handle(eventType.scheduleNext, () =>
@@ -68,24 +71,28 @@ export default class RandomImages {
         );
         const totalWeight = weights.reduce((sum, w) => sum + w, 0);
 
-        let random = Math.random() * totalWeight;
-        let selectedIndex = 0;
-        for (let i = 0; i < weights.length; i++) {
-          random -= weights[i];
-          if (random <= 0) {
-            selectedIndex = i;
-            break;
-          }
-        }
-
-        const randomImage = imagesWithDistance[selectedIndex].image;
-
-        pipe(Image.pushNextImage(randomImage));
         pipe(
-          Scheduler.schedule({
-            id: scheduleId,
-            duration: getImageSwitchDuration(intensity),
-            event: { type: eventType.scheduleNext },
+          Rand.next(roll => {
+            let remaining = roll * totalWeight;
+            let selectedIndex = 0;
+            for (let i = 0; i < weights.length; i++) {
+              remaining -= weights[i];
+              if (remaining <= 0) {
+                selectedIndex = i;
+                break;
+              }
+            }
+
+            const randomImage = imagesWithDistance[selectedIndex].image;
+
+            return Composer.pipe(
+              Image.pushNextImage(randomImage),
+              Scheduler.schedule({
+                id: scheduleId,
+                duration: getImageSwitchDuration(intensity),
+                event: { type: eventType.scheduleNext },
+              })
+            );
           })
         );
       })

@@ -2,6 +2,7 @@ import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
 import Pace from '../pace';
+import Rand from '../rand';
 import { DiceEvent } from '../../../types';
 import { IntensityState } from '../intensity';
 import {
@@ -76,27 +77,31 @@ export const climaxOutcome: DiceOutcome = {
     ),
 
     seq.on('resolve', () =>
-      Composer.bind(settings, s => {
-        if (Math.random() * 100 <= s.climaxChance) {
-          const ruin = Math.random() * 100 <= s.ruinChance;
-          return Composer.pipe(
-            Phase.setPhase(ruin ? GamePhase.break : GamePhase.climax),
-            seq.message({
-              title: ruin ? '$HANDS OFF! Ruin your orgasm!' : 'Cum!',
-              description: undefined,
-            }),
-            seq.after(3000, 'end', { countdown: 10, ruin })
-          );
-        }
-        return Composer.pipe(
-          Phase.setPhase(GamePhase.break),
-          seq.message({
-            title: '$HANDS OFF! Do not cum!',
-            description: undefined,
-          }),
-          seq.after(1000, 'end', { countdown: 5, denied: true })
-        );
-      })
+      Composer.bind(settings, s =>
+        Rand.next(roll => {
+          if (roll * 100 > s.climaxChance) {
+            return Composer.pipe(
+              Phase.setPhase(GamePhase.break),
+              seq.message({
+                title: '$HANDS OFF! Do not cum!',
+                description: undefined,
+              }),
+              seq.after(1000, 'end', { countdown: 5, denied: true })
+            );
+          }
+          return Rand.next(ruinRoll => {
+            const ruin = ruinRoll * 100 <= s.ruinChance;
+            return Composer.pipe(
+              Phase.setPhase(ruin ? GamePhase.break : GamePhase.climax),
+              seq.message({
+                title: ruin ? '$HANDS OFF! Ruin your orgasm!' : 'Cum!',
+                description: undefined,
+              }),
+              seq.after(3000, 'end', { countdown: 10, ruin })
+            );
+          });
+        })
+      )
     ),
 
     seq.on<ClimaxEndPayload>('end', event => {
