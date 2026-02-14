@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import styled from 'styled-components';
 import { GameEngineProvider } from './GameProvider';
 import { GameMessages } from './components/GameMessages';
@@ -76,16 +77,18 @@ const StyledBottomBar = styled.div`
 
 export const GamePage = () => {
   const settingsPipe = useSettingsPipe();
+  const pipes = useMemo(
+    () => [
+      pluginManagerPipe,
+      pluginInstallerPipe,
+      registerPlugins,
+      settingsPipe,
+    ],
+    [settingsPipe]
+  );
 
   return (
-    <GameEngineProvider
-      pipes={[
-        pluginManagerPipe,
-        pluginInstallerPipe,
-        registerPlugins,
-        settingsPipe,
-      ]}
-    >
+    <GameEngineProvider pipes={pipes}>
       <StyledGamePage className='game-page'>
         <GameImages />
         <StyledTopBar>
