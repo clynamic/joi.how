@@ -1,7 +1,7 @@
 import { pluginPaths, type Plugin } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine';
-import { Events, getEventKey } from '../../engine/pipes/Events';
+import { Events } from '../../engine/pipes/Events';
 import { ImageItem } from '../../types';
 
 declare module '../../engine/sdk' {
@@ -20,11 +20,7 @@ export type ImageState = {
 
 const image = pluginPaths<ImageState>(PLUGIN_ID);
 
-const eventType = {
-  pushNext: getEventKey(PLUGIN_ID, 'pushNext'),
-  setImage: getEventKey(PLUGIN_ID, 'setImage'),
-  setNextImages: getEventKey(PLUGIN_ID, 'setNextImages'),
-};
+const eventType = Events.getKeys(PLUGIN_ID, 'push_next', 'set_image', 'set_next_images');
 
 export default class Image {
   static pushNextImage(img: ImageItem): Pipe {

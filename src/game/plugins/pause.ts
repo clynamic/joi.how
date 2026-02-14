@@ -1,7 +1,7 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
-import { Events, getEventKey } from '../../engine/pipes/Events';
+import { Events } from '../../engine/pipes/Events';
 import { pluginPaths } from '../../engine/plugins/Plugins';
 import { Sequence } from '../Sequence';
 
@@ -20,10 +20,7 @@ export type PauseState = {
 
 const pause = pluginPaths<PauseState>(PLUGIN_ID);
 
-const eventType = {
-  on: getEventKey(PLUGIN_ID, 'on'),
-  off: getEventKey(PLUGIN_ID, 'off'),
-};
+const eventType = Events.getKeys(PLUGIN_ID, 'on', 'off');
 
 const resume = Sequence.for(PLUGIN_ID, 'resume');
 

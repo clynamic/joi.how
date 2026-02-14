@@ -1,6 +1,6 @@
 import { pluginPaths, type Plugin } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
-import { Events, getEventKey } from '../../engine/pipes/Events';
+import { Events } from '../../engine/pipes/Events';
 import { Composer } from '../../engine';
 
 declare module '../../engine/sdk' {
@@ -27,8 +27,8 @@ export type PhaseState = {
 const phase = pluginPaths<PhaseState>(PLUGIN_ID);
 
 const eventType = {
-  enter: (p: string) => getEventKey(PLUGIN_ID, `enter.${p}`),
-  leave: (p: string) => getEventKey(PLUGIN_ID, `leave.${p}`),
+  enter: (p: string) => Events.getKey(PLUGIN_ID, `enter.${p}`),
+  leave: (p: string) => Events.getKey(PLUGIN_ID, `leave.${p}`),
 };
 
 export default class Phase {

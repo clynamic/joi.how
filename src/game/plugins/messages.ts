@@ -2,7 +2,7 @@ import type { Plugin } from '../../engine/plugins/Plugins';
 import { pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
-import { Events, GameEvent, getEventKey } from '../../engine/pipes/Events';
+import { Events, GameEvent } from '../../engine/pipes/Events';
 import { getScheduleKey, Scheduler } from '../../engine/pipes/Scheduler';
 
 declare module '../../engine/sdk' {
@@ -34,15 +34,12 @@ const PLUGIN_ID = 'core.messages';
 
 const paths = pluginPaths<MessageState>(PLUGIN_ID);
 
-const eventType = {
-  send: getEventKey(PLUGIN_ID, 'sendMessage'),
-  expire: getEventKey(PLUGIN_ID, 'expireMessage'),
-};
+const eventType = Events.getKeys(PLUGIN_ID, 'send_message', 'expire_message');
 
 export default class Messages {
   static send(message: PartialGameMessage): Pipe {
     return Events.dispatch({
-      type: eventType.send,
+      type: eventType.sendMessage,
       payload: message,
     });
   }
@@ -56,7 +53,7 @@ export default class Messages {
     activate: Composer.set(paths.state, { messages: [] }),
 
     update: Composer.pipe(
-      Events.handle(eventType.send, event =>
+      Events.handle(eventType.sendMessage, event =>
         Composer.pipe(
           Composer.over(paths.state, ({ messages = [] }) => {
             const patch = event.payload as GameMessage;
@@ -89,7 +86,7 @@ export default class Messages {
                   id: scheduleId,
                   duration: updated.duration,
                   event: {
-                    type: eventType.expire,
+                    type: eventType.expireMessage,
                     payload: updated.id,
                   },
                 })
@@ -101,7 +98,7 @@ export default class Messages {
         )
       ),
 
-      Events.handle(eventType.expire, event =>
+      Events.handle(eventType.expireMessage, event =>
         Composer.over(paths.state, ({ messages = [] }) => ({
           messages: messages.filter(m => m.id !== event.payload),
         }))

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { Composer } from '../Composer';
 import { GameFrame, Pipe } from '../State';
-import { eventPipe } from './Events';
+import { Events } from './Events';
 import {
   perfPipe,
   withTiming,
@@ -26,7 +26,7 @@ const tick = (frame: GameFrame): GameFrame => ({
   },
 });
 
-const basePipe: Pipe = Composer.pipe(eventPipe, perfPipe);
+const basePipe: Pipe = Composer.pipe(Events.pipe, perfPipe);
 
 const getPerfCtx = (frame: GameFrame): PerfContext | undefined =>
   (frame.context as any)?.core?.perf;
@@ -160,7 +160,7 @@ describe('Perf', () => {
     it('should work without perfPipe (graceful fallback)', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
-        eventPipe,
+        Events.pipe,
         withTiming('test.plugin', 'update', noop)
       );
 

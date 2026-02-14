@@ -1,6 +1,6 @@
 import { pluginPaths, type Plugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine';
-import { Events, getEventKey } from '../../engine/pipes/Events';
+import { Events } from '../../engine/pipes/Events';
 import Messages from './messages';
 import { Scheduler, getScheduleKey } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
@@ -27,9 +27,7 @@ const settings = typedPath<Settings>(gameContext.settings);
 
 const AUTOSTART_KEY = getScheduleKey(PLUGIN_ID, 'autoStart');
 
-const eventType = {
-  startGame: getEventKey(PLUGIN_ID, 'startGame'),
-};
+const eventType = Events.getKeys(PLUGIN_ID, 'start_game');
 
 export default class Warmup {
   static plugin: Plugin = {

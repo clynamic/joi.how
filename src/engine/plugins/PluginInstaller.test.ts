@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { pluginInstallerPipe } from './PluginInstaller';
 import { pluginManagerPipe } from './PluginManager';
-import { eventPipe } from '../pipes/Events';
+import { Events } from '../pipes/Events';
 import { Composer } from '../Composer';
 import { GameFrame, Pipe } from '../State';
 import { sdk } from '../sdk';
@@ -26,7 +26,7 @@ const tick = (frame: GameFrame): GameFrame => ({
 });
 
 const fullPipe: Pipe = Composer.pipe(
-  eventPipe,
+  Events.pipe,
   pluginManagerPipe,
   pluginInstallerPipe
 );

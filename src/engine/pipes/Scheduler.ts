@@ -2,7 +2,7 @@ import { Composer } from '../Composer';
 import { typedPath } from '../Lens';
 import { pluginPaths } from '../plugins/Plugins';
 import { GameTiming, Pipe } from '../State';
-import { Events, GameEvent, getEventKey } from './Events';
+import { Events, GameEvent } from './Events';
 
 const PLUGIN_NAMESPACE = 'core.scheduler';
 
@@ -25,15 +25,16 @@ type SchedulerState = {
 const scheduler = pluginPaths<SchedulerState>(PLUGIN_NAMESPACE);
 const timing = typedPath<GameTiming>(['context']);
 
-const eventType = {
-  schedule: getEventKey(PLUGIN_NAMESPACE, 'schedule'),
-  cancel: getEventKey(PLUGIN_NAMESPACE, 'cancel'),
-  hold: getEventKey(PLUGIN_NAMESPACE, 'hold'),
-  release: getEventKey(PLUGIN_NAMESPACE, 'release'),
-  holdByPrefix: getEventKey(PLUGIN_NAMESPACE, 'holdByPrefix'),
-  releaseByPrefix: getEventKey(PLUGIN_NAMESPACE, 'releaseByPrefix'),
-  cancelByPrefix: getEventKey(PLUGIN_NAMESPACE, 'cancelByPrefix'),
-};
+const eventType = Events.getKeys(
+  PLUGIN_NAMESPACE,
+  'schedule',
+  'cancel',
+  'hold',
+  'release',
+  'hold_by_prefix',
+  'release_by_prefix',
+  'cancel_by_prefix'
+);
 
 export class Scheduler {
   static schedule(event: ScheduledEvent): Pipe {

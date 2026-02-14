@@ -1,6 +1,6 @@
 import { Composer } from '../Composer';
 import { GameContext, GameFrame, Pipe } from '../State';
-import { Events, getEventKey, GameEvent } from './Events';
+import { Events, GameEvent } from './Events';
 import { pluginPaths, PluginId } from '../plugins/Plugins';
 import { typedPath } from '../Lens';
 
@@ -36,10 +36,7 @@ const DEFAULT_CONFIG: PerfConfig = {
   pluginBudget: 1,
 };
 
-const eventType = {
-  overBudget: getEventKey(PLUGIN_NAMESPACE, 'over_budget'),
-  configure: getEventKey(PLUGIN_NAMESPACE, 'configure'),
-};
+const eventType = Events.getKeys(PLUGIN_NAMESPACE, 'over_budget', 'configure');
 
 const perf = pluginPaths<never, PerfContext>(PLUGIN_NAMESPACE);
 const gameContext = typedPath<GameContext>(['context']);

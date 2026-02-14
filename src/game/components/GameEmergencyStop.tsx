@@ -3,14 +3,14 @@ import { WaButton, WaIcon } from '@awesome.me/webawesome/dist/react';
 import { useGameState } from '../hooks';
 import { useDispatchEvent } from '../hooks/UseDispatchEvent';
 import Phase, { GamePhase } from '../plugins/phase';
-import { getEventKey } from '../../engine/pipes/Events';
+import { Events } from '../../engine/pipes/Events';
 
 export const GameEmergencyStop = () => {
   const phase = useGameState(Phase.paths.state.current) ?? '';
   const { dispatchEvent } = useDispatchEvent();
 
   const onStop = useCallback(() => {
-    dispatchEvent({ type: getEventKey('core.emergencyStop', 'stop') });
+    dispatchEvent({ type: Events.getKey('core.emergencyStop', 'stop') });
   }, [dispatchEvent]);
 
   return (
