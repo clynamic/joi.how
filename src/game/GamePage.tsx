@@ -2,7 +2,6 @@ import styled from 'styled-components';
 import { GameEngineProvider } from './GameProvider';
 import { messagesPipe } from '../engine/pipes/Messages';
 import { GameMessages } from './components/GameMessages';
-import { PauseButton } from './components/Pause';
 import { useSettingsPipe } from './pipes';
 import { GameImages } from './components/GameImages';
 import { pluginInstallerPipe } from '../engine/plugins/PluginInstaller';
@@ -102,7 +101,6 @@ export const GamePage = () => {
         <StyledBottomBar>
           <GameSettings />
           <GameEmergencyStop />
-          <PauseButton />
         </StyledBottomBar>
         <GameSound />
         <GameVibrator />
