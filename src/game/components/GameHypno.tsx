@@ -4,8 +4,8 @@ import { GameHypnoType, HypnoPhrases } from '../../types';
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useGameState } from '../hooks';
-import { IntensityState } from '../plugins/intensity';
-import { HypnoState } from '../plugins/hypno';
+import Intensity from '../plugins/intensity';
+import Hypno from '../plugins/hypno';
 
 const StyledGameHypno = motion.create(styled.div`
   pointer-events: none;
@@ -16,9 +16,9 @@ const StyledGameHypno = motion.create(styled.div`
 
 export const GameHypno = () => {
   const [hypno] = useSetting('hypno');
-  const { currentPhrase = 0 } = useGameState<HypnoState>(['core.hypno']) ?? {};
+  const { currentPhrase = 0 } = useGameState(Hypno.paths.state) ?? {};
   const { intensity = 0 } =
-    useGameState<IntensityState>(['core.intensity']) ?? {};
+    useGameState(Intensity.paths.state) ?? {};
   const translate = useTranslate();
 
   const phrase = useMemo(() => {

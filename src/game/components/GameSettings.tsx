@@ -18,8 +18,9 @@ import {
   WaDivider,
   WaIcon,
 } from '@awesome.me/webawesome/dist/react';
-import { useGameEngine, useGameState } from '../hooks';
-import { GamePhase, PhaseState } from '../plugins/phase';
+import { useGameState } from '../hooks';
+import { useDispatchEvent } from '../hooks/UseDispatchEvent';
+import Phase, { GamePhase } from '../plugins/phase';
 import Pause from '../plugins/pause';
 
 const StyledGameSettings = styled.div`
@@ -72,9 +73,9 @@ const GameSettingsDialogContent = memo(() => (
 
 export const GameSettings = () => {
   const [open, setOpen] = useState(false);
-  const { current: phase } = useGameState<PhaseState>(['core.phase']) ?? {};
+  const { current: phase } = useGameState(Phase.paths.state) ?? {};
   const [fullscreen, setFullscreen] = useFullscreen();
-  const { injectImpulse } = useGameEngine();
+  const { inject } = useDispatchEvent();
   const wasActiveRef = useRef(false);
 
   const onOpen = useCallback(
@@ -82,16 +83,16 @@ export const GameSettings = () => {
       if (opening) {
         wasActiveRef.current = phase === GamePhase.active;
         if (phase === GamePhase.active) {
-          injectImpulse(Pause.setPaused(true));
+          inject(Pause.setPaused(true));
         }
       } else {
         if (wasActiveRef.current) {
-          injectImpulse(Pause.setPaused(false));
+          inject(Pause.setPaused(false));
         }
       }
       setOpen(opening);
     },
-    [injectImpulse, phase]
+    [inject, phase]
   );
 
   return (

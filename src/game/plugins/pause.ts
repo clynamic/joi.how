@@ -129,4 +129,8 @@ export default class Pause {
       Composer.set(pause.context, undefined)
     ),
   };
+
+  static get paths() {
+    return pause;
+  }
 }

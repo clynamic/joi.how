@@ -47,4 +47,8 @@ export default class Intensity {
 
     deactivate: Composer.set(intensity.state, undefined),
   };
+
+  static get paths() {
+    return intensity;
+  }
 }

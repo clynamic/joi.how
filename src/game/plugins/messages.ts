@@ -125,4 +125,8 @@ export default class Messages {
       Composer.set(paths.context, undefined)
     ),
   };
+
+  static get paths() {
+    return paths;
+  }
 }

@@ -3,9 +3,9 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { defaultTransition } from '../../utils';
 import { useGameState } from '../hooks';
-import { GamePhase, PhaseState } from '../plugins/phase';
-import { StrokeDirection, StrokeState } from '../plugins/stroke';
-import { PaceState } from '../plugins/pace';
+import Phase, { GamePhase } from '../plugins/phase';
+import Stroke, { StrokeDirection } from '../plugins/stroke';
+import Pace from '../plugins/pace';
 
 const StyledGameMeter = styled.div`
   pointer-events: none;
@@ -25,9 +25,9 @@ enum MeterColor {
 }
 
 export const GameMeter = () => {
-  const { stroke } = useGameState<StrokeState>(['core.stroke']) ?? {};
-  const { current: phase } = useGameState<PhaseState>(['core.phase']) ?? {};
-  const { pace } = useGameState<PaceState>(['core.pace']) ?? {};
+  const { stroke } = useGameState(Stroke.paths.state) ?? {};
+  const { current: phase } = useGameState(Phase.paths.state) ?? {};
+  const { pace } = useGameState(Pace.paths.state) ?? {};
 
   const switchDuration = useMemo(() => {
     if (!pace || pace === 0) return 0;

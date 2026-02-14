@@ -5,7 +5,8 @@ import { JoiImage } from '../../common';
 import { useImagePreloader } from '../../utils';
 import { ImageSize, ImageType } from '../../types';
 import { useGameState } from '../hooks';
-import { ImageState } from '../plugins/image';
+import Image from '../plugins/image';
+import Intensity from '../plugins/intensity';
 
 const StyledGameImages = styled.div`
   position: absolute;
@@ -44,10 +45,8 @@ const StyledBackgroundImage = motion.create(styled.div`
 `);
 
 export const GameImages = () => {
-  const { currentImage, nextImages = [] } = useGameState<ImageState>([
-    'core.images',
-  ]);
-  const { intensity } = useGameState(['core.intensity']);
+  const { currentImage, nextImages = [] } = useGameState(Image.paths.state);
+  const { intensity } = useGameState(Intensity.paths.state);
   const [videoSound] = useSetting('videoSound');
   const [highRes] = useSetting('highRes');
 

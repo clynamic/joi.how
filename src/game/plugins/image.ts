@@ -120,4 +120,8 @@ export default class Image {
       Composer.set(image.context, undefined)
     ),
   };
+
+  static get paths() {
+    return image;
+  }
 }
