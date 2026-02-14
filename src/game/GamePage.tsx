@@ -8,7 +8,8 @@ import { GameSound } from './components/GameSound';
 import { GameVibrator } from './components/GameVibrator';
 import { GameInstructions } from './components/GameInstructions';
 import { GameEmergencyStop } from './components/GameEmergencyStop';
-import { GameSettings } from './components/GameSettings';
+import { GamePauseMenu } from './components/GamePauseMenu';
+import { GameResume } from './components/GameResume';
 import { useGameEngine } from './hooks/UseGameEngine';
 import Pause from './plugins/pause';
 
@@ -92,9 +93,10 @@ export const GamePage = () => {
         <GameHypno />
       </StyledCenter>
       <StyledBottomBar>
-        <GameSettings />
+        <GamePauseMenu />
         <GameEmergencyStop />
       </StyledBottomBar>
+      <GameResume />
       <GameSound />
       <GameVibrator />
     </StyledGamePage>

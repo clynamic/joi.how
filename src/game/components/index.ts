@@ -5,6 +5,7 @@ export * from './GameInstructions';
 export * from './GameIntensity';
 export * from './GameMessages';
 export * from './GameMeter';
-export * from './GameSettings';
+export * from './GameResume';
+export * from './GamePauseMenu';
 export * from './GameSound';
 export * from './GameVibrator';

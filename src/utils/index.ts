@@ -1,4 +1,5 @@
 export * from './animation';
+export * from './dialogNesting';
 export * from './fullscreen';
 export * from './images';
 export * from './intensity';

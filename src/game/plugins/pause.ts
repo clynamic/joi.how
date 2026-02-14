@@ -16,37 +16,35 @@ const PLUGIN_ID = 'core.pause';
 export type PauseState = {
   paused: boolean;
   prev: boolean;
+  countdown: number | null;
 };
 
-const pause = pluginPaths<PauseState>(PLUGIN_ID);
+const paths = pluginPaths<PauseState>(PLUGIN_ID);
 
 const eventType = Events.getKeys(PLUGIN_ID, 'on', 'off');
 
+type SetPayload = { paused: boolean };
 type CountdownPayload = { remaining: number };
 
-const resume = Sequence.for(PLUGIN_ID, 'resume');
+const seq = Sequence.for(PLUGIN_ID, 'set');
 
 export default class Pause {
   static setPaused(val: boolean): Pipe {
-    return Composer.when(
-      val,
-      Composer.pipe(resume.cancel(), Composer.set(pause.state.paused, true)),
-      resume.start()
-    );
+    return seq.start({ paused: val });
   }
 
   static get togglePause(): Pipe {
-    return Composer.bind(pause.state, state => Pause.setPaused(!state?.paused));
+    return Composer.bind(paths.state, state => Pause.setPaused(!state?.paused));
   }
 
   static whenPaused(pipe: Pipe): Pipe {
-    return Composer.bind(pause.state, state =>
+    return Composer.bind(paths.state, state =>
       Composer.when(!!state?.paused, pipe)
     );
   }
 
   static whenPlaying(pipe: Pipe): Pipe {
-    return Composer.bind(pause.state, state =>
+    return Composer.bind(paths.state, state =>
       Composer.when(!state?.paused, pipe)
     );
   }
@@ -65,40 +63,41 @@ export default class Pause {
       name: 'Pause',
     },
 
-    activate: Composer.set(pause.state, { paused: true, prev: true }),
+    activate: Composer.set(paths.state, { paused: true, prev: true, countdown: null }),
 
     update: Composer.pipe(
       Composer.do(({ get, set, pipe }) => {
-        const { paused, prev } = get(pause.state);
+        const { paused, prev } = get(paths.state);
         if (paused === prev) return;
-        set(pause.state.prev, paused);
+        set(paths.state.prev, paused);
         pipe(Events.dispatch({ type: paused ? eventType.on : eventType.off }));
       }),
 
-      resume.on(() =>
-        Composer.pipe(
-          resume.message({
-            title: 'Get ready to continue.',
-            description: '3...',
-          }),
-          resume.after(1000, 'countdown', { remaining: 2 })
+      seq.on<SetPayload>(event =>
+        Composer.when(
+          event.payload.paused,
+          Composer.pipe(
+            seq.cancel(),
+            Composer.set(paths.state.paused, true),
+            Composer.set(paths.state.countdown, null)
+          ),
+          Composer.pipe(
+            Composer.set(paths.state.countdown, 3),
+            seq.after(1000, 'countdown', { remaining: 2 })
+          )
         )
       ),
 
-      resume.on<CountdownPayload>('countdown', event =>
+      seq.on<CountdownPayload>('countdown', event =>
         Composer.when(
           event.payload.remaining <= 0,
           Composer.pipe(
-            resume.message({
-              title: 'Continue.',
-              description: undefined,
-              duration: 1500,
-            }),
-            Composer.set(pause.state.paused, false)
+            Composer.set(paths.state.countdown, null),
+            Composer.set(paths.state.paused, false)
           ),
           Composer.pipe(
-            resume.message({ description: `${event.payload.remaining}...` }),
-            resume.after(1000, 'countdown', {
+            Composer.set(paths.state.countdown, event.payload.remaining),
+            seq.after(1000, 'countdown', {
               remaining: event.payload.remaining - 1,
             })
           )
@@ -106,10 +105,10 @@ export default class Pause {
       )
     ),
 
-    deactivate: Composer.set(pause.state, undefined),
+    deactivate: Composer.set(paths.state, undefined),
   };
 
   static get paths() {
-    return pause;
+    return paths;
   }
 }
