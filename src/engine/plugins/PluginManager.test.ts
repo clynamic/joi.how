@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Plugin, PluginClass, EnabledMap } from './Plugins';
 import { PluginManager, pluginManagerPipe } from './PluginManager';
-import { eventPipe } from '../pipes/Events';
+import { Events } from '../pipes/Events';
 import { Composer } from '../Composer';
 import { Pipe, GameFrame } from '../State';
 
@@ -23,7 +23,7 @@ const tick = (frame: GameFrame, n = 1): GameFrame => ({
   },
 });
 
-const gamePipe: Pipe = Composer.pipe(eventPipe, pluginManagerPipe);
+const gamePipe: Pipe = Composer.pipe(Events.pipe, pluginManagerPipe);
 
 const getLoadedIds = (frame: GameFrame): string[] =>
   (frame.state as any)?.core?.plugin_manager?.loaded ?? [];

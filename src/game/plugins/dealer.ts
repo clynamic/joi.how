@@ -1,6 +1,6 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
-import { Events, getEventKey } from '../../engine/pipes/Events';
+import { Events } from '../../engine/pipes/Events';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { Sequence } from '../Sequence';
 import Phase, { GamePhase } from './phase';
@@ -52,7 +52,7 @@ const rollChances: Record<string, number> = {
 };
 
 const eventKeyForOutcome = (id: GameEventType): string =>
-  getEventKey(PLUGIN_ID, id);
+  Events.getKey(PLUGIN_ID, id);
 
 const roll = Sequence.for(PLUGIN_ID, 'roll');
 

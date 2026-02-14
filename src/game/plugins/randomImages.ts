@@ -1,6 +1,6 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine';
-import { Events, getEventKey } from '../../engine/pipes/Events';
+import { Events } from '../../engine/pipes/Events';
 import { Scheduler, getScheduleKey } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { ImageItem } from '../../types';
@@ -19,9 +19,7 @@ const images = typedPath<ImageItem[]>(['context', 'images']);
 const intensityState = typedPath<IntensityState>(['state', 'core.intensity']);
 const imageState = typedPath<ImageState>(['state', 'core.images']);
 
-const eventType = {
-  scheduleNext: getEventKey(PLUGIN_ID, 'scheduleNext'),
-};
+const eventType = Events.getKeys(PLUGIN_ID, 'schedule_next');
 
 const scheduleId = getScheduleKey(PLUGIN_ID, 'randomImageSwitch');
 

@@ -6,7 +6,7 @@ import {
   flushDOMOperations,
 } from '../DOMBatcher';
 import { Storage } from '../pipes/Storage';
-import { Events, getEventKey } from '../pipes/Events';
+import { Events } from '../pipes/Events';
 import {
   pluginPaths,
   type PluginId,
@@ -19,12 +19,13 @@ import { sdk } from '../sdk';
 
 const PLUGIN_NAMESPACE = 'core.plugin_manager';
 
-const eventType = {
-  register: getEventKey(PLUGIN_NAMESPACE, 'register'),
-  unregister: getEventKey(PLUGIN_NAMESPACE, 'unregister'),
-  enable: getEventKey(PLUGIN_NAMESPACE, 'enable'),
-  disable: getEventKey(PLUGIN_NAMESPACE, 'disable'),
-};
+const eventType = Events.getKeys(
+  PLUGIN_NAMESPACE,
+  'register',
+  'unregister',
+  'enable',
+  'disable'
+);
 
 const storageKey = {
   enabled: `${PLUGIN_NAMESPACE}.enabled`,

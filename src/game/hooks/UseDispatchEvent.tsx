@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useContextSelector } from 'use-context-selector';
-import { dispatchEvent, GameEvent } from '../../engine/pipes/Events';
+import { Events, GameEvent } from '../../engine/pipes/Events';
 import { Pipe } from '../../engine/State';
 import { GameEngineContext } from '../GameProvider';
 
@@ -16,7 +16,7 @@ export function useDispatchEvent() {
         injectImpulse?.(pipe);
       },
       dispatchEvent: (event: GameEvent) => {
-        injectImpulse?.(dispatchEvent(event));
+        injectImpulse?.(Events.dispatch(event));
       },
     }),
     [injectImpulse]

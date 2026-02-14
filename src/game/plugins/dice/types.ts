@@ -1,5 +1,5 @@
 import { Pipe, GameFrame } from '../../../engine/State';
-import { Events, getEventKey } from '../../../engine/pipes/Events';
+import { Events } from '../../../engine/pipes/Events';
 import { pluginPaths } from '../../../engine/plugins/Plugins';
 import { typedPath } from '../../../engine/Lens';
 import { IntensityState } from '../intensity';
@@ -21,7 +21,7 @@ export const intensityState = typedPath<IntensityState>([
 ]);
 export const settings = typedPath<Settings>(['context', 'settings']);
 
-export const OUTCOME_DONE = getEventKey(PLUGIN_ID, 'outcome.done');
+export const OUTCOME_DONE = Events.getKey(PLUGIN_ID, 'outcome.done');
 export const outcomeDone = (): Pipe => Events.dispatch({ type: OUTCOME_DONE });
 
 export type DiceOutcome = {
