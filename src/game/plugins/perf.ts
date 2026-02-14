@@ -1,5 +1,5 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
-import type { PerfMetrics, PluginHookPhase } from '../../engine/pipes/Perf';
+import type { PerfMetrics } from '../../engine/pipes/Perf';
 import { Composer } from '../../engine/Composer';
 import { Perf } from '../../engine/pipes/Perf';
 import { pluginPaths } from '../../engine/plugins/Plugins';
@@ -38,7 +38,7 @@ function budgetColor(duration: number, budget: number): string {
 
 function formatLine(
   id: string,
-  phase: PluginHookPhase,
+  phase: string,
   avg: number,
   budget: number
 ): string {
@@ -100,18 +100,12 @@ export default class PerfOverlay {
 
       const { plugins, config } = ctx;
       const lines: string[] = [];
-      const phaseOrder: PluginHookPhase[] = [
-        'activate',
-        'update',
-        'deactivate',
-      ];
 
       let totalAvg = 0;
 
-      for (const phase of phaseOrder) {
-        for (const [id, phases] of Object.entries(plugins as PerfMetrics)) {
-          if (id === PLUGIN_ID) continue;
-          const entry = phases[phase];
+      for (const [id, phases] of Object.entries(plugins as PerfMetrics)) {
+        if (id === PLUGIN_ID) continue;
+        for (const [phase, entry] of Object.entries(phases)) {
           if (!entry) continue;
           totalAvg += entry.avg;
           lines.push(formatLine(id, phase, entry.avg, config.pluginBudget));
