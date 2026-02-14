@@ -8,7 +8,6 @@ import {
 } from '../../../src/engine/plugins/PluginManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import { PluginClass } from '../../../src/engine/plugins/Plugins';
-import Messages from '../../../src/game/plugins/messages';
 import Pause, { PauseState } from '../../../src/game/plugins/pause';
 import { makeFrame, tick } from '../../utils';
 
@@ -40,7 +39,6 @@ function bootstrap(): GameFrame {
   };
 
   let frame = gamePipe(makeFrame());
-  frame = PluginManager.register(makePluginClass(Messages.plugin))(frame);
   frame = PluginManager.register(makePluginClass(Pause.plugin))(frame);
   frame = PluginManager.register(makePluginClass(dealerPlugin))(frame);
   frame = gamePipe(tick(frame));
@@ -53,10 +51,6 @@ function getScheduled(frame: GameFrame): ScheduledEvent[] {
 
 function getPauseState(frame: GameFrame): PauseState | undefined {
   return (frame.state as any)?.core?.pause;
-}
-
-function getMessages(frame: GameFrame): any[] {
-  return (frame.state as any)?.core?.messages?.messages ?? [];
 }
 
 function getDealerScheduled(frame: GameFrame): ScheduledEvent[] {
@@ -164,7 +158,7 @@ describe('Pause + Scheduler resume', () => {
     expect(dealerEvent?.duration).toBeLessThan(durationBeforeResume!);
   });
 
-  it('should show countdown messages during resume', () => {
+  it('should count down through pause state during resume', () => {
     let frame = bootstrap();
 
     frame = withImpulse(Pause.setPaused(true))(tick(frame));
@@ -174,20 +168,21 @@ describe('Pause + Scheduler resume', () => {
 
     frame = withImpulse(Pause.setPaused(false))(tick(frame));
 
-    const seenDescriptions: string[] = [];
+    const seenCountdowns: number[] = [];
 
     for (let i = 0; i < 300; i++) {
       frame = gamePipe(tick(frame, 100));
-      const msg = getMessages(frame).find(m => m.id === 'resume');
-      if (msg?.description && !seenDescriptions.includes(msg.description)) {
-        seenDescriptions.push(msg.description);
+      const countdown = getPauseState(frame)?.countdown;
+      if (countdown != null && !seenCountdowns.includes(countdown)) {
+        seenCountdowns.push(countdown);
       }
     }
 
-    expect(seenDescriptions).toContain('3...');
-    expect(seenDescriptions).toContain('2...');
-    expect(seenDescriptions).toContain('1...');
+    expect(seenCountdowns).toContain(3);
+    expect(seenCountdowns).toContain(2);
+    expect(seenCountdowns).toContain(1);
     expect(getPauseState(frame)?.paused).toBe(false);
+    expect(getPauseState(frame)?.countdown).toBeNull();
   });
 
   it('should cancel resume countdown when re-paused', () => {
