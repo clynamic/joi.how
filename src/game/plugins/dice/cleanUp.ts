@@ -9,7 +9,7 @@ import {
   PLUGIN_ID,
   intensityState,
   settings,
-  setBusy,
+  outcomeDone,
   DiceOutcome,
 } from './types';
 
@@ -40,7 +40,7 @@ export const cleanUpOutcome: DiceOutcome = {
           prompts: undefined,
         }),
         Phase.setPhase(GamePhase.active),
-        setBusy(false)
+        outcomeDone()
       )
     )
   ),

@@ -8,7 +8,7 @@ import {
   paceState,
   intensityState,
   settings,
-  setBusy,
+  outcomeDone,
   DiceOutcome,
 } from './types';
 import { doRandomPace } from './randomPace';
@@ -56,7 +56,7 @@ export const halfPaceOutcome: DiceOutcome = {
           duration: 5000,
         }),
         doRandomPace(),
-        setBusy(false)
+        outcomeDone()
       )
     )
   ),

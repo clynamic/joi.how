@@ -7,7 +7,7 @@ import {
   PLUGIN_ID,
   intensityState,
   settings,
-  setBusy,
+  outcomeDone,
   DiceOutcome,
 } from './types';
 import { doRandomPace } from './randomPace';
@@ -62,6 +62,6 @@ export const risingPaceOutcome: DiceOutcome = {
         seq.after(15000, 'done')
       )
     ),
-    seq.on('done', () => Composer.pipe(doRandomPace(), setBusy(false)))
+    seq.on('done', () => Composer.pipe(doRandomPace(), outcomeDone()))
   ),
 };
