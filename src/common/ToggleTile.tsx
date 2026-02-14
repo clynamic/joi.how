@@ -20,6 +20,7 @@ export class JoiToggleTileElement extends LitElement {
       display: block;
       width: 100%;
       cursor: pointer;
+      text-align: left;
 
       background: var(--wa-color-neutral-fill-quiet);
       opacity: var(--tile-inactive-opacity);
