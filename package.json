@@ -9,7 +9,9 @@
     "build": "tsc && vite build",
     "format": "prettier --write .",
     "lint": "eslint . --ext ts,tsx --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@awesome.me/webawesome": "^3.2.1",
