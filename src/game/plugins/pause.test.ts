@@ -13,7 +13,7 @@ import Pause, { PauseState } from './pause';
 
 const makeFrame = (): GameFrame => ({
   state: {},
-  context: { tick: 0, deltaTime: 16, elapsedTime: 0 },
+  context: { tick: 0, step: 16, time: 0 },
 });
 
 const tick = (frame: GameFrame, dt = 16): GameFrame => ({
@@ -21,8 +21,8 @@ const tick = (frame: GameFrame, dt = 16): GameFrame => ({
   context: {
     ...frame.context,
     tick: frame.context.tick + 1,
-    deltaTime: dt,
-    elapsedTime: frame.context.elapsedTime + dt,
+    step: dt,
+    time: frame.context.time + dt,
   },
 });
 

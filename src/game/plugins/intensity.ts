@@ -36,7 +36,7 @@ export default class Intensity {
       Phase.whenPhase(
         GamePhase.active,
         Composer.do(({ get, over }) => {
-          const delta = get(gameContext.deltaTime);
+          const delta = get(gameContext.step);
           const s = get(settings);
           over(intensity.state, ({ intensity: i = 0 }) => ({
             intensity: Math.min(1, i + delta / (s.gameDuration * 1000)),

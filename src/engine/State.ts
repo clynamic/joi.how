@@ -8,8 +8,8 @@ export type GameContext = {
 
 export type GameTiming = {
   tick: number;
-  deltaTime: number;
-  elapsedTime: number;
+  step: number;
+  time: number;
 };
 
 export type GameFrame = {

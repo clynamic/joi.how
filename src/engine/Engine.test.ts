@@ -14,31 +14,39 @@ describe('GameEngine', () => {
   it('should increment tick on each tick', () => {
     const engine = new GameEngine({}, frame => frame);
 
-    engine.tick(16);
+    engine.tick();
     expect(engine.getContext().tick).toBe(1);
 
-    engine.tick(16);
+    engine.tick();
     expect(engine.getContext().tick).toBe(2);
   });
 
-  it('should accumulate elapsed time', () => {
+  it('should accumulate time by fixed step', () => {
     const engine = new GameEngine({}, frame => frame);
 
-    engine.tick(16);
-    expect(engine.getContext().elapsedTime).toBe(16);
+    engine.tick();
+    expect(engine.getContext().time).toBe(16);
 
-    engine.tick(20);
-    expect(engine.getContext().elapsedTime).toBe(36);
+    engine.tick();
+    expect(engine.getContext().time).toBe(32);
   });
 
-  it('should update deltaTime on each tick', () => {
+  it('should use default step of 16ms', () => {
     const engine = new GameEngine({}, frame => frame);
 
-    engine.tick(16);
-    expect(engine.getContext().deltaTime).toBe(16);
+    engine.tick();
+    expect(engine.getContext().step).toBe(16);
+  });
 
-    engine.tick(33);
-    expect(engine.getContext().deltaTime).toBe(33);
+  it('should accept custom step size', () => {
+    const engine = new GameEngine({}, frame => frame, { step: 8 });
+
+    engine.tick();
+    expect(engine.getContext().step).toBe(8);
+    expect(engine.getContext().time).toBe(8);
+
+    engine.tick();
+    expect(engine.getContext().time).toBe(16);
   });
 
   it('should pass state through pipe', () => {
@@ -48,7 +56,7 @@ describe('GameEngine', () => {
     });
 
     const engine = new GameEngine({}, pipe);
-    engine.tick(16);
+    engine.tick();
 
     expect(engine.getState()).toEqual({ modified: true });
   });
@@ -60,10 +68,10 @@ describe('GameEngine', () => {
     });
 
     const engine = new GameEngine({}, pipe);
-    engine.tick(16);
+    engine.tick();
 
     const state1 = engine.getState();
-    engine.tick(16);
+    engine.tick();
     const state2 = engine.getState();
 
     expect(state1.nested).not.toBe(state2.nested);
@@ -77,7 +85,7 @@ describe('GameEngine', () => {
     });
 
     const engine = new GameEngine({}, pipe);
-    engine.tick(16);
+    engine.tick();
 
     const state = engine.getState();
     expect(() => {

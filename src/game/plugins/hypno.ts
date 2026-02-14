@@ -46,7 +46,7 @@ export default class Hypno {
         const delay = 3000 - i * 29;
         if (delay <= 0) return;
 
-        const delta = get(gameContext.deltaTime);
+        const delta = get(gameContext.step);
         const state = get(hypno.state);
         if (!state) return;
 

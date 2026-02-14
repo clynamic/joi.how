@@ -69,7 +69,7 @@ export class Scheduler {
   }
 
   static pipe: Pipe = Composer.pipe(
-    Composer.bind(timing.deltaTime, delta =>
+    Composer.bind(timing.step, delta =>
       Composer.over(scheduler.state, ({ scheduled = [] }) => {
         const remaining: ScheduledEvent[] = [];
         const current: GameEvent[] = [];
