@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { Composer } from '../Composer';
-import { GameFrame, Pipe } from '../State';
-import { Events } from './Events';
-import { Perf, type PerfContext, type PluginPerfEntry } from './Perf';
-import { sdk } from '../sdk';
+import { Composer } from '../../../src/engine/Composer';
+import { GameFrame, Pipe } from '../../../src/engine/State';
+import { Events } from '../../../src/engine/pipes/Events';
+import { Perf, type PerfContext, type PluginPerfEntry } from '../../../src/engine/pipes/Perf';
+import { sdk } from '../../../src/engine/sdk';
 
 const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
   state: {},

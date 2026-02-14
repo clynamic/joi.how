@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Composer } from '../../engine/Composer';
-import { Events } from '../../engine/pipes/Events';
-import { Scheduler, ScheduledEvent } from '../../engine/pipes/Scheduler';
+import { Composer } from '../../../src/engine/Composer';
+import { Events } from '../../../src/engine/pipes/Events';
+import { Scheduler, ScheduledEvent } from '../../../src/engine/pipes/Scheduler';
 import {
   pluginManagerPipe,
   PluginManager,
-} from '../../engine/plugins/PluginManager';
-import { GameFrame, Pipe } from '../../engine/State';
-import { PluginClass } from '../../engine/plugins/Plugins';
-import Messages from './messages';
-import Pause, { PauseState } from './pause';
+} from '../../../src/engine/plugins/PluginManager';
+import { GameFrame, Pipe } from '../../../src/engine/State';
+import { PluginClass } from '../../../src/engine/plugins/Plugins';
+import Messages from '../../../src/game/plugins/messages';
+import Pause, { PauseState } from '../../../src/game/plugins/pause';
 
 const makeFrame = (): GameFrame => ({
   state: {},

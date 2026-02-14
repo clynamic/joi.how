@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { GameEngine } from './Engine';
-import { GameFrame, Pipe } from './State';
+import { GameEngine } from '../../src/engine/Engine';
+import { GameFrame, Pipe } from '../../src/engine/State';
 
 describe('GameEngine', () => {
   it('should initialize with given state', () => {

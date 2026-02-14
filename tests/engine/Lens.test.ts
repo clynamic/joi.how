@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { lensFromPath, normalizePath } from './Lens';
+import { lensFromPath, normalizePath } from '../../src/engine/Lens';
 
 describe('Lens', () => {
   describe('normalizePath', () => {

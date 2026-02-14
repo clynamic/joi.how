@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { pluginInstallerPipe } from './PluginInstaller';
-import { pluginManagerPipe } from './PluginManager';
-import { Events } from '../pipes/Events';
-import { Composer } from '../Composer';
-import { GameFrame, Pipe } from '../State';
-import { sdk } from '../sdk';
-import type { Plugin, PluginClass } from './Plugins';
+import { pluginInstallerPipe } from '../../../src/engine/plugins/PluginInstaller';
+import { pluginManagerPipe } from '../../../src/engine/plugins/PluginManager';
+import { Events } from '../../../src/engine/pipes/Events';
+import { Composer } from '../../../src/engine/Composer';
+import { GameFrame, Pipe } from '../../../src/engine/State';
+import { sdk } from '../../../src/engine/sdk';
+import type { Plugin, PluginClass } from '../../../src/engine/plugins/Plugins';
 
 const PLUGIN_NAMESPACE = 'core.plugin_installer';
 

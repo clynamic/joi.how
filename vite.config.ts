@@ -31,7 +31,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts', 'src/**/*.d.ts'],
+      exclude: ['src/**/*.d.ts', 'tests/**/*.test.ts'],
     },
   },
 });
