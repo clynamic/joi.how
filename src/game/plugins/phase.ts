@@ -56,7 +56,10 @@ export default class Phase {
       name: 'Phase',
     },
 
-    activate: Composer.set(phase.state, { current: GamePhase.warmup, prev: GamePhase.warmup }),
+    activate: Composer.set(phase.state, {
+      current: GamePhase.warmup,
+      prev: GamePhase.warmup,
+    }),
 
     update: Composer.do(({ get, set, pipe }) => {
       const { current, prev } = get(phase.state);

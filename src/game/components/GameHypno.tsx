@@ -17,8 +17,7 @@ const StyledGameHypno = motion.create(styled.div`
 export const GameHypno = () => {
   const [hypno] = useSetting('hypno');
   const { currentPhrase = 0 } = useGameState(Hypno.paths.state) ?? {};
-  const { intensity = 0 } =
-    useGameState(Intensity.paths.state) ?? {};
+  const { intensity = 0 } = useGameState(Intensity.paths.state) ?? {};
   const translate = useTranslate();
 
   const phrase = useMemo(() => {

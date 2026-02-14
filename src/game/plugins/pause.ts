@@ -28,18 +28,13 @@ export default class Pause {
   static setPaused(val: boolean): Pipe {
     return Composer.when(
       val,
-      Composer.pipe(
-        resume.cancel(),
-        Composer.set(pause.state.paused, true)
-      ),
+      Composer.pipe(resume.cancel(), Composer.set(pause.state.paused, true)),
       resume.start()
     );
   }
 
   static get togglePause(): Pipe {
-    return Composer.bind(pause.state, state =>
-      Pause.setPaused(!state?.paused)
-    );
+    return Composer.bind(pause.state, state => Pause.setPaused(!state?.paused));
   }
 
   static whenPaused(pipe: Pipe): Pipe {

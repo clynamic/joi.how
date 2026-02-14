@@ -20,7 +20,12 @@ export type ImageState = {
 
 const image = pluginPaths<ImageState>(PLUGIN_ID);
 
-const eventType = Events.getKeys(PLUGIN_ID, 'push_next', 'set_image', 'set_next_images');
+const eventType = Events.getKeys(
+  PLUGIN_ID,
+  'push_next',
+  'set_image',
+  'set_next_images'
+);
 
 export default class Image {
   static pushNextImage(img: ImageItem): Pipe {
