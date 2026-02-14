@@ -56,7 +56,12 @@ export default class Fps {
       el.style.display = visible ? '' : 'none';
 
       document.querySelector('.game-page')?.appendChild(el);
-      set(fps.context, { el, fpsHistory: [], tpsHistory: [], lastWallTime: performance.now() });
+      set(fps.context, {
+        el,
+        fpsHistory: [],
+        tpsHistory: [],
+        lastWallTime: performance.now(),
+      });
     }),
 
     update: Composer.do(({ get, set }) => {
@@ -85,7 +90,8 @@ export default class Fps {
           ? tpsHistory.reduce((sum, v) => sum + v, 0) / tpsHistory.length
           : currentTps;
 
-      if (ctx.el) ctx.el.textContent = `${Math.round(avgFps)} FPS / ${Math.round(avgTps)} TPS`;
+      if (ctx.el)
+        ctx.el.textContent = `${Math.round(avgFps)} FPS / ${Math.round(avgTps)} TPS`;
 
       set(fps.context, { ...ctx, fpsHistory, tpsHistory, lastWallTime: now });
     }),

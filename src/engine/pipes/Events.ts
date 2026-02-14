@@ -48,7 +48,10 @@ export class Events {
     return pendingLens.over((pending = []) => [...pending, event]);
   }
 
-  static handle<T = any>(type: string, fn: (event: GameEvent<T>) => Pipe): Pipe {
+  static handle<T = any>(
+    type: string,
+    fn: (event: GameEvent<T>) => Pipe
+  ): Pipe {
     const { namespace, key } = Events.parseKey(type);
     const isWildcard = key === '*';
     const prefix = namespace + '/';
