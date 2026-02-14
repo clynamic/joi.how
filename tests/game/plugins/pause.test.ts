@@ -63,6 +63,14 @@ function getDealerScheduled(frame: GameFrame): ScheduledEvent[] {
   return getScheduled(frame).filter(s => s.id?.startsWith(DEALER_ID));
 }
 
+function unpauseAndWait(frame: GameFrame): GameFrame {
+  frame = withImpulse(Pause.setPaused(false))(tick(frame));
+  for (let i = 0; i < 300; i++) {
+    frame = gamePipe(tick(frame, 100));
+  }
+  return frame;
+}
+
 describe('Pause + Scheduler resume', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -93,7 +101,7 @@ describe('Pause + Scheduler resume', () => {
   });
 
   it('should hold dealer events when paused', () => {
-    let frame = bootstrap();
+    let frame = unpauseAndWait(bootstrap());
 
     frame = withImpulse(
       Scheduler.schedule({
@@ -123,7 +131,7 @@ describe('Pause + Scheduler resume', () => {
   });
 
   it('should release dealer events after resume countdown', () => {
-    let frame = bootstrap();
+    let frame = unpauseAndWait(bootstrap());
 
     frame = withImpulse(
       Scheduler.schedule({

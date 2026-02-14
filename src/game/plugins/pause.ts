@@ -65,7 +65,7 @@ export default class Pause {
       name: 'Pause',
     },
 
-    activate: Composer.set(pause.state, { paused: false, prev: false }),
+    activate: Composer.set(pause.state, { paused: true, prev: true }),
 
     update: Composer.pipe(
       Composer.do(({ get, set, pipe }) => {
