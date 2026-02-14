@@ -58,6 +58,12 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
     const loop = (time: number) => {
       if (!engineRef.current) return;
 
+      if (document.hidden) {
+        lastTimeRef.current = null;
+        frameId = requestAnimationFrame(loop);
+        return;
+      }
+
       if (lastTimeRef.current == null) {
         lastTimeRef.current = time;
         frameId = requestAnimationFrame(loop);
