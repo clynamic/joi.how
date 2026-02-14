@@ -1,7 +1,7 @@
 import { pluginPaths, type Plugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine';
 import { Events, getEventKey } from '../../engine/pipes/Events';
-import { Messages } from '../../engine/pipes/Messages';
+import Messages from './messages';
 import { Scheduler, getScheduleKey } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { Settings } from '../../settings';

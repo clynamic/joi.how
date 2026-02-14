@@ -2,10 +2,10 @@ import { Pipe } from '../engine/State';
 import {
   Events,
   getEventKey,
-  Messages,
   Scheduler,
   getScheduleKey,
 } from '../engine/pipes';
+import Messages from './plugins/messages';
 
 type EventHandler = Parameters<typeof Events.handle>[1];
 type MessageInput = Omit<Parameters<typeof Messages.send>[0], 'id'>;
