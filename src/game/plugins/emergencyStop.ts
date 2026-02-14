@@ -14,6 +14,8 @@ const PLUGIN_ID = 'core.emergencyStop';
 const intensityState = typedPath<IntensityState>(['state', 'core.intensity']);
 const settings = typedPath<Settings>(['context', 'settings']);
 
+type CountdownPayload = { remaining: number };
+
 const seq = Sequence.for(PLUGIN_ID, 'stop');
 
 declare module '../../engine/sdk' {
@@ -48,7 +50,7 @@ export default class EmergencyStop {
         )
       ),
 
-      seq.on('countdown', event => {
+      seq.on<CountdownPayload>('countdown', event => {
         const { remaining } = event.payload;
         if (remaining <= 0) {
           return Composer.pipe(

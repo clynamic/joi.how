@@ -1,7 +1,7 @@
 import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import Pace from '../pace';
-import { GameEvent as GameEventType } from '../../../types';
+import { DiceEvent } from '../../../types';
 import { round } from '../../../utils';
 import {
   PLUGIN_ID,
@@ -13,10 +13,12 @@ import {
 } from './types';
 import { doRandomPace } from './randomPace';
 
+type HalfPacePayload = { portion: number };
+
 const seq = Sequence.for(PLUGIN_ID, 'halfPace');
 
 export const halfPaceOutcome: DiceOutcome = {
-  id: GameEventType.halfPace,
+  id: DiceEvent.halfPace,
   check: frame => {
     const i = (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100;
     return i >= 10 && i <= 50;
@@ -36,13 +38,13 @@ export const halfPaceOutcome: DiceOutcome = {
         })
       )
     ),
-    seq.on('step2', event =>
+    seq.on<HalfPacePayload>('step2', event =>
       Composer.pipe(
         seq.message({ description: '2...' }),
         seq.after(event.payload.portion, 'step3', event.payload)
       )
     ),
-    seq.on('step3', event =>
+    seq.on<HalfPacePayload>('step3', event =>
       Composer.pipe(
         seq.message({ description: '1...' }),
         seq.after(event.payload.portion, 'done')

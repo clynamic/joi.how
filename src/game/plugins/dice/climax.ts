@@ -2,7 +2,7 @@ import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
 import Pace from '../pace';
-import { GameEvent as GameEventType } from '../../../types';
+import { DiceEvent } from '../../../types';
 import { IntensityState } from '../intensity';
 import {
   PLUGIN_ID,
@@ -13,16 +13,18 @@ import {
 } from './types';
 import { edged } from './edge';
 
+type ClimaxEndPayload = { countdown: number; denied?: boolean; ruin?: boolean };
+
 const seq = Sequence.for(PLUGIN_ID, 'climax');
 
 export const climaxOutcome: DiceOutcome = {
-  id: GameEventType.climax,
+  id: DiceEvent.climax,
   check: frame => {
     const i = (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100;
     const s = Composer.get(settings)(frame);
     return (
       i >= 100 &&
-      (!s?.events.includes(GameEventType.edge) || !!Composer.get(edged)(frame))
+      (!s?.events.includes(DiceEvent.edge) || !!Composer.get(edged)(frame))
     );
   },
   update: Composer.pipe(
@@ -97,7 +99,7 @@ export const climaxOutcome: DiceOutcome = {
       })
     ),
 
-    seq.on('end', event => {
+    seq.on<ClimaxEndPayload>('end', event => {
       const { countdown, denied, ruin } = event.payload;
       const decay = Composer.over(intensityState, (s: IntensityState) => ({
         intensity: Math.max(0, s.intensity - (denied ? 0.2 : 0.1)),

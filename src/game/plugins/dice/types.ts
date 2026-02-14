@@ -5,7 +5,7 @@ import { typedPath } from '../../../engine/Lens';
 import { IntensityState } from '../intensity';
 import { PaceState } from '../pace';
 import { Settings } from '../../../settings';
-import { GameEvent as GameEventType } from '../../../types';
+import { DiceEvent } from '../../../types';
 
 export const PLUGIN_ID = 'core.dice';
 
@@ -25,7 +25,7 @@ export const OUTCOME_DONE = Events.getKey(PLUGIN_ID, 'outcome.done');
 export const outcomeDone = (): Pipe => Events.dispatch({ type: OUTCOME_DONE });
 
 export type DiceOutcome = {
-  id: GameEventType;
+  id: DiceEvent;
   check?: (frame: GameFrame) => boolean;
   activate?: Pipe;
   update: Pipe;

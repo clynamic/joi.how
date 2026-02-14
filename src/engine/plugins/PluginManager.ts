@@ -109,39 +109,37 @@ const apiPipe: Pipe = Composer.over<PluginManagerContext>(pm.context, ctx => ({
 
 // TODO: enable/disable plugin storage should probably live elsewhere.
 const enableDisablePipe: Pipe = Composer.pipe(
-  Events.handle(eventType.enable, event =>
+  Events.handle<PluginId>(eventType.enable, event =>
     Storage.bind<EnabledMap>(storageKey.enabled, (map = {}) =>
       Storage.set<EnabledMap>(storageKey.enabled, {
         ...map,
-        [event.payload as PluginId]: true,
+        [event.payload]: true,
       })
     )
   ),
-  Events.handle(eventType.disable, event =>
+  Events.handle<PluginId>(eventType.disable, event =>
     Storage.bind<EnabledMap>(storageKey.enabled, (map = {}) =>
       Storage.set<EnabledMap>(storageKey.enabled, {
         ...map,
-        [event.payload as PluginId]: false,
+        [event.payload]: false,
       })
     )
   )
 );
 
 const reconcilePipe: Pipe = Composer.pipe(
-  Events.handle(eventType.register, event =>
+  Events.handle<PluginClass>(eventType.register, event =>
     Composer.do<GameFrame>(({ over }) => {
-      const cls = event.payload as PluginClass;
       over(pm.context.registry, registry => ({
         ...registry,
-        [cls.plugin.id]: cls,
+        [event.payload.plugin.id]: event.payload,
       }));
     })
   ),
-  Events.handle(eventType.unregister, event =>
+  Events.handle<PluginId>(eventType.unregister, event =>
     Composer.do<GameFrame>(({ over }) => {
-      const id = event.payload as PluginId;
       over(pm.context.toUnload, (ids = []) =>
-        Array.isArray(ids) ? [...ids, id] : [id]
+        Array.isArray(ids) ? [...ids, event.payload] : [event.payload]
       );
     })
   ),
@@ -238,12 +236,11 @@ const lifecyclePipe: Pipe = Composer.do<GameFrame>(({ get, pipe }) => {
 });
 
 const finalizePipe: Pipe = Composer.pipe(
-  Events.handle(eventType.unregister, event =>
+  Events.handle<PluginId>(eventType.unregister, event =>
     Composer.do<GameFrame>(({ over }) => {
-      const id = event.payload as PluginId;
       over(pm.context.registry, registry => {
         const next = { ...registry };
-        delete next[id];
+        delete next[event.payload];
         return next;
       });
     })

@@ -1,13 +1,13 @@
 import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
-import { GameEvent as GameEventType } from '../../../types';
+import { DiceEvent } from '../../../types';
 import { PLUGIN_ID, intensityState, outcomeDone, DiceOutcome } from './types';
 
 const seq = Sequence.for(PLUGIN_ID, 'pause');
 
 export const pauseOutcome: DiceOutcome = {
-  id: GameEventType.pause,
+  id: DiceEvent.pause,
   check: frame =>
     (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100 >= 15,
   update: Composer.pipe(

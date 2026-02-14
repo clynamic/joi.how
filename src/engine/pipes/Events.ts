@@ -4,10 +4,9 @@ import { pluginPaths } from '../plugins/Plugins';
 import { GameFrame, Pipe } from '../State';
 import { CamelCase, toCamel } from '../../utils/case';
 
-export type GameEvent = {
-  type: string;
-  payload?: any;
-};
+export type GameEvent<T = any> = { type: string } & (unknown extends T
+  ? { payload?: T }
+  : { payload: T });
 
 export type EventState = {
   pending: GameEvent[];
@@ -45,11 +44,11 @@ export class Events {
     };
   }
 
-  static dispatch(event: GameEvent): Pipe {
+  static dispatch<T>(event: GameEvent<T>): Pipe {
     return pendingLens.over((pending = []) => [...pending, event]);
   }
 
-  static handle(type: string, fn: (event: GameEvent) => Pipe): Pipe {
+  static handle<T = any>(type: string, fn: (event: GameEvent<T>) => Pipe): Pipe {
     const { namespace, key } = Events.parseKey(type);
     const isWildcard = key === '*';
     const prefix = namespace + '/';
@@ -61,7 +60,7 @@ export class Events {
       let result: GameFrame = obj;
       for (const event of current) {
         if (isWildcard ? event.type.startsWith(prefix) : event.type === type) {
-          result = fn(event)(result);
+          result = fn(event as GameEvent<T>)(result);
         }
       }
       return result;

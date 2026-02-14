@@ -1,21 +1,20 @@
 import { Pipe } from '../engine/State';
-import { Events, Scheduler } from '../engine/pipes';
+import { Events, GameEvent, Scheduler } from '../engine/pipes';
 import Messages from './plugins/messages';
 
-type EventHandler = Parameters<typeof Events.handle>[1];
 type MessageInput = Omit<Parameters<typeof Messages.send>[0], 'id'>;
 type MessagePrompt = NonNullable<MessageInput['prompts']>[number];
 
 export type SequenceScope = {
   messageId: string;
-  on(handler: EventHandler): Pipe;
-  on(name: string, handler: EventHandler): Pipe;
+  on<T = any>(handler: (event: GameEvent<T>) => Pipe): Pipe;
+  on<T = any>(name: string, handler: (event: GameEvent<T>) => Pipe): Pipe;
   message(msg: MessageInput): Pipe;
-  after(duration: number, target: string, payload?: any): Pipe;
-  prompt(title: string, target: string, payload?: any): MessagePrompt;
-  start(payload?: any): Pipe;
+  after<T = any>(duration: number, target: string, payload?: T): Pipe;
+  prompt<T = any>(title: string, target: string, payload?: T): MessagePrompt;
+  start<T = any>(payload?: T): Pipe;
   cancel(): Pipe;
-  dispatch(target: string, payload?: any): Pipe;
+  dispatch<T = any>(target: string, payload?: T): Pipe;
   eventKey(target: string): string;
   scheduleKey(target: string): string;
 };
@@ -54,13 +53,13 @@ export class Sequence {
         Events.dispatch({
           type: rootKey,
           ...(payload !== undefined && { payload }),
-        }),
+        } as GameEvent),
       cancel: () => Scheduler.cancelByPrefix(Scheduler.getKey(namespace, name)),
       dispatch: (target, payload) =>
         Events.dispatch({
           type: target ? nodeKey(target) : rootKey,
           ...(payload !== undefined && { payload }),
-        }),
+        } as GameEvent),
       eventKey: nodeKey,
       scheduleKey: schedKey,
     };

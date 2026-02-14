@@ -1,7 +1,7 @@
 import { Composer } from '../../../engine/Composer';
 import { typedPath } from '../../../engine/Lens';
 import { Sequence } from '../../Sequence';
-import { GameEvent as GameEventType } from '../../../types';
+import { DiceEvent } from '../../../types';
 import { PLUGIN_ID, outcomeDone, DiceOutcome } from './types';
 
 export enum Paws {
@@ -28,7 +28,7 @@ const randomPaw = (exclude?: Paws): Paws => {
 const seq = Sequence.for(PLUGIN_ID, 'randomGrip');
 
 export const randomGripOutcome: DiceOutcome = {
-  id: GameEventType.randomGrip,
+  id: DiceEvent.randomGrip,
   activate: Composer.over(pawsPath, () => randomPaw()),
   update: Composer.pipe(
     seq.on(() =>

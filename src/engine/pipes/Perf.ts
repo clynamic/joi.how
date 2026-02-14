@@ -1,6 +1,6 @@
 import { Composer } from '../Composer';
 import { GameContext, Pipe } from '../State';
-import { Events, GameEvent } from './Events';
+import { Events, type GameEvent } from './Events';
 import { pluginPaths, PluginId } from '../plugins/Plugins';
 import { typedPath } from '../Lens';
 import { sdk } from '../sdk';
@@ -34,6 +34,8 @@ const EXPIRY_TICKS = 900;
 const DEFAULT_CONFIG: PerfConfig = {
   pluginBudget: 1,
 };
+
+type OverBudgetPayload = { id: string; phase: string; duration: number; budget: number };
 
 const eventType = Events.getKeys(PLUGIN_NAMESPACE, 'over_budget', 'configure');
 
@@ -116,8 +118,8 @@ export class Perf {
     });
   }
 
-  static onOverBudget(fn: (event: GameEvent) => Pipe): Pipe {
-    return Events.handle(eventType.overBudget, fn);
+  static onOverBudget(fn: (event: GameEvent<OverBudgetPayload>) => Pipe): Pipe {
+    return Events.handle<OverBudgetPayload>(eventType.overBudget, fn);
   }
 
   static pipe: Pipe = Composer.pipe(
@@ -159,12 +161,12 @@ export class Perf {
       }
     }),
 
-    Events.handle(eventType.configure, event =>
+    Events.handle<Partial<PerfConfig>>(eventType.configure, event =>
       Composer.over(perf.context, ctx => ({
         ...ctx,
         config: {
           ...ctx.config,
-          ...(event.payload as Partial<PerfConfig>),
+          ...event.payload,
         },
       }))
     )
