@@ -2,7 +2,7 @@ import { Composer } from '../../../engine/Composer';
 import { typedPath } from '../../../engine/Lens';
 import { Sequence } from '../../Sequence';
 import { GameEvent as GameEventType } from '../../../types';
-import { PLUGIN_ID, setBusy, DiceOutcome } from './types';
+import { PLUGIN_ID, outcomeDone, DiceOutcome } from './types';
 
 export enum Paws {
   left = 'left',
@@ -44,6 +44,6 @@ export const randomGripOutcome: DiceOutcome = {
         );
       })
     ),
-    seq.on('done', () => setBusy(false))
+    seq.on('done', () => outcomeDone())
   ),
 };

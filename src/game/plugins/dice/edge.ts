@@ -7,7 +7,7 @@ import {
   PLUGIN_ID,
   intensityState,
   settings,
-  setBusy,
+  outcomeDone,
   DiceOutcome,
 } from './types';
 
@@ -35,6 +35,6 @@ export const edgeOutcome: DiceOutcome = {
         )
       )
     ),
-    seq.on('done', () => setBusy(false))
+    seq.on('done', () => outcomeDone())
   ),
 };

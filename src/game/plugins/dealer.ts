@@ -6,7 +6,7 @@ import { Sequence } from '../Sequence';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
 import { GameEvent as GameEventType } from '../../types';
-import { PLUGIN_ID, dice, settings, DiceOutcome } from './dice/types';
+import { PLUGIN_ID, dice, settings, OUTCOME_DONE, DiceOutcome } from './dice/types';
 import { edgeOutcome } from './dice/edge';
 import { pauseOutcome } from './dice/pause';
 import { randomPaceOutcome } from './dice/randomPace';
@@ -102,6 +102,10 @@ export default class Dealer {
       ),
 
       ...outcomes.map(o => o.update),
+
+      Events.handle(OUTCOME_DONE, () =>
+        Composer.set(dice.state.busy, false)
+      ),
 
       Phase.onLeave(GamePhase.active, () =>
         Composer.set(dice.state.busy, false)

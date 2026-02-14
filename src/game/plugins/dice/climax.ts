@@ -8,7 +8,7 @@ import {
   PLUGIN_ID,
   intensityState,
   settings,
-  setBusy,
+  outcomeDone,
   DiceOutcome,
 } from './types';
 import { edged } from './edge';
@@ -149,7 +149,7 @@ export const climaxOutcome: DiceOutcome = {
           seq.message({ title: 'Start to $stroke again', duration: 5000 }),
           Pace.setPace(s.minPace),
           Phase.setPhase(GamePhase.active),
-          setBusy(false)
+          outcomeDone()
         )
       )
     ),

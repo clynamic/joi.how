@@ -2,7 +2,7 @@ import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
 import { GameEvent as GameEventType } from '../../../types';
-import { PLUGIN_ID, intensityState, setBusy, DiceOutcome } from './types';
+import { PLUGIN_ID, intensityState, outcomeDone, DiceOutcome } from './types';
 
 const seq = Sequence.for(PLUGIN_ID, 'pause');
 
@@ -25,7 +25,7 @@ export const pauseOutcome: DiceOutcome = {
       Composer.pipe(
         seq.message({ title: 'Start stroking again!', duration: 5000 }),
         Phase.setPhase(GamePhase.active),
-        setBusy(false)
+        outcomeDone()
       )
     )
   ),

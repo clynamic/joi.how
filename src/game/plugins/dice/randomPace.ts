@@ -8,7 +8,7 @@ import {
   PLUGIN_ID,
   intensityState,
   settings,
-  setBusy,
+  outcomeDone,
   DiceOutcome,
 } from './types';
 
@@ -39,6 +39,6 @@ export const randomPaceOutcome: DiceOutcome = {
   id: GameEventType.randomPace,
   update: Composer.pipe(
     seq.on(() => Composer.pipe(doRandomPace(), seq.after(9000, 'done'))),
-    seq.on('done', () => setBusy(false))
+    seq.on('done', () => outcomeDone())
   ),
 };
