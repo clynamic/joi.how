@@ -10,21 +10,7 @@ import { GameFrame, Pipe } from '../../../src/engine/State';
 import { PluginClass } from '../../../src/engine/plugins/Plugins';
 import Messages from '../../../src/game/plugins/messages';
 import Pause, { PauseState } from '../../../src/game/plugins/pause';
-
-const makeFrame = (): GameFrame => ({
-  state: {},
-  context: { tick: 0, step: 16, time: 0 },
-});
-
-const tick = (frame: GameFrame, dt = 16): GameFrame => ({
-  ...frame,
-  context: {
-    ...frame.context,
-    tick: frame.context.tick + 1,
-    step: dt,
-    time: frame.context.time + dt,
-  },
-});
+import { makeFrame, tick } from '../../utils';
 
 const gamePipe: Pipe = Composer.pipe(
   Events.pipe,

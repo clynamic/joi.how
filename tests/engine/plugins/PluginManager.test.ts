@@ -4,24 +4,9 @@ import { PluginManager, pluginManagerPipe } from '../../../src/engine/plugins/Pl
 import { Events } from '../../../src/engine/pipes/Events';
 import { Composer } from '../../../src/engine/Composer';
 import { Pipe, GameFrame } from '../../../src/engine/State';
+import { makeFrame, tick } from '../../utils';
 
 const PLUGIN_NAMESPACE = 'core.plugin_manager';
-
-const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
-  state: {},
-  context: { tick: 0, step: 16, time: 0 },
-  ...overrides,
-});
-
-const tick = (frame: GameFrame, n = 1): GameFrame => ({
-  ...frame,
-  context: {
-    ...frame.context,
-    tick: frame.context.tick + n,
-    step: 16,
-    time: frame.context.time + 16 * n,
-  },
-});
 
 const gamePipe: Pipe = Composer.pipe(Events.pipe, pluginManagerPipe);
 
@@ -140,7 +125,7 @@ describe('Plugin System', () => {
       const frame3 = gamePipe(tick(frame2));
 
       const frame4 = PluginManager.enable('test.plugin')(frame3);
-      gamePipe(tick(frame4, 2));
+      gamePipe(tick(tick(frame4)));
 
       expect(activateCount).toBe(2);
     });
@@ -181,7 +166,7 @@ describe('Plugin System', () => {
       const frame2 = PluginManager.unregister('test.plugin')(frame1);
       const frame3 = gamePipe(tick(frame2));
 
-      gamePipe(tick(frame3, 2));
+      gamePipe(tick(tick(frame3)));
       expect(activateCount).toBe(1);
     });
   });

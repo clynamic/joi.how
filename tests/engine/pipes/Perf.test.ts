@@ -4,22 +4,7 @@ import { GameFrame, Pipe } from '../../../src/engine/State';
 import { Events } from '../../../src/engine/pipes/Events';
 import { Perf, type PerfContext, type PluginPerfEntry } from '../../../src/engine/pipes/Perf';
 import { sdk } from '../../../src/engine/sdk';
-
-const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
-  state: {},
-  context: { tick: 0, step: 16, time: 0 },
-  ...overrides,
-});
-
-const tick = (frame: GameFrame): GameFrame => ({
-  ...frame,
-  context: {
-    ...frame.context,
-    tick: frame.context.tick + 1,
-    step: 16,
-    time: frame.context.time + 16,
-  },
-});
+import { makeFrame, tick } from '../../utils';
 
 const basePipe: Pipe = Composer.pipe(Events.pipe, Perf.pipe);
 
