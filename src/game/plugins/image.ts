@@ -1,5 +1,5 @@
 import { pluginPaths, type Plugin } from '../../engine/plugins/Plugins';
-import { Pipe, PipeTransformer } from '../../engine/State';
+import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine';
 import { Events, getEventKey } from '../../engine/pipes/Events';
 import { ImageItem } from '../../types';
@@ -18,13 +18,7 @@ export type ImageState = {
   nextImages: ImageItem[];
 };
 
-type ImageContext = {
-  pushNextImage: PipeTransformer<[ImageItem]>;
-  setCurrentImage: PipeTransformer<[ImageItem | undefined]>;
-  setNextImages: PipeTransformer<[ImageItem[]]>;
-};
-
-const image = pluginPaths<ImageState, ImageContext>(PLUGIN_ID);
+const image = pluginPaths<ImageState>(PLUGIN_ID);
 
 const eventType = {
   pushNext: getEventKey(PLUGIN_ID, 'pushNext'),
@@ -34,15 +28,15 @@ const eventType = {
 
 export default class Image {
   static pushNextImage(img: ImageItem): Pipe {
-    return Composer.call(image.context.pushNextImage, img);
+    return Events.dispatch({ type: eventType.pushNext, payload: img });
   }
 
   static setCurrentImage(img: ImageItem | undefined): Pipe {
-    return Composer.call(image.context.setCurrentImage, img);
+    return Events.dispatch({ type: eventType.setImage, payload: img });
   }
 
   static setNextImages(imgs: ImageItem[]): Pipe {
-    return Composer.call(image.context.setNextImages, imgs);
+    return Events.dispatch({ type: eventType.setNextImages, payload: imgs });
   }
 
   static plugin: Plugin = {
@@ -51,21 +45,11 @@ export default class Image {
       name: 'Image',
     },
 
-    activate: Composer.pipe(
-      Composer.set(image.state, {
-        currentImage: undefined,
-        seenImages: [],
-        nextImages: [],
-      }),
-      Composer.set(image.context, {
-        pushNextImage: (img: ImageItem) =>
-          Events.dispatch({ type: eventType.pushNext, payload: img }),
-        setCurrentImage: (img: ImageItem | undefined) =>
-          Events.dispatch({ type: eventType.setImage, payload: img }),
-        setNextImages: (imgs: ImageItem[]) =>
-          Events.dispatch({ type: eventType.setNextImages, payload: imgs }),
-      })
-    ),
+    activate: Composer.set(image.state, {
+      currentImage: undefined,
+      seenImages: [],
+      nextImages: [],
+    }),
 
     update: Composer.pipe(
       Events.handle(eventType.pushNext, event =>
@@ -115,10 +99,7 @@ export default class Image {
       )
     ),
 
-    deactivate: Composer.pipe(
-      Composer.set(image.state, undefined),
-      Composer.set(image.context, undefined)
-    ),
+    deactivate: Composer.set(image.state, undefined),
   };
 
   static get paths() {

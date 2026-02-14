@@ -1,5 +1,5 @@
 import { pluginPaths, type Plugin } from '../../engine/plugins/Plugins';
-import { Pipe, PipeTransformer } from '../../engine/State';
+import { Pipe } from '../../engine/State';
 import { Events, getEventKey } from '../../engine/pipes/Events';
 import { Composer } from '../../engine';
 
@@ -24,11 +24,7 @@ export type PhaseState = {
   prev: string;
 };
 
-type PhaseContext = {
-  setPhase: PipeTransformer<[string]>;
-};
-
-const phase = pluginPaths<PhaseState, PhaseContext>(PLUGIN_ID);
+const phase = pluginPaths<PhaseState>(PLUGIN_ID);
 
 const eventType = {
   enter: (p: string) => getEventKey(PLUGIN_ID, `enter.${p}`),
@@ -37,7 +33,7 @@ const eventType = {
 
 export default class Phase {
   static setPhase(p: string): Pipe {
-    return Composer.call(phase.context.setPhase, p);
+    return Composer.set(phase.state.current, p);
   }
 
   static whenPhase(p: string, pipe: Pipe): Pipe {
@@ -60,12 +56,7 @@ export default class Phase {
       name: 'Phase',
     },
 
-    activate: Composer.do(({ set }) => {
-      set(phase.state, { current: GamePhase.warmup, prev: GamePhase.warmup });
-      set(phase.context, {
-        setPhase: p => Composer.set(phase.state.current, p),
-      });
-    }),
+    activate: Composer.set(phase.state, { current: GamePhase.warmup, prev: GamePhase.warmup }),
 
     update: Composer.do(({ get, set, pipe }) => {
       const { current, prev } = get(phase.state);
@@ -75,10 +66,7 @@ export default class Phase {
       pipe(Events.dispatch({ type: eventType.enter(current) }));
     }),
 
-    deactivate: Composer.pipe(
-      Composer.set(phase.state, undefined),
-      Composer.set(phase.context, undefined)
-    ),
+    deactivate: Composer.set(phase.state, undefined),
   };
 
   static get paths() {
