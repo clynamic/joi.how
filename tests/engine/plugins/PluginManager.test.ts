@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Plugin, PluginClass, EnabledMap } from './Plugins';
-import { PluginManager, pluginManagerPipe } from './PluginManager';
-import { Events } from '../pipes/Events';
-import { Composer } from '../Composer';
-import { Pipe, GameFrame } from '../State';
+import { Plugin, PluginClass, EnabledMap } from '../../../src/engine/plugins/Plugins';
+import { PluginManager, pluginManagerPipe } from '../../../src/engine/plugins/PluginManager';
+import { Events } from '../../../src/engine/pipes/Events';
+import { Composer } from '../../../src/engine/Composer';
+import { Pipe, GameFrame } from '../../../src/engine/State';
 
 const PLUGIN_NAMESPACE = 'core.plugin_manager';
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Composer } from './Composer';
+import { Composer } from '../../src/engine/Composer';
 
 describe('Composer', () => {
   describe('instance methods', () => {
