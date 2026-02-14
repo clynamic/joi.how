@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Plugin, PluginClass, EnabledMap } from '../../../src/engine/plugins/Plugins';
-import { PluginManager, pluginManagerPipe } from '../../../src/engine/plugins/PluginManager';
+import {
+  Plugin,
+  PluginClass,
+  EnabledMap,
+} from '../../../src/engine/plugins/Plugins';
+import {
+  PluginManager,
+  pluginManagerPipe,
+} from '../../../src/engine/plugins/PluginManager';
 import { Events } from '../../../src/engine/pipes/Events';
 import { Composer } from '../../../src/engine/Composer';
 import { Pipe, GameFrame } from '../../../src/engine/State';

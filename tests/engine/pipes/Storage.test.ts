@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Storage, STORAGE_NAMESPACE, StorageContext } from '../../../src/engine/pipes/Storage';
+import {
+  Storage,
+  STORAGE_NAMESPACE,
+  StorageContext,
+} from '../../../src/engine/pipes/Storage';
 import { GameFrame } from '../../../src/engine/State';
 import { Composer } from '../../../src/engine/Composer';
 
