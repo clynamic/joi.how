@@ -30,7 +30,7 @@ export default class Fps {
       style.id = STYLE_ID;
       style.textContent = `
         [${ELEMENT_ATTR}="${PLUGIN_ID}"] {
-          position: absolute;
+          position: fixed;
           top: 8px;
           right: 8px;
           background: black;
@@ -55,7 +55,7 @@ export default class Fps {
       const visible = get(Debug.paths.state.visible);
       el.style.display = visible ? '' : 'none';
 
-      document.querySelector('.game-page')?.appendChild(el);
+      document.body.appendChild(el);
       set(fps.context, {
         el,
         fpsHistory: [],

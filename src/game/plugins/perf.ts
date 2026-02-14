@@ -63,7 +63,7 @@ export default class PerfOverlay {
       style.id = STYLE_ID;
       style.textContent = `
         [${ELEMENT_ATTR}="${PLUGIN_ID}"] {
-          position: absolute;
+          position: fixed;
           top: 42px;
           right: 8px;
           background: rgba(0, 0, 0, 0.8);
@@ -91,7 +91,7 @@ export default class PerfOverlay {
       const visible = get(Debug.paths.state.visible);
       el.style.display = visible ? '' : 'none';
 
-      document.querySelector('.game-page')?.appendChild(el);
+      document.body.appendChild(el);
       set(po.context, { el });
     }),
 
