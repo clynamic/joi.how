@@ -1,4 +1,5 @@
-import { createContext, useEffect, useRef, useState, ReactNode } from 'react';
+import { useEffect, useRef, useState, ReactNode, useCallback } from 'react';
+import { createContext } from 'use-context-selector';
 import { GameEngine, GameState, Pipe, GameContext } from '../engine';
 import { eventPipe } from '../engine/pipes/Events';
 import { schedulerPipe } from '../engine/pipes/Scheduler';
@@ -95,9 +96,9 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
     };
   }, [pipes]);
 
-  const injectImpulse = (pipe: Pipe) => {
+  const injectImpulse = useCallback((pipe: Pipe) => {
     pendingImpulseRef.current.push(pipe);
-  };
+  }, []);
 
   return (
     <GameEngineContext.Provider value={{ state, context, injectImpulse }}>

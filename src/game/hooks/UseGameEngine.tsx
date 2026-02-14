@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext } from 'use-context-selector';
 import { GameEngineContext } from '../GameProvider';
 
 export function useGameEngine() {

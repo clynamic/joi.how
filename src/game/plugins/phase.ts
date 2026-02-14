@@ -80,4 +80,8 @@ export default class Phase {
       Composer.set(phase.context, undefined)
     ),
   };
+
+  static get paths() {
+    return phase;
+  }
 }

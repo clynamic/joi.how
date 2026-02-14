@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useGameContext } from '../hooks';
 import { useSetting } from '../../settings';
-import { PaceContext } from '../plugins/pace';
+import Pace from '../plugins/pace';
 
 export const GamePace = () => {
   const [minPace] = useSetting('minPace');
-  const { resetPace } = useGameContext<PaceContext>(['core.pace']);
+  const { resetPace } = useGameContext(Pace.paths.context);
 
   useEffect(() => {
     resetPace();

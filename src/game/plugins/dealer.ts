@@ -127,5 +127,5 @@ export default class Dealer {
   }
 }
 
-export { Paws, PawLabels } from './dice/randomGrip';
+export { Paws, PawLabels, pawsPath } from './dice/randomGrip';
 export { type DiceState } from './dice/types';

@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react';
 import { useAutoRef, useVibratorValue, VibrationMode, wait } from '../../utils';
 import { useSetting } from '../../settings';
 import { useGameState } from '../hooks';
-import { GamePhase, PhaseState } from '../plugins/phase';
-import { StrokeDirection, StrokeState } from '../plugins/stroke';
-import { PaceState } from '../plugins/pace';
-import { IntensityState } from '../plugins/intensity';
+import { GamePhase } from '../plugins/phase';
+import Phase from '../plugins/phase';
+import { StrokeDirection } from '../plugins/stroke';
+import Stroke from '../plugins/stroke';
+import Pace from '../plugins/pace';
+import Intensity from '../plugins/intensity';
 
 export const GameVibrator = () => {
-  const { stroke } = useGameState<StrokeState>(['core.stroke']) ?? {};
-  const { intensity } = useGameState<IntensityState>(['core.intensity']) ?? {};
-  const { pace } = useGameState<PaceState>(['core.pace']) ?? {};
-  const { current: phase } = useGameState<PhaseState>(['core.phase']) ?? {};
+  const { stroke } = useGameState(Stroke.paths.state) ?? {};
+  const { intensity } = useGameState(Intensity.paths.state) ?? {};
+  const { pace } = useGameState(Pace.paths.state) ?? {};
+  const { current: phase } = useGameState(Phase.paths.state) ?? {};
   const [mode] = useSetting('vibrations');
   const [devices] = useVibratorValue('devices');
 

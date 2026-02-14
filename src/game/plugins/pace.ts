@@ -57,4 +57,8 @@ export default class Pace {
       Composer.set(pace.context, undefined)
     ),
   };
+
+  static get paths() {
+    return pace;
+  }
 }
