@@ -2,6 +2,7 @@ import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import { Pipe } from '../../../engine/State';
 import Pace from '../pace';
+import Rand from '../rand';
 import { DiceEvent } from '../../../types';
 import { intensityToPaceRange, round } from '../../../utils';
 import {
@@ -15,25 +16,28 @@ import {
 const seq = Sequence.for(PLUGIN_ID, 'randomPace');
 
 export const doRandomPace = (): Pipe =>
-  Composer.bind(intensityState, ist =>
-    Composer.bind(settings, s => {
-      const i = ist?.intensity ?? 0;
-      const { min, max } = intensityToPaceRange(
-        i * 100,
-        s.steepness,
-        s.timeshift,
-        { min: s.minPace, max: s.maxPace }
-      );
-      const newPace = round(Math.random() * (max - min) + min);
-      return Composer.pipe(
-        Pace.setPace(newPace),
-        seq.message({
-          title: `Pace changed to ${newPace}!`,
-          duration: 5000,
-        })
-      );
-    })
-  );
+  Composer.do(({ get, pipe }) => {
+    const i = get(intensityState)?.intensity ?? 0;
+    const s = get(settings);
+    const { min, max } = intensityToPaceRange(
+      i * 100,
+      s.steepness,
+      s.timeshift,
+      { min: s.minPace, max: s.maxPace }
+    );
+    pipe(
+      Rand.nextFloatRange(min, max, v => {
+        const newPace = round(v);
+        return Composer.pipe(
+          Pace.setPace(newPace),
+          seq.message({
+            title: `Pace changed to ${newPace}!`,
+            duration: 5000,
+          })
+        );
+      })
+    );
+  });
 
 export const randomPaceOutcome: DiceOutcome = {
   id: DiceEvent.randomPace,

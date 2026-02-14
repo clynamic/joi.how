@@ -1,6 +1,7 @@
 import { Composer } from '../../../engine/Composer';
 import { Sequence } from '../../Sequence';
 import Pace from '../pace';
+import Rand from '../rand';
 import { DiceEvent } from '../../../types';
 import { round } from '../../../utils';
 import {
@@ -25,18 +26,22 @@ export const halfPaceOutcome: DiceOutcome = {
   },
   update: Composer.pipe(
     seq.on(() =>
-      Composer.bind(paceState, pace =>
-        Composer.bind(settings, s => {
-          const newPace = Math.max(round((pace?.pace ?? 1) / 2), s.minPace);
-          const duration = Math.ceil(Math.random() * 20000) + 12000;
-          const portion = duration / 3;
-          return Composer.pipe(
-            Pace.setPace(newPace),
-            seq.message({ title: 'Half pace!', description: '3...' }),
-            seq.after(portion, 'step2', { portion })
-          );
-        })
-      )
+      Composer.do(({ get, pipe }) => {
+        const pace = get(paceState);
+        const s = get(settings);
+        const newPace = Math.max(round((pace?.pace ?? 1) / 2), s.minPace);
+        pipe(
+          Rand.next(v => {
+            const duration = Math.ceil(v * 20000) + 12000;
+            const portion = duration / 3;
+            return Composer.pipe(
+              Pace.setPace(newPace),
+              seq.message({ title: 'Half pace!', description: '3...' }),
+              seq.after(portion, 'step2', { portion })
+            );
+          })
+        );
+      })
     ),
     seq.on<HalfPacePayload>('step2', event =>
       Composer.pipe(

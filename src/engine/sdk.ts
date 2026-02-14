@@ -4,7 +4,6 @@ import { Scheduler } from './pipes/Scheduler';
 import { Storage } from './pipes/Storage';
 import { PluginManager } from './plugins/PluginManager';
 import { pluginPaths } from './plugins/Plugins';
-import { Random } from './Random';
 import { Perf } from './pipes/Perf';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -18,7 +17,6 @@ export interface SDK extends PluginSDK {
   Storage: typeof Storage;
   PluginManager: typeof PluginManager;
   Perf: typeof Perf;
-  Random: typeof Random;
   pluginPaths: typeof pluginPaths;
 }
 
@@ -30,6 +28,5 @@ export const sdk: SDK = {
   Storage,
   PluginManager,
   Perf,
-  Random,
   pluginPaths,
 } as SDK;

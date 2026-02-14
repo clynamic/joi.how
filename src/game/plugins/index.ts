@@ -12,6 +12,7 @@ import Image from './image';
 import RandomImages from './randomImages';
 import Warmup from './warmup';
 import Stroke from './stroke';
+import Rand from './rand';
 import Dealer from './dealer';
 import EmergencyStop from './emergencyStop';
 import Hypno from './hypno';
@@ -24,6 +25,7 @@ const plugins = [
   Pace,
   Intensity,
   Stroke,
+  Rand,
   Dealer,
   EmergencyStop,
   Hypno,

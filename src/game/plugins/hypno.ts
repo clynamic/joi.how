@@ -8,6 +8,7 @@ import Pause from './pause';
 import { IntensityState } from './intensity';
 import { Settings } from '../../settings';
 import { GameHypnoType, HypnoPhrases } from '../../types';
+import Rand from './rand';
 
 const PLUGIN_ID = 'core.hypno';
 
@@ -35,7 +36,7 @@ export default class Hypno {
     }),
 
     update: Pause.whenPlaying(
-      Composer.do(({ get, set }) => {
+      Composer.do(({ get, set, pipe }) => {
         const phase = get(phaseState)?.current;
         if (phase !== GamePhase.active) return;
 
@@ -59,10 +60,14 @@ export default class Hypno {
         const phrases = HypnoPhrases[s.hypno];
         if (phrases.length <= 0) return;
 
-        set(hypno.state, {
-          currentPhrase: Math.floor(Math.random() * phrases.length),
-          timer: 0,
-        });
+        pipe(
+          Rand.nextInt(phrases.length, idx =>
+            Composer.set(hypno.state, {
+              currentPhrase: idx,
+              timer: 0,
+            })
+          )
+        );
       })
     ),
 
