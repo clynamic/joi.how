@@ -1,6 +1,7 @@
 import { lensFromPath } from '../Lens';
 import { Composer } from '../Composer';
-import { GameFrame, GameState, Pipe, PipeTransformer } from '../State';
+import { pluginPaths } from '../plugins/Plugins';
+import { GameFrame, Pipe, PipeTransformer } from '../State';
 
 export type GameEvent = {
   type: string;
@@ -14,8 +15,9 @@ export type EventState = {
 
 const PLUGIN_NAMESPACE = 'core.events';
 
-const eventStateLens = lensFromPath<GameFrame, EventState>(['state', PLUGIN_NAMESPACE]);
-const pendingLens = lensFromPath<GameFrame, GameEvent[]>(['state', PLUGIN_NAMESPACE, 'pending']);
+const events = pluginPaths<EventState>(PLUGIN_NAMESPACE);
+const eventStateLens = lensFromPath<GameFrame, EventState>(events.state);
+const pendingLens = lensFromPath<GameFrame, GameEvent[]>(events.state.pending);
 
 export const getEventKey = (namespace: string, key: string): string => {
   return `${namespace}/${key}`;
@@ -73,10 +75,7 @@ export class Events {
  * This prevents events from being processed during the same frame they are created.
  * This is important because pipes later in the pipeline may add new events.
  */
-export const eventPipe: Pipe = Composer.zoom<GameState>(
-  'state',
-  Composer.over<EventState>(PLUGIN_NAMESPACE, ({ pending = [] }) => ({
-    pending: [],
-    current: pending,
-  }))
-);
+export const eventPipe: Pipe = Composer.over(events.state, ({ pending = [] }) => ({
+  pending: [],
+  current: pending,
+}));

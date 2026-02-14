@@ -12,7 +12,9 @@
  */
 
 import { Composer } from '../Composer';
-import { Pipe } from '../State';
+import { typedPath } from '../Lens';
+import { pluginPaths } from '../plugins/Plugins';
+import { GameTiming, Pipe } from '../State';
 
 export const STORAGE_NAMESPACE = 'how.joi.storage';
 const CACHE_TTL = 30000; // 30 seconds of game time (deltaTime sum)
@@ -26,13 +28,16 @@ export type StorageContext = {
   cache: { [key: string]: CacheEntry };
 };
 
+const storage = pluginPaths<never, StorageContext>(STORAGE_NAMESPACE);
+const timing = typedPath<GameTiming>(['context']);
+
 /**
  * Storage pipe - updates cache expiry based on deltaTime
  */
 export const storagePipe: Pipe = Composer.pipe(
   // Clean up expired entries
-  Composer.bind<number>(['context', 'elapsedTime'], elapsedTime =>
-    Composer.over<StorageContext>(['context', STORAGE_NAMESPACE], ctx => {
+  Composer.bind(timing.elapsedTime, elapsedTime =>
+    Composer.over(storage.context, ctx => {
       const newCache: { [key: string]: CacheEntry } = {};
 
       // Keep only non-expired entries
@@ -70,8 +75,8 @@ export class Storage {
    * Gets a value, using cache or loading from localStorage
    */
   static bind<T = any>(key: string, fn: (value: T | undefined) => Pipe): Pipe {
-    return Composer.bind<StorageContext>(
-      ['context', STORAGE_NAMESPACE],
+    return Composer.bind(
+      storage.context,
       ctx => {
         const cache = ctx?.cache || {};
         const cached = cache[key];
@@ -86,9 +91,9 @@ export class Storage {
 
         // Cache it (will be set with expiry in the next pipe)
         return Composer.pipe(
-          Composer.bind<number>(['context', 'elapsedTime'], elapsedTime =>
-            Composer.over<StorageContext>(
-              ['context', STORAGE_NAMESPACE],
+          Composer.bind(timing.elapsedTime, elapsedTime =>
+            Composer.over(
+              storage.context,
               ctx => ({
                 cache: {
                   ...(ctx?.cache || {}),
@@ -119,8 +124,8 @@ export class Storage {
       }
 
       // Update cache
-      return Composer.bind<number>(['context', 'elapsedTime'], elapsedTime =>
-        Composer.over<StorageContext>(['context', STORAGE_NAMESPACE], ctx => ({
+      return Composer.bind(timing.elapsedTime, elapsedTime =>
+        Composer.over(storage.context, ctx => ({
           cache: {
             ...(ctx?.cache || {}),
             [key]: {
@@ -146,8 +151,8 @@ export class Storage {
       }
 
       // Remove from cache
-      return Composer.over<StorageContext>(
-        ['context', STORAGE_NAMESPACE],
+      return Composer.over(
+        storage.context,
         ctx => {
           const newCache = { ...(ctx?.cache || {}) };
           delete newCache[key];

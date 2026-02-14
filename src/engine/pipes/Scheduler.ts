@@ -1,5 +1,7 @@
 import { Composer } from '../Composer';
-import { Pipe } from '../State';
+import { typedPath } from '../Lens';
+import { pluginPaths } from '../plugins/Plugins';
+import { GameTiming, Pipe } from '../State';
 import { Events, GameEvent, getEventKey } from './Events';
 
 const PLUGIN_NAMESPACE = 'core.scheduler';
@@ -19,6 +21,9 @@ type SchedulerState = {
   scheduled: ScheduledEvent[];
   current: GameEvent[];
 };
+
+const scheduler = pluginPaths<SchedulerState>(PLUGIN_NAMESPACE);
+const timing = typedPath<GameTiming>(['context']);
 
 const eventType = {
   schedule: getEventKey(PLUGIN_NAMESPACE, 'schedule'),
@@ -61,92 +66,76 @@ export class Scheduler {
 }
 
 export const schedulerPipe: Pipe = Composer.pipe(
-  Composer.bind<number>(['context', 'deltaTime'], delta =>
-    Composer.over<SchedulerState>(
-      ['state', PLUGIN_NAMESPACE],
-      ({ scheduled = [] }) => {
-        const remaining: ScheduledEvent[] = [];
-        const current: GameEvent[] = [];
+  Composer.bind(timing.deltaTime, delta =>
+    Composer.over(scheduler.state, ({ scheduled = [] }) => {
+      const remaining: ScheduledEvent[] = [];
+      const current: GameEvent[] = [];
 
-        for (const entry of scheduled) {
-          if (entry.held) {
-            remaining.push(entry);
-            continue;
-          }
-          const time = entry.duration - delta;
-          if (time <= 0) {
-            current.push(entry.event);
-          } else {
-            remaining.push({ ...entry, duration: time });
-          }
+      for (const entry of scheduled) {
+        if (entry.held) {
+          remaining.push(entry);
+          continue;
         }
-
-        return { scheduled: remaining, current };
+        const time = entry.duration - delta;
+        if (time <= 0) {
+          current.push(entry.event);
+        } else {
+          remaining.push({ ...entry, duration: time });
+        }
       }
-    )
+
+      return { scheduled: remaining, current };
+    })
   ),
 
-  Composer.bind<GameEvent[]>(['state', PLUGIN_NAMESPACE, 'current'], events =>
+  Composer.bind(scheduler.state.current, events =>
     Composer.pipe(...events.map(Events.dispatch))
   ),
 
   Events.handle(eventType.schedule, event =>
-    Composer.over<ScheduledEvent[]>(
-      ['state', PLUGIN_NAMESPACE, 'scheduled'],
-      (list = []) => [
-        ...list.filter(e => e.id !== event.payload.id),
-        event.payload,
-      ]
-    )
+    Composer.over(scheduler.state.scheduled, (list = []) => [
+      ...list.filter(e => e.id !== event.payload.id),
+      event.payload,
+    ])
   ),
 
   Events.handle(eventType.cancel, event =>
-    Composer.over<ScheduledEvent[]>(
-      ['state', PLUGIN_NAMESPACE, 'scheduled'],
-      (list = []) => list.filter(s => s.id !== event.payload)
+    Composer.over(scheduler.state.scheduled, (list = []) =>
+      list.filter(s => s.id !== event.payload)
     )
   ),
 
   Events.handle(eventType.hold, event =>
-    Composer.over<ScheduledEvent[]>(
-      ['state', PLUGIN_NAMESPACE, 'scheduled'],
-      (list = []) =>
-        list.map(s => (s.id === event.payload ? { ...s, held: true } : s))
+    Composer.over(scheduler.state.scheduled, (list = []) =>
+      list.map(s => (s.id === event.payload ? { ...s, held: true } : s))
     )
   ),
 
   Events.handle(eventType.release, event =>
-    Composer.over<ScheduledEvent[]>(
-      ['state', PLUGIN_NAMESPACE, 'scheduled'],
-      (list = []) =>
-        list.map(s => (s.id === event.payload ? { ...s, held: false } : s))
+    Composer.over(scheduler.state.scheduled, (list = []) =>
+      list.map(s => (s.id === event.payload ? { ...s, held: false } : s))
     )
   ),
 
   Events.handle(eventType.holdByPrefix, event =>
-    Composer.over<ScheduledEvent[]>(
-      ['state', PLUGIN_NAMESPACE, 'scheduled'],
-      (list = []) =>
-        list.map(s =>
-          s.id?.startsWith(event.payload) ? { ...s, held: true } : s
-        )
+    Composer.over(scheduler.state.scheduled, (list = []) =>
+      list.map(s =>
+        s.id?.startsWith(event.payload) ? { ...s, held: true } : s
+      )
     )
   ),
 
   Events.handle(eventType.releaseByPrefix, event =>
-    Composer.over<ScheduledEvent[]>(
-      ['state', PLUGIN_NAMESPACE, 'scheduled'],
-      (list = []) =>
-        list.map(s =>
-          s.id?.startsWith(event.payload) ? { ...s, held: false } : s
-        )
+    Composer.over(scheduler.state.scheduled, (list = []) =>
+      list.map(s =>
+        s.id?.startsWith(event.payload) ? { ...s, held: false } : s
+      )
     )
   ),
 
   Events.handle(eventType.cancelByPrefix, event =>
-    Composer.over<ScheduledEvent[]>(
-      ['state', PLUGIN_NAMESPACE, 'scheduled'],
-      (list = []) => list.filter(s => !s.id?.startsWith(event.payload))
+    Composer.over(scheduler.state.scheduled, (list = []) =>
+      list.filter(s => !s.id?.startsWith(event.payload))
     )
   )
 );
