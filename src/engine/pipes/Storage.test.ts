@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   Storage,
-  storagePipe,
   STORAGE_NAMESPACE,
   StorageContext,
 } from './Storage';
@@ -175,7 +174,7 @@ describe('Storage', () => {
     });
   });
 
-  describe('storagePipe', () => {
+  describe('Storage.pipe', () => {
     it('should clean up expired cache entries', () => {
       let frame: GameFrame = {
         state: {},
@@ -193,7 +192,7 @@ describe('Storage', () => {
         })
       )(frame);
 
-      const result = storagePipe(frame);
+      const result = Storage.pipe(frame);
 
       const storage = result.context.how.joi.storage;
       expect(storage.cache['expired.key']).toBeUndefined();

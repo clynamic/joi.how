@@ -32,27 +32,6 @@ const storage = pluginPaths<never, StorageContext>(STORAGE_NAMESPACE);
 const timing = typedPath<GameTiming>(['context']);
 
 /**
- * Storage pipe - updates cache expiry based on deltaTime
- */
-export const storagePipe: Pipe = Composer.pipe(
-  // Clean up expired entries
-  Composer.bind(timing.elapsedTime, elapsedTime =>
-    Composer.over(storage.context, ctx => {
-      const newCache: { [key: string]: CacheEntry } = {};
-
-      // Keep only non-expired entries
-      for (const [key, entry] of Object.entries(ctx?.cache || {})) {
-        if (entry.expiry > elapsedTime) {
-          newCache[key] = entry;
-        }
-      }
-
-      return { cache: newCache };
-    })
-  )
-);
-
-/**
  * Storage API for reading and writing to localStorage
  */
 export class Storage {
@@ -161,4 +140,23 @@ export class Storage {
       )(frame);
     };
   }
+
+  /**
+   * Storage pipe - updates cache expiry based on deltaTime
+   */
+  static pipe: Pipe = Composer.pipe(
+    Composer.bind(timing.elapsedTime, elapsedTime =>
+      Composer.over(storage.context, ctx => {
+        const newCache: { [key: string]: CacheEntry } = {};
+
+        for (const [key, entry] of Object.entries(ctx?.cache || {})) {
+          if (entry.expiry > elapsedTime) {
+            newCache[key] = entry;
+          }
+        }
+
+        return { cache: newCache };
+      })
+    )
+  );
 }

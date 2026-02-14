@@ -1,7 +1,7 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine';
 import { Events } from '../../engine/pipes/Events';
-import { Scheduler, getScheduleKey } from '../../engine/pipes/Scheduler';
+import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { ImageItem } from '../../types';
 import Image, { ImageState } from './image';
@@ -21,7 +21,7 @@ const imageState = typedPath<ImageState>(['state', 'core.images']);
 
 const eventType = Events.getKeys(PLUGIN_ID, 'schedule_next');
 
-const scheduleId = getScheduleKey(PLUGIN_ID, 'randomImageSwitch');
+const scheduleId = Scheduler.getKey(PLUGIN_ID, 'randomImageSwitch');
 
 const getImageSwitchDuration = (intensity: number): number => {
   return Math.max((100 - intensity * 100) * 80, 2000);
