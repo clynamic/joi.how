@@ -1,8 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-export interface SettingsGridProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface SettingsGridProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 

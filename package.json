@@ -9,14 +9,7 @@
     "build": "tsc && vite build",
     "format": "prettier --write .",
     "lint": "eslint . --ext ts,tsx --max-warnings 0",
-    "preview": "vite preview",
-    "prepare": "husky"
-  },
-  "lint-staged": {
-    "*.{js,ts,tsx}": [
-      "eslint --fix --max-warnings 0",
-      "prettier --write"
-    ]
+    "preview": "vite preview"
   },
   "dependencies": {
     "@awesome.me/webawesome": "^3.2.1",
@@ -65,8 +58,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4",
-    "husky": "^9.0.11",
-    "lint-staged": "^16",
+    "jsdom": "^27.1.0",
     "prettier": "^3.2.5",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"

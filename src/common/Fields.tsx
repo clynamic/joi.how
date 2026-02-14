@@ -2,8 +2,9 @@ import { PropsWithChildren } from 'react';
 import styled from 'styled-components';
 import { SettingsGrid } from './SettingsGrid';
 
-export interface FieldsProps
-  extends PropsWithChildren<React.HTMLAttributes<HTMLFieldSetElement>> {
+export interface FieldsProps extends PropsWithChildren<
+  React.HTMLAttributes<HTMLFieldSetElement>
+> {
   label?: React.ReactNode;
 }
 
