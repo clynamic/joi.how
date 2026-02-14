@@ -1,5 +1,5 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
-import { Pipe, PipeTransformer } from '../../engine/State';
+import { Pipe } from '../../engine/State';
 import { typedPath } from '../../engine/Lens';
 import { Settings } from '../../settings';
 import { Composer, pluginPaths } from '../../engine';
@@ -14,23 +14,21 @@ const PLUGIN_ID = 'core.pace';
 
 export type PaceState = {
   pace: number;
+  prevMinPace: number;
 };
 
-export type PaceContext = {
-  setPace: PipeTransformer<[number]>;
-  resetPace: PipeTransformer<[]>;
-};
-
-const pace = pluginPaths<PaceState, PaceContext>(PLUGIN_ID);
+const pace = pluginPaths<PaceState>(PLUGIN_ID);
 const settings = typedPath<Settings>(['context', 'settings']);
 
 export default class Pace {
   static setPace(val: number): Pipe {
-    return Composer.call(pace.context.setPace, val);
+    return Composer.set(pace.state.pace, val);
   }
 
   static resetPace(): Pipe {
-    return Composer.call(pace.context.resetPace);
+    return Composer.bind(settings, s =>
+      Composer.set(pace.state.pace, s.minPace)
+    );
   }
 
   static plugin: Plugin = {
@@ -39,23 +37,19 @@ export default class Pace {
       name: 'Pace',
     },
 
-    activate: Composer.pipe(
-      Composer.bind(settings, s =>
-        Composer.set(pace.state, { pace: s.minPace })
-      ),
-      Composer.set(pace.context, {
-        setPace: (val: number) => Composer.set(pace.state.pace, val),
-        resetPace: () =>
-          Composer.bind(settings, s =>
-            Composer.set(pace.state.pace, s.minPace)
-          ),
-      })
+    activate: Composer.bind(settings, s =>
+      Composer.set(pace.state, { pace: s.minPace, prevMinPace: s.minPace })
     ),
 
-    deactivate: Composer.pipe(
-      Composer.set(pace.state, undefined),
-      Composer.set(pace.context, undefined)
-    ),
+    update: Composer.do(({ get, set }) => {
+      const { prevMinPace } = get(pace.state);
+      const { minPace } = get(settings);
+      if (minPace === prevMinPace) return;
+      set(pace.state.prevMinPace, minPace);
+      set(pace.state.pace, minPace);
+    }),
+
+    deactivate: Composer.set(pace.state, undefined),
   };
 
   static get paths() {

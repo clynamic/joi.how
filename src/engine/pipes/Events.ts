@@ -1,5 +1,6 @@
+import { lensFromPath } from '../Lens';
 import { Composer } from '../Composer';
-import { GameContext, GameState, Pipe, PipeTransformer } from '../State';
+import { GameFrame, GameState, Pipe, PipeTransformer } from '../State';
 
 export type GameEvent = {
   type: string;
@@ -11,12 +12,10 @@ export type EventState = {
   current: GameEvent[];
 };
 
-export type EventContext = {
-  dispatch: PipeTransformer<[GameEvent]>;
-  handle: PipeTransformer<[string, PipeTransformer<[GameEvent]>]>;
-};
-
 const PLUGIN_NAMESPACE = 'core.events';
+
+const eventStateLens = lensFromPath<GameFrame, EventState>(['state', PLUGIN_NAMESPACE]);
+const pendingLens = lensFromPath<GameFrame, GameEvent[]>(['state', PLUGIN_NAMESPACE, 'pending']);
 
 export const getEventKey = (namespace: string, key: string): string => {
   return `${namespace}/${key}`;
@@ -36,39 +35,36 @@ export const readEventKey = (
 };
 
 export const dispatchEvent: PipeTransformer<[GameEvent]> = event =>
-  Composer.over<EventState['pending']>(
-    ['state', PLUGIN_NAMESPACE, 'pending'],
-    (pending = []) => [...pending, event]
-  );
+  pendingLens.over((pending = []) => [...pending, event]);
 
 export const handleEvent: PipeTransformer<
   [string, (event: GameEvent) => Pipe]
-> = (type, fn) =>
-  Composer.bind<EventState>(['state', PLUGIN_NAMESPACE], ({ current = [] }) =>
-    Composer.pipe(
-      ...current
-        .filter(event => {
-          const { namespace: ns, key: k } = readEventKey(event.type);
-          const { namespace, key } = readEventKey(type);
-          return key === '*' ? ns === namespace : ns === namespace && k === key;
-        })
-        .map(fn)
-    )
-  );
+> = (type, fn) => {
+  const { namespace, key } = readEventKey(type);
+  const isWildcard = key === '*';
+  const prefix = namespace + '/';
+
+  return (obj: GameFrame): GameFrame => {
+    const state = eventStateLens.get(obj);
+    const current = state?.current;
+    if (!current || current.length === 0) return obj;
+    let result: GameFrame = obj;
+    for (const event of current) {
+      if (isWildcard ? event.type.startsWith(prefix) : event.type === type) {
+        result = fn(event)(result);
+      }
+    }
+    return result;
+  };
+};
 
 export class Events {
   static dispatch(event: GameEvent): Pipe {
-    return Composer.bind<EventContext>(
-      ['context', PLUGIN_NAMESPACE],
-      ({ dispatch }) => dispatch(event)
-    );
+    return dispatchEvent(event);
   }
 
   static handle(type: string, fn: (event: GameEvent) => Pipe): Pipe {
-    return Composer.bind<EventContext>(
-      ['context', PLUGIN_NAMESPACE],
-      ({ handle }) => handle(type, fn)
-    );
+    return handleEvent(type, fn);
   }
 }
 
@@ -77,19 +73,10 @@ export class Events {
  * This prevents events from being processed during the same frame they are created.
  * This is important because pipes later in the pipeline may add new events.
  */
-export const eventPipe: Pipe = Composer.pipe(
-  Composer.zoom<GameState>(
-    'state',
-    Composer.over<EventState>(PLUGIN_NAMESPACE, ({ pending = [] }) => ({
-      pending: [],
-      current: pending,
-    }))
-  ),
-  Composer.zoom<GameContext>(
-    'context',
-    Composer.set<EventContext>(PLUGIN_NAMESPACE, {
-      dispatch: dispatchEvent,
-      handle: handleEvent,
-    })
-  )
+export const eventPipe: Pipe = Composer.zoom<GameState>(
+  'state',
+  Composer.over<EventState>(PLUGIN_NAMESPACE, ({ pending = [] }) => ({
+    pending: [],
+    current: pending,
+  }))
 );

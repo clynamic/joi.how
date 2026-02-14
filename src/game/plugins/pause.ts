@@ -1,5 +1,5 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
-import { Pipe, PipeTransformer } from '../../engine/State';
+import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
 import { Events, getEventKey } from '../../engine/pipes/Events';
 import { pluginPaths } from '../../engine/plugins/Plugins';
@@ -18,12 +18,7 @@ export type PauseState = {
   prev: boolean;
 };
 
-type PauseContext = {
-  setPaused: PipeTransformer<[boolean]>;
-  togglePause: Pipe;
-};
-
-const pause = pluginPaths<PauseState, PauseContext>(PLUGIN_ID);
+const pause = pluginPaths<PauseState>(PLUGIN_ID);
 
 const eventType = {
   on: getEventKey(PLUGIN_ID, 'on'),
@@ -34,11 +29,20 @@ const resume = Sequence.for(PLUGIN_ID, 'resume');
 
 export default class Pause {
   static setPaused(val: boolean): Pipe {
-    return Composer.call(pause.context.setPaused, val);
+    return Composer.when(
+      val,
+      Composer.pipe(
+        resume.cancel(),
+        Composer.set(pause.state.paused, true)
+      ),
+      resume.start()
+    );
   }
 
   static get togglePause(): Pipe {
-    return Composer.bind(pause.context.togglePause, fn => fn);
+    return Composer.bind(pause.state, state =>
+      Pause.setPaused(!state?.paused)
+    );
   }
 
   static whenPaused(pipe: Pipe): Pipe {
@@ -67,23 +71,7 @@ export default class Pause {
       name: 'Pause',
     },
 
-    activate: Composer.do(({ set }) => {
-      set(pause.state, { paused: false, prev: false });
-      set(pause.context, {
-        setPaused: val =>
-          Composer.when(
-            val,
-            Composer.pipe(
-              resume.cancel(),
-              Composer.set(pause.state.paused, true)
-            ),
-            resume.start()
-          ),
-        togglePause: Composer.bind(pause.state, state =>
-          Pause.setPaused(!state?.paused)
-        ),
-      });
-    }),
+    activate: Composer.set(pause.state, { paused: false, prev: false }),
 
     update: Composer.pipe(
       Composer.do(({ get, set, pipe }) => {
@@ -124,10 +112,7 @@ export default class Pause {
       )
     ),
 
-    deactivate: Composer.pipe(
-      Composer.set(pause.state, undefined),
-      Composer.set(pause.context, undefined)
-    ),
+    deactivate: Composer.set(pause.state, undefined),
   };
 
   static get paths() {

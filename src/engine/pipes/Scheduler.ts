@@ -1,5 +1,5 @@
 import { Composer } from '../Composer';
-import { Pipe, PipeTransformer } from '../State';
+import { Pipe } from '../State';
 import { Events, GameEvent, getEventKey } from './Events';
 
 const PLUGIN_NAMESPACE = 'core.scheduler';
@@ -20,64 +20,43 @@ type SchedulerState = {
   current: GameEvent[];
 };
 
-export type SchedulerContext = {
-  schedule: PipeTransformer<[ScheduledEvent]>;
-  cancel: PipeTransformer<[string]>;
-  hold: PipeTransformer<[string]>;
-  release: PipeTransformer<[string]>;
-  holdByPrefix: PipeTransformer<[string]>;
-  releaseByPrefix: PipeTransformer<[string]>;
-  cancelByPrefix: PipeTransformer<[string]>;
+const eventType = {
+  schedule: getEventKey(PLUGIN_NAMESPACE, 'schedule'),
+  cancel: getEventKey(PLUGIN_NAMESPACE, 'cancel'),
+  hold: getEventKey(PLUGIN_NAMESPACE, 'hold'),
+  release: getEventKey(PLUGIN_NAMESPACE, 'release'),
+  holdByPrefix: getEventKey(PLUGIN_NAMESPACE, 'holdByPrefix'),
+  releaseByPrefix: getEventKey(PLUGIN_NAMESPACE, 'releaseByPrefix'),
+  cancelByPrefix: getEventKey(PLUGIN_NAMESPACE, 'cancelByPrefix'),
 };
 
 export class Scheduler {
   static schedule(event: ScheduledEvent): Pipe {
-    return Composer.bind<SchedulerContext>(
-      ['context', PLUGIN_NAMESPACE],
-      ({ schedule }) => schedule(event)
-    );
+    return Events.dispatch({ type: eventType.schedule, payload: event });
   }
 
   static cancel(id: string): Pipe {
-    return Composer.bind<SchedulerContext>(
-      ['context', PLUGIN_NAMESPACE],
-      ({ cancel }) => cancel(id)
-    );
+    return Events.dispatch({ type: eventType.cancel, payload: id });
   }
 
   static hold(id: string): Pipe {
-    return Composer.bind<SchedulerContext>(
-      ['context', PLUGIN_NAMESPACE],
-      ({ hold }) => hold(id)
-    );
+    return Events.dispatch({ type: eventType.hold, payload: id });
   }
 
   static release(id: string): Pipe {
-    return Composer.bind<SchedulerContext>(
-      ['context', PLUGIN_NAMESPACE],
-      ({ release }) => release(id)
-    );
+    return Events.dispatch({ type: eventType.release, payload: id });
   }
 
   static holdByPrefix(prefix: string): Pipe {
-    return Composer.bind<SchedulerContext>(
-      ['context', PLUGIN_NAMESPACE],
-      ({ holdByPrefix }) => holdByPrefix(prefix)
-    );
+    return Events.dispatch({ type: eventType.holdByPrefix, payload: prefix });
   }
 
   static releaseByPrefix(prefix: string): Pipe {
-    return Composer.bind<SchedulerContext>(
-      ['context', PLUGIN_NAMESPACE],
-      ({ releaseByPrefix }) => releaseByPrefix(prefix)
-    );
+    return Events.dispatch({ type: eventType.releaseByPrefix, payload: prefix });
   }
 
   static cancelByPrefix(prefix: string): Pipe {
-    return Composer.bind<SchedulerContext>(
-      ['context', PLUGIN_NAMESPACE],
-      ({ cancelByPrefix }) => cancelByPrefix(prefix)
-    );
+    return Events.dispatch({ type: eventType.cancelByPrefix, payload: prefix });
   }
 }
 
@@ -111,51 +90,7 @@ export const schedulerPipe: Pipe = Composer.pipe(
     Composer.pipe(...events.map(Events.dispatch))
   ),
 
-  Composer.set<SchedulerContext>(['context', PLUGIN_NAMESPACE], {
-    schedule: (e: ScheduledEvent) =>
-      Events.dispatch({
-        type: getEventKey(PLUGIN_NAMESPACE, 'schedule'),
-        payload: e,
-      }),
-
-    cancel: (id: string) =>
-      Events.dispatch({
-        type: getEventKey(PLUGIN_NAMESPACE, 'cancel'),
-        payload: id,
-      }),
-
-    hold: (id: string) =>
-      Events.dispatch({
-        type: getEventKey(PLUGIN_NAMESPACE, 'hold'),
-        payload: id,
-      }),
-
-    release: (id: string) =>
-      Events.dispatch({
-        type: getEventKey(PLUGIN_NAMESPACE, 'release'),
-        payload: id,
-      }),
-
-    holdByPrefix: (prefix: string) =>
-      Events.dispatch({
-        type: getEventKey(PLUGIN_NAMESPACE, 'holdByPrefix'),
-        payload: prefix,
-      }),
-
-    releaseByPrefix: (prefix: string) =>
-      Events.dispatch({
-        type: getEventKey(PLUGIN_NAMESPACE, 'releaseByPrefix'),
-        payload: prefix,
-      }),
-
-    cancelByPrefix: (prefix: string) =>
-      Events.dispatch({
-        type: getEventKey(PLUGIN_NAMESPACE, 'cancelByPrefix'),
-        payload: prefix,
-      }),
-  }),
-
-  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'schedule'), event =>
+  Events.handle(eventType.schedule, event =>
     Composer.over<ScheduledEvent[]>(
       ['state', PLUGIN_NAMESPACE, 'scheduled'],
       (list = []) => [
@@ -165,14 +100,14 @@ export const schedulerPipe: Pipe = Composer.pipe(
     )
   ),
 
-  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'cancel'), event =>
+  Events.handle(eventType.cancel, event =>
     Composer.over<ScheduledEvent[]>(
       ['state', PLUGIN_NAMESPACE, 'scheduled'],
       (list = []) => list.filter(s => s.id !== event.payload)
     )
   ),
 
-  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'hold'), event =>
+  Events.handle(eventType.hold, event =>
     Composer.over<ScheduledEvent[]>(
       ['state', PLUGIN_NAMESPACE, 'scheduled'],
       (list = []) =>
@@ -180,7 +115,7 @@ export const schedulerPipe: Pipe = Composer.pipe(
     )
   ),
 
-  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'release'), event =>
+  Events.handle(eventType.release, event =>
     Composer.over<ScheduledEvent[]>(
       ['state', PLUGIN_NAMESPACE, 'scheduled'],
       (list = []) =>
@@ -188,7 +123,7 @@ export const schedulerPipe: Pipe = Composer.pipe(
     )
   ),
 
-  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'holdByPrefix'), event =>
+  Events.handle(eventType.holdByPrefix, event =>
     Composer.over<ScheduledEvent[]>(
       ['state', PLUGIN_NAMESPACE, 'scheduled'],
       (list = []) =>
@@ -198,7 +133,7 @@ export const schedulerPipe: Pipe = Composer.pipe(
     )
   ),
 
-  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'releaseByPrefix'), event =>
+  Events.handle(eventType.releaseByPrefix, event =>
     Composer.over<ScheduledEvent[]>(
       ['state', PLUGIN_NAMESPACE, 'scheduled'],
       (list = []) =>
@@ -208,7 +143,7 @@ export const schedulerPipe: Pipe = Composer.pipe(
     )
   ),
 
-  Events.handle(getEventKey(PLUGIN_NAMESPACE, 'cancelByPrefix'), event =>
+  Events.handle(eventType.cancelByPrefix, event =>
     Composer.over<ScheduledEvent[]>(
       ['state', PLUGIN_NAMESPACE, 'scheduled'],
       (list = []) => list.filter(s => !s.id?.startsWith(event.payload))

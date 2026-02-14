@@ -1,6 +1,6 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
 import { pluginPaths } from '../../engine/plugins/Plugins';
-import { Pipe, PipeTransformer } from '../../engine/State';
+import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
 import { Events, GameEvent, getEventKey } from '../../engine/pipes/Events';
 import { getScheduleKey, Scheduler } from '../../engine/pipes/Scheduler';
@@ -26,17 +26,13 @@ export interface GameMessage {
 
 export type PartialGameMessage = Partial<GameMessage> & Pick<GameMessage, 'id'>;
 
-export type MessageContext = {
-  sendMessage: PipeTransformer<[PartialGameMessage]>;
-};
-
 export type MessageState = {
   messages: GameMessage[];
 };
 
 const PLUGIN_ID = 'core.messages';
 
-const paths = pluginPaths<MessageState, MessageContext>(PLUGIN_ID);
+const paths = pluginPaths<MessageState>(PLUGIN_ID);
 
 const eventType = {
   send: getEventKey(PLUGIN_ID, 'sendMessage'),
@@ -45,9 +41,10 @@ const eventType = {
 
 export default class Messages {
   static send(message: PartialGameMessage): Pipe {
-    return Composer.bind<MessageContext>(paths.context, ({ sendMessage }) =>
-      sendMessage(message)
-    );
+    return Events.dispatch({
+      type: eventType.send,
+      payload: message,
+    });
   }
 
   static plugin: Plugin = {
@@ -56,16 +53,7 @@ export default class Messages {
       name: 'Messages',
     },
 
-    activate: Composer.do(({ set }) => {
-      set(paths.state, { messages: [] });
-      set(paths.context, {
-        sendMessage: msg =>
-          Events.dispatch({
-            type: eventType.send,
-            payload: msg,
-          }),
-      });
-    }),
+    activate: Composer.set(paths.state, { messages: [] }),
 
     update: Composer.pipe(
       Events.handle(eventType.send, event =>
@@ -120,10 +108,7 @@ export default class Messages {
       )
     ),
 
-    deactivate: Composer.pipe(
-      Composer.set(paths.state, undefined),
-      Composer.set(paths.context, undefined)
-    ),
+    deactivate: Composer.set(paths.state, undefined),
   };
 
   static get paths() {
