@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { useTranslate } from '../../settings';
 
 import { defaultTransition, playTone } from '../../utils';
-import { GameMessage, MessageState } from '../../engine/pipes/Messages';
+import { GameMessage, MessageState } from '../plugins/messages';
 import { useGameState } from '../hooks/UseGameValue';
 
 import _ from 'lodash';

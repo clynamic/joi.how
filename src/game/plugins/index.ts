@@ -14,8 +14,10 @@ import Stroke from './stroke';
 import Dealer from './dealer';
 import EmergencyStop from './emergencyStop';
 import Hypno from './hypno';
+import Messages from './messages';
 
 const plugins = [
+  Messages,
   Pause,
   Phase,
   Pace,

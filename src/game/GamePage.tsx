@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import { GameEngineProvider } from './GameProvider';
-import { messagesPipe } from '../engine/pipes/Messages';
 import { GameMessages } from './components/GameMessages';
 import { useSettingsPipe } from './pipes';
 import { GameImages } from './components/GameImages';
@@ -81,7 +80,6 @@ export const GamePage = () => {
   return (
     <GameEngineProvider
       pipes={[
-        messagesPipe,
         pluginManagerPipe,
         pluginInstallerPipe,
         registerPlugins,
