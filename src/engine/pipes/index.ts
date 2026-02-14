@@ -1,5 +1,4 @@
 export * from './Events';
-export * from './Fps';
 export * from '../plugins/PluginInstaller';
 export * from '../plugins/PluginManager';
 export * from '../plugins/Plugins';
