@@ -74,12 +74,14 @@ const StyledBottomBar = styled.div`
 `;
 
 export const GamePage = () => {
-  const { injectImpulse } = useGameEngine();
+  const { state, injectImpulse } = useGameEngine();
+  const ready = !!state;
 
   useEffect(() => {
+    if (!ready) return;
     injectImpulse(Pause.setPaused(false));
     return () => injectImpulse(Pause.setPaused(true));
-  }, [injectImpulse]);
+  }, [ready, injectImpulse]);
 
   return (
     <StyledGamePage className='game-page'>
