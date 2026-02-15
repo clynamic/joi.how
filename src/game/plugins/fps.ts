@@ -1,4 +1,4 @@
-import { Composer, GameContext, pluginPaths, typedPath } from '../../engine';
+import { Composer, pluginPaths } from '../../engine';
 import type { Plugin } from '../../engine/plugins/Plugins';
 import Debug from './debug';
 
@@ -9,13 +9,26 @@ const HISTORY_SIZE = 30;
 
 type FpsContext = {
   el: HTMLElement;
-  fpsHistory: number[];
-  tpsHistory: number[];
-  lastWallTime: number;
+  tickTimestamps: number[];
 };
 
 const fps = pluginPaths<never, FpsContext>(PLUGIN_ID);
-const gameContext = typedPath<GameContext>(['context']);
+
+let rafId = 0;
+let lastFrameTime: number | null = null;
+let fpsHistory: number[] = [];
+
+function rafLoop() {
+  const now = performance.now();
+  if (lastFrameTime !== null) {
+    const delta = now - lastFrameTime;
+    if (delta > 0) {
+      fpsHistory = [...fpsHistory, 1000 / delta].slice(-HISTORY_SIZE);
+    }
+  }
+  lastFrameTime = now;
+  rafId = requestAnimationFrame(rafLoop);
+}
 
 export default class Fps {
   static plugin: Plugin = {
@@ -56,12 +69,12 @@ export default class Fps {
       el.style.display = visible ? '' : 'none';
 
       document.body.appendChild(el);
-      set(fps.context, {
-        el,
-        fpsHistory: [],
-        tpsHistory: [],
-        lastWallTime: performance.now(),
-      });
+
+      lastFrameTime = null;
+      fpsHistory = [];
+      rafId = requestAnimationFrame(rafLoop);
+
+      set(fps.context, { el, tickTimestamps: [] });
     }),
 
     update: Composer.do(({ get, set }) => {
@@ -72,31 +85,29 @@ export default class Fps {
       if (ctx.el) ctx.el.style.display = visible ? '' : 'none';
       if (!visible) return;
 
-      const now = performance.now();
-      const wallDelta = now - ctx.lastWallTime;
-
-      const currentFps = wallDelta > 0 ? 1000 / wallDelta : 0;
-      const fpsHistory = [...ctx.fpsHistory, currentFps].slice(-HISTORY_SIZE);
       const avgFps =
         fpsHistory.length > 0
           ? fpsHistory.reduce((sum, v) => sum + v, 0) / fpsHistory.length
-          : currentFps;
+          : 0;
 
-      const step = get(gameContext.step);
-      const currentTps = step > 0 ? 1000 / step : 0;
-      const tpsHistory = [...ctx.tpsHistory, currentTps].slice(-HISTORY_SIZE);
-      const avgTps =
-        tpsHistory.length > 0
-          ? tpsHistory.reduce((sum, v) => sum + v, 0) / tpsHistory.length
-          : currentTps;
+      const now = performance.now();
+      const cutoff = now - 1000;
+      const tickTimestamps = [...ctx.tickTimestamps, now].filter(
+        t => t >= cutoff
+      );
 
       if (ctx.el)
-        ctx.el.textContent = `${Math.round(avgFps)} FPS / ${Math.round(avgTps)} TPS`;
+        ctx.el.textContent = `${Math.round(avgFps)} FPS / ${tickTimestamps.length} TPS`;
 
-      set(fps.context, { ...ctx, fpsHistory, tpsHistory, lastWallTime: now });
+      set(fps.context, { ...ctx, tickTimestamps });
     }),
 
     deactivate: Composer.do(({ get, set }) => {
+      cancelAnimationFrame(rafId);
+      rafId = 0;
+      lastFrameTime = null;
+      fpsHistory = [];
+
       const el = get(fps.context)?.el;
       if (el) el.remove();
       set(fps.context, undefined);
