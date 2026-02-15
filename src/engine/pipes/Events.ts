@@ -45,7 +45,10 @@ export class Events {
   }
 
   static dispatch<T>(event: GameEvent<T>): Pipe {
-    return pendingLens.over(pending => [...(Array.isArray(pending) ? pending : []), event]);
+    return pendingLens.over(pending => [
+      ...(Array.isArray(pending) ? pending : []),
+      event,
+    ]);
   }
 
   static handle<T = any>(
