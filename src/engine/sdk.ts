@@ -2,9 +2,7 @@ import { Composer } from './Composer';
 import { Events } from './pipes/Events';
 import { Scheduler } from './pipes/Scheduler';
 import { Storage } from './pipes/Storage';
-import { PluginManager } from './plugins/PluginManager';
 import { pluginPaths } from './plugins/Plugins';
-import { Perf } from './pipes/Perf';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PluginSDK {}
@@ -15,8 +13,6 @@ export interface SDK extends PluginSDK {
   Events: typeof Events;
   Scheduler: typeof Scheduler;
   Storage: typeof Storage;
-  PluginManager: typeof PluginManager;
-  Perf: typeof Perf;
   pluginPaths: typeof pluginPaths;
 }
 
@@ -26,7 +22,7 @@ export const sdk: SDK = {
   Events,
   Scheduler,
   Storage,
-  PluginManager,
-  Perf,
   pluginPaths,
 } as SDK;
+
+(globalThis as any).sdk = sdk;
