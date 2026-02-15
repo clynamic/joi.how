@@ -5,6 +5,12 @@ import { pluginPaths, PluginId } from '../plugins/Plugins';
 import { typedPath } from '../Lens';
 import { sdk } from '../sdk';
 
+declare module '../sdk' {
+  interface SDK {
+    Perf: typeof Perf;
+  }
+}
+
 export type PluginPerfEntry = {
   last: number;
   avg: number;
@@ -174,3 +180,5 @@ export class Perf {
     return perf;
   }
 }
+
+sdk.Perf = Perf;

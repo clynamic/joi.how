@@ -1,5 +1,6 @@
 import { Pipe } from '../engine/State';
 import { Events, GameEvent, Scheduler } from '../engine/pipes';
+import { sdk } from '../engine/sdk';
 import Messages from './plugins/messages';
 
 type MessageInput = Omit<Parameters<typeof Messages.send>[0], 'id'>;
@@ -65,3 +66,11 @@ export class Sequence {
     };
   }
 }
+
+declare module '../engine/sdk' {
+  interface SDK {
+    Sequence: typeof Sequence;
+  }
+}
+
+sdk.Sequence = Sequence;

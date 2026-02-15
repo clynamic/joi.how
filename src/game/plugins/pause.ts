@@ -4,12 +4,7 @@ import { Composer } from '../../engine/Composer';
 import { Events } from '../../engine/pipes/Events';
 import { pluginPaths } from '../../engine/plugins/Plugins';
 import { Sequence } from '../Sequence';
-
-declare module '../../engine/sdk' {
-  interface PluginSDK {
-    Pause: typeof Pause;
-  }
-}
+import { sdk } from '../../engine/sdk';
 
 const PLUGIN_ID = 'core.pause';
 
@@ -63,7 +58,11 @@ export default class Pause {
       name: 'Pause',
     },
 
-    activate: Composer.set(paths.state, { paused: true, prev: true, countdown: null }),
+    activate: Composer.set(paths.state, {
+      paused: true,
+      prev: true,
+      countdown: null,
+    }),
 
     update: Composer.pipe(
       Composer.do(({ get, set, pipe }) => {
@@ -112,3 +111,11 @@ export default class Pause {
     return paths;
   }
 }
+
+declare module '../../engine/sdk' {
+  interface PluginSDK {
+    Pause: typeof Pause;
+  }
+}
+
+sdk.Pause = Pause;

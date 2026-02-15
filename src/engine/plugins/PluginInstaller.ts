@@ -1,7 +1,6 @@
 import { Composer } from '../Composer';
 import { Pipe, GameFrame } from '../State';
 import { Storage } from '../pipes/Storage';
-import { sdk } from '../sdk';
 import { PluginManager } from './PluginManager';
 import { pluginPaths, type PluginId, type PluginClass } from './Plugins';
 
@@ -15,6 +14,7 @@ type PluginLoad = {
 
 type InstallerState = {
   installed: PluginId[];
+  failed: PluginId[];
 };
 
 type InstallerContext = {
@@ -29,8 +29,6 @@ const storageKey = {
 };
 
 async function load(code: string): Promise<PluginClass> {
-  (globalThis as any).sdk = sdk;
-
   const blob = new Blob([code], { type: 'text/javascript' });
   const url = URL.createObjectURL(blob);
 
@@ -58,14 +56,16 @@ const importPipe: Pipe = Storage.bind<PluginId[]>(
         Storage.bind<string>(storageKey.code(id), code =>
           Composer.do<GameFrame>(({ get, over }) => {
             const installed = get(ins.state.installed) ?? [];
+            const failed = get(ins.state.failed) ?? [];
             const pending = get(ins.context.pending);
 
-            if (installed.includes(id) || pending?.has(id)) return;
+            if (installed.includes(id) || failed.includes(id) || pending?.has(id)) return;
 
             if (!code) {
               console.error(
                 `[PluginInstaller] plugin "${id}" has no code in storage`
               );
+              over(ins.state.failed, (ids = []) => [...(Array.isArray(ids) ? ids : []), id]);
               return;
             }
 
@@ -96,17 +96,18 @@ const resolvePipe: Pipe = Composer.do<GameFrame>(({ get, set, over, pipe }) => {
   if (!pending?.size) return;
 
   const resolved: PluginClass[] = [];
+  const failed: PluginId[] = [];
   const remaining = new Map<PluginId, PluginLoad>();
 
   for (const [id, entry] of pending) {
     if (entry.result) {
       resolved.push(entry.result);
     } else if (entry.error) {
-      // TODO: provide state for failed plugins
       console.error(
         `[PluginInstaller] failed to load plugin "${id}":`,
         entry.error
       );
+      failed.push(id);
     } else {
       remaining.set(id, entry);
     }
@@ -117,6 +118,13 @@ const resolvePipe: Pipe = Composer.do<GameFrame>(({ get, set, over, pipe }) => {
     over(ins.state.installed, (ids = []) => [
       ...(Array.isArray(ids) ? ids : []),
       ...resolved.map(cls => cls.plugin.id),
+    ]);
+  }
+
+  if (failed.length > 0) {
+    over(ins.state.failed, (ids = []) => [
+      ...(Array.isArray(ids) ? ids : []),
+      ...failed,
     ]);
   }
 

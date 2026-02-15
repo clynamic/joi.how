@@ -270,6 +270,14 @@ const finalizePipe: Pipe = Composer.pipe(
   })
 );
 
+declare module '../sdk' {
+  interface SDK {
+    PluginManager: typeof PluginManager;
+  }
+}
+
+sdk.PluginManager = PluginManager;
+
 export const pluginManagerPipe: Pipe = Composer.pipe(
   apiPipe,
   enableDisablePipe,
