@@ -18,7 +18,7 @@ const seq = Sequence.for(PLUGIN_ID, 'edge');
 export const edgeOutcome: DiceOutcome = {
   id: DiceEvent.edge,
   check: frame => {
-    const i = (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100;
+    const i = Composer.get(intensityState)(frame).intensity * 100;
     return i >= 90 && !Composer.get(edged)(frame);
   },
   update: Composer.pipe(

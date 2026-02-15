@@ -55,8 +55,8 @@ export default class RandomImages {
         const imgs = get(images);
         if (!imgs || imgs.length === 0) return;
 
-        const { seenImages = [] } = get(imageState) ?? {};
-        const { intensity = 0 } = get(intensityState) ?? {};
+        const { seenImages = [] } = get(imageState);
+        const { intensity = 0 } = get(intensityState);
 
         const imagesWithDistance = imgs.map(image => {
           const seenIndex = seenImages.indexOf(image);

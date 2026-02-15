@@ -55,7 +55,7 @@ export default class Messages {
     update: Composer.pipe(
       Events.handle<PartialGameMessage>(eventType.sendMessage, event =>
         Composer.pipe(
-          Composer.over(paths.state, ({ messages = [] }) => {
+          Composer.over(paths.state, ({ messages }) => {
             const patch = event.payload;
             const index = messages.findIndex(m => m.id === patch.id);
             const existing = messages[index];
@@ -72,7 +72,7 @@ export default class Messages {
           }),
 
           Composer.do(({ get, pipe }) => {
-            const { messages = [] } = get(paths.state);
+            const { messages } = get(paths.state);
             const messageId = event.payload.id;
             const updated = messages.find(m => m.id === messageId);
             const scheduleId = Scheduler.getKey(
@@ -99,7 +99,7 @@ export default class Messages {
       ),
 
       Events.handle<string>(eventType.expireMessage, event =>
-        Composer.over(paths.state, ({ messages = [] }) => ({
+        Composer.over(paths.state, ({ messages }) => ({
           messages: messages.filter(m => m.id !== event.payload),
         }))
       )

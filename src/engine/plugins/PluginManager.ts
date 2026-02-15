@@ -182,8 +182,6 @@ const reconcilePipe: Pipe = Composer.pipe(
   )
 );
 
-// TODO: lifecycle should include error handling
-// TODO: OTEL spans for performance monitoring
 const lifecyclePipe: Pipe = Composer.do<GameFrame>(({ get, pipe }) => {
   const toUnload = get(pm.context.toUnload) ?? [];
   const toLoad = get(pm.context.toLoad) ?? [];

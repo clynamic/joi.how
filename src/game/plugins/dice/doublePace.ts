@@ -18,12 +18,12 @@ const seq = Sequence.for(PLUGIN_ID, 'doublePace');
 export const doublePaceOutcome: DiceOutcome = {
   id: DiceEvent.doublePace,
   check: frame =>
-    (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100 >= 20,
+    Composer.get(intensityState)(frame).intensity * 100 >= 20,
   update: Composer.pipe(
     seq.on(() =>
       Composer.bind(paceState, pace =>
         Composer.bind(settings, s => {
-          const newPace = Math.min(round((pace?.pace ?? 1) * 2), s.maxPace);
+          const newPace = Math.min(round(pace.pace * 2), s.maxPace);
           return Composer.pipe(
             Pace.setPace(newPace),
             seq.message({ title: 'Double pace!', description: '3...' }),

@@ -15,7 +15,7 @@ const seq = Sequence.for(PLUGIN_ID, 'cleanUp');
 export const cleanUpOutcome: DiceOutcome = {
   id: DiceEvent.cleanUp,
   check: frame =>
-    (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100 >= 75,
+    Composer.get(intensityState)(frame).intensity * 100 >= 75,
   update: Composer.pipe(
     seq.on(() =>
       Composer.bind(settings, s =>

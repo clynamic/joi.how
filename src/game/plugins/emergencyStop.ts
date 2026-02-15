@@ -35,7 +35,7 @@ export default class EmergencyStop {
       seq.on(() =>
         Composer.bind(intensityState, ist =>
           Composer.bind(settings, s => {
-            const i = (ist?.intensity ?? 0) * 100;
+            const i = ist.intensity * 100;
             const timeToCalmDown = Math.ceil((i * 500 + 10000) / 1000);
             return Composer.pipe(
               Phase.setPhase(GamePhase.break),

@@ -44,7 +44,6 @@ export default class Warmup {
           GamePhase.warmup,
           Composer.do(({ get, set, pipe }) => {
             const s = get(settings);
-            if (!s) return;
 
             if (s.warmupDuration === 0) {
               pipe(Phase.setPhase(GamePhase.active));
@@ -52,7 +51,7 @@ export default class Warmup {
             }
 
             const state = get(warmup.state);
-            if (state?.initialized) return;
+            if (state.initialized) return;
 
             set(warmup.state.initialized, true);
             pipe(

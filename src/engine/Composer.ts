@@ -29,8 +29,8 @@ function _set<T, A>(obj: T, path: Path<A>, value: A): T {
   return lensFromPath<T, A>(path).set(value)(obj);
 }
 
-function _over<T, A>(obj: T, path: Path<A>, fn: (a: A) => A): T {
-  return lensFromPath<T, A>(path).over(fn)(obj);
+function _over<T, A>(obj: T, path: Path<A>, fn: (a: A) => A, fallback?: A): T {
+  return lensFromPath<T, A>(path).over(fn, fallback)(obj);
 }
 
 function _bind<T, A>(obj: T, path: Path<A>, fn: Transformer<[A], T>): T {
@@ -153,16 +153,16 @@ export class Composer<T extends object> {
   /**
    * Updates the value at the specified path with the mapping function.
    */
-  over<A>(path: Path<A>, fn: (a: A) => A): this {
-    this.obj = _over(this.obj, path, fn);
+  over<A>(path: Path<A>, fn: (a: A) => A, fallback?: A): this {
+    this.obj = _over(this.obj, path, fn, fallback);
     return this;
   }
 
   /**
    * Shorthand for building a composer that updates a path.
    */
-  static over<A>(path: Path<A>, fn: (a: A) => A) {
-    return <T extends object>(obj: T): T => _over(obj, path, fn);
+  static over<A>(path: Path<A>, fn: (a: A) => A, fallback?: A) {
+    return <T extends object>(obj: T): T => _over(obj, path, fn, fallback);
   }
 
   /**
