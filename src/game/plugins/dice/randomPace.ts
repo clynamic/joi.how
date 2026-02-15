@@ -17,7 +17,7 @@ const seq = Sequence.for(PLUGIN_ID, 'randomPace');
 
 export const doRandomPace = (): Pipe =>
   Composer.do(({ get, pipe }) => {
-    const i = get(intensityState)?.intensity ?? 0;
+    const i = get(intensityState).intensity;
     const s = get(settings);
     const { min, max } = intensityToPaceRange(
       i * 100,

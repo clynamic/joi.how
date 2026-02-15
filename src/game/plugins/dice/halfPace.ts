@@ -21,7 +21,7 @@ const seq = Sequence.for(PLUGIN_ID, 'halfPace');
 export const halfPaceOutcome: DiceOutcome = {
   id: DiceEvent.halfPace,
   check: frame => {
-    const i = (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100;
+    const i = Composer.get(intensityState)(frame).intensity * 100;
     return i >= 10 && i <= 50;
   },
   update: Composer.pipe(
@@ -29,7 +29,7 @@ export const halfPaceOutcome: DiceOutcome = {
       Composer.do(({ get, pipe }) => {
         const pace = get(paceState);
         const s = get(settings);
-        const newPace = Math.max(round((pace?.pace ?? 1) / 2), s.minPace);
+        const newPace = Math.max(round(pace.pace / 2), s.minPace);
         pipe(
           Rand.next(v => {
             const duration = Math.ceil(v * 20000) + 12000;

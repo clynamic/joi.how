@@ -71,7 +71,7 @@ export default class Dealer {
       Composer.bind(settings, s =>
         Composer.pipe(
           ...outcomes.flatMap(o =>
-            o.activate && s?.events.includes(o.id) ? [o.activate] : []
+            o.activate && s.events.includes(o.id) ? [o.activate] : []
           )
         )
       ),
@@ -85,11 +85,9 @@ export default class Dealer {
             GamePhase.active,
             Composer.do(({ get, pipe }) => {
               const state = get(dice.state);
-              if (!state || state.busy) return;
+              if (state.busy) return;
 
               const s = get(settings);
-              if (!s) return;
-
               const frame = get();
 
               const eligible = outcomes.filter(o => {

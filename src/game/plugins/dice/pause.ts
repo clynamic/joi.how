@@ -9,11 +9,11 @@ const seq = Sequence.for(PLUGIN_ID, 'pause');
 export const pauseOutcome: DiceOutcome = {
   id: DiceEvent.pause,
   check: frame =>
-    (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100 >= 15,
+    Composer.get(intensityState)(frame).intensity * 100 >= 15,
   update: Composer.pipe(
     seq.on(() =>
       Composer.bind(intensityState, ist => {
-        const i = (ist?.intensity ?? 0) * 100;
+        const i = ist.intensity * 100;
         return Composer.pipe(
           seq.message({ title: 'Stop stroking!' }),
           Phase.setPhase(GamePhase.break),

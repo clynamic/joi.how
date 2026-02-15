@@ -140,7 +140,7 @@ describe('Lens', () => {
         expect(obj.a.b).toBe(5);
       });
 
-      it('should provide empty object when value is undefined', () => {
+      it('should default to {} when value is undefined', () => {
         const lens = lensFromPath<
           { a?: { b?: { value: number } } },
           { value: number }
@@ -150,6 +150,15 @@ describe('Lens', () => {
         const result = lens.over(x => ({ value: (x.value || 0) + 1 }))(obj);
 
         expect(result.a?.b?.value).toBe(1);
+      });
+
+      it('should accept a custom fallback for missing values', () => {
+        const lens = lensFromPath<{ a?: { b?: number } }, number>('a.b');
+        const obj = {};
+
+        const result = lens.over(x => x + 1, 0)(obj);
+
+        expect(result.a?.b).toBe(1);
       });
 
       it('should not mutate the original object', () => {

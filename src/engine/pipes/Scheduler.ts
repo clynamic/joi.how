@@ -96,32 +96,32 @@ export class Scheduler {
     ),
 
     Events.handle<ScheduledEvent>(eventType.schedule, event =>
-      Composer.over(scheduler.state.scheduled, (list = []) => [
+      Composer.over(scheduler.state.scheduled, list => [
         ...list.filter(e => e.id !== event.payload.id),
         event.payload,
       ])
     ),
 
     Events.handle<string>(eventType.cancel, event =>
-      Composer.over(scheduler.state.scheduled, (list = []) =>
+      Composer.over(scheduler.state.scheduled, list =>
         list.filter(s => s.id !== event.payload)
       )
     ),
 
     Events.handle<string>(eventType.hold, event =>
-      Composer.over(scheduler.state.scheduled, (list = []) =>
+      Composer.over(scheduler.state.scheduled, list =>
         list.map(s => (s.id === event.payload ? { ...s, held: true } : s))
       )
     ),
 
     Events.handle<string>(eventType.release, event =>
-      Composer.over(scheduler.state.scheduled, (list = []) =>
+      Composer.over(scheduler.state.scheduled, list =>
         list.map(s => (s.id === event.payload ? { ...s, held: false } : s))
       )
     ),
 
     Events.handle<string>(eventType.holdByPrefix, event =>
-      Composer.over(scheduler.state.scheduled, (list = []) =>
+      Composer.over(scheduler.state.scheduled, list =>
         list.map(s =>
           s.id?.startsWith(event.payload) ? { ...s, held: true } : s
         )
@@ -129,7 +129,7 @@ export class Scheduler {
     ),
 
     Events.handle<string>(eventType.releaseByPrefix, event =>
-      Composer.over(scheduler.state.scheduled, (list = []) =>
+      Composer.over(scheduler.state.scheduled, list =>
         list.map(s =>
           s.id?.startsWith(event.payload) ? { ...s, held: false } : s
         )
@@ -137,7 +137,7 @@ export class Scheduler {
     ),
 
     Events.handle<string>(eventType.cancelByPrefix, event =>
-      Composer.over(scheduler.state.scheduled, (list = []) =>
+      Composer.over(scheduler.state.scheduled, list =>
         list.filter(s => !s.id?.startsWith(event.payload))
       )
     )

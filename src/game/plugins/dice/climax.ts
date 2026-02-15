@@ -21,11 +21,11 @@ const seq = Sequence.for(PLUGIN_ID, 'climax');
 export const climaxOutcome: DiceOutcome = {
   id: DiceEvent.climax,
   check: frame => {
-    const i = (Composer.get(intensityState)(frame)?.intensity ?? 0) * 100;
+    const i = Composer.get(intensityState)(frame).intensity * 100;
     const s = Composer.get(settings)(frame);
     return (
       i >= 100 &&
-      (!s?.events.includes(DiceEvent.edge) || !!Composer.get(edged)(frame))
+      (!s.events.includes(DiceEvent.edge) || !!Composer.get(edged)(frame))
     );
   },
   update: Composer.pipe(

@@ -37,20 +37,18 @@ export default class Hypno {
 
     update: Pause.whenPlaying(
       Composer.do(({ get, set, pipe }) => {
-        const phase = get(phaseState)?.current;
+        const phase = get(phaseState).current;
         if (phase !== GamePhase.active) return;
 
         const s = get(settings);
-        if (!s || s.hypno === GameHypnoType.off) return;
+        if (s.hypno === GameHypnoType.off) return;
 
-        const i = (get(intensityState)?.intensity ?? 0) * 100;
+        const i = get(intensityState).intensity * 100;
         const delay = 3000 - i * 29;
         if (delay <= 0) return;
 
         const delta = get(gameContext.step);
         const state = get(hypno.state);
-        if (!state) return;
-
         const elapsed = state.timer + delta;
         if (elapsed < delay) {
           set(hypno.state.timer, elapsed);

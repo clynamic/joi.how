@@ -1,7 +1,7 @@
 export type Lens<S, A> = {
   get: (source: S) => A;
   set: (value: A) => (source: S) => S;
-  over: (fn: (a: A) => A) => (source: S) => S;
+  over: (fn: (a: A) => A, fallback?: A) => (source: S) => S;
 };
 
 export type StringPath = (string | number | symbol)[] | string;
@@ -47,8 +47,11 @@ export function lensFromPath<S = any, A = any>(path: Path): Lens<S, A> {
       get: (source: S) => source as unknown as A,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       set: (value: A) => (_source: S) => value as unknown as S,
-      over: (fn: (a: A) => A) => (source: S) =>
-        fn(source as unknown as A) as unknown as S,
+      over:
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        (fn: (a: A) => A, _fallback = {} as A) =>
+          (source: S) =>
+            fn(source as unknown as A) as unknown as S,
     };
   }
 
@@ -77,9 +80,9 @@ export function lensFromPath<S = any, A = any>(path: Path): Lens<S, A> {
       },
 
     over:
-      (fn: (a: A) => A) =>
+      (fn: (a: A) => A, fallback = {} as A) =>
       (source: S): S => {
-        const current = lens.get(source) ?? ({} as A);
+        const current = lens.get(source) ?? fallback;
         return lens.set(fn(current))(source);
       },
   };
