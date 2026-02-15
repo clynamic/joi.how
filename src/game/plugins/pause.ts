@@ -12,6 +12,7 @@ export type PauseState = {
   paused: boolean;
   prev: boolean;
   countdown: number | null;
+  gen: number;
 };
 
 const paths = pluginPaths<PauseState>(PLUGIN_ID);
@@ -19,7 +20,7 @@ const paths = pluginPaths<PauseState>(PLUGIN_ID);
 const eventType = Events.getKeys(PLUGIN_ID, 'on', 'off');
 
 type SetPayload = { paused: boolean };
-type CountdownPayload = { remaining: number };
+type CountdownPayload = { remaining: number; gen: number };
 
 const seq = Sequence.for(PLUGIN_ID, 'set');
 
@@ -62,6 +63,7 @@ export default class Pause {
       paused: true,
       prev: true,
       countdown: null,
+      gen: 0,
     }),
 
     update: Composer.pipe(
@@ -73,32 +75,42 @@ export default class Pause {
       }),
 
       seq.on<SetPayload>(event =>
-        Composer.when(
-          event.payload.paused,
-          Composer.pipe(
-            seq.cancel(),
-            Composer.set(paths.state.paused, true),
-            Composer.set(paths.state.countdown, null)
-          ),
-          Composer.pipe(
-            Composer.set(paths.state.countdown, 3),
-            seq.after(1000, 'countdown', { remaining: 2 })
-          )
-        )
+        Composer.bind(paths.state.gen, (gen = 0) => {
+          const next = gen + 1;
+          return Composer.when(
+            event.payload.paused,
+            Composer.pipe(
+              Composer.set(paths.state.gen, next),
+              Composer.set(paths.state.paused, true),
+              Composer.set(paths.state.countdown, null)
+            ),
+            Composer.pipe(
+              Composer.set(paths.state.gen, next),
+              Composer.set(paths.state.countdown, 3),
+              seq.after(1000, 'countdown', { remaining: 2, gen: next })
+            )
+          );
+        })
       ),
 
       seq.on<CountdownPayload>('countdown', event =>
-        Composer.when(
-          event.payload.remaining <= 0,
-          Composer.pipe(
-            Composer.set(paths.state.countdown, null),
-            Composer.set(paths.state.paused, false)
-          ),
-          Composer.pipe(
-            Composer.set(paths.state.countdown, event.payload.remaining),
-            seq.after(1000, 'countdown', {
-              remaining: event.payload.remaining - 1,
-            })
+        Composer.bind(paths.state.gen, gen =>
+          Composer.when(
+            event.payload.gen === gen,
+            Composer.when(
+              event.payload.remaining <= 0,
+              Composer.pipe(
+                Composer.set(paths.state.countdown, null),
+                Composer.set(paths.state.paused, false)
+              ),
+              Composer.pipe(
+                Composer.set(paths.state.countdown, event.payload.remaining),
+                seq.after(1000, 'countdown', {
+                  remaining: event.payload.remaining - 1,
+                  gen,
+                })
+              )
+            )
           )
         )
       )
