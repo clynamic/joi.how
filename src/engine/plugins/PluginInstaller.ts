@@ -59,13 +59,21 @@ const importPipe: Pipe = Storage.bind<PluginId[]>(
             const failed = get(ins.state.failed) ?? [];
             const pending = get(ins.context.pending);
 
-            if (installed.includes(id) || failed.includes(id) || pending?.has(id)) return;
+            if (
+              installed.includes(id) ||
+              failed.includes(id) ||
+              pending?.has(id)
+            )
+              return;
 
             if (!code) {
               console.error(
                 `[PluginInstaller] plugin "${id}" has no code in storage`
               );
-              over(ins.state.failed, (ids = []) => [...(Array.isArray(ids) ? ids : []), id]);
+              over(ins.state.failed, (ids = []) => [
+                ...(Array.isArray(ids) ? ids : []),
+                id,
+              ]);
               return;
             }
 
