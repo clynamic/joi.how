@@ -157,13 +157,10 @@ export class Perf {
     }),
 
     Events.handle<Partial<PerfConfig>>(eventType.configure, event =>
-      Composer.over(
-        perf.context.config,
-        (config = DEFAULT_CONFIG) => ({
-          ...config,
-          ...event.payload,
-        })
-      )
+      Composer.over(perf.context.config, (config = DEFAULT_CONFIG) => ({
+        ...config,
+        ...event.payload,
+      }))
     )
   );
 

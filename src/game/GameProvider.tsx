@@ -51,7 +51,14 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
 
     engineRef.current = new GameEngine(
       {},
-      Piper([impulsePipe, Events.pipe, Scheduler.pipe, Perf.pipe, Errors.pipe, ...pipes])
+      Piper([
+        impulsePipe,
+        Events.pipe,
+        Scheduler.pipe,
+        Perf.pipe,
+        Errors.pipe,
+        ...pipes,
+      ])
     );
 
     const STEP = 16;
