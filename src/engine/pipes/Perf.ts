@@ -50,6 +50,39 @@ const eventType = Events.getKeys(PLUGIN_NAMESPACE, 'over_budget', 'configure');
 const perf = pluginPaths<never, PerfContext>(PLUGIN_NAMESPACE);
 const gameContext = typedPath<GameContext>(['context']);
 
+function isEntry(value: unknown): value is PluginPerfEntry {
+  return value != null && typeof value === 'object' && 'lastTick' in value;
+}
+
+function pruneExpired(
+  node: Record<string, unknown>,
+  tick: number
+): [Record<string, unknown> | undefined, boolean] {
+  let dirty = false;
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(node)) {
+    if (isEntry(value)) {
+      if (tick - value.lastTick <= EXPIRY_TICKS) {
+        result[key] = value;
+      } else {
+        dirty = true;
+      }
+    } else if (value && typeof value === 'object') {
+      const [pruned, changed] = pruneExpired(
+        value as Record<string, unknown>,
+        tick
+      );
+      if (pruned) result[key] = pruned;
+      else dirty = true;
+      if (changed) dirty = true;
+    }
+  }
+
+  const empty = Object.keys(result).length === 0;
+  return [empty ? undefined : result, dirty];
+}
+
 export class Perf {
   static withTiming(id: PluginId, phase: string, pluginPipe: Pipe): Pipe {
     return Composer.do(({ get, set, pipe }) => {
@@ -64,47 +97,26 @@ export class Perf {
       const duration = after - before;
 
       const tick = get(gameContext.tick) ?? 0;
-      const ctx = get(perf.context) ?? { plugins: {}, config: DEFAULT_CONFIG };
-      const pluginMetrics = ctx.plugins[id] ?? {};
-      const entry = pluginMetrics[phase];
+      const entryPath = perf.context.plugins[id][phase];
+      const entry = get<PluginPerfEntry>(entryPath);
 
       const samples = entry
         ? [...entry.samples, duration].slice(-SAMPLE_SIZE)
         : [duration];
 
-      const avg =
-        samples.length > 0
-          ? samples.reduce((sum, v) => sum + v, 0) / samples.length
-          : duration;
-
+      const avg = samples.reduce((sum, v) => sum + v, 0) / samples.length;
       const max = entry ? Math.max(entry.max, duration) : duration;
 
-      const newEntry: PluginPerfEntry = {
-        last: duration,
-        avg,
-        max,
-        samples,
-        lastTick: tick,
-      };
+      set(entryPath, { last: duration, avg, max, samples, lastTick: tick });
 
-      set(perf.context, {
-        ...ctx,
-        plugins: {
-          ...ctx.plugins,
-          [id]: {
-            ...pluginMetrics,
-            [phase]: newEntry,
-          },
-        },
-      });
+      const budget =
+        get<number>(perf.context.config.pluginBudget) ??
+        DEFAULT_CONFIG.pluginBudget;
 
-      const budget = ctx.config.pluginBudget;
       if (duration > budget) {
-        if (sdk.debug) {
-          console.warn(
-            `[perf] ${id} ${phase} took ${duration.toFixed(2)}ms (budget: ${budget}ms)`
-          );
-        }
+        console.warn(
+          `[perf] ${id} ${phase} took ${duration.toFixed(2)}ms (budget: ${budget}ms)`
+        );
         pipe(
           Events.dispatch({
             type: eventType.overBudget,
@@ -127,52 +139,31 @@ export class Perf {
   }
 
   static pipe: Pipe = Composer.pipe(
-    Composer.over(
-      perf.context,
-      (ctx = { plugins: {}, config: DEFAULT_CONFIG }) => ({
-        ...ctx,
-        plugins: ctx.plugins ?? {},
-        config: ctx.config ?? DEFAULT_CONFIG,
-      })
-    ),
+    Composer.do(({ get, set }) => {
+      if (!get(perf.context.config)) {
+        set(perf.context.config, DEFAULT_CONFIG);
+      }
+    }),
 
     Composer.do(({ get, set }) => {
       const tick = get(gameContext.tick) ?? 0;
-      const ctx = get(perf.context);
-      if (!ctx) return;
+      const plugins = get<Record<string, unknown>>(perf.context.plugins);
+      if (!plugins) return;
 
-      let dirty = false;
-      const pruned: PerfMetrics = {};
-
-      for (const [id, phases] of Object.entries(ctx.plugins)) {
-        const kept: Record<string, PluginPerfEntry> = {};
-        for (const [phase, entry] of Object.entries(phases)) {
-          if (entry && tick - entry.lastTick <= EXPIRY_TICKS) {
-            kept[phase] = entry;
-          } else {
-            dirty = true;
-          }
-        }
-        if (Object.keys(kept).length > 0) {
-          pruned[id] = kept;
-        } else {
-          dirty = true;
-        }
-      }
-
+      const [pruned, dirty] = pruneExpired(plugins, tick);
       if (dirty) {
-        set(perf.context, { ...ctx, plugins: pruned });
+        set(perf.context.plugins, pruned ?? {});
       }
     }),
 
     Events.handle<Partial<PerfConfig>>(eventType.configure, event =>
-      Composer.over(perf.context, ctx => ({
-        ...ctx,
-        config: {
-          ...ctx.config,
+      Composer.over(
+        perf.context.config,
+        (config = DEFAULT_CONFIG) => ({
+          ...config,
           ...event.payload,
-        },
-      }))
+        })
+      )
     )
   );
 

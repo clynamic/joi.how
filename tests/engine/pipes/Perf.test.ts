@@ -4,23 +4,24 @@ import { GameFrame, Pipe } from '../../../src/engine/State';
 import { Events } from '../../../src/engine/pipes/Events';
 import {
   Perf,
-  type PerfContext,
+  type PerfConfig,
   type PluginPerfEntry,
 } from '../../../src/engine/pipes/Perf';
+import { lensFromPath } from '../../../src/engine/Lens';
 import { sdk } from '../../../src/engine/sdk';
 import { makeFrame, tick } from '../../utils';
 
 const basePipe: Pipe = Composer.pipe(Events.pipe, Perf.pipe);
-
-const getPerfCtx = (frame: GameFrame): PerfContext | undefined =>
-  (frame.context as any)?.core?.perf;
 
 const getEntry = (
   frame: GameFrame,
   pluginId: string,
   phase: string
 ): PluginPerfEntry | undefined =>
-  (getPerfCtx(frame)?.plugins as any)?.[pluginId]?.[phase];
+  lensFromPath(['context', 'core.perf', 'plugins', pluginId, phase]).get(frame);
+
+const getConfig = (frame: GameFrame): PerfConfig | undefined =>
+  lensFromPath(['context', 'core.perf', 'config']).get(frame);
 
 describe('Perf', () => {
   beforeEach(() => {
@@ -211,8 +212,8 @@ describe('Perf', () => {
       const frame1 = Perf.configure({ pluginBudget: 2 })(frame0);
       const frame2 = basePipe(tick(frame1));
 
-      const ctx = getPerfCtx(frame2);
-      expect(ctx!.config.pluginBudget).toBe(2);
+      const config = getConfig(frame2);
+      expect(config!.pluginBudget).toBe(2);
     });
   });
 });
