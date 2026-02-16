@@ -47,9 +47,7 @@ export default class Clock {
           set(clock.context, { lastWall: now });
         })
       ),
-      Pause.onPause(() =>
-        Composer.set(clock.context, { lastWall: null })
-      )
+      Pause.onPause(() => Composer.set(clock.context, { lastWall: null }))
     ),
 
     deactivate: Composer.pipe(

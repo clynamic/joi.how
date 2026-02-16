@@ -8,8 +8,7 @@ const seq = Sequence.for(PLUGIN_ID, 'pause');
 
 export const pauseOutcome: DiceOutcome = {
   id: DiceEvent.pause,
-  check: frame =>
-    Composer.get(intensityState)(frame).intensity * 100 >= 15,
+  check: frame => Composer.get(intensityState)(frame).intensity * 100 >= 15,
   update: Composer.pipe(
     seq.on(() =>
       Composer.bind(intensityState, ist => {
