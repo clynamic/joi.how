@@ -179,9 +179,9 @@ describe('Errors', () => {
         Errors.withCatch('test.plugin', 'update', failing)
       );
 
-      let frame = pipe(makeFrame());
+      const frame = pipe(makeFrame());
       msg = 'second';
-      frame = pipe(tick(frame));
+      pipe(tick(frame));
 
       expect(spy).toHaveBeenCalledTimes(2);
       spy.mockRestore();

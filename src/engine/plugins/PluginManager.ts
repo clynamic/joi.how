@@ -203,7 +203,11 @@ const lifecyclePipe: Pipe = Composer.do<GameFrame>(({ get, pipe }) => {
     .map(id => {
       const p = (loadedRefs[id] ?? registry[id])?.plugin.deactivate;
       return p
-        ? Perf.withTiming(id, 'deactivate', Errors.withCatch(id, 'deactivate', p))
+        ? Perf.withTiming(
+            id,
+            'deactivate',
+            Errors.withCatch(id, 'deactivate', p)
+          )
         : undefined;
     })
     .filter(Boolean) as Pipe[];
