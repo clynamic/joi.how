@@ -1,11 +1,13 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
+import { Pipe } from '../../engine/State';
 import { Events } from '../../engine/pipes/Events';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { Sequence } from '../Sequence';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
 import Rand from './rand';
+import Clock from './clock';
 import { DiceEvent } from '../../types';
 import {
   PLUGIN_ID,
@@ -13,6 +15,7 @@ import {
   settings,
   OUTCOME_DONE,
   DiceOutcome,
+  DiceLogEntry,
 } from './dice/types';
 import { edgeOutcome } from './dice/edge';
 import { pauseOutcome } from './dice/pause';
@@ -54,9 +57,6 @@ const rollChances: Record<string, number> = {
   [DiceEvent.risingPace]: 30,
 };
 
-const eventKeyForOutcome = (id: DiceEvent): string =>
-  Events.getKey(PLUGIN_ID, id);
-
 const roll = Sequence.for(PLUGIN_ID, 'roll');
 
 export default class Dealer {
@@ -67,14 +67,8 @@ export default class Dealer {
     },
 
     activate: Composer.pipe(
-      Composer.set(dice.state, { busy: false }),
-      Composer.bind(settings, s =>
-        Composer.pipe(
-          ...outcomes.flatMap(o =>
-            o.activate && s.events.includes(o.id) ? [o.activate] : []
-          )
-        )
-      ),
+      Composer.set(dice.state, { busy: false, log: [] }),
+      ...outcomes.flatMap(o => o.activate ? [o.activate] : []),
       roll.after(1000, 'check')
     ),
 
@@ -99,25 +93,17 @@ export default class Dealer {
 
               const guaranteed = eligible.find(o => rollChances[o.id] === 1);
               if (guaranteed) {
-                pipe(
-                  Composer.set(dice.state.busy, true),
-                  Events.dispatch({ type: eventKeyForOutcome(guaranteed.id) })
-                );
+                pipe(roll.dispatch('trigger', guaranteed.id));
                 return;
               }
 
               pipe(
-                Rand.next(roll => {
+                Rand.next(value => {
                   let cumulative = 0;
                   for (const outcome of eligible) {
                     cumulative += 1 / rollChances[outcome.id];
-                    if (roll < cumulative) {
-                      return Composer.pipe(
-                        Composer.set(dice.state.busy, true),
-                        Events.dispatch({
-                          type: eventKeyForOutcome(outcome.id),
-                        })
-                      );
+                    if (value < cumulative) {
+                      return roll.dispatch('trigger', outcome.id);
                     }
                   }
                   return Composer.pipe();
@@ -127,6 +113,20 @@ export default class Dealer {
           ),
           roll.after(1000, 'check')
         )
+      ),
+
+      roll.on('trigger', event =>
+        Composer.do(({ get, set, over, pipe }) => {
+          set(dice.state.busy, true);
+          const elapsed = get(Clock.paths.state)?.elapsed ?? 0;
+          over(dice.state.log, (log: DiceLogEntry[]) => [
+            ...log,
+            { time: elapsed, event: event.payload },
+          ]);
+          pipe(
+            Events.dispatch({ type: Events.getKey(PLUGIN_ID, event.payload) })
+          );
+        })
       ),
 
       ...outcomes.map(o => o.update),
@@ -143,6 +143,10 @@ export default class Dealer {
 
     deactivate: Composer.set(dice.state, undefined),
   };
+
+  static triggerOutcome(id: DiceEvent): Pipe {
+    return roll.dispatch('trigger', id);
+  }
 
   static get paths() {
     return dice;

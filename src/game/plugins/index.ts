@@ -17,6 +17,7 @@ import Dealer from './dealer';
 import EmergencyStop from './emergencyStop';
 import Hypno from './hypno';
 import Messages from './messages';
+import Clock from './clock';
 
 const plugins = [
   Messages,
@@ -24,6 +25,7 @@ const plugins = [
   Phase,
   Pace,
   Intensity,
+  Clock,
   Stroke,
   Rand,
   Dealer,
