@@ -4,6 +4,7 @@ import { GameEngine, GameState, Pipe, GameContext } from '../engine';
 import { Events } from '../engine/pipes/Events';
 import { Scheduler } from '../engine/pipes/Scheduler';
 import { Perf } from '../engine/pipes/Perf';
+import { Errors } from '../engine/pipes/Errors';
 import { Piper } from '../engine/Piper';
 import { Composer } from '../engine/Composer';
 
@@ -50,7 +51,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
 
     engineRef.current = new GameEngine(
       {},
-      Piper([impulsePipe, Events.pipe, Scheduler.pipe, Perf.pipe, ...pipes])
+      Piper([impulsePipe, Events.pipe, Scheduler.pipe, Perf.pipe, Errors.pipe, ...pipes])
     );
 
     const STEP = 16;
