@@ -12,4 +12,6 @@ export * from './setters';
 export * from './sound';
 export * from './state';
 export * from './translate';
+export * from './vibrator';
+export * from './time';
 export * from './wait';

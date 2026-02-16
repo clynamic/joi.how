@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { GameMessages } from './components/GameMessages';
 import { GameImages } from './components/GameImages';
@@ -11,7 +12,9 @@ import { GameEmergencyStop } from './components/GameEmergencyStop';
 import { GamePauseMenu } from './components/GamePauseMenu';
 import { GameResume } from './components/GameResume';
 import { useGameEngine } from './hooks/UseGameEngine';
+import { useGameState } from './hooks';
 import Pause from './plugins/pause';
+import { climax } from './plugins/dice/climax';
 
 const StyledGamePage = styled.div`
   position: relative;
@@ -74,14 +77,23 @@ const StyledBottomBar = styled.div`
 `;
 
 export const GamePage = () => {
+  // TODO: none of this logic should live inside this component.
   const { state, injectImpulse } = useGameEngine();
   const ready = !!state;
+  const done = useGameState(climax.done);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Replace this with on Scene transition to play, unpause
     if (!ready) return;
     injectImpulse(Pause.setPaused(false));
     return () => injectImpulse(Pause.setPaused(true));
   }, [ready, injectImpulse]);
+
+  useEffect(() => {
+    // Replace this with Scene transition to end
+    if (done === true) navigate('/end');
+  }, [done, navigate]);
 
   return (
     <StyledGamePage className='game-page'>

@@ -1,4 +1,5 @@
 import { Composer } from '../../../engine/Composer';
+import { typedPath } from '../../../engine/Lens';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
 import Pace from '../pace';
@@ -13,6 +14,15 @@ import {
   DiceOutcome,
 } from './types';
 import { edged } from './edge';
+
+export type ClimaxResultType = 'climax' | 'denied' | 'ruined' | null;
+
+type ClimaxState = {
+  result: ClimaxResultType;
+  done: boolean;
+};
+
+export const climax = typedPath<ClimaxState>(['state', PLUGIN_ID, 'climax']);
 
 type ClimaxEndPayload = { countdown: number; denied?: boolean; ruin?: boolean };
 
@@ -81,6 +91,7 @@ export const climaxOutcome: DiceOutcome = {
         Rand.next(roll => {
           if (roll * 100 > s.climaxChance) {
             return Composer.pipe(
+              Composer.set(climax.result, 'denied'),
               Phase.setPhase(GamePhase.break),
               seq.message({
                 title: '$HANDS OFF! Do not cum!',
@@ -92,6 +103,7 @@ export const climaxOutcome: DiceOutcome = {
           return Rand.next(ruinRoll => {
             const ruin = ruinRoll * 100 <= s.ruinChance;
             return Composer.pipe(
+              Composer.set(climax.result, ruin ? 'ruined' : 'climax'),
               Phase.setPhase(ruin ? GamePhase.break : GamePhase.climax),
               seq.message({
                 title: ruin ? '$HANDS OFF! Ruin your orgasm!' : 'Cum!',
@@ -161,10 +173,6 @@ export const climaxOutcome: DiceOutcome = {
       )
     ),
 
-    seq.on('leave', () =>
-      Composer.do(() => {
-        window.location.href = '/';
-      })
-    )
+    seq.on('leave', () => Composer.set(climax.done, true))
   ),
 };

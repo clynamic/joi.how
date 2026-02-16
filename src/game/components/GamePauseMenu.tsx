@@ -78,7 +78,7 @@ export const GamePauseMenu = () => {
   }, [inject]);
 
   const onEndGame = useCallback(() => {
-    navigate('/');
+    navigate('/end');
   }, [navigate]);
 
   const onSettings = useCallback(() => {

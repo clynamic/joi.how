@@ -9,8 +9,11 @@ import { DiceEvent } from '../../../types';
 
 export const PLUGIN_ID = 'core.dice';
 
+export type DiceLogEntry = { time: number; event: DiceEvent };
+
 export type DiceState = {
   busy: boolean;
+  log: DiceLogEntry[];
 };
 
 export const dice = pluginPaths<DiceState>(PLUGIN_ID);
