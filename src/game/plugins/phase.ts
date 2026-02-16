@@ -27,8 +27,8 @@ export type PhaseState = {
 const phase = pluginPaths<PhaseState>(PLUGIN_ID);
 
 const eventType = {
-  enter: (p: string) => Events.getKey(PLUGIN_ID, `enter.${p}`),
-  leave: (p: string) => Events.getKey(PLUGIN_ID, `leave.${p}`),
+  enter: (p: string) => Events.getKey(PLUGIN_ID, `enter/${p}`),
+  leave: (p: string) => Events.getKey(PLUGIN_ID, `leave/${p}`),
 };
 
 export default class Phase {

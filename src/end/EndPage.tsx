@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { WaButton } from '@awesome.me/webawesome/dist/react';
 import { ContentSection } from '../common';
@@ -7,6 +5,7 @@ import { useGameEngine } from '../game/hooks/UseGameEngine';
 import { useGameState } from '../game/hooks';
 import Clock from '../game/plugins/clock';
 import Rand from '../game/plugins/rand';
+import Scene from '../game/plugins/scene';
 import { formatTime } from '../utils';
 import { ClimaxResult } from './ClimaxResult';
 import { GameTimeline } from './GameTimeline';
@@ -108,16 +107,9 @@ const StyledFinishButton = styled(WaButton)`
 `;
 
 export const EndPage = () => {
-  const { state } = useGameEngine();
-  const navigate = useNavigate();
+  const { injectImpulse } = useGameEngine();
   const clockState = useGameState(Clock.paths.state) as { elapsed?: number } | undefined;
   const randState = useGameState(Rand.paths.state) as { seed?: string } | undefined;
-
-  useEffect(() => {
-    if (!state) navigate('/');
-  }, [state, navigate]);
-
-  if (!state) return null;
 
   const displayTime = typeof clockState?.elapsed === 'number' ? clockState.elapsed : 0;
   const seed = randState?.seed ?? '';
@@ -142,7 +134,7 @@ export const EndPage = () => {
         <GameTimeline />
       </StyledCard>
       <StyledActions>
-        <StyledFinishButton size='large' onClick={() => navigate('/')}>
+        <StyledFinishButton size='large' onClick={() => injectImpulse(Scene.setScene('home'))}>
           Finish
         </StyledFinishButton>
       </StyledActions>

@@ -1,6 +1,7 @@
 import { PluginManager } from '../../engine/plugins/PluginManager';
 import { Composer } from '../../engine/Composer';
 import { Pipe } from '../../engine/State';
+import Scene from './scene';
 import Debug from './debug';
 import Fps from './fps';
 import Intensity from './intensity';
@@ -20,6 +21,7 @@ import Messages from './messages';
 import Clock from './clock';
 
 const plugins = [
+  Scene,
   Messages,
   Pause,
   Phase,

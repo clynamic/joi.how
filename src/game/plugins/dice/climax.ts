@@ -2,6 +2,7 @@ import { Composer } from '../../../engine/Composer';
 import { typedPath } from '../../../engine/Lens';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
+import Scene from '../scene';
 import Pace from '../pace';
 import Rand from '../rand';
 import { DiceEvent } from '../../../types';
@@ -19,7 +20,6 @@ export type ClimaxResultType = 'climax' | 'denied' | 'ruined' | null;
 
 type ClimaxState = {
   result: ClimaxResultType;
-  done: boolean;
 };
 
 export const climax = typedPath<ClimaxState>(['state', PLUGIN_ID, 'climax']);
@@ -173,6 +173,6 @@ export const climaxOutcome: DiceOutcome = {
       )
     ),
 
-    seq.on('leave', () => Composer.set(climax.done, true))
+    seq.on('leave', () => Scene.setScene('end'))
   ),
 };

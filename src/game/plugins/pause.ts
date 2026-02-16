@@ -5,6 +5,7 @@ import { Events } from '../../engine/pipes/Events';
 import { pluginPaths } from '../../engine/plugins/Plugins';
 import { Sequence } from '../Sequence';
 import { sdk } from '../../engine/sdk';
+import Scene from './scene';
 
 const PLUGIN_ID = 'core.pause';
 
@@ -67,6 +68,9 @@ export default class Pause {
     }),
 
     update: Composer.pipe(
+      Scene.onEnter('game', () => Pause.setPaused(false)),
+      Scene.onLeave('game', () => Pause.setPaused(true)),
+
       Composer.do(({ get, set, pipe }) => {
         const { paused, prev } = get(paths.state);
         if (paused === prev) return;
