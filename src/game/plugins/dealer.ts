@@ -68,7 +68,7 @@ export default class Dealer {
 
     activate: Composer.pipe(
       Composer.set(dice.state, { busy: false, log: [] }),
-      ...outcomes.flatMap(o => o.activate ? [o.activate] : []),
+      ...outcomes.flatMap(o => (o.activate ? [o.activate] : [])),
       roll.after(1000, 'check')
     ),
 

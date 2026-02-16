@@ -38,9 +38,15 @@ const StyledEndPage = styled.div`
     animation: ${fadeInUp} 500ms cubic-bezier(0.23, 1, 0.32, 1) both;
   }
 
-  & > :nth-child(1) { animation-delay: 100ms; }
-  & > :nth-child(2) { animation-delay: 250ms; }
-  & > :nth-child(3) { animation-delay: 400ms; }
+  & > :nth-child(1) {
+    animation-delay: 100ms;
+  }
+  & > :nth-child(2) {
+    animation-delay: 250ms;
+  }
+  & > :nth-child(3) {
+    animation-delay: 400ms;
+  }
 `;
 
 const StyledTitle = styled.h1`
@@ -108,10 +114,15 @@ const StyledFinishButton = styled(WaButton)`
 
 export const EndPage = () => {
   const { injectImpulse } = useGameEngine();
-  const clockState = useGameState(Clock.paths.state) as { elapsed?: number } | undefined;
-  const randState = useGameState(Rand.paths.state) as { seed?: string } | undefined;
+  const clockState = useGameState(Clock.paths.state) as
+    | { elapsed?: number }
+    | undefined;
+  const randState = useGameState(Rand.paths.state) as
+    | { seed?: string }
+    | undefined;
 
-  const displayTime = typeof clockState?.elapsed === 'number' ? clockState.elapsed : 0;
+  const displayTime =
+    typeof clockState?.elapsed === 'number' ? clockState.elapsed : 0;
   const seed = randState?.seed ?? '';
 
   return (
@@ -126,7 +137,11 @@ export const EndPage = () => {
             <StyledStatLabel>Play time</StyledStatLabel>
           </StyledStat>
           <StyledStat>
-            <StyledStatValue style={{ fontFamily: 'monospace', fontSize: '1rem' }}>{seed}</StyledStatValue>
+            <StyledStatValue
+              style={{ fontFamily: 'monospace', fontSize: '1rem' }}
+            >
+              {seed}
+            </StyledStatValue>
             <StyledStatLabel>Seed</StyledStatLabel>
           </StyledStat>
         </StyledStatsRow>
@@ -134,7 +149,10 @@ export const EndPage = () => {
         <GameTimeline />
       </StyledCard>
       <StyledActions>
-        <StyledFinishButton size='large' onClick={() => injectImpulse(Scene.setScene('home'))}>
+        <StyledFinishButton
+          size='large'
+          onClick={() => injectImpulse(Scene.setScene('home'))}
+        >
           Finish
         </StyledFinishButton>
       </StyledActions>
