@@ -17,13 +17,13 @@ const fullPipe: Pipe = Composer.pipe(
 );
 
 const getPending = (frame: GameFrame): Map<string, any> | undefined =>
-  (frame.context as any)?.core?.plugin_installer?.pending;
+  frame?.core?.plugin_installer?.pending;
 
 const getInstalledIds = (frame: GameFrame): string[] =>
-  (frame.state as any)?.core?.plugin_installer?.installed ?? [];
+  frame?.core?.plugin_installer?.installed ?? [];
 
 const getLoadedIds = (frame: GameFrame): string[] =>
-  (frame.state as any)?.core?.plugin_manager?.loaded ?? [];
+  frame?.core?.plugin_manager?.loaded ?? [];
 
 function makeLoadResult(plugin: Plugin, name: string) {
   const cls = { plugin, name } as PluginClass;
@@ -84,7 +84,7 @@ describe('Plugin Installer', () => {
 
     const result = pluginInstallerPipe(
       makeFrame({
-        state: { core: { plugin_installer: { installed: ['user.test'] } } },
+        core: { plugin_installer: { installed: ['user.test'] } },
       })
     );
 
@@ -104,7 +104,7 @@ describe('Plugin Installer', () => {
     const frame0 = fullPipe(makeFrame());
 
     const frame1 = Composer.set(
-      ['context', 'core', 'plugin_installer', 'pending'],
+      ['core', 'plugin_installer', 'pending'],
       new Map([['user.resolved', makeLoadResult(testPlugin, 'TestPlugin')]])
     )(frame0);
 
@@ -124,7 +124,7 @@ describe('Plugin Installer', () => {
     const frame0 = fullPipe(makeFrame());
 
     const frame1 = Composer.set(
-      ['context', 'core', 'plugin_installer', 'pending'],
+      ['core', 'plugin_installer', 'pending'],
       new Map([['user.sdk', makeLoadResult(testPlugin, 'TestPlugin')]])
     )(frame0);
 
@@ -141,7 +141,7 @@ describe('Plugin Installer', () => {
     const frame0 = fullPipe(makeFrame());
 
     const frame1 = Composer.set(
-      ['context', 'core', 'plugin_installer', 'pending'],
+      ['core', 'plugin_installer', 'pending'],
       new Map([
         [
           'user.broken',

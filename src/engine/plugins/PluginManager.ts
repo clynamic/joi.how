@@ -1,5 +1,5 @@
 import { Composer } from '../Composer';
-import { Pipe, PipeTransformer, GameFrame } from '../State';
+import { Pipe, PipeTransformer } from '../State';
 import {
   startDOMBatching,
   stopDOMBatching,
@@ -32,10 +32,6 @@ const storageKey = {
   enabled: `${PLUGIN_NAMESPACE}.enabled`,
 };
 
-type PluginManagerState = {
-  loaded: PluginId[];
-};
-
 export type PluginManagerAPI = {
   register: PipeTransformer<[PluginClass]>;
   unregister: PipeTransformer<[PluginId]>;
@@ -43,44 +39,35 @@ export type PluginManagerAPI = {
   disable: PipeTransformer<[PluginId]>;
 };
 
-type PluginManagerContext = PluginManagerAPI & {
+type PluginManagerState = PluginManagerAPI & {
+  loaded: PluginId[];
   registry: PluginRegistry;
   loadedRefs: Record<PluginId, PluginClass>;
   toLoad: PluginId[];
   toUnload: PluginId[];
 };
 
-const pm = pluginPaths<PluginManagerState, PluginManagerContext>(
-  PLUGIN_NAMESPACE
-);
+const pm = pluginPaths<PluginManagerState>(PLUGIN_NAMESPACE);
 
 export class PluginManager {
   static register(pluginClass: PluginClass): Pipe {
-    return Composer.bind<PluginManagerAPI>(pm.context, ({ register }) =>
-      register(pluginClass)
-    );
+    return Composer.bind(pm, ({ register }) => register(pluginClass));
   }
 
   static unregister(id: PluginId): Pipe {
-    return Composer.bind<PluginManagerAPI>(pm.context, ({ unregister }) =>
-      unregister(id)
-    );
+    return Composer.bind(pm, ({ unregister }) => unregister(id));
   }
 
   static enable(id: PluginId): Pipe {
-    return Composer.bind<PluginManagerAPI>(pm.context, ({ enable }) =>
-      enable(id)
-    );
+    return Composer.bind(pm, ({ enable }) => enable(id));
   }
 
   static disable(id: PluginId): Pipe {
-    return Composer.bind<PluginManagerAPI>(pm.context, ({ disable }) =>
-      disable(id)
-    );
+    return Composer.bind(pm, ({ disable }) => disable(id));
   }
 }
 
-const apiPipe: Pipe = Composer.over<PluginManagerContext>(pm.context, ctx => ({
+const apiPipe: Pipe = Composer.over(pm, ctx => ({
   ...ctx,
 
   register: plugin =>
@@ -130,25 +117,25 @@ const enableDisablePipe: Pipe = Composer.pipe(
 
 const reconcilePipe: Pipe = Composer.pipe(
   Events.handle<PluginClass>(eventType.register, event =>
-    Composer.do<GameFrame>(({ over }) => {
-      over(pm.context.registry, registry => ({
+    Composer.do(({ over }) => {
+      over(pm.registry, registry => ({
         ...registry,
         [event.payload.plugin.id]: event.payload,
       }));
     })
   ),
   Events.handle<PluginId>(eventType.unregister, event =>
-    Composer.do<GameFrame>(({ over }) => {
-      over(pm.context.toUnload, (ids = []) =>
+    Composer.do(({ over }) => {
+      over(pm.toUnload, (ids = []) =>
         Array.isArray(ids) ? [...ids, event.payload] : [event.payload]
       );
     })
   ),
   Storage.bind<EnabledMap>(storageKey.enabled, (stored = {}) =>
-    Composer.do<GameFrame>(({ get, set, pipe }) => {
-      const registry = get(pm.context.registry) ?? {};
-      const loaded = get(pm.state.loaded) ?? [];
-      const forcedUnload = get(pm.context.toUnload) ?? [];
+    Composer.do(({ get, set, pipe }) => {
+      const registry = get(pm.registry) ?? {};
+      const loaded = get(pm.loaded) ?? [];
+      const forcedUnload = get(pm.toUnload) ?? [];
 
       const map = { ...stored };
       let dirty = false;
@@ -177,17 +164,17 @@ const reconcilePipe: Pipe = Composer.pipe(
       if (!dirty && toLoad.length === 0 && toUnload.length === 0) return;
 
       if (dirty) pipe(Storage.set<EnabledMap>(storageKey.enabled, map));
-      if (toLoad.length > 0) set(pm.context.toLoad, toLoad);
-      if (toUnload.length > 0) set(pm.context.toUnload, toUnload);
+      if (toLoad.length > 0) set(pm.toLoad, toLoad);
+      if (toUnload.length > 0) set(pm.toUnload, toUnload);
     })
   )
 );
 
-const lifecyclePipe: Pipe = Composer.do<GameFrame>(({ get, pipe }) => {
-  const toUnload = get(pm.context.toUnload) ?? [];
-  const toLoad = get(pm.context.toLoad) ?? [];
-  const loadedRefs = get(pm.context.loadedRefs) ?? {};
-  const registry = get(pm.context.registry) ?? {};
+const lifecyclePipe: Pipe = Composer.do(({ get, pipe }) => {
+  const toUnload = get(pm.toUnload) ?? [];
+  const toLoad = get(pm.toLoad) ?? [];
+  const loadedRefs = get(pm.loadedRefs) ?? {};
+  const registry = get(pm.registry) ?? {};
 
   for (const id of toUnload) {
     const cls = loadedRefs[id] ?? registry[id];
@@ -246,22 +233,22 @@ const lifecyclePipe: Pipe = Composer.do<GameFrame>(({ get, pipe }) => {
 
 const finalizePipe: Pipe = Composer.pipe(
   Events.handle<PluginId>(eventType.unregister, event =>
-    Composer.do<GameFrame>(({ over }) => {
-      over(pm.context.registry, registry => {
+    Composer.do(({ over }) => {
+      over(pm.registry, registry => {
         const next = { ...registry };
         delete next[event.payload];
         return next;
       });
     })
   ),
-  Composer.do<GameFrame>(({ get, set, over }) => {
-    const toUnload = get(pm.context.toUnload) ?? [];
-    const toLoad = get(pm.context.toLoad) ?? [];
+  Composer.do(({ get, set, over }) => {
+    const toUnload = get(pm.toUnload) ?? [];
+    const toLoad = get(pm.toLoad) ?? [];
 
     if (toLoad.length === 0 && toUnload.length === 0) return;
 
-    const loadedRefs = get(pm.context.loadedRefs) ?? {};
-    const registry = get(pm.context.registry) ?? {};
+    const loadedRefs = get(pm.loadedRefs) ?? {};
+    const registry = get(pm.registry) ?? {};
 
     const newRefs = { ...loadedRefs };
     for (const id of toUnload) delete newRefs[id];
@@ -269,8 +256,8 @@ const finalizePipe: Pipe = Composer.pipe(
       if (registry[id]) newRefs[id] = registry[id];
     }
 
-    set(pm.state.loaded, Object.keys(newRefs));
-    over(pm.context, ctx => ({
+    set(pm.loaded, Object.keys(newRefs));
+    over(pm, ctx => ({
       ...ctx,
       loadedRefs: newRefs,
       toLoad: [],

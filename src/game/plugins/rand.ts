@@ -40,16 +40,16 @@ export default class Rand {
 
     activate: Composer.do(({ set }) => {
       const seed = Date.now().toString();
-      set(paths.state, { seed, cursor: stringToSeed(seed) });
+      set(paths, { seed, cursor: stringToSeed(seed) });
     }),
 
-    deactivate: Composer.set(paths.state, undefined),
+    deactivate: Composer.set(paths, undefined),
   };
 
   static next(fn: (value: number) => Pipe): Pipe {
     return Composer.do(({ get, set, pipe }) => {
-      const [cursor, value] = advance(get(paths.state.cursor));
-      set(paths.state.cursor, cursor);
+      const [cursor, value] = advance(get(paths.cursor));
+      set(paths.cursor, cursor);
       pipe(fn(value));
     });
   }
@@ -72,7 +72,7 @@ export default class Rand {
 
   static shuffle<T>(arr: T[], fn: (shuffled: T[]) => Pipe): Pipe {
     return Composer.do(({ get, set, pipe }) => {
-      let cursor = get(paths.state.cursor);
+      let cursor = get(paths.cursor);
       const shuffled = [...arr];
       for (let i = shuffled.length - 1; i > 0; i--) {
         const [c, v] = advance(cursor);
@@ -80,7 +80,7 @@ export default class Rand {
         const j = Math.floor(v * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
-      set(paths.state.cursor, cursor);
+      set(paths.cursor, cursor);
       pipe(fn(shuffled));
     });
   }

@@ -14,8 +14,8 @@ export const useSettingsPipe = (): Pipe => {
   return useCallback<Pipe>(
     frame =>
       Composer.pipe(
-        Composer.set(['context', 'settings'], settingsRef.current),
-        Composer.set(['context', 'images'], imagesRef.current)
+        Composer.set(['settings'], settingsRef.current),
+        Composer.set(['images'], imagesRef.current)
       )(frame),
     []
   );

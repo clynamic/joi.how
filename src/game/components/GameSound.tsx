@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { playTone } from '../../utils/sound';
 import { wait } from '../../utils';
-import { useGameState } from '../hooks';
+import { useGameFrame } from '../hooks';
 import Phase, { GamePhase } from '../plugins/phase';
 import Stroke, { StrokeDirection } from '../plugins/stroke';
 
 export const GameSound = () => {
-  const { stroke } = useGameState(Stroke.paths.state) ?? {};
-  const { current: phase } = useGameState(Phase.paths.state) ?? {};
+  const { stroke } = useGameFrame(Stroke.paths) ?? {};
+  const { current: phase } = useGameFrame(Phase.paths) ?? {};
 
   const [currentPhase, setCurrentPhase] = useState(phase);
 

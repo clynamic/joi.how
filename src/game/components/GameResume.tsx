@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useGameState } from '../hooks';
+import { useGameFrame } from '../hooks';
 import Pause from '../plugins/pause';
 
 const StyledOverlay = styled(motion.div)`
@@ -23,7 +23,7 @@ const display = (countdown: number) =>
   countdown === 3 ? 'Ready?' : `${countdown}`;
 
 export const GameResume = () => {
-  const { countdown } = useGameState(Pause.paths.state) ?? {};
+  const { countdown } = useGameFrame(Pause.paths) ?? {};
 
   return (
     <AnimatePresence mode='wait'>

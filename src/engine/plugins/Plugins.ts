@@ -1,13 +1,8 @@
 import { typedPath, TypedPath } from '../Lens';
 import { Pipe } from '../State';
 
-export function pluginPaths<TState, TContext = Record<string, never>>(
-  namespace: string
-): { state: TypedPath<TState>; context: TypedPath<TContext> } {
-  return {
-    state: typedPath<TState>(['state', namespace]),
-    context: typedPath<TContext>(['context', namespace]),
-  };
+export function pluginPaths<T>(namespace: string): TypedPath<T> {
+  return typedPath<T>([namespace]);
 }
 
 export type PluginId = string;

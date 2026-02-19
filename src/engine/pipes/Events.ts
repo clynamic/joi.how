@@ -16,8 +16,8 @@ export type EventState = {
 const PLUGIN_NAMESPACE = 'core.events';
 
 const events = pluginPaths<EventState>(PLUGIN_NAMESPACE);
-const eventStateLens = lensFromPath<GameFrame, EventState>(events.state);
-const pendingLens = lensFromPath<GameFrame, GameEvent[]>(events.state.pending);
+const eventStateLens = lensFromPath<GameFrame, EventState>(events);
+const pendingLens = lensFromPath<GameFrame, GameEvent[]>(events.pending);
 
 export class Events {
   static getKey(namespace: string, key: string): string {
@@ -75,7 +75,7 @@ export class Events {
    * This prevents events from being processed during the same frame they are created.
    * This is important because pipes later in the pipeline may add new events.
    */
-  static pipe: Pipe = Composer.over(events.state, ({ pending = [] }) => ({
+  static pipe: Pipe = Composer.over(events, ({ pending = [] }) => ({
     pending: [],
     current: pending,
   }));

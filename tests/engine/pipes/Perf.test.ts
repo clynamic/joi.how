@@ -18,10 +18,10 @@ const getEntry = (
   pluginId: string,
   phase: string
 ): PluginPerfEntry | undefined =>
-  lensFromPath(['context', 'core.perf', 'plugins', pluginId, phase]).get(frame);
+  lensFromPath(['core.perf', 'plugins', pluginId, phase]).get(frame);
 
 const getConfig = (frame: GameFrame): PerfConfig | undefined =>
-  lensFromPath(['context', 'core.perf', 'config']).get(frame);
+  lensFromPath(['core.perf', 'config']).get(frame);
 
 describe('Perf', () => {
   beforeEach(() => {
@@ -177,7 +177,7 @@ describe('Perf', () => {
       );
       const frame1 = pipe(makeFrame());
 
-      const pending = (frame1.state as any)?.core?.events?.pending ?? [];
+      const pending = frame1?.core?.events?.pending ?? [];
       const overBudgetEvents = pending.filter(
         (e: any) => e.type === 'core.perf/over_budget'
       );
@@ -196,7 +196,7 @@ describe('Perf', () => {
       );
       const frame1 = pipe(makeFrame());
 
-      const pending = (frame1.state as any)?.core?.events?.pending ?? [];
+      const pending = frame1?.core?.events?.pending ?? [];
       const overBudgetEvents = pending.filter(
         (e: any) => e.type === 'core.perf/over_budget'
       );

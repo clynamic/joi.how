@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { JoiImage } from '../../common';
 import { useImagePreloader } from '../../utils';
 import { ImageSize, ImageType } from '../../types';
-import { useGameState } from '../hooks';
+import { useGameFrame } from '../hooks';
 import Image from '../plugins/image';
 import Intensity from '../plugins/intensity';
 
@@ -45,8 +45,8 @@ const StyledBackgroundImage = motion.create(styled.div`
 `);
 
 export const GameImages = () => {
-  const { currentImage, nextImages = [] } = useGameState(Image.paths.state);
-  const { intensity } = useGameState(Intensity.paths.state);
+  const { currentImage, nextImages = [] } = useGameFrame(Image.paths);
+  const { intensity } = useGameFrame(Intensity.paths);
   const [videoSound] = useSetting('videoSound');
   const [highRes] = useSetting('highRes');
 

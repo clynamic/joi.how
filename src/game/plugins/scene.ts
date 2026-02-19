@@ -26,11 +26,11 @@ const eventType = {
 
 export default class Scene {
   static setScene(s: string): Pipe {
-    return Composer.set(scene.state.current, s);
+    return Composer.set(scene.current, s);
   }
 
   static whenScene(s: string, pipe: Pipe): Pipe {
-    return Composer.bind(scene.state, state =>
+    return Composer.bind(scene, state =>
       Composer.when(state?.current === s, pipe)
     );
   }
@@ -49,20 +49,20 @@ export default class Scene {
       name: 'Scene',
     },
 
-    activate: Composer.set(scene.state, {
+    activate: Composer.set(scene, {
       current: 'unknown',
       prev: 'unknown',
     }),
 
     update: Composer.do(({ get, set, pipe }) => {
-      const { current, prev } = get(scene.state);
+      const { current, prev } = get(scene);
       if (current === prev) return;
-      set(scene.state.prev, current);
+      set(scene.prev, current);
       pipe(Events.dispatch({ type: eventType.leave(prev) }));
       pipe(Events.dispatch({ type: eventType.enter(current) }));
     }),
 
-    deactivate: Composer.set(scene.state, undefined),
+    deactivate: Composer.set(scene, undefined),
   };
 
   static get paths() {

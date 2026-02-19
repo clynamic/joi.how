@@ -46,11 +46,11 @@ function bootstrap(): GameFrame {
 }
 
 function getScheduled(frame: GameFrame): ScheduledEvent[] {
-  return (frame.state as any)?.core?.scheduler?.scheduled ?? [];
+  return frame?.core?.scheduler?.scheduled ?? [];
 }
 
 function getPauseState(frame: GameFrame): PauseState | undefined {
-  return (frame.state as any)?.core?.pause;
+  return frame?.core?.pause;
 }
 
 function getDealerScheduled(frame: GameFrame): ScheduledEvent[] {

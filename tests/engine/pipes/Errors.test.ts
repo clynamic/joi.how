@@ -14,9 +14,7 @@ const getEntry = (
   pluginId: string,
   phase: string
 ): ErrorEntry | undefined =>
-  lensFromPath(['context', 'core.errors', 'plugins', pluginId, phase]).get(
-    frame
-  );
+  lensFromPath(['core.errors', 'plugins', pluginId, phase]).get(frame);
 
 describe('Errors', () => {
   beforeEach(() => {

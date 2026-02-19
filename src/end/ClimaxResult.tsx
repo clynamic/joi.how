@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useGameState } from '../game/hooks';
+import { useGameFrame } from '../game/hooks';
 import { climax, type ClimaxResultType } from '../game/plugins/dice/climax';
 
 type OutcomeDisplay = { label: string; description: string };
@@ -30,7 +30,7 @@ const StyledDescription = styled.span`
 `;
 
 export const ClimaxResult = () => {
-  const result = useGameState(climax.result) as ClimaxResultType;
+  const result = useGameFrame(climax.result) as ClimaxResultType;
   const display = (result && outcomes[result]) || earlyEnd;
 
   return (

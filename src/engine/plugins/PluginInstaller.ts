@@ -1,5 +1,5 @@
 import { Composer } from '../Composer';
-import { Pipe, GameFrame } from '../State';
+import { Pipe } from '../State';
 import { Storage } from '../pipes/Storage';
 import { PluginManager } from './PluginManager';
 import { pluginPaths, type PluginId, type PluginClass } from './Plugins';
@@ -15,13 +15,10 @@ type PluginLoad = {
 type InstallerState = {
   installed: PluginId[];
   failed: PluginId[];
-};
-
-type InstallerContext = {
   pending: Map<PluginId, PluginLoad>;
 };
 
-const ins = pluginPaths<InstallerState, InstallerContext>(PLUGIN_NAMESPACE);
+const ins = pluginPaths<InstallerState>(PLUGIN_NAMESPACE);
 
 const storageKey = {
   user: `${PLUGIN_NAMESPACE}.user`,
@@ -54,10 +51,10 @@ const importPipe: Pipe = Storage.bind<PluginId[]>(
     Composer.pipe(
       ...userPluginIds.map(id =>
         Storage.bind<string>(storageKey.code(id), code =>
-          Composer.do<GameFrame>(({ get, over }) => {
-            const installed = get(ins.state.installed) ?? [];
-            const failed = get(ins.state.failed) ?? [];
-            const pending = get(ins.context.pending);
+          Composer.do(({ get, over }) => {
+            const installed = get(ins.installed) ?? [];
+            const failed = get(ins.failed) ?? [];
+            const pending = get(ins.pending);
 
             if (
               installed.includes(id) ||
@@ -70,14 +67,14 @@ const importPipe: Pipe = Storage.bind<PluginId[]>(
               console.error(
                 `[PluginInstaller] plugin "${id}" has no code in storage`
               );
-              over(ins.state.failed, (ids = []) => [
+              over(ins.failed, (ids = []) => [
                 ...(Array.isArray(ids) ? ids : []),
                 id,
               ]);
               return;
             }
 
-            over(ins.context.pending, pending => {
+            over(ins.pending, pending => {
               if (!(pending instanceof Map)) pending = new Map();
               // TODO: generic async resolver pipe?
               const pluginLoad: PluginLoad = {
@@ -99,8 +96,8 @@ const importPipe: Pipe = Storage.bind<PluginId[]>(
     )
 );
 
-const resolvePipe: Pipe = Composer.do<GameFrame>(({ get, set, over, pipe }) => {
-  const pending = get(ins.context.pending);
+const resolvePipe: Pipe = Composer.do(({ get, set, over, pipe }) => {
+  const pending = get(ins.pending);
   if (!pending?.size) return;
 
   const resolved: PluginClass[] = [];
@@ -123,21 +120,21 @@ const resolvePipe: Pipe = Composer.do<GameFrame>(({ get, set, over, pipe }) => {
 
   if (resolved.length > 0) {
     pipe(...resolved.map(PluginManager.register));
-    over(ins.state.installed, (ids = []) => [
+    over(ins.installed, (ids = []) => [
       ...(Array.isArray(ids) ? ids : []),
       ...resolved.map(cls => cls.plugin.id),
     ]);
   }
 
   if (failed.length > 0) {
-    over(ins.state.failed, (ids = []) => [
+    over(ins.failed, (ids = []) => [
       ...(Array.isArray(ids) ? ids : []),
       ...failed,
     ]);
   }
 
   if (remaining.size !== pending.size) {
-    set(ins.context.pending, remaining);
+    set(ins.pending, remaining);
   }
 });
 

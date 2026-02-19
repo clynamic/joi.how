@@ -17,12 +17,9 @@ export type DiceState = {
 };
 
 export const dice = pluginPaths<DiceState>(PLUGIN_ID);
-export const paceState = typedPath<PaceState>(['state', 'core.pace']);
-export const intensityState = typedPath<IntensityState>([
-  'state',
-  'core.intensity',
-]);
-export const settings = typedPath<Settings>(['context', 'settings']);
+export const paceState = typedPath<PaceState>(['core.pace']);
+export const intensityState = typedPath<IntensityState>(['core.intensity']);
+export const settings = typedPath<Settings>(['settings']);
 
 export const OUTCOME_DONE = Events.getKey(PLUGIN_ID, 'outcome.done');
 export const outcomeDone = (): Pipe => Events.dispatch({ type: OUTCOME_DONE });

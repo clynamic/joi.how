@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { WaButton, WaDialog, WaIcon } from '@awesome.me/webawesome/dist/react';
 import { nestedDialogProps, useFullscreen } from '../../utils';
-import { useGameState } from '../hooks';
+import { useGameFrame } from '../hooks';
 import { useDispatchEvent } from '../hooks/UseDispatchEvent';
 import Pause from '../plugins/pause';
 
@@ -61,7 +61,7 @@ const StyledMenuButton = styled(WaButton)`
 `;
 
 export const GamePauseMenu = () => {
-  const { paused, countdown } = useGameState(Pause.paths.state) ?? {};
+  const { paused, countdown } = useGameFrame(Pause.paths) ?? {};
   const [fullscreen, setFullscreen] = useFullscreen();
   const { inject } = useDispatchEvent();
   const navigate = useNavigate();

@@ -23,10 +23,7 @@ describe('Storage', () => {
         return (frame: GameFrame) => frame;
       });
 
-      const frame: GameFrame = {
-        state: {},
-        context: { tick: 0, step: 0, time: 0 },
-      };
+      const frame: GameFrame = { tick: 0, step: 0, time: 0 };
 
       pipe(frame);
       expect(result).toEqual({ value: 42 });
@@ -39,10 +36,7 @@ describe('Storage', () => {
         return (frame: GameFrame) => frame;
       });
 
-      const frame: GameFrame = {
-        state: {},
-        context: { tick: 0, step: 0, time: 0 },
-      };
+      const frame: GameFrame = { tick: 0, step: 0, time: 0 };
 
       pipe(frame);
       expect(result).toBeUndefined();
@@ -55,13 +49,10 @@ describe('Storage', () => {
         return (frame: GameFrame) => frame;
       });
 
-      let frame1: GameFrame = {
-        state: {},
-        context: { tick: 0, step: 0, time: 1000 },
-      };
+      let frame1: GameFrame = { tick: 0, step: 0, time: 1000 };
 
       frame1 = Composer.over<Partial<StorageContext>>(
-        ['context', STORAGE_NAMESPACE],
+        [STORAGE_NAMESPACE],
         (storage = {}) => ({
           cache: {},
           ...storage,
@@ -71,13 +62,10 @@ describe('Storage', () => {
       pipe(frame1);
       expect(callCount).toBe(1);
 
-      let frame2: GameFrame = {
-        state: {},
-        context: { tick: 1, step: 16, time: 1016 },
-      };
+      let frame2: GameFrame = { tick: 1, step: 16, time: 1016 };
 
       frame2 = Composer.over<Partial<StorageContext>>(
-        ['context', STORAGE_NAMESPACE],
+        [STORAGE_NAMESPACE],
         (storage = {}) => ({
           cache: {
             'test.key': {
@@ -98,10 +86,7 @@ describe('Storage', () => {
     it('should write to localStorage', () => {
       const pipe = Storage.set('test.key', { foo: 'bar' });
 
-      const frame: GameFrame = {
-        state: {},
-        context: { tick: 0, step: 0, time: 0 },
-      };
+      const frame: GameFrame = { tick: 0, step: 0, time: 0 };
 
       pipe(frame);
 
@@ -112,13 +97,10 @@ describe('Storage', () => {
     it('should update cache', () => {
       const pipe = Storage.set('test.key', 'value');
 
-      let frame: GameFrame = {
-        state: {},
-        context: { tick: 0, step: 0, time: 1000 },
-      };
+      let frame: GameFrame = { tick: 0, step: 0, time: 1000 };
 
       frame = Composer.over<Partial<StorageContext>>(
-        ['context', STORAGE_NAMESPACE],
+        [STORAGE_NAMESPACE],
         (storage = {}) => ({
           cache: {},
           ...storage,
@@ -127,7 +109,7 @@ describe('Storage', () => {
 
       const result = pipe(frame);
 
-      const storage = result.context.how.joi.storage;
+      const storage = result.how.joi.storage;
       expect(storage.cache['test.key'].value).toBe('value');
       expect(storage.cache['test.key'].expiry).toBe(31000);
     });
@@ -139,10 +121,7 @@ describe('Storage', () => {
 
       const pipe = Storage.remove('test.key');
 
-      const frame: GameFrame = {
-        state: {},
-        context: { tick: 0, step: 0, time: 0 },
-      };
+      const frame: GameFrame = { tick: 0, step: 0, time: 0 };
 
       pipe(frame);
 
@@ -152,13 +131,10 @@ describe('Storage', () => {
     it('should remove from cache', () => {
       const pipe = Storage.remove('test.key');
 
-      let frame: GameFrame = {
-        state: {},
-        context: { tick: 0, step: 0, time: 0 },
-      };
+      let frame: GameFrame = { tick: 0, step: 0, time: 0 };
 
       frame = Composer.over<Partial<StorageContext>>(
-        ['context', STORAGE_NAMESPACE],
+        [STORAGE_NAMESPACE],
         (storage = {}) => ({
           cache: {
             'test.key': { value: 'foo', expiry: 1000 },
@@ -169,20 +145,17 @@ describe('Storage', () => {
 
       const result = pipe(frame);
 
-      const storage = result.context.how.joi.storage;
+      const storage = result.how.joi.storage;
       expect(storage.cache['test.key']).toBeUndefined();
     });
   });
 
   describe('Storage.pipe', () => {
     it('should clean up expired cache entries', () => {
-      let frame: GameFrame = {
-        state: {},
-        context: { tick: 0, step: 0, time: 20000 },
-      };
+      let frame: GameFrame = { tick: 0, step: 0, time: 20000 };
 
       frame = Composer.over<Partial<StorageContext>>(
-        ['context', STORAGE_NAMESPACE],
+        [STORAGE_NAMESPACE],
         (storage = {}) => ({
           cache: {
             'expired.key': { value: 'old', expiry: 10000 },
@@ -194,7 +167,7 @@ describe('Storage', () => {
 
       const result = Storage.pipe(frame);
 
-      const storage = result.context.how.joi.storage;
+      const storage = result.how.joi.storage;
       expect(storage.cache['expired.key']).toBeUndefined();
       expect(storage.cache['valid.key']).toBeDefined();
       expect(storage.cache['valid.key'].value).toBe('new');

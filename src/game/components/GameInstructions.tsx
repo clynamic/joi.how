@@ -12,7 +12,7 @@ import { useMemo } from 'react';
 import { DiceEvent } from '../../types';
 import { ProgressBar } from '../../common';
 import { WaDivider } from '@awesome.me/webawesome/dist/react';
-import { useGameState } from '../hooks';
+import { useGameFrame } from '../hooks';
 import Pace from '../plugins/pace';
 import Intensity from '../plugins/intensity';
 import { Paws, PawLabels, pawsPath } from '../plugins/dealer';
@@ -64,7 +64,7 @@ const StyledIntensityMeter = styled.div`
 `;
 
 const PaceDisplay = () => {
-  const { pace = 0 } = useGameState(Pace.paths.state) ?? {};
+  const { pace = 0 } = useGameFrame(Pace.paths) ?? {};
   const [maxPace] = useSetting('maxPace');
   const paceSection = useMemo(() => maxPace / 3, [maxPace]);
 
@@ -87,7 +87,7 @@ const PaceDisplay = () => {
 };
 
 const GripDisplay = () => {
-  const paws = useGameState(pawsPath) ?? Paws.both;
+  const paws = useGameFrame(pawsPath) ?? Paws.both;
 
   return (
     <StyledGripIcons>
@@ -105,7 +105,7 @@ const GripDisplay = () => {
 };
 
 const IntensityDisplay = () => {
-  const { intensity = 0 } = useGameState(Intensity.paths.state) ?? {};
+  const { intensity = 0 } = useGameFrame(Intensity.paths) ?? {};
   const intensityPct = Math.round(intensity * 100);
 
   return (

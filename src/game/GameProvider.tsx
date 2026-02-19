@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, ReactNode, useCallback } from 'react';
 import { createContext } from 'use-context-selector';
-import { GameEngine, GameState, Pipe, GameContext } from '../engine';
+import { GameEngine, Pipe, GameFrame } from '../engine';
 import { Events } from '../engine/pipes/Events';
 import { Scheduler } from '../engine/pipes/Scheduler';
 import { Perf } from '../engine/pipes/Perf';
@@ -10,13 +10,9 @@ import { Composer } from '../engine/Composer';
 
 type GameEngineContextValue = {
   /**
-   * The current state of the game engine.
+   * The current game frame containing all plugin data and timing.
    */
-  state: GameState | null;
-  /**
-   * The current game context which contains inter-pipe data and debugging information.
-   */
-  context: GameContext | null;
+  frame: GameFrame | null;
   /**
    * Queue a one-shot pipe to run in the next tick only.
    */
@@ -36,8 +32,7 @@ type Props = {
 export function GameEngineProvider({ children, pipes = [] }: Props) {
   const engineRef = useRef<GameEngine | null>(null);
 
-  const [state, setState] = useState<GameState | null>(null);
-  const [context, setContext] = useState<GameContext | null>(null);
+  const [frame, setFrame] = useState<GameFrame | null>(null);
 
   const pendingImpulseRef = useRef<Pipe[]>([]);
   const activeImpulseRef = useRef<Pipe[]>([]);
@@ -101,8 +96,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
       }
 
       if (ticked) {
-        setState(engineRef.current.getState());
-        setContext(engineRef.current.getContext());
+        setFrame(engineRef.current.getFrame());
       }
 
       frameId = requestAnimationFrame(loop);
@@ -123,7 +117,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
   }, []);
 
   return (
-    <GameEngineContext.Provider value={{ state, context, injectImpulse }}>
+    <GameEngineContext.Provider value={{ frame, injectImpulse }}>
       {children}
     </GameEngineContext.Provider>
   );

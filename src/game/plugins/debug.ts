@@ -22,9 +22,7 @@ export default class Debug {
   }
 
   static whenVisible(pipe: Pipe): Pipe {
-    return Composer.bind(debug.state, state =>
-      Composer.when(!!state?.visible, pipe)
-    );
+    return Composer.bind(debug, state => Composer.when(!!state?.visible, pipe));
   }
 
   static plugin: Plugin = {
@@ -42,15 +40,15 @@ export default class Debug {
       };
       window.addEventListener('keydown', handler);
       sdk.debug = false;
-      set(debug.state.visible, false);
+      set(debug.visible, false);
     }),
 
     update: Composer.do(({ get, set }) => {
       if (!pendingToggle) return;
       pendingToggle = false;
-      const current = get(debug.state.visible);
+      const current = get(debug.visible);
       sdk.debug = !current;
-      set(debug.state.visible, !current);
+      set(debug.visible, !current);
     }),
 
     deactivate: Composer.do(({ set }) => {
@@ -60,7 +58,7 @@ export default class Debug {
       }
       pendingToggle = false;
       sdk.debug = false;
-      set(debug.state, undefined);
+      set(debug, undefined);
     }),
   };
 }
