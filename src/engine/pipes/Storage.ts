@@ -28,8 +28,8 @@ export type StorageContext = {
   cache: { [key: string]: CacheEntry };
 };
 
-const storage = pluginPaths<never, StorageContext>(STORAGE_NAMESPACE);
-const timing = typedPath<GameTiming>(['context']);
+const storage = pluginPaths<StorageContext>(STORAGE_NAMESPACE);
+const timing = typedPath<GameTiming>([]);
 
 /**
  * Storage API for reading and writing to localStorage
@@ -54,22 +54,19 @@ export class Storage {
    * Gets a value, using cache or loading from localStorage
    */
   static bind<T = any>(key: string, fn: (value: T | undefined) => Pipe): Pipe {
-    return Composer.bind(storage.context, ctx => {
+    return Composer.bind(storage, ctx => {
       const cache = ctx?.cache || {};
       const cached = cache[key];
 
-      // Return cached value if available and not expired
       if (cached) {
         return fn(cached.value as T | undefined);
       }
 
-      // Load from localStorage
       const value = Storage.load<T>(key);
 
-      // Cache it (will be set with expiry in the next pipe)
       return Composer.pipe(
         Composer.bind(timing.time, elapsedTime =>
-          Composer.over(storage.context, ctx => ({
+          Composer.over(storage, ctx => ({
             cache: {
               ...(ctx?.cache || {}),
               [key]: {
@@ -89,16 +86,14 @@ export class Storage {
    */
   static set<T = any>(key: string, value: T): Pipe {
     return frame => {
-      // Write to localStorage
       try {
         localStorage.setItem(key, JSON.stringify(value));
       } catch (e) {
         console.error('Failed to write to localStorage:', e);
       }
 
-      // Update cache
       return Composer.bind(timing.time, elapsedTime =>
-        Composer.over(storage.context, ctx => ({
+        Composer.over(storage, ctx => ({
           cache: {
             ...(ctx?.cache || {}),
             [key]: {
@@ -116,15 +111,13 @@ export class Storage {
    */
   static remove(key: string): Pipe {
     return frame => {
-      // Remove from localStorage
       try {
         localStorage.removeItem(key);
       } catch (e) {
         console.error('Failed to remove from localStorage:', e);
       }
 
-      // Remove from cache
-      return Composer.over(storage.context, ctx => {
+      return Composer.over(storage, ctx => {
         const newCache = { ...(ctx?.cache || {}) };
         delete newCache[key];
         return { cache: newCache };
@@ -137,7 +130,7 @@ export class Storage {
    */
   static pipe: Pipe = Composer.pipe(
     Composer.bind(timing.time, elapsedTime =>
-      Composer.over(storage.context, ctx => {
+      Composer.over(storage, ctx => {
         const newCache: { [key: string]: CacheEntry } = {};
 
         for (const [key, entry] of Object.entries(ctx?.cache || {})) {

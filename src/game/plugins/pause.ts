@@ -31,19 +31,15 @@ export default class Pause {
   }
 
   static get togglePause(): Pipe {
-    return Composer.bind(paths.state, state => Pause.setPaused(!state?.paused));
+    return Composer.bind(paths, state => Pause.setPaused(!state?.paused));
   }
 
   static whenPaused(pipe: Pipe): Pipe {
-    return Composer.bind(paths.state, state =>
-      Composer.when(!!state?.paused, pipe)
-    );
+    return Composer.bind(paths, state => Composer.when(!!state?.paused, pipe));
   }
 
   static whenPlaying(pipe: Pipe): Pipe {
-    return Composer.bind(paths.state, state =>
-      Composer.when(!state?.paused, pipe)
-    );
+    return Composer.bind(paths, state => Composer.when(!state?.paused, pipe));
   }
 
   static onPause(fn: () => Pipe): Pipe {
@@ -60,7 +56,7 @@ export default class Pause {
       name: 'Pause',
     },
 
-    activate: Composer.set(paths.state, {
+    activate: Composer.set(paths, {
       paused: true,
       prev: true,
       countdown: null,
@@ -72,25 +68,25 @@ export default class Pause {
       Scene.onLeave('game', () => Pause.setPaused(true)),
 
       Composer.do(({ get, set, pipe }) => {
-        const { paused, prev } = get(paths.state);
+        const { paused, prev } = get(paths);
         if (paused === prev) return;
-        set(paths.state.prev, paused);
+        set(paths.prev, paused);
         pipe(Events.dispatch({ type: paused ? eventType.on : eventType.off }));
       }),
 
       seq.on<SetPayload>(event =>
-        Composer.bind(paths.state.gen, (gen = 0) => {
+        Composer.bind(paths.gen, (gen = 0) => {
           const next = gen + 1;
           return Composer.when(
             event.payload.paused,
             Composer.pipe(
-              Composer.set(paths.state.gen, next),
-              Composer.set(paths.state.paused, true),
-              Composer.set(paths.state.countdown, null)
+              Composer.set(paths.gen, next),
+              Composer.set(paths.paused, true),
+              Composer.set(paths.countdown, null)
             ),
             Composer.pipe(
-              Composer.set(paths.state.gen, next),
-              Composer.set(paths.state.countdown, 3),
+              Composer.set(paths.gen, next),
+              Composer.set(paths.countdown, 3),
               seq.after(1000, 'countdown', { remaining: 2, gen: next })
             )
           );
@@ -98,17 +94,17 @@ export default class Pause {
       ),
 
       seq.on<CountdownPayload>('countdown', event =>
-        Composer.bind(paths.state.gen, gen =>
+        Composer.bind(paths.gen, gen =>
           Composer.when(
             event.payload.gen === gen,
             Composer.when(
               event.payload.remaining <= 0,
               Composer.pipe(
-                Composer.set(paths.state.countdown, null),
-                Composer.set(paths.state.paused, false)
+                Composer.set(paths.countdown, null),
+                Composer.set(paths.paused, false)
               ),
               Composer.pipe(
-                Composer.set(paths.state.countdown, event.payload.remaining),
+                Composer.set(paths.countdown, event.payload.remaining),
                 seq.after(1000, 'countdown', {
                   remaining: event.payload.remaining - 1,
                   gen,
@@ -120,7 +116,7 @@ export default class Pause {
       )
     ),
 
-    deactivate: Composer.set(paths.state, undefined),
+    deactivate: Composer.set(paths, undefined),
   };
 
   static get paths() {

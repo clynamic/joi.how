@@ -5,7 +5,6 @@ import Messages from './messages';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { Settings } from '../../settings';
-import { GameContext } from '../../engine';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
 
@@ -22,8 +21,7 @@ type WarmupState = {
 };
 
 const warmup = pluginPaths<WarmupState>(PLUGIN_ID);
-const gameContext = typedPath<GameContext>(['context']);
-const settings = typedPath<Settings>(gameContext.settings);
+const settings = typedPath<Settings>(['settings']);
 
 const AUTOSTART_KEY = Scheduler.getKey(PLUGIN_ID, 'autoStart');
 
@@ -36,7 +34,7 @@ export default class Warmup {
       name: 'Warmup',
     },
 
-    activate: Composer.set(warmup.state, { initialized: false }),
+    activate: Composer.set(warmup, { initialized: false }),
 
     update: Composer.pipe(
       Pause.whenPlaying(
@@ -50,10 +48,10 @@ export default class Warmup {
               return;
             }
 
-            const state = get(warmup.state);
+            const state = get(warmup);
             if (state.initialized) return;
 
-            set(warmup.state.initialized, true);
+            set(warmup.initialized, true);
             pipe(
               Messages.send({
                 id: GamePhase.warmup,
@@ -80,7 +78,7 @@ export default class Warmup {
       Events.handle(eventType.startGame, () =>
         Composer.pipe(
           Scheduler.cancel(AUTOSTART_KEY),
-          Composer.set(warmup.state, { initialized: false }),
+          Composer.set(warmup, { initialized: false }),
           Messages.send({
             id: GamePhase.warmup,
             title: 'Now follow what I say, $player!',
@@ -95,6 +93,6 @@ export default class Warmup {
       Pause.onResume(() => Scheduler.release(AUTOSTART_KEY))
     ),
 
-    deactivate: Composer.set(warmup.state, undefined),
+    deactivate: Composer.set(warmup, undefined),
   };
 }

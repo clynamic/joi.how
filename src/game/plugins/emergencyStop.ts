@@ -11,8 +11,8 @@ import { Settings } from '../../settings';
 
 const PLUGIN_ID = 'core.emergencyStop';
 
-const intensityState = typedPath<IntensityState>(['state', 'core.intensity']);
-const settings = typedPath<Settings>(['context', 'settings']);
+const intensityState = typedPath<IntensityState>(['core.intensity']);
+const settings = typedPath<Settings>(['settings']);
 
 type CountdownPayload = { remaining: number };
 

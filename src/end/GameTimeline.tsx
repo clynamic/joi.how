@@ -9,7 +9,7 @@ import {
   Tooltip,
   TooltipProps,
 } from 'recharts';
-import { useGameState } from '../game/hooks';
+import { useGameFrame } from '../game/hooks';
 import Pace, { type PaceEntry } from '../game/plugins/pace';
 import Dealer from '../game/plugins/dealer';
 import Clock from '../game/plugins/clock';
@@ -51,13 +51,13 @@ const GraphTooltip = ({ active, payload }: TooltipProps<number, string>) => {
 };
 
 export const GameTimeline = () => {
-  const paceState = useGameState(Pace.paths.state) as
+  const paceState = useGameFrame(Pace.paths) as
     | { history?: PaceEntry[] }
     | undefined;
-  const diceState = useGameState(Dealer.paths.state) as
+  const diceState = useGameFrame(Dealer.paths) as
     | { log?: DiceLogEntry[] }
     | undefined;
-  const clockState = useGameState(Clock.paths.state) as
+  const clockState = useGameFrame(Clock.paths) as
     | { elapsed?: number }
     | undefined;
 

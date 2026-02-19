@@ -1,4 +1,4 @@
-import { useGameState } from '../hooks';
+import { useGameFrame } from '../hooks';
 import Intensity from '../plugins/intensity';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFire } from '@fortawesome/free-solid-svg-icons';
@@ -14,7 +14,7 @@ const StyledIntensityMeter = styled.div`
 `;
 
 export const GameIntensity = () => {
-  const { intensity } = useGameState(Intensity.paths.state);
+  const { intensity } = useGameFrame(Intensity.paths);
 
   return (
     <StyledIntensityMeter>

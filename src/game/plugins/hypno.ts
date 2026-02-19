@@ -2,7 +2,7 @@ import type { Plugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
 import { pluginPaths } from '../../engine/plugins/Plugins';
 import { typedPath } from '../../engine/Lens';
-import { GameContext } from '../../engine';
+import { GameTiming } from '../../engine/State';
 import { GamePhase, PhaseState } from './phase';
 import Pause from './pause';
 import { IntensityState } from './intensity';
@@ -18,10 +18,10 @@ export type HypnoState = {
 };
 
 const hypno = pluginPaths<HypnoState>(PLUGIN_ID);
-const gameContext = typedPath<GameContext>(['context']);
-const phaseState = typedPath<PhaseState>(['state', 'core.phase']);
-const intensityState = typedPath<IntensityState>(['state', 'core.intensity']);
-const settings = typedPath<Settings>(['context', 'settings']);
+const timing = typedPath<GameTiming>([]);
+const phaseState = typedPath<PhaseState>(['core.phase']);
+const intensityState = typedPath<IntensityState>(['core.intensity']);
+const settings = typedPath<Settings>(['settings']);
 
 export default class Hypno {
   static plugin: Plugin = {
@@ -30,7 +30,7 @@ export default class Hypno {
       name: 'Hypno',
     },
 
-    activate: Composer.set(hypno.state, {
+    activate: Composer.set(hypno, {
       currentPhrase: 0,
       timer: 0,
     }),
@@ -47,11 +47,11 @@ export default class Hypno {
         const delay = 3000 - i * 29;
         if (delay <= 0) return;
 
-        const delta = get(gameContext.step);
-        const state = get(hypno.state);
+        const delta = get(timing.step);
+        const state = get(hypno);
         const elapsed = state.timer + delta;
         if (elapsed < delay) {
-          set(hypno.state.timer, elapsed);
+          set(hypno.timer, elapsed);
           return;
         }
 
@@ -60,7 +60,7 @@ export default class Hypno {
 
         pipe(
           Rand.nextInt(phrases.length, idx =>
-            Composer.set(hypno.state, {
+            Composer.set(hypno, {
               currentPhrase: idx,
               timer: 0,
             })
@@ -69,7 +69,7 @@ export default class Hypno {
       })
     ),
 
-    deactivate: Composer.set(hypno.state, undefined),
+    deactivate: Composer.set(hypno, undefined),
   };
 
   static get paths() {

@@ -19,7 +19,7 @@ type SchedulerState = {
 };
 
 const scheduler = pluginPaths<SchedulerState>(PLUGIN_NAMESPACE);
-const timing = typedPath<GameTiming>(['context']);
+const timing = typedPath<GameTiming>([]);
 
 const eventType = Events.getKeys(
   PLUGIN_NAMESPACE,
@@ -36,6 +36,9 @@ export class Scheduler {
   static getKey(namespace: string, key: string): string {
     return `${namespace}/schedule/${key}`;
   }
+
+  // These API methods are events to ensure they dont have weird ordering problems.
+  // TODO: re-evaluate this decision
 
   static schedule(event: ScheduledEvent): Pipe {
     return Events.dispatch({ type: eventType.schedule, payload: event });
@@ -70,7 +73,7 @@ export class Scheduler {
 
   static pipe: Pipe = Composer.pipe(
     Composer.bind(timing.step, delta =>
-      Composer.over(scheduler.state, ({ scheduled = [] }) => {
+      Composer.over(scheduler, ({ scheduled = [] }) => {
         const remaining: ScheduledEvent[] = [];
         const current: GameEvent[] = [];
 
@@ -91,37 +94,37 @@ export class Scheduler {
       })
     ),
 
-    Composer.bind(scheduler.state.current, events =>
+    Composer.bind(scheduler.current, events =>
       Composer.pipe(...events.map(Events.dispatch))
     ),
 
     Events.handle<ScheduledEvent>(eventType.schedule, event =>
-      Composer.over(scheduler.state.scheduled, list => [
+      Composer.over(scheduler.scheduled, list => [
         ...list.filter(e => e.id !== event.payload.id),
         event.payload,
       ])
     ),
 
     Events.handle<string>(eventType.cancel, event =>
-      Composer.over(scheduler.state.scheduled, list =>
+      Composer.over(scheduler.scheduled, list =>
         list.filter(s => s.id !== event.payload)
       )
     ),
 
     Events.handle<string>(eventType.hold, event =>
-      Composer.over(scheduler.state.scheduled, list =>
+      Composer.over(scheduler.scheduled, list =>
         list.map(s => (s.id === event.payload ? { ...s, held: true } : s))
       )
     ),
 
     Events.handle<string>(eventType.release, event =>
-      Composer.over(scheduler.state.scheduled, list =>
+      Composer.over(scheduler.scheduled, list =>
         list.map(s => (s.id === event.payload ? { ...s, held: false } : s))
       )
     ),
 
     Events.handle<string>(eventType.holdByPrefix, event =>
-      Composer.over(scheduler.state.scheduled, list =>
+      Composer.over(scheduler.scheduled, list =>
         list.map(s =>
           s.id?.startsWith(event.payload) ? { ...s, held: true } : s
         )
@@ -129,7 +132,7 @@ export class Scheduler {
     ),
 
     Events.handle<string>(eventType.releaseByPrefix, event =>
-      Composer.over(scheduler.state.scheduled, list =>
+      Composer.over(scheduler.scheduled, list =>
         list.map(s =>
           s.id?.startsWith(event.payload) ? { ...s, held: false } : s
         )
@@ -137,7 +140,7 @@ export class Scheduler {
     ),
 
     Events.handle<string>(eventType.cancelByPrefix, event =>
-      Composer.over(scheduler.state.scheduled, list =>
+      Composer.over(scheduler.scheduled, list =>
         list.filter(s => !s.id?.startsWith(event.payload))
       )
     )

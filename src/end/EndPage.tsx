@@ -2,7 +2,7 @@ import styled, { keyframes } from 'styled-components';
 import { WaButton } from '@awesome.me/webawesome/dist/react';
 import { ContentSection } from '../common';
 import { useGameEngine } from '../game/hooks/UseGameEngine';
-import { useGameState } from '../game/hooks';
+import { useGameFrame } from '../game/hooks';
 import Clock from '../game/plugins/clock';
 import Rand from '../game/plugins/rand';
 import Scene from '../game/plugins/scene';
@@ -114,12 +114,10 @@ const StyledFinishButton = styled(WaButton)`
 
 export const EndPage = () => {
   const { injectImpulse } = useGameEngine();
-  const clockState = useGameState(Clock.paths.state) as
+  const clockState = useGameFrame(Clock.paths) as
     | { elapsed?: number }
     | undefined;
-  const randState = useGameState(Rand.paths.state) as
-    | { seed?: string }
-    | undefined;
+  const randState = useGameFrame(Rand.paths) as { seed?: string } | undefined;
 
   const displayTime =
     typeof clockState?.elapsed === 'number' ? clockState.elapsed : 0;

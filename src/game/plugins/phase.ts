@@ -33,11 +33,11 @@ const eventType = {
 
 export default class Phase {
   static setPhase(p: string): Pipe {
-    return Composer.set(phase.state.current, p);
+    return Composer.set(phase.current, p);
   }
 
   static whenPhase(p: string, pipe: Pipe): Pipe {
-    return Composer.bind(phase.state, state =>
+    return Composer.bind(phase, state =>
       Composer.when(state?.current === p, pipe)
     );
   }
@@ -56,20 +56,20 @@ export default class Phase {
       name: 'Phase',
     },
 
-    activate: Composer.set(phase.state, {
+    activate: Composer.set(phase, {
       current: GamePhase.warmup,
       prev: GamePhase.warmup,
     }),
 
     update: Composer.do(({ get, set, pipe }) => {
-      const { current, prev } = get(phase.state);
+      const { current, prev } = get(phase);
       if (current === prev) return;
-      set(phase.state.prev, current);
+      set(phase.prev, current);
       pipe(Events.dispatch({ type: eventType.leave(prev) }));
       pipe(Events.dispatch({ type: eventType.enter(current) }));
     }),
 
-    deactivate: Composer.set(phase.state, undefined),
+    deactivate: Composer.set(phase, undefined),
   };
 
   static get paths() {

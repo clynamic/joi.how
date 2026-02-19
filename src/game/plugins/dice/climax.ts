@@ -22,7 +22,7 @@ type ClimaxState = {
   result: ClimaxResultType;
 };
 
-export const climax = typedPath<ClimaxState>(['state', PLUGIN_ID, 'climax']);
+export const climax = typedPath<ClimaxState>([PLUGIN_ID, 'climax']);
 
 type ClimaxEndPayload = { countdown: number; denied?: boolean; ruin?: boolean };
 

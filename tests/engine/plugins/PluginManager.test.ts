@@ -18,10 +18,10 @@ const PLUGIN_NAMESPACE = 'core.plugin_manager';
 const gamePipe: Pipe = Composer.pipe(Events.pipe, pluginManagerPipe);
 
 const getLoadedIds = (frame: GameFrame): string[] =>
-  (frame.state as any)?.core?.plugin_manager?.loaded ?? [];
+  frame?.core?.plugin_manager?.loaded ?? [];
 
 const getLoadedRefs = (frame: GameFrame): Record<string, Plugin> =>
-  (frame.context as any)?.core?.plugin_manager?.loadedRefs ?? {};
+  frame?.core?.plugin_manager?.loadedRefs ?? {};
 
 const makePluginClass = (plugin: Plugin): PluginClass => ({
   plugin,

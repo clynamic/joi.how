@@ -1,11 +1,3 @@
-export type GameState = {
-  [key: string]: any;
-};
-
-export type GameContext = {
-  [key: string]: any;
-} & GameTiming;
-
 export type GameTiming = {
   tick: number;
   step: number;
@@ -13,9 +5,8 @@ export type GameTiming = {
 };
 
 export type GameFrame = {
-  state: GameState;
-  context: GameContext;
-};
+  [key: string]: any;
+} & GameTiming;
 
 export type Pipe = (value: GameFrame) => GameFrame;
 

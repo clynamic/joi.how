@@ -13,13 +13,10 @@ const PLUGIN_ID = 'core.clock';
 
 export type ClockState = {
   elapsed: number;
-};
-
-type ClockContext = {
   lastWall: number | null;
 };
 
-const clock = pluginPaths<ClockState, ClockContext>(PLUGIN_ID);
+const clock = pluginPaths<ClockState>(PLUGIN_ID);
 
 export default class Clock {
   static plugin: Plugin = {
@@ -28,32 +25,27 @@ export default class Clock {
       name: 'Clock',
     },
 
-    activate: Composer.pipe(
-      Composer.set(clock.state, { elapsed: 0 }),
-      Composer.set(clock.context, { lastWall: null })
-    ),
+    activate: Composer.set(clock, { elapsed: 0, lastWall: null }),
 
     update: Composer.pipe(
       Pause.whenPlaying(
         Composer.do(({ get, over, set }) => {
           const now = performance.now();
-          const ctx = get(clock.context);
-          if (ctx?.lastWall !== null && ctx?.lastWall !== undefined) {
-            const delta = now - ctx.lastWall;
-            over(clock.state, ({ elapsed = 0 }) => ({
+          const state = get(clock);
+          if (state?.lastWall !== null && state?.lastWall !== undefined) {
+            const delta = now - state.lastWall;
+            over(clock, ({ elapsed = 0, ...rest }) => ({
+              ...rest,
               elapsed: elapsed + delta,
             }));
           }
-          set(clock.context, { lastWall: now });
+          set(clock.lastWall, now);
         })
       ),
-      Pause.onPause(() => Composer.set(clock.context, { lastWall: null }))
+      Pause.onPause(() => Composer.set(clock.lastWall, null))
     ),
 
-    deactivate: Composer.pipe(
-      Composer.set(clock.state, undefined),
-      Composer.set(clock.context, undefined)
-    ),
+    deactivate: Composer.set(clock, undefined),
   };
 
   static get paths() {

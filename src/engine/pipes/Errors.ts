@@ -23,7 +23,7 @@ export type ErrorsContext = {
 
 const PLUGIN_NAMESPACE = 'core.errors';
 
-const errors = pluginPaths<never, ErrorsContext>(PLUGIN_NAMESPACE);
+const errors = pluginPaths<ErrorsContext>(PLUGIN_NAMESPACE);
 
 export class Errors {
   static withCatch(id: PluginId, phase: string, pluginPipe: Pipe): Pipe {
@@ -35,8 +35,8 @@ export class Errors {
         const stack = err instanceof Error ? err.stack : undefined;
         const timestamp = Date.now();
 
-        const entryPath = errors.context.plugins[id][phase];
-        const existing = get<ErrorEntry>(entryPath);
+        const entryPath = errors.plugins[id][phase];
+        const existing = get(entryPath);
         const count = existing ? existing.count + 1 : 1;
         const isNew = !existing || existing.message !== message;
 

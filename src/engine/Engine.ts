@@ -1,4 +1,4 @@
-import { GameState, GameContext, Pipe, GameTiming, GameFrame } from './State';
+import { Pipe, GameTiming, GameFrame } from './State';
 import { deepFreeze } from './freeze';
 
 export type GameEngineOptions = {
@@ -6,8 +6,12 @@ export type GameEngineOptions = {
 };
 
 export class GameEngine {
-  constructor(initial: GameState, pipe: Pipe, options?: GameEngineOptions) {
-    this.state = { ...initial };
+  constructor(
+    initial: Record<string, any>,
+    pipe: Pipe,
+    options?: GameEngineOptions
+  ) {
+    this.frame = { ...initial } as GameFrame;
     this.pipe = pipe;
     this.step = options?.step ?? 16;
     this.timing = {
@@ -15,14 +19,12 @@ export class GameEngine {
       step: this.step,
       time: 0,
     };
-    this.context = this.timing;
   }
 
   /**
-   * The state of the engine. This object should contain all information to run the game from a cold start.
-   * Pipes may add any additional fields. Must be serializable to JSON.
+   * The frame contains all plugin data. Each plugin's data lives at frame[pluginId].
    */
-  private state: GameState;
+  private frame: GameFrame;
 
   /**
    * The pipe is a function that produces a new game frame based on the current game frame.
@@ -35,30 +37,16 @@ export class GameEngine {
   private step: number;
 
   /**
-   * The context of the engine. May contain any ephemeral information of any plugin, however it is to be noted;
-   * Context may be discarded at any time, so it may not contain information necessary to restore the game state.
-   * It is not required to be serializable. As such, this object can contain inter-pipe communication, utility functions, or debugging information.
-   */
-  private context: GameContext;
-
-  /**
    * Contains the timing information of the game engine. This may not be modified by either the outside nor by pipes.
    */
   private timing: GameTiming;
 
   /**
-   * Returns the current game state.
+   * Returns the current game frame.
    */
-  public getState(): GameState {
-    return this.state;
-  }
-
-  /**
-   * Returns the current game context.
-   */
-  public getContext(): GameContext {
+  public getFrame(): GameFrame {
     return {
-      ...this.context,
+      ...this.frame,
       ...this.timing,
     };
   }
@@ -66,28 +54,24 @@ export class GameEngine {
   /**
    * Runs the game engine for a single fixed-step tick.
    */
-  public tick(): GameState {
+  public tick(): GameFrame {
     this.timing.tick += 1;
     this.timing.time += this.step;
 
     const frame: GameFrame = {
-      state: this.state,
-      context: {
-        ...this.context,
-        ...this.timing,
-      },
+      ...this.frame,
+      ...this.timing,
     };
 
     const result = this.pipe(frame);
 
-    this.state = result.state;
-    this.context = {
-      ...result.context,
+    this.frame = {
+      ...result,
       ...this.timing,
     };
 
-    if (import.meta.env.DEV) deepFreeze(this.state);
+    if (import.meta.env.DEV) deepFreeze(this.frame);
 
-    return this.state;
+    return this.frame;
   }
 }

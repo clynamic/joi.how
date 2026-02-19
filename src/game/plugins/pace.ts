@@ -3,7 +3,7 @@ import { Pipe } from '../../engine/State';
 import { typedPath } from '../../engine/Lens';
 import { Settings } from '../../settings';
 import { Composer, pluginPaths } from '../../engine';
-import Clock, { ClockState } from './clock';
+import Clock from './clock';
 
 declare module '../../engine/sdk' {
   interface PluginSDK {
@@ -23,18 +23,15 @@ export type PaceState = {
 };
 
 const pace = pluginPaths<PaceState>(PLUGIN_ID);
-const settings = typedPath<Settings>(['context', 'settings']);
-const clockState = typedPath<ClockState>(Clock.paths.state);
+const settings = typedPath<Settings>(['settings']);
 
 export default class Pace {
   static setPace(val: number): Pipe {
-    return Composer.set(pace.state.pace, val);
+    return Composer.set(pace.pace, val);
   }
 
   static resetPace(): Pipe {
-    return Composer.bind(settings, s =>
-      Composer.set(pace.state.pace, s.minPace)
-    );
+    return Composer.bind(settings, s => Composer.set(pace.pace, s.minPace));
   }
 
   static plugin: Plugin = {
@@ -44,7 +41,7 @@ export default class Pace {
     },
 
     activate: Composer.bind(settings, s =>
-      Composer.set(pace.state, {
+      Composer.set(pace, {
         pace: s.minPace,
         prevMinPace: s.minPace,
         prevPace: s.minPace,
@@ -53,25 +50,25 @@ export default class Pace {
     ),
 
     update: Composer.do(({ get, set, over }) => {
-      const state = get(pace.state);
+      const state = get(pace);
       const { minPace } = get(settings);
 
       if (minPace !== state.prevMinPace) {
-        set(pace.state.prevMinPace, minPace);
-        set(pace.state.pace, minPace);
+        set(pace.prevMinPace, minPace);
+        set(pace.pace, minPace);
       }
 
       if (state.pace !== state.prevPace) {
-        const { elapsed } = get(clockState) ?? { elapsed: 0 };
-        set(pace.state.prevPace, state.pace);
-        over(pace.state.history, (h: PaceEntry[]) => [
+        const { elapsed } = get(Clock.paths) ?? { elapsed: 0 };
+        set(pace.prevPace, state.pace);
+        over(pace.history, (h: PaceEntry[]) => [
           ...h,
           { time: elapsed, pace: state.pace },
         ]);
       }
     }),
 
-    deactivate: Composer.set(pace.state, undefined),
+    deactivate: Composer.set(pace, undefined),
   };
 
   static get paths() {

@@ -3,9 +3,9 @@ import { Composer } from '../../engine/Composer';
 import { pluginPaths } from '../../engine/plugins/Plugins';
 import { typedPath } from '../../engine/Lens';
 import { Settings } from '../../settings';
+import { GameTiming } from '../../engine/State';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
-import { GameContext } from '../../engine';
 
 declare module '../../engine/sdk' {
   interface PluginSDK {
@@ -20,8 +20,8 @@ export type IntensityState = {
 };
 
 const intensity = pluginPaths<IntensityState>(PLUGIN_ID);
-const gameContext = typedPath<GameContext>(['context']);
-const settings = typedPath<Settings>(gameContext.settings);
+const timing = typedPath<GameTiming>([]);
+const settings = typedPath<Settings>(['settings']);
 
 export default class Intensity {
   static plugin: Plugin = {
@@ -30,22 +30,22 @@ export default class Intensity {
       name: 'Intensity',
     },
 
-    activate: Composer.set(intensity.state, { intensity: 0 }),
+    activate: Composer.set(intensity, { intensity: 0 }),
 
     update: Pause.whenPlaying(
       Phase.whenPhase(
         GamePhase.active,
         Composer.do(({ get, over }) => {
-          const delta = get(gameContext.step);
+          const delta = get(timing.step);
           const s = get(settings);
-          over(intensity.state, ({ intensity: i = 0 }) => ({
+          over(intensity, ({ intensity: i = 0 }) => ({
             intensity: Math.min(1, i + delta / (s.gameDuration * 1000)),
           }));
         })
       )
     ),
 
-    deactivate: Composer.set(intensity.state, undefined),
+    deactivate: Composer.set(intensity, undefined),
   };
 
   static get paths() {

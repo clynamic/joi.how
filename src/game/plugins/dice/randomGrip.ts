@@ -17,7 +17,7 @@ export const PawLabels: Record<Paws, string> = {
   both: 'Both',
 };
 
-export const pawsPath = typedPath<Paws>(['state', PLUGIN_ID, 'paws']);
+export const pawsPath = typedPath<Paws>([PLUGIN_ID, 'paws']);
 
 const allPaws = Object.values(Paws);
 

@@ -1,5 +1,5 @@
 import type { Plugin } from '../../engine/plugins/Plugins';
-import type { PerfMetrics } from '../../engine/pipes/Perf';
+import type { PluginPerfEntry } from '../../engine/pipes/Perf';
 import { Composer } from '../../engine/Composer';
 import { Perf } from '../../engine/pipes/Perf';
 import { pluginPaths } from '../../engine/plugins/Plugins';
@@ -13,7 +13,7 @@ type PerfOverlayContext = {
   el: HTMLElement;
 };
 
-const po = pluginPaths<never, PerfOverlayContext>(PLUGIN_ID);
+const po = pluginPaths<PerfOverlayContext>(PLUGIN_ID);
 
 const COLOR_OK = [0x4a, 0xde, 0x80] as const;
 const COLOR_WARN = [0xfa, 0xcc, 0x15] as const;
@@ -88,22 +88,22 @@ export default class PerfOverlay {
       const el = document.createElement('div');
       el.setAttribute(ELEMENT_ATTR, PLUGIN_ID);
 
-      const visible = get(Debug.paths.state.visible);
+      const visible = get(Debug.paths.visible);
       el.style.display = visible ? '' : 'none';
 
       document.body.appendChild(el);
-      set(po.context, { el });
+      set(po, { el });
     }),
 
     update: Composer.do(({ get }) => {
-      const el = get(po.context)?.el;
+      const el = get(po)?.el;
       if (!el) return;
 
-      const visible = get(Debug.paths.state.visible);
+      const visible = get(Debug.paths.visible);
       el.style.display = visible ? '' : 'none';
       if (!visible) return;
 
-      const ctx = get(Perf.paths.context);
+      const ctx = get(Perf.paths);
       if (!ctx) return;
 
       const { plugins, config } = ctx;
@@ -111,14 +111,22 @@ export default class PerfOverlay {
 
       let totalAvg = 0;
 
-      for (const [id, phases] of Object.entries(plugins as PerfMetrics)) {
-        if (id === PLUGIN_ID) continue;
-        for (const [phase, entry] of Object.entries(phases)) {
-          if (!entry) continue;
-          totalAvg += entry.avg;
-          lines.push(formatLine(id, phase, entry.avg, config.pluginBudget));
+      const walk = (node: Record<string, any>, prefix: string[]) => {
+        for (const [key, value] of Object.entries(node)) {
+          if (!value || typeof value !== 'object') continue;
+          if ('lastTick' in value) {
+            const id = prefix.join('.');
+            if (id === PLUGIN_ID) continue;
+            const entry = value as PluginPerfEntry;
+            totalAvg += entry.avg;
+            lines.push(formatLine(id, key, entry.avg, config.pluginBudget));
+          } else {
+            walk(value, [...prefix, key]);
+          }
         }
-      }
+      };
+
+      walk(plugins as Record<string, any>, []);
 
       if (lines.length > 0) {
         const totalColor = budgetColor(
@@ -138,9 +146,9 @@ export default class PerfOverlay {
     }),
 
     deactivate: Composer.do(({ get, set }) => {
-      const el = get(po.context)?.el;
+      const el = get(po)?.el;
       if (el) el.remove();
-      set(po.context, undefined);
+      set(po, undefined);
     }),
   };
 }

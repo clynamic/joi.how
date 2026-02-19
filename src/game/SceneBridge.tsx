@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGameEngine } from './hooks/UseGameEngine';
-import { useGameState } from './hooks';
+import { useGameFrame } from './hooks';
 import Scene from './plugins/scene';
 
 const routeToScene: Record<string, string> = {
@@ -20,7 +20,7 @@ export const SceneBridge = () => {
   const { injectImpulse } = useGameEngine();
   const location = useLocation();
   const navigate = useNavigate();
-  const sceneState = useGameState(Scene.paths.state) as
+  const sceneState = useGameFrame(Scene.paths) as
     | { current?: string }
     | undefined;
 

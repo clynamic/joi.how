@@ -12,7 +12,7 @@ type FpsContext = {
   tickTimestamps: number[];
 };
 
-const fps = pluginPaths<never, FpsContext>(PLUGIN_ID);
+const fps = pluginPaths<FpsContext>(PLUGIN_ID);
 
 let rafId = 0;
 let lastFrameTime: number | null = null;
@@ -65,7 +65,7 @@ export default class Fps {
       const el = document.createElement('div');
       el.setAttribute(ELEMENT_ATTR, PLUGIN_ID);
 
-      const visible = get(Debug.paths.state.visible);
+      const visible = get(Debug.paths.visible);
       el.style.display = visible ? '' : 'none';
 
       document.body.appendChild(el);
@@ -74,14 +74,14 @@ export default class Fps {
       fpsHistory = [];
       rafId = requestAnimationFrame(rafLoop);
 
-      set(fps.context, { el, tickTimestamps: [] });
+      set(fps, { el, tickTimestamps: [] });
     }),
 
     update: Composer.do(({ get, set }) => {
-      const ctx = get(fps.context);
+      const ctx = get(fps);
       if (!ctx) return;
 
-      const visible = get(Debug.paths.state.visible);
+      const visible = get(Debug.paths.visible);
       if (ctx.el) ctx.el.style.display = visible ? '' : 'none';
       if (!visible) return;
 
@@ -99,7 +99,7 @@ export default class Fps {
       if (ctx.el)
         ctx.el.textContent = `${Math.round(avgFps)} FPS / ${tickTimestamps.length} TPS`;
 
-      set(fps.context, { ...ctx, tickTimestamps });
+      set(fps, { ...ctx, tickTimestamps });
     }),
 
     deactivate: Composer.do(({ get, set }) => {
@@ -108,9 +108,9 @@ export default class Fps {
       lastFrameTime = null;
       fpsHistory = [];
 
-      const el = get(fps.context)?.el;
+      const el = get(fps)?.el;
       if (el) el.remove();
-      set(fps.context, undefined);
+      set(fps, undefined);
     }),
   };
 }

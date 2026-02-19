@@ -11,7 +11,7 @@ import {
   DiceOutcome,
 } from './types';
 
-export const edged = typedPath<boolean>(['state', PLUGIN_ID, 'edged']);
+export const edged = typedPath<boolean>([PLUGIN_ID, 'edged']);
 
 const seq = Sequence.for(PLUGIN_ID, 'edge');
 

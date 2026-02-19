@@ -1,5 +1,5 @@
 import { Composer } from '../Composer';
-import { GameContext, Pipe } from '../State';
+import { GameFrame, Pipe } from '../State';
 import { Events, type GameEvent } from './Events';
 import { pluginPaths, PluginId } from '../plugins/Plugins';
 import { typedPath } from '../Lens';
@@ -47,8 +47,8 @@ type OverBudgetPayload = {
 
 const eventType = Events.getKeys(PLUGIN_NAMESPACE, 'over_budget', 'configure');
 
-const perf = pluginPaths<never, PerfContext>(PLUGIN_NAMESPACE);
-const gameContext = typedPath<GameContext>(['context']);
+const perf = pluginPaths<PerfContext>(PLUGIN_NAMESPACE);
+const frameTiming = typedPath<GameFrame>([]);
 
 function isEntry(value: unknown): value is PluginPerfEntry {
   return value != null && typeof value === 'object' && 'lastTick' in value;
@@ -96,9 +96,9 @@ export class Perf {
       const after = performance.now();
       const duration = after - before;
 
-      const tick = get(gameContext.tick) ?? 0;
-      const entryPath = perf.context.plugins[id][phase];
-      const entry = get<PluginPerfEntry>(entryPath);
+      const tick = get(frameTiming.tick) ?? 0;
+      const entryPath = perf.plugins[id][phase];
+      const entry = get(entryPath);
 
       const samples = entry
         ? [...entry.samples, duration].slice(-SAMPLE_SIZE)
@@ -110,8 +110,7 @@ export class Perf {
       set(entryPath, { last: duration, avg, max, samples, lastTick: tick });
 
       const budget =
-        get<number>(perf.context.config.pluginBudget) ??
-        DEFAULT_CONFIG.pluginBudget;
+        get(perf.config.pluginBudget) ?? DEFAULT_CONFIG.pluginBudget;
 
       if (duration > budget) {
         console.warn(
@@ -140,24 +139,24 @@ export class Perf {
 
   static pipe: Pipe = Composer.pipe(
     Composer.do(({ get, set }) => {
-      if (!get(perf.context.config)) {
-        set(perf.context.config, DEFAULT_CONFIG);
+      if (!get(perf.config)) {
+        set(perf.config, DEFAULT_CONFIG);
       }
     }),
 
     Composer.do(({ get, set }) => {
-      const tick = get(gameContext.tick) ?? 0;
-      const plugins = get<Record<string, unknown>>(perf.context.plugins);
+      const tick = get(frameTiming.tick) ?? 0;
+      const plugins = get(perf.plugins);
       if (!plugins) return;
 
       const [pruned, dirty] = pruneExpired(plugins, tick);
       if (dirty) {
-        set(perf.context.plugins, pruned ?? {});
+        set(perf.plugins, pruned ?? {});
       }
     }),
 
     Events.handle<Partial<PerfConfig>>(eventType.configure, event =>
-      Composer.over(perf.context.config, (config = DEFAULT_CONFIG) => ({
+      Composer.over(perf.config, (config = DEFAULT_CONFIG) => ({
         ...config,
         ...event.payload,
       }))

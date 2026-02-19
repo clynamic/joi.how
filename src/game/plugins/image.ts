@@ -46,7 +46,7 @@ export default class Image {
       name: 'Image',
     },
 
-    activate: Composer.set(image.state, {
+    activate: Composer.set(image, {
       currentImage: undefined,
       seenImages: [],
       nextImages: [],
@@ -55,7 +55,7 @@ export default class Image {
     update: Composer.pipe(
       Events.handle<ImageItem>(eventType.pushNext, event =>
         Composer.over(
-          image.state,
+          image,
           ({ currentImage, seenImages = [], nextImages = [] }) => {
             const newImage = event.payload;
             const next = [...nextImages];
@@ -86,21 +86,21 @@ export default class Image {
       ),
 
       Events.handle<ImageItem[]>(eventType.setNextImages, event =>
-        Composer.over(image.state, state => ({
+        Composer.over(image, state => ({
           ...state,
           nextImages: event.payload,
         }))
       ),
 
       Events.handle<ImageItem | undefined>(eventType.setImage, event =>
-        Composer.over(image.state, state => ({
+        Composer.over(image, state => ({
           ...state,
           currentImage: event.payload,
         }))
       )
     ),
 
-    deactivate: Composer.set(image.state, undefined),
+    deactivate: Composer.set(image, undefined),
   };
 
   static get paths() {

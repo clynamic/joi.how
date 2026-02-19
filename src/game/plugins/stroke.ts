@@ -2,7 +2,7 @@ import type { Plugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
 import { pluginPaths } from '../../engine/plugins/Plugins';
 import { typedPath } from '../../engine/Lens';
-import { GameContext } from '../../engine';
+import { GameTiming } from '../../engine/State';
 import { PhaseState, GamePhase } from './phase';
 import Pause from './pause';
 import { PaceState } from './pace';
@@ -26,9 +26,9 @@ export type StrokeState = {
 };
 
 const stroke = pluginPaths<StrokeState>(PLUGIN_ID);
-const gameContext = typedPath<GameContext>(['context']);
-const phaseState = typedPath<PhaseState>(['state', 'core.phase']);
-const paceState = typedPath<PaceState>(['state', 'core.pace']);
+const timing = typedPath<GameTiming>([]);
+const phaseState = typedPath<PhaseState>(['core.phase']);
+const paceState = typedPath<PaceState>(['core.pace']);
 
 export default class Stroke {
   static plugin: Plugin = {
@@ -37,7 +37,7 @@ export default class Stroke {
       name: 'Stroke',
     },
 
-    activate: Composer.set(stroke.state, {
+    activate: Composer.set(stroke, {
       stroke: StrokeDirection.up,
       timer: 0,
     }),
@@ -50,15 +50,15 @@ export default class Stroke {
         const pace = get(paceState)?.pace;
         if (!pace || pace <= 0) return;
 
-        const delta = get(gameContext.step);
-        const state = get(stroke.state);
+        const delta = get(timing.step);
+        const state = get(stroke);
         if (!state) return;
 
         const interval = (1 / pace) * 1000;
         const elapsed = state.timer + delta;
 
         if (elapsed >= interval) {
-          set(stroke.state, {
+          set(stroke, {
             stroke:
               state.stroke === StrokeDirection.up
                 ? StrokeDirection.down
@@ -66,12 +66,12 @@ export default class Stroke {
             timer: elapsed - interval,
           });
         } else {
-          set(stroke.state.timer, elapsed);
+          set(stroke.timer, elapsed);
         }
       })
     ),
 
-    deactivate: Composer.set(stroke.state, undefined),
+    deactivate: Composer.set(stroke, undefined),
   };
 
   static get paths() {

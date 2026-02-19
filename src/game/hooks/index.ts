@@ -1,4 +1,3 @@
 export * from './UseDispatchEvent';
-export * from './UseGameContext';
 export * from './UseGameEngine';
-export * from './UseGameValue';
+export * from './UseGameFrame';

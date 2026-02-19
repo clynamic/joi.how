@@ -16,9 +16,9 @@ declare module '../../engine/sdk' {
 
 const PLUGIN_ID = 'core.random_images';
 
-const images = typedPath<ImageItem[]>(['context', 'images']);
-const intensityState = typedPath<IntensityState>(['state', 'core.intensity']);
-const imageState = typedPath<ImageState>(['state', 'core.images']);
+const images = typedPath<ImageItem[]>(['images']);
+const intensityState = typedPath<IntensityState>(['core.intensity']);
+const imageState = typedPath<ImageState>(['core.images']);
 
 const eventType = Events.getKeys(PLUGIN_ID, 'schedule_next');
 

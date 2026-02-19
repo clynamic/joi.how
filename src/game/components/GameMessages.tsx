@@ -6,7 +6,7 @@ import { useTranslate } from '../../settings';
 import { defaultTransition, playTone } from '../../utils';
 import { GameMessage } from '../plugins/messages';
 import Messages from '../plugins/messages';
-import { useGameState } from '../hooks/UseGameValue';
+import { useGameFrame } from '../hooks/UseGameFrame';
 
 import _ from 'lodash';
 import { useDispatchEvent } from '../hooks/UseDispatchEvent';
@@ -60,7 +60,7 @@ const StyledGameMessageButton = motion.create(styled.button`
 `);
 
 export const GameMessages = () => {
-  const { messages } = useGameState(Messages.paths.state);
+  const { messages } = useGameFrame(Messages.paths);
   const { dispatchEvent } = useDispatchEvent();
   const translate = useTranslate();
 

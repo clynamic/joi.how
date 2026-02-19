@@ -67,7 +67,7 @@ export default class Dealer {
     },
 
     activate: Composer.pipe(
-      Composer.set(dice.state, { busy: false, log: [] }),
+      Composer.set(dice, { busy: false, log: [] }),
       ...outcomes.flatMap(o => (o.activate ? [o.activate] : [])),
       roll.after(1000, 'check')
     ),
@@ -78,7 +78,7 @@ export default class Dealer {
           Phase.whenPhase(
             GamePhase.active,
             Composer.do(({ get, pipe }) => {
-              const state = get(dice.state);
+              const state = get(dice);
               if (state.busy) return;
 
               const s = get(settings);
@@ -117,9 +117,9 @@ export default class Dealer {
 
       roll.on('trigger', event =>
         Composer.do(({ get, set, over, pipe }) => {
-          set(dice.state.busy, true);
-          const elapsed = get(Clock.paths.state)?.elapsed ?? 0;
-          over(dice.state.log, (log: DiceLogEntry[]) => [
+          set(dice.busy, true);
+          const elapsed = get(Clock.paths)?.elapsed ?? 0;
+          over(dice.log, (log: DiceLogEntry[]) => [
             ...log,
             { time: elapsed, event: event.payload },
           ]);
@@ -131,17 +131,15 @@ export default class Dealer {
 
       ...outcomes.map(o => o.update),
 
-      Events.handle(OUTCOME_DONE, () => Composer.set(dice.state.busy, false)),
+      Events.handle(OUTCOME_DONE, () => Composer.set(dice.busy, false)),
 
-      Phase.onLeave(GamePhase.active, () =>
-        Composer.set(dice.state.busy, false)
-      ),
+      Phase.onLeave(GamePhase.active, () => Composer.set(dice.busy, false)),
 
       Pause.onPause(() => Scheduler.holdByPrefix(PLUGIN_ID)),
       Pause.onResume(() => Scheduler.releaseByPrefix(PLUGIN_ID))
     ),
 
-    deactivate: Composer.set(dice.state, undefined),
+    deactivate: Composer.set(dice, undefined),
   };
 
   static triggerOutcome(id: DiceEvent): Pipe {
