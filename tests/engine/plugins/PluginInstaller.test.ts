@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { pluginInstallerPipe } from '../../../src/engine/plugins/PluginInstaller';
 import { pluginManagerPipe } from '../../../src/engine/plugins/PluginManager';
+import { moduleManagerPipe } from '../../../src/engine/modules/ModuleManager';
 import { Events } from '../../../src/engine/pipes/Events';
 import { Composer } from '../../../src/engine/Composer';
 import { GameFrame, Pipe } from '../../../src/engine/State';
@@ -12,6 +13,7 @@ const PLUGIN_NAMESPACE = 'core.plugin_installer';
 
 const fullPipe: Pipe = Composer.pipe(
   Events.pipe,
+  moduleManagerPipe,
   pluginManagerPipe,
   pluginInstallerPipe
 );
@@ -22,8 +24,8 @@ const getPending = (frame: GameFrame): Map<string, any> | undefined =>
 const getInstalledIds = (frame: GameFrame): string[] =>
   frame?.core?.plugin_installer?.installed ?? [];
 
-const getLoadedIds = (frame: GameFrame): string[] =>
-  frame?.core?.plugin_manager?.loaded ?? [];
+const getOrder = (frame: GameFrame): string[] =>
+  (frame as any)?.core?.modules?.order ?? [];
 
 function makeLoadResult(plugin: Plugin, name: string) {
   const cls = { plugin, name } as PluginClass;
@@ -113,9 +115,10 @@ describe('Plugin Installer', () => {
     expect(getInstalledIds(frame2)).toContain('user.resolved');
 
     const frame3 = fullPipe(tick(frame2));
+    const frame4 = fullPipe(tick(frame3));
 
     expect(activated).toBe(true);
-    expect(getLoadedIds(frame3)).toContain('user.resolved');
+    expect(getOrder(frame4)).toContain('user.resolved');
   });
 
   it('should register plugin class on sdk by name', () => {
@@ -129,10 +132,11 @@ describe('Plugin Installer', () => {
     )(frame0);
 
     const frame2 = fullPipe(tick(frame1));
-    fullPipe(tick(frame2));
+    const frame3 = fullPipe(tick(frame2));
+    fullPipe(tick(frame3));
 
     expect((sdk as any).TestPlugin).toBeDefined();
-    expect((sdk as any).TestPlugin.plugin.id).toBe('user.sdk');
+    expect((sdk as any).TestPlugin.id).toBe('user.sdk');
   });
 
   it('should drop errored plugins from pending', () => {

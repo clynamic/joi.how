@@ -6,6 +6,7 @@ import {
   pluginManagerPipe,
   PluginManager,
 } from '../../../src/engine/plugins/PluginManager';
+import { moduleManagerPipe } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import { PluginClass } from '../../../src/engine/plugins/Plugins';
 import Pause, { PauseState } from '../../../src/game/plugins/pause';
@@ -14,6 +15,7 @@ import { makeFrame, tick } from '../../utils';
 const gamePipe: Pipe = Composer.pipe(
   Events.pipe,
   Scheduler.pipe,
+  moduleManagerPipe,
   pluginManagerPipe
 );
 
@@ -41,6 +43,7 @@ function bootstrap(): GameFrame {
   let frame = gamePipe(makeFrame());
   frame = PluginManager.register(makePluginClass(Pause.plugin))(frame);
   frame = PluginManager.register(makePluginClass(dealerPlugin))(frame);
+  frame = gamePipe(tick(frame));
   frame = gamePipe(tick(frame));
   return frame;
 }
