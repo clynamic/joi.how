@@ -1,3 +1,4 @@
+export * from './modules';
 export * from './pipes';
 export * from './Composer';
 export * from './DOMBatcher';

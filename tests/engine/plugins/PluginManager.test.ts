@@ -8,6 +8,7 @@ import {
   PluginManager,
   pluginManagerPipe,
 } from '../../../src/engine/plugins/PluginManager';
+import { moduleManagerPipe } from '../../../src/engine/modules/ModuleManager';
 import { Events } from '../../../src/engine/pipes/Events';
 import { Composer } from '../../../src/engine/Composer';
 import { Pipe, GameFrame } from '../../../src/engine/State';
@@ -15,13 +16,17 @@ import { makeFrame, tick } from '../../utils';
 
 const PLUGIN_NAMESPACE = 'core.plugin_manager';
 
-const gamePipe: Pipe = Composer.pipe(Events.pipe, pluginManagerPipe);
+const gamePipe: Pipe = Composer.pipe(
+  Events.pipe,
+  moduleManagerPipe,
+  pluginManagerPipe
+);
 
-const getLoadedIds = (frame: GameFrame): string[] =>
-  frame?.core?.plugin_manager?.loaded ?? [];
+const getOrder = (frame: GameFrame): string[] =>
+  (frame as any)?.core?.modules?.order ?? [];
 
-const getLoadedRefs = (frame: GameFrame): Record<string, Plugin> =>
-  frame?.core?.plugin_manager?.loadedRefs ?? {};
+const getRegistry = (frame: GameFrame): Record<string, any> =>
+  (frame as any)?.core?.modules?.registry ?? {};
 
 const makePluginClass = (plugin: Plugin): PluginClass => ({
   plugin,
@@ -31,7 +36,8 @@ const makePluginClass = (plugin: Plugin): PluginClass => ({
 function bootstrap(plugin: Plugin): GameFrame {
   const frame0 = gamePipe(makeFrame());
   const frame1 = PluginManager.register(makePluginClass(plugin))(frame0);
-  return gamePipe(tick(frame1));
+  const frame2 = gamePipe(tick(frame1));
+  return gamePipe(tick(frame2));
 }
 
 describe('Plugin System', () => {
@@ -69,14 +75,14 @@ describe('Plugin System', () => {
       expect(stored['test.plugin']).toBe(true);
     });
 
-    it('should track loaded plugin in state', () => {
+    it('should track loaded module in order', () => {
       const result = bootstrap({ id: 'test.plugin' });
-      expect(getLoadedIds(result)).toContain('test.plugin');
+      expect(getOrder(result)).toContain('test.plugin');
     });
 
-    it('should store plugin ref in context', () => {
+    it('should store module in registry', () => {
       const result = bootstrap({ id: 'test.plugin' });
-      expect(getLoadedRefs(result)).toHaveProperty('test.plugin');
+      expect(getRegistry(result)).toHaveProperty('test.plugin');
     });
   });
 
@@ -107,13 +113,14 @@ describe('Plugin System', () => {
           return frame;
         },
       });
-      expect(getLoadedIds(frame1)).toContain('test.plugin');
+      expect(getOrder(frame1)).toContain('test.plugin');
 
       const frame2 = PluginManager.disable('test.plugin')(frame1);
       const frame3 = gamePipe(tick(frame2));
+      const frame4 = gamePipe(tick(frame3));
 
       expect(deactivateCalled).toBe(true);
-      expect(getLoadedIds(frame3)).not.toContain('test.plugin');
+      expect(getOrder(frame4)).not.toContain('test.plugin');
     });
 
     it('should re-enable a disabled plugin', () => {
@@ -130,9 +137,11 @@ describe('Plugin System', () => {
 
       const frame2 = PluginManager.disable('test.plugin')(frame1);
       const frame3 = gamePipe(tick(frame2));
+      const frame4 = gamePipe(tick(frame3));
 
-      const frame4 = PluginManager.enable('test.plugin')(frame3);
-      gamePipe(tick(tick(frame4)));
+      const frame5 = PluginManager.enable('test.plugin')(frame4);
+      const frame6 = gamePipe(tick(frame5));
+      gamePipe(tick(frame6));
 
       expect(activateCount).toBe(2);
     });
@@ -149,13 +158,14 @@ describe('Plugin System', () => {
           return frame;
         },
       });
-      expect(getLoadedIds(frame1)).toContain('test.plugin');
+      expect(getOrder(frame1)).toContain('test.plugin');
 
       const frame2 = PluginManager.unregister('test.plugin')(frame1);
       const frame3 = gamePipe(tick(frame2));
+      const frame4 = gamePipe(tick(frame3));
 
       expect(deactivateCalled).toBe(true);
-      expect(getLoadedIds(frame3)).not.toContain('test.plugin');
+      expect(getOrder(frame4)).not.toContain('test.plugin');
     });
 
     it('should not re-activate after unregister', () => {
@@ -172,8 +182,9 @@ describe('Plugin System', () => {
 
       const frame2 = PluginManager.unregister('test.plugin')(frame1);
       const frame3 = gamePipe(tick(frame2));
+      const frame4 = gamePipe(tick(frame3));
 
-      gamePipe(tick(tick(frame3)));
+      gamePipe(tick(tick(frame4)));
       expect(activateCount).toBe(1);
     });
   });
@@ -186,7 +197,7 @@ describe('Plugin System', () => {
       );
 
       const result = bootstrap({ id: 'test.plugin' });
-      expect(getLoadedIds(result)).not.toContain('test.plugin');
+      expect(getOrder(result)).not.toContain('test.plugin');
     });
   });
 

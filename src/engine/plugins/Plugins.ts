@@ -1,6 +1,7 @@
 import { typedPath, TypedPath } from '../Lens';
-import { Pipe } from '../State';
+import type { Module } from '../modules/Module';
 
+// TODO: make typedPath accept string and kill this thing.
 export function pluginPaths<T>(namespace: string): TypedPath<T> {
   return typedPath<T>([namespace]);
 }
@@ -14,12 +15,14 @@ export type PluginMeta = {
   author?: string;
 };
 
-export type Plugin = {
-  id: PluginId;
+export type PluginConstraints = {
+  dependsOn?: PluginId[];
+  conflictsWith?: PluginId[];
+};
+
+export type Plugin = Module & {
   meta?: PluginMeta;
-  activate?: Pipe;
-  update?: Pipe;
-  deactivate?: Pipe;
+  constraints?: PluginConstraints;
 };
 
 export type PluginClass = {
