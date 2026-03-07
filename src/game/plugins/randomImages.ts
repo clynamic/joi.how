@@ -52,7 +52,7 @@ const RandomImages = definePlugin({
       const { intensity = 0 } = get(intensityState);
 
       const imagesWithDistance = imgs.map(image => {
-        const seenIndex = seenImages.indexOf(image);
+        const seenIndex = seenImages.indexOf(image.id);
         const distance = seenIndex === -1 ? seenImages.length : seenIndex;
         return { image, distance };
       });
