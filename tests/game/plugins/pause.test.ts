@@ -3,10 +3,9 @@ import { Composer } from '../../../src/engine/Composer';
 import { Events } from '../../../src/engine/pipes/Events';
 import { Scheduler, ScheduledEvent } from '../../../src/engine/pipes/Scheduler';
 import {
-  pluginManagerPipe,
-  PluginManager,
-} from '../../../src/engine/plugins/PluginManager';
-import { moduleManagerPipe } from '../../../src/engine/modules/ModuleManager';
+  ModuleManager,
+  moduleManagerPipe,
+} from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Pause, { PauseState } from '../../../src/game/plugins/pause';
 import { makeFrame, tick } from '../../utils';
@@ -14,8 +13,7 @@ import { makeFrame, tick } from '../../utils';
 const gamePipe: Pipe = Composer.pipe(
   Events.pipe,
   Scheduler.pipe,
-  moduleManagerPipe,
-  pluginManagerPipe
+  moduleManagerPipe
 );
 
 const withImpulse = (impulse: Pipe): Pipe => Composer.pipe(impulse, gamePipe);
@@ -32,8 +30,8 @@ function bootstrap(): GameFrame {
   };
 
   let frame = gamePipe(makeFrame());
-  frame = PluginManager.register(Pause)(frame);
-  frame = PluginManager.register(dealerPlugin)(frame);
+  frame = ModuleManager.load(Pause)(frame);
+  frame = ModuleManager.load(dealerPlugin)(frame);
   frame = gamePipe(tick(frame));
   frame = gamePipe(tick(frame));
   return frame;
