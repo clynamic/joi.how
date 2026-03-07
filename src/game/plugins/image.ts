@@ -1,14 +1,8 @@
-import { pluginPaths, type Plugin } from '../../engine/plugins/Plugins';
+import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine';
 import { Events } from '../../engine/pipes/Events';
 import { ImageItem } from '../../types';
-
-declare module '../../engine/sdk' {
-  interface PluginSDK {
-    Image: typeof Image;
-  }
-}
 
 const PLUGIN_ID = 'core.images';
 
@@ -27,83 +21,90 @@ const eventType = Events.getKeys(
   'set_next_images'
 );
 
-export default class Image {
-  static pushNextImage(img: ImageItem): Pipe {
+const Image = definePlugin({
+  name: 'Image',
+  id: PLUGIN_ID,
+  meta: {
+    name: 'Image',
+  },
+
+  pushNextImage(img: ImageItem): Pipe {
     return Events.dispatch({ type: eventType.pushNext, payload: img });
-  }
+  },
 
-  static setCurrentImage(img: ImageItem | undefined): Pipe {
+  setCurrentImage(img: ImageItem | undefined): Pipe {
     return Events.dispatch({ type: eventType.setImage, payload: img });
-  }
+  },
 
-  static setNextImages(imgs: ImageItem[]): Pipe {
+  setNextImages(imgs: ImageItem[]): Pipe {
     return Events.dispatch({ type: eventType.setNextImages, payload: imgs });
-  }
+  },
 
-  static plugin: Plugin = {
-    id: PLUGIN_ID,
-    meta: {
-      name: 'Image',
-    },
+  activate: Composer.set(image, {
+    currentImage: undefined,
+    seenImages: [],
+    nextImages: [],
+  }),
 
-    activate: Composer.set(image, {
-      currentImage: undefined,
-      seenImages: [],
-      nextImages: [],
-    }),
+  update: Composer.pipe(
+    Events.handle<ImageItem>(eventType.pushNext, event =>
+      Composer.over(
+        image,
+        ({ currentImage, seenImages = [], nextImages = [] }) => {
+          const newImage = event.payload;
+          const next = [...nextImages];
+          const seen = [...seenImages];
 
-    update: Composer.pipe(
-      Events.handle<ImageItem>(eventType.pushNext, event =>
-        Composer.over(
-          image,
-          ({ currentImage, seenImages = [], nextImages = [] }) => {
-            const newImage = event.payload;
-            const next = [...nextImages];
-            const seen = [...seenImages];
-
-            if (currentImage) {
-              const existingIndex = seen.indexOf(currentImage);
-              if (existingIndex !== -1) {
-                seen.splice(existingIndex, 1);
-              }
-              seen.unshift(currentImage);
+          if (currentImage) {
+            const existingIndex = seen.indexOf(currentImage);
+            if (existingIndex !== -1) {
+              seen.splice(existingIndex, 1);
             }
-
-            if (seen.length > 500) {
-              seen.pop();
-            }
-
-            next.push(newImage);
-            const newCurrent = next.shift();
-
-            return {
-              currentImage: newCurrent,
-              seenImages: seen,
-              nextImages: next,
-            };
+            seen.unshift(currentImage);
           }
-        )
-      ),
 
-      Events.handle<ImageItem[]>(eventType.setNextImages, event =>
-        Composer.over(image, state => ({
-          ...state,
-          nextImages: event.payload,
-        }))
-      ),
+          if (seen.length > 500) {
+            seen.pop();
+          }
 
-      Events.handle<ImageItem | undefined>(eventType.setImage, event =>
-        Composer.over(image, state => ({
-          ...state,
-          currentImage: event.payload,
-        }))
+          next.push(newImage);
+          const newCurrent = next.shift();
+
+          return {
+            currentImage: newCurrent,
+            seenImages: seen,
+            nextImages: next,
+          };
+        }
       )
     ),
 
-    deactivate: Composer.set(image, undefined),
-  };
+    Events.handle<ImageItem[]>(eventType.setNextImages, event =>
+      Composer.over(image, state => ({
+        ...state,
+        nextImages: event.payload,
+      }))
+    ),
 
-  static get paths() {
+    Events.handle<ImageItem | undefined>(eventType.setImage, event =>
+      Composer.over(image, state => ({
+        ...state,
+        currentImage: event.payload,
+      }))
+    )
+  ),
+
+  deactivate: Composer.set(image, undefined),
+
+  get paths() {
     return image;
+  },
+});
+
+declare module '../../engine/sdk' {
+  interface PluginSDK {
+    Image: typeof Image;
   }
 }
+
+export default Image;

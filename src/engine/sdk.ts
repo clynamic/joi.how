@@ -7,6 +7,7 @@ import { pluginPaths } from './plugins/Plugins';
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PluginSDK {}
 
+
 export interface SDK extends PluginSDK {
   debug: boolean;
   Composer: typeof Composer;

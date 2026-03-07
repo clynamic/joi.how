@@ -25,10 +25,11 @@ export type Plugin = Module & {
   constraints?: PluginConstraints;
 };
 
-export type PluginClass = {
-  plugin: Plugin;
-  name: string;
-};
-
-export type PluginRegistry = Record<PluginId, PluginClass>;
+export type PluginRegistry = Record<PluginId, Plugin>;
 export type EnabledMap = Record<PluginId, boolean>;
+
+export function definePlugin<T extends Plugin & { [key: string]: unknown }>(
+  plugin: T
+): T {
+  return plugin;
+}

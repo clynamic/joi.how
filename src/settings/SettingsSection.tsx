@@ -6,6 +6,7 @@ import {
   HypnoSettings,
   PaceSettings,
   PlayerSettings,
+  PluginSettings,
   ServiceSettings,
   ImageSettings,
   BoardSettings,
@@ -38,6 +39,7 @@ export const SettingsSection = () => {
       <ImageSettings />
       <ToyListSettings />
       <TradeSettings />
+      <PluginSettings />
     </StyledSettingsSection>
   );
 };

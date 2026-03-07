@@ -1,15 +1,8 @@
-import type { Plugin } from '../../engine/plugins/Plugins';
-import { pluginPaths } from '../../engine/plugins/Plugins';
+import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
 import { Events, GameEvent } from '../../engine/pipes/Events';
 import { Scheduler } from '../../engine/pipes/Scheduler';
-
-declare module '../../engine/sdk' {
-  interface PluginSDK {
-    Messages: typeof Messages;
-  }
-}
 
 export interface GameMessagePrompt {
   title: string;
@@ -36,79 +29,86 @@ const paths = pluginPaths<MessageState>(PLUGIN_ID);
 
 const eventType = Events.getKeys(PLUGIN_ID, 'send_message', 'expire_message');
 
-export default class Messages {
-  static send(message: PartialGameMessage): Pipe {
+const Messages = definePlugin({
+  name: 'Messages',
+  id: PLUGIN_ID,
+  meta: {
+    name: 'Messages',
+  },
+
+  send(message: PartialGameMessage): Pipe {
     return Events.dispatch({
       type: eventType.sendMessage,
       payload: message,
     });
-  }
+  },
 
-  static plugin: Plugin = {
-    id: PLUGIN_ID,
-    meta: {
-      name: 'Messages',
-    },
+  activate: Composer.set(paths, { messages: [] }),
 
-    activate: Composer.set(paths, { messages: [] }),
+  update: Composer.pipe(
+    Events.handle<PartialGameMessage>(eventType.sendMessage, event =>
+      Composer.pipe(
+        Composer.over(paths, ({ messages }) => {
+          const patch = event.payload;
+          const index = messages.findIndex(m => m.id === patch.id);
+          const existing = messages[index];
 
-    update: Composer.pipe(
-      Events.handle<PartialGameMessage>(eventType.sendMessage, event =>
-        Composer.pipe(
-          Composer.over(paths, ({ messages }) => {
-            const patch = event.payload;
-            const index = messages.findIndex(m => m.id === patch.id);
-            const existing = messages[index];
+          if (!existing && !patch.title) return { messages };
 
-            if (!existing && !patch.title) return { messages };
+          const updated = [...messages];
+          updated[index < 0 ? updated.length : index] = {
+            ...existing,
+            ...patch,
+          };
 
-            const updated = [...messages];
-            updated[index < 0 ? updated.length : index] = {
-              ...existing,
-              ...patch,
-            };
+          return { messages: updated };
+        }),
 
-            return { messages: updated };
-          }),
+        Composer.do(({ get, pipe }) => {
+          const { messages } = get(paths);
+          const messageId = event.payload.id;
+          const updated = messages.find(m => m.id === messageId);
+          const scheduleId = Scheduler.getKey(
+            PLUGIN_ID,
+            `message/${messageId}`
+          );
 
-          Composer.do(({ get, pipe }) => {
-            const { messages } = get(paths);
-            const messageId = event.payload.id;
-            const updated = messages.find(m => m.id === messageId);
-            const scheduleId = Scheduler.getKey(
-              PLUGIN_ID,
-              `message/${messageId}`
+          if (updated?.duration !== undefined) {
+            return pipe(
+              Scheduler.schedule({
+                id: scheduleId,
+                duration: updated.duration,
+                event: {
+                  type: eventType.expireMessage,
+                  payload: updated.id,
+                },
+              })
             );
-
-            if (updated?.duration !== undefined) {
-              return pipe(
-                Scheduler.schedule({
-                  id: scheduleId,
-                  duration: updated.duration,
-                  event: {
-                    type: eventType.expireMessage,
-                    payload: updated.id,
-                  },
-                })
-              );
-            } else {
-              return pipe(Scheduler.cancel(scheduleId));
-            }
-          })
-        )
-      ),
-
-      Events.handle<string>(eventType.expireMessage, event =>
-        Composer.over(paths, ({ messages }) => ({
-          messages: messages.filter(m => m.id !== event.payload),
-        }))
+          } else {
+            return pipe(Scheduler.cancel(scheduleId));
+          }
+        })
       )
     ),
 
-    deactivate: Composer.set(paths, undefined),
-  };
+    Events.handle<string>(eventType.expireMessage, event =>
+      Composer.over(paths, ({ messages }) => ({
+        messages: messages.filter(m => m.id !== event.payload),
+      }))
+    )
+  ),
 
-  static get paths() {
+  deactivate: Composer.set(paths, undefined),
+
+  get paths() {
     return paths;
+  },
+});
+
+declare module '../../engine/sdk' {
+  interface PluginSDK {
+    Messages: typeof Messages;
   }
 }
+
+export default Messages;

@@ -1,10 +1,8 @@
-import type { Plugin } from '../../engine/plugins/Plugins';
+import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
 import { Events } from '../../engine/pipes/Events';
-import { pluginPaths } from '../../engine/plugins/Plugins';
 import { Sequence } from '../Sequence';
-import { sdk } from '../../engine/sdk';
 import Scene from './scene';
 
 const PLUGIN_ID = 'core.pause';
@@ -25,104 +23,103 @@ type CountdownPayload = { remaining: number; gen: number };
 
 const seq = Sequence.for(PLUGIN_ID, 'set');
 
-export default class Pause {
-  static setPaused(val: boolean): Pipe {
+const Pause = definePlugin({
+  name: 'Pause',
+  id: PLUGIN_ID,
+  meta: {
+    name: 'Pause',
+  },
+
+  setPaused(val: boolean): Pipe {
     return seq.start({ paused: val });
-  }
+  },
 
-  static get togglePause(): Pipe {
-    return Composer.bind(paths, state => Pause.setPaused(!state?.paused));
-  }
+  get togglePause(): Pipe {
+    return Composer.bind(paths, state => seq.start({ paused: !state?.paused }));
+  },
 
-  static whenPaused(pipe: Pipe): Pipe {
+  whenPaused(pipe: Pipe): Pipe {
     return Composer.bind(paths, state => Composer.when(!!state?.paused, pipe));
-  }
+  },
 
-  static whenPlaying(pipe: Pipe): Pipe {
+  whenPlaying(pipe: Pipe): Pipe {
     return Composer.bind(paths, state => Composer.when(!state?.paused, pipe));
-  }
+  },
 
-  static onPause(fn: () => Pipe): Pipe {
+  onPause(fn: () => Pipe): Pipe {
     return Events.handle(eventType.on, fn);
-  }
+  },
 
-  static onResume(fn: () => Pipe): Pipe {
+  onResume(fn: () => Pipe): Pipe {
     return Events.handle(eventType.off, fn);
-  }
+  },
 
-  static plugin: Plugin = {
-    id: PLUGIN_ID,
-    meta: {
-      name: 'Pause',
-    },
+  activate: Composer.set(paths, {
+    paused: true,
+    prev: true,
+    countdown: null,
+    gen: 0,
+  }),
 
-    activate: Composer.set(paths, {
-      paused: true,
-      prev: true,
-      countdown: null,
-      gen: 0,
+  update: Composer.pipe(
+    Scene.onEnter('game', () => seq.start({ paused: false })),
+    Scene.onLeave('game', () => seq.start({ paused: true })),
+
+    Composer.do(({ get, set, pipe }) => {
+      const { paused, prev } = get(paths);
+      if (paused === prev) return;
+      set(paths.prev, paused);
+      pipe(Events.dispatch({ type: paused ? eventType.on : eventType.off }));
     }),
 
-    update: Composer.pipe(
-      Scene.onEnter('game', () => Pause.setPaused(false)),
-      Scene.onLeave('game', () => Pause.setPaused(true)),
+    seq.on<SetPayload>(event =>
+      Composer.bind(paths.gen, (gen = 0) => {
+        const next = gen + 1;
+        return Composer.when(
+          event.payload.paused,
+          Composer.pipe(
+            Composer.set(paths.gen, next),
+            Composer.set(paths.paused, true),
+            Composer.set(paths.countdown, null)
+          ),
+          Composer.pipe(
+            Composer.set(paths.gen, next),
+            Composer.set(paths.countdown, 3),
+            seq.after(1000, 'countdown', { remaining: 2, gen: next })
+          )
+        );
+      })
+    ),
 
-      Composer.do(({ get, set, pipe }) => {
-        const { paused, prev } = get(paths);
-        if (paused === prev) return;
-        set(paths.prev, paused);
-        pipe(Events.dispatch({ type: paused ? eventType.on : eventType.off }));
-      }),
-
-      seq.on<SetPayload>(event =>
-        Composer.bind(paths.gen, (gen = 0) => {
-          const next = gen + 1;
-          return Composer.when(
-            event.payload.paused,
+    seq.on<CountdownPayload>('countdown', event =>
+      Composer.bind(paths.gen, gen =>
+        Composer.when(
+          event.payload.gen === gen,
+          Composer.when(
+            event.payload.remaining <= 0,
             Composer.pipe(
-              Composer.set(paths.gen, next),
-              Composer.set(paths.paused, true),
-              Composer.set(paths.countdown, null)
+              Composer.set(paths.countdown, null),
+              Composer.set(paths.paused, false)
             ),
             Composer.pipe(
-              Composer.set(paths.gen, next),
-              Composer.set(paths.countdown, 3),
-              seq.after(1000, 'countdown', { remaining: 2, gen: next })
-            )
-          );
-        })
-      ),
-
-      seq.on<CountdownPayload>('countdown', event =>
-        Composer.bind(paths.gen, gen =>
-          Composer.when(
-            event.payload.gen === gen,
-            Composer.when(
-              event.payload.remaining <= 0,
-              Composer.pipe(
-                Composer.set(paths.countdown, null),
-                Composer.set(paths.paused, false)
-              ),
-              Composer.pipe(
-                Composer.set(paths.countdown, event.payload.remaining),
-                seq.after(1000, 'countdown', {
-                  remaining: event.payload.remaining - 1,
-                  gen,
-                })
-              )
+              Composer.set(paths.countdown, event.payload.remaining),
+              seq.after(1000, 'countdown', {
+                remaining: event.payload.remaining - 1,
+                gen,
+              })
             )
           )
         )
       )
-    ),
+    )
+  ),
 
-    deactivate: Composer.set(paths, undefined),
-  };
+  deactivate: Composer.set(paths, undefined),
 
-  static get paths() {
+  get paths() {
     return paths;
-  }
-}
+  },
+});
 
 declare module '../../engine/sdk' {
   interface PluginSDK {
@@ -130,4 +127,4 @@ declare module '../../engine/sdk' {
   }
 }
 
-sdk.Pause = Pause;
+export default Pause;

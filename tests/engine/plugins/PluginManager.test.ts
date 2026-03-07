@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   Plugin,
-  PluginClass,
   EnabledMap,
 } from '../../../src/engine/plugins/Plugins';
 import {
@@ -28,14 +27,9 @@ const getOrder = (frame: GameFrame): string[] =>
 const getRegistry = (frame: GameFrame): Record<string, any> =>
   (frame as any)?.core?.modules?.registry ?? {};
 
-const makePluginClass = (plugin: Plugin): PluginClass => ({
-  plugin,
-  name: plugin.id,
-});
-
 function bootstrap(plugin: Plugin): GameFrame {
   const frame0 = gamePipe(makeFrame());
-  const frame1 = PluginManager.register(makePluginClass(plugin))(frame0);
+  const frame1 = PluginManager.register(plugin)(frame0);
   const frame2 = gamePipe(tick(frame1));
   return gamePipe(tick(frame2));
 }

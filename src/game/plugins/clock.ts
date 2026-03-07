@@ -1,13 +1,6 @@
-import type { Plugin } from '../../engine/plugins/Plugins';
+import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
-import { pluginPaths } from '../../engine/plugins/Plugins';
 import Pause from './pause';
-
-declare module '../../engine/sdk' {
-  interface PluginSDK {
-    Clock: typeof Clock;
-  }
-}
 
 const PLUGIN_ID = 'core.clock';
 
@@ -18,37 +11,44 @@ export type ClockState = {
 
 const clock = pluginPaths<ClockState>(PLUGIN_ID);
 
-export default class Clock {
-  static plugin: Plugin = {
-    id: PLUGIN_ID,
-    meta: {
-      name: 'Clock',
-    },
+const Clock = definePlugin({
+  name: 'Clock',
+  id: PLUGIN_ID,
+  meta: {
+    name: 'Clock',
+  },
 
-    activate: Composer.set(clock, { elapsed: 0, lastWall: null }),
+  activate: Composer.set(clock, { elapsed: 0, lastWall: null }),
 
-    update: Composer.pipe(
-      Pause.whenPlaying(
-        Composer.do(({ get, over, set }) => {
-          const now = performance.now();
-          const state = get(clock);
-          if (state?.lastWall !== null && state?.lastWall !== undefined) {
-            const delta = now - state.lastWall;
-            over(clock, ({ elapsed = 0, ...rest }) => ({
-              ...rest,
-              elapsed: elapsed + delta,
-            }));
-          }
-          set(clock.lastWall, now);
-        })
-      ),
-      Pause.onPause(() => Composer.set(clock.lastWall, null))
+  update: Composer.pipe(
+    Pause.whenPlaying(
+      Composer.do(({ get, over, set }) => {
+        const now = performance.now();
+        const state = get(clock);
+        if (state?.lastWall !== null && state?.lastWall !== undefined) {
+          const delta = now - state.lastWall;
+          over(clock, ({ elapsed = 0, ...rest }) => ({
+            ...rest,
+            elapsed: elapsed + delta,
+          }));
+        }
+        set(clock.lastWall, now);
+      })
     ),
+    Pause.onPause(() => Composer.set(clock.lastWall, null))
+  ),
 
-    deactivate: Composer.set(clock, undefined),
-  };
+  deactivate: Composer.set(clock, undefined),
 
-  static get paths() {
+  get paths() {
     return clock;
+  },
+});
+
+declare module '../../engine/sdk' {
+  interface PluginSDK {
+    Clock: typeof Clock;
   }
 }
+
+export default Clock;

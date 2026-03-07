@@ -1,17 +1,10 @@
-import type { Plugin } from '../../engine/plugins/Plugins';
+import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
-import { pluginPaths } from '../../engine/plugins/Plugins';
 import { typedPath } from '../../engine/Lens';
 import { GameTiming } from '../../engine/State';
 import { PhaseState, GamePhase } from './phase';
 import Pause from './pause';
 import { PaceState } from './pace';
-
-declare module '../../engine/sdk' {
-  interface PluginSDK {
-    Stroke: typeof Stroke;
-  }
-}
 
 const PLUGIN_ID = 'core.stroke';
 
@@ -30,51 +23,58 @@ const timing = typedPath<GameTiming>([]);
 const phaseState = typedPath<PhaseState>(['core.phase']);
 const paceState = typedPath<PaceState>(['core.pace']);
 
-export default class Stroke {
-  static plugin: Plugin = {
-    id: PLUGIN_ID,
-    meta: {
-      name: 'Stroke',
-    },
+const Stroke = definePlugin({
+  name: 'Stroke',
+  id: PLUGIN_ID,
+  meta: {
+    name: 'Stroke',
+  },
 
-    activate: Composer.set(stroke, {
-      stroke: StrokeDirection.up,
-      timer: 0,
-    }),
+  activate: Composer.set(stroke, {
+    stroke: StrokeDirection.up,
+    timer: 0,
+  }),
 
-    update: Pause.whenPlaying(
-      Composer.do(({ get, set }) => {
-        const phase = get(phaseState)?.current;
-        if (phase !== GamePhase.active && phase !== GamePhase.finale) return;
+  update: Pause.whenPlaying(
+    Composer.do(({ get, set }) => {
+      const phase = get(phaseState)?.current;
+      if (phase !== GamePhase.active && phase !== GamePhase.finale) return;
 
-        const pace = get(paceState)?.pace;
-        if (!pace || pace <= 0) return;
+      const pace = get(paceState)?.pace;
+      if (!pace || pace <= 0) return;
 
-        const delta = get(timing.step);
-        const state = get(stroke);
-        if (!state) return;
+      const delta = get(timing.step);
+      const state = get(stroke);
+      if (!state) return;
 
-        const interval = (1 / pace) * 1000;
-        const elapsed = state.timer + delta;
+      const interval = (1 / pace) * 1000;
+      const elapsed = state.timer + delta;
 
-        if (elapsed >= interval) {
-          set(stroke, {
-            stroke:
-              state.stroke === StrokeDirection.up
-                ? StrokeDirection.down
-                : StrokeDirection.up,
-            timer: elapsed - interval,
-          });
-        } else {
-          set(stroke.timer, elapsed);
-        }
-      })
-    ),
+      if (elapsed >= interval) {
+        set(stroke, {
+          stroke:
+            state.stroke === StrokeDirection.up
+              ? StrokeDirection.down
+              : StrokeDirection.up,
+          timer: elapsed - interval,
+        });
+      } else {
+        set(stroke.timer, elapsed);
+      }
+    })
+  ),
 
-    deactivate: Composer.set(stroke, undefined),
-  };
+  deactivate: Composer.set(stroke, undefined),
 
-  static get paths() {
+  get paths() {
     return stroke;
+  },
+});
+
+declare module '../../engine/sdk' {
+  interface PluginSDK {
+    Stroke: typeof Stroke;
   }
 }
+
+export default Stroke;
