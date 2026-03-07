@@ -78,9 +78,7 @@ const PerfOverlay = definePlugin({
     `;
     if (!style.parentNode) document.head.appendChild(style);
 
-    const existing = document.querySelector(
-      `[${ELEMENT_ATTR}="${PLUGIN_ID}"]`
-    );
+    const existing = document.querySelector(`[${ELEMENT_ATTR}="${PLUGIN_ID}"]`);
     if (existing) existing.remove();
 
     const el = document.createElement('div');

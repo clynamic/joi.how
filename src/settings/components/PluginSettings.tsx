@@ -30,16 +30,10 @@ export const PluginSettings = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const { inject } = useDispatchEvent();
   const [expanded, setExpanded] = useState<string | null>(null);
-  const rawInstalled =
-    useGameFrame(['core', 'plugin_installer', 'installed']);
-  const installed: string[] = Array.isArray(rawInstalled)
-    ? rawInstalled
-    : [];
-  const rawDisabled =
-    useGameFrame(['core', 'plugin_installer', 'disabled']);
-  const disabled: string[] = Array.isArray(rawDisabled)
-    ? rawDisabled
-    : [];
+  const rawInstalled = useGameFrame(['core', 'plugin_installer', 'installed']);
+  const installed: string[] = Array.isArray(rawInstalled) ? rawInstalled : [];
+  const rawDisabled = useGameFrame(['core', 'plugin_installer', 'disabled']);
+  const disabled: string[] = Array.isArray(rawDisabled) ? rawDisabled : [];
   const meta: Record<string, PluginMeta> =
     useGameFrame(['core', 'plugin_installer', 'meta']) ?? {};
 

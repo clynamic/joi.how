@@ -140,10 +140,7 @@ const PluginInstaller = definePlugin({
       for (const error of batch) {
         console.error(`[PluginInstaller] failed to load plugin:`, error);
       }
-      over(ins.failed, (ids = []) => [
-        ...ids,
-        ...batch.map(e => e.message),
-      ]);
+      over(ins.failed, (ids = []) => [...ids, ...batch.map(e => e.message)]);
     }
   }),
 
