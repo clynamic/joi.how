@@ -1,6 +1,7 @@
-import { PluginManager } from '../../engine/plugins/PluginManager';
+import { ModuleManager } from '../../engine/modules/ModuleManager';
 import { Composer } from '../../engine/Composer';
 import { Pipe } from '../../engine/State';
+import PluginInstaller from '../../engine/plugins/PluginInstaller';
 import Scene from './scene';
 import Debug from './debug';
 import Fps from './fps';
@@ -42,5 +43,6 @@ const plugins = [
 ];
 
 export const registerPlugins: Pipe = Composer.pipe(
-  ...plugins.map(PluginManager.register)
+  ModuleManager.load(PluginInstaller),
+  ...plugins.map(ModuleManager.load)
 );

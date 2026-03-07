@@ -42,7 +42,7 @@ function formatLine(
   avg: number,
   budget: number
 ): string {
-  const name = id.padEnd(24);
+  const name = (id.length > 24 ? id.slice(0, 23) + '…' : id).padEnd(24);
   const ph = phase.padEnd(11);
   const a = `${avg.toFixed(2)}ms`.padStart(8);
   const color = budgetColor(avg, budget);

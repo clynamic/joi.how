@@ -1,139 +1,220 @@
+import {
+  definePlugin,
+  pluginPaths,
+  type Plugin,
+  type PluginId,
+  type PluginMeta,
+} from './Plugins';
 import { Composer } from '../Composer';
 import { Pipe } from '../State';
-import { Storage } from '../pipes/Storage';
-import { PluginManager } from './PluginManager';
-import { pluginPaths, type Plugin, type PluginId } from './Plugins';
+import { ModuleManager } from '../modules/ModuleManager';
 
-const PLUGIN_NAMESPACE = 'core.plugin_installer';
+const PLUGIN_ID = 'core.plugin_installer';
 
-type PluginLoad = {
-  promise: Promise<Plugin>;
-  result?: Plugin;
-  error?: Error;
-};
+type MetaMap = Record<PluginId, PluginMeta>;
 
 type InstallerState = {
   installed: PluginId[];
+  disabled: PluginId[];
+  meta: MetaMap;
   failed: PluginId[];
-  pending: Map<PluginId, PluginLoad>;
 };
 
-const ins = pluginPaths<InstallerState>(PLUGIN_NAMESPACE);
+const ins = pluginPaths<InstallerState>(PLUGIN_ID);
 
 const storageKey = {
-  user: `${PLUGIN_NAMESPACE}.user`,
-  code: (id: PluginId) => `${PLUGIN_NAMESPACE}.code/${id}`,
+  installed: `${PLUGIN_ID}.installed`,
+  code: (id: PluginId) => `${PLUGIN_ID}.code/${id}`,
+  disabled: `${PLUGIN_ID}.disabled`,
+  meta: `${PLUGIN_ID}.meta`,
 };
 
-async function load(code: string): Promise<Plugin> {
+function getInstalledIds(): PluginId[] {
+  return JSON.parse(localStorage.getItem(storageKey.installed) ?? '[]');
+}
+
+function getDisabledIds(): PluginId[] {
+  return JSON.parse(localStorage.getItem(storageKey.disabled) ?? '[]');
+}
+
+function setDisabledIds(ids: PluginId[]) {
+  localStorage.setItem(storageKey.disabled, JSON.stringify(ids));
+}
+
+async function loadFromCode(code: string): Promise<Plugin> {
   const blob = new Blob([code], { type: 'text/javascript' });
   const url = URL.createObjectURL(blob);
-
   try {
     const module = await import(/* @vite-ignore */ url);
     const exported = module.default;
-
     if (exported?.id) return exported as Plugin;
-
-    throw new Error(
-      'Plugin must export a default object with an id field'
-    );
+    throw new Error('Plugin must export a default object with an id field');
   } finally {
     URL.revokeObjectURL(url);
   }
 }
 
-const importPipe: Pipe = Storage.bind<PluginId[]>(
-  storageKey.user,
-  (userPluginIds = []) =>
-    Composer.pipe(
-      ...userPluginIds.map(id =>
-        Storage.bind<string>(storageKey.code(id), code =>
-          Composer.do(({ get, over }) => {
-            const installed = get(ins.installed) ?? [];
-            const failed = get(ins.failed) ?? [];
-            const pending = get(ins.pending);
+type LoadResult = { plugin: Plugin; code: string };
 
-            if (
-              installed.includes(id) ||
-              failed.includes(id) ||
-              pending?.has(id)
-            )
-              return;
+let loaded: LoadResult[] = [];
+let errors: Error[] = [];
 
-            if (!code) {
-              console.error(
-                `[PluginInstaller] plugin "${id}" has no code in storage`
-              );
-              over(ins.failed, (ids = []) => [
-                ...(Array.isArray(ids) ? ids : []),
-                id,
-              ]);
-              return;
-            }
+function submitLoad(code: string) {
+  loadFromCode(code).then(
+    plugin => loaded.push({ plugin, code }),
+    error => errors.push(error)
+  );
+}
 
-            over(ins.pending, pending => {
-              if (!(pending instanceof Map)) pending = new Map();
-              // TODO: generic async resolver pipe?
-              const pluginLoad: PluginLoad = {
-                promise: load(code),
-              };
-              pluginLoad.promise.then(
-                plugin => {
-                  pluginLoad.result = plugin;
-                },
-                error => {
-                  pluginLoad.error = error;
-                }
-              );
-              return new Map([...pending, [id, pluginLoad]]);
-            });
-          })
-        )
-      )
-    )
-);
+const PluginInstaller = definePlugin({
+  id: PLUGIN_ID,
+  name: 'PluginInstaller',
 
-const resolvePipe: Pipe = Composer.do(({ get, set, over, pipe }) => {
-  const pending = get(ins.pending);
-  if (!pending?.size) return;
+  activate: Composer.do(({ set, over }) => {
+    const installedIds = getInstalledIds();
+    const disabledIds = getDisabledIds();
 
-  const resolved: Plugin[] = [];
-  const failed: PluginId[] = [];
-  const remaining = new Map<PluginId, PluginLoad>();
+    const meta: MetaMap = JSON.parse(
+      localStorage.getItem(storageKey.meta) ?? '{}'
+    );
 
-  for (const [id, entry] of pending) {
-    if (entry.result) {
-      resolved.push(entry.result);
-    } else if (entry.error) {
-      console.error(
-        `[PluginInstaller] failed to load plugin "${id}":`,
-        entry.error
-      );
-      failed.push(id);
-    } else {
-      remaining.set(id, entry);
+    set(ins.installed, installedIds);
+    set(ins.disabled, disabledIds);
+    set(ins.meta, meta);
+
+    for (const id of installedIds) {
+      if (disabledIds.includes(id)) continue;
+
+      const rawCode = localStorage.getItem(storageKey.code(id));
+      if (!rawCode) {
+        console.error(
+          `[PluginInstaller] plugin "${id}" has no code in storage`
+        );
+        over(ins.failed, (ids = []) => [...ids, id]);
+        continue;
+      }
+
+      submitLoad(JSON.parse(rawCode) as string);
     }
-  }
+  }),
 
-  if (resolved.length > 0) {
-    pipe(...resolved.map(PluginManager.register));
-    over(ins.installed, (ids = []) => [
-      ...(Array.isArray(ids) ? ids : []),
-      ...resolved.map(plugin => plugin.id),
-    ]);
-  }
+  update: Composer.do(({ set, over, pipe }) => {
+    if (loaded.length === 0 && errors.length === 0) return;
 
-  if (failed.length > 0) {
-    over(ins.failed, (ids = []) => [
-      ...(Array.isArray(ids) ? ids : []),
-      ...failed,
-    ]);
-  }
+    if (loaded.length > 0) {
+      const batch = loaded;
+      loaded = [];
 
-  if (remaining.size !== pending.size) {
-    set(ins.pending, remaining);
-  }
+      const installedIds = getInstalledIds();
+      const meta: MetaMap = JSON.parse(
+        localStorage.getItem(storageKey.meta) ?? '{}'
+      );
+      const newInstalledIds = [...installedIds];
+
+      for (const { plugin, code } of batch) {
+        const id = plugin.id;
+        if (!newInstalledIds.includes(id)) newInstalledIds.push(id);
+        localStorage.setItem(storageKey.code(id), JSON.stringify(code));
+        if (plugin.meta) meta[id] = plugin.meta;
+      }
+
+      localStorage.setItem(
+        storageKey.installed,
+        JSON.stringify(newInstalledIds)
+      );
+      localStorage.setItem(storageKey.meta, JSON.stringify(meta));
+      set(ins.meta, meta);
+      pipe(...batch.map(({ plugin }) => ModuleManager.load(plugin)));
+      over(ins.installed, (ids = []) => {
+        const newIds = batch
+          .map(({ plugin }) => plugin.id)
+          .filter(id => !ids.includes(id));
+        return [...ids, ...newIds];
+      });
+    }
+
+    if (errors.length > 0) {
+      const batch = errors;
+      errors = [];
+
+      for (const error of batch) {
+        console.error(`[PluginInstaller] failed to load plugin:`, error);
+      }
+      over(ins.failed, (ids = []) => [
+        ...ids,
+        ...batch.map(e => e.message),
+      ]);
+    }
+  }),
+
+  deactivate: Composer.do(() => {
+    loaded = [];
+    errors = [];
+  }),
+
+  install(code: string): Pipe {
+    submitLoad(code);
+    return Composer.pipe();
+  },
+
+  remove(id: PluginId): Pipe {
+    return Composer.pipe(
+      Composer.do(({ over }) => {
+        localStorage.setItem(
+          storageKey.installed,
+          JSON.stringify(getInstalledIds().filter(i => i !== id))
+        );
+        localStorage.removeItem(storageKey.code(id));
+        setDisabledIds(getDisabledIds().filter(i => i !== id));
+
+        const meta: MetaMap = JSON.parse(
+          localStorage.getItem(storageKey.meta) ?? '{}'
+        );
+        delete meta[id];
+        localStorage.setItem(storageKey.meta, JSON.stringify(meta));
+        over(ins.meta, (m = {}) => {
+          const next = { ...m };
+          delete next[id];
+          return next;
+        });
+
+        over(ins.installed, (ids = []) => ids.filter(i => i !== id));
+        over(ins.disabled, (ids = []) => ids.filter(i => i !== id));
+        over(ins.failed, (ids = []) => ids.filter(i => i !== id));
+      }),
+      ModuleManager.unload(id)
+    );
+  },
+
+  enable(id: PluginId): Pipe {
+    return Composer.do(({ over }) => {
+      setDisabledIds(getDisabledIds().filter(i => i !== id));
+      over(ins.disabled, (ids = []) => ids.filter(i => i !== id));
+
+      const rawCode = localStorage.getItem(storageKey.code(id));
+      if (!rawCode) return;
+
+      submitLoad(JSON.parse(rawCode) as string);
+    });
+  },
+
+  disable(id: PluginId): Pipe {
+    return Composer.do(({ over, pipe }) => {
+      const disabled = getDisabledIds();
+      if (!disabled.includes(id)) {
+        setDisabledIds([...disabled, id]);
+        over(ins.disabled, (ids = []) => [...ids, id]);
+      }
+
+      pipe(ModuleManager.unload(id));
+    });
+  },
 });
 
-export const pluginInstallerPipe: Pipe = Composer.pipe(importPipe, resolvePipe);
+export default PluginInstaller;
+
+declare module '../sdk' {
+  interface PluginSDK {
+    PluginInstaller: typeof PluginInstaller;
+  }
+}
