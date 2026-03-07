@@ -8,7 +8,7 @@ const PLUGIN_ID = 'core.images';
 
 export type ImageState = {
   currentImage?: ImageItem;
-  seenImages: ImageItem[];
+  seenImages: string[];
   nextImages: ImageItem[];
 };
 
@@ -56,11 +56,11 @@ const Image = definePlugin({
           const seen = [...seenImages];
 
           if (currentImage) {
-            const existingIndex = seen.indexOf(currentImage);
+            const existingIndex = seen.indexOf(currentImage.id);
             if (existingIndex !== -1) {
               seen.splice(existingIndex, 1);
             }
-            seen.unshift(currentImage);
+            seen.unshift(currentImage.id);
           }
 
           if (seen.length > 500) {
