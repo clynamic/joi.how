@@ -206,9 +206,9 @@ describe('Plugin Installer', () => {
     frame = PluginInstaller.disable('user.dup')(frame);
     frame = fullPipe(tick(frame));
 
-    expect(
-      getDisabledIds(frame).filter(id => id === 'user.dup')
-    ).toHaveLength(1);
+    expect(getDisabledIds(frame).filter(id => id === 'user.dup')).toHaveLength(
+      1
+    );
   });
 
   it('should clean up disabled on remove', () => {
