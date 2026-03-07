@@ -1,14 +1,7 @@
-import { pluginPaths, type Plugin } from '../../engine/plugins/Plugins';
+import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Events } from '../../engine/pipes/Events';
 import { Composer } from '../../engine';
-import { sdk } from '../../engine/sdk';
-
-declare module '../../engine/sdk' {
-  interface PluginSDK {
-    Scene: typeof Scene;
-  }
-}
 
 const PLUGIN_ID = 'core.scene';
 
@@ -24,50 +17,55 @@ const eventType = {
   leave: (s: string) => Events.getKey(PLUGIN_ID, `leave/${s}`),
 };
 
-export default class Scene {
-  static setScene(s: string): Pipe {
-    return Composer.set(scene.current, s);
-  }
+const Scene = definePlugin({
+  name: 'Scene',
+  id: PLUGIN_ID,
+  meta: {
+    name: 'Scene',
+  },
 
-  static whenScene(s: string, pipe: Pipe): Pipe {
+  setScene(s: string): Pipe {
+    return Composer.set(scene.current, s);
+  },
+
+  whenScene(s: string, pipe: Pipe): Pipe {
     return Composer.bind(scene, state =>
       Composer.when(state?.current === s, pipe)
     );
-  }
+  },
 
-  static onEnter(s: string, fn: () => Pipe): Pipe {
+  onEnter(s: string, fn: () => Pipe): Pipe {
     return Events.handle(eventType.enter(s), fn);
-  }
+  },
 
-  static onLeave(s: string, fn: () => Pipe): Pipe {
+  onLeave(s: string, fn: () => Pipe): Pipe {
     return Events.handle(eventType.leave(s), fn);
-  }
+  },
 
-  static plugin: Plugin = {
-    id: PLUGIN_ID,
-    meta: {
-      name: 'Scene',
-    },
+  activate: Composer.set(scene, {
+    current: 'unknown',
+    prev: 'unknown',
+  }),
 
-    activate: Composer.set(scene, {
-      current: 'unknown',
-      prev: 'unknown',
-    }),
+  update: Composer.do(({ get, set, pipe }) => {
+    const { current, prev } = get(scene);
+    if (current === prev) return;
+    set(scene.prev, current);
+    pipe(Events.dispatch({ type: eventType.leave(prev) }));
+    pipe(Events.dispatch({ type: eventType.enter(current) }));
+  }),
 
-    update: Composer.do(({ get, set, pipe }) => {
-      const { current, prev } = get(scene);
-      if (current === prev) return;
-      set(scene.prev, current);
-      pipe(Events.dispatch({ type: eventType.leave(prev) }));
-      pipe(Events.dispatch({ type: eventType.enter(current) }));
-    }),
+  deactivate: Composer.set(scene, undefined),
 
-    deactivate: Composer.set(scene, undefined),
-  };
-
-  static get paths() {
+  get paths() {
     return scene;
+  },
+});
+
+declare module '../../engine/sdk' {
+  interface PluginSDK {
+    Scene: typeof Scene;
   }
 }
 
-sdk.Scene = Scene;
+export default Scene;

@@ -6,7 +6,7 @@ import { Events } from '../../../src/engine/pipes/Events';
 import { Composer } from '../../../src/engine/Composer';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import { sdk } from '../../../src/engine/sdk';
-import type { Plugin, PluginClass } from '../../../src/engine/plugins/Plugins';
+import type { Plugin } from '../../../src/engine/plugins/Plugins';
 import { makeFrame, tick } from '../../utils';
 
 const PLUGIN_NAMESPACE = 'core.plugin_installer';
@@ -27,11 +27,10 @@ const getInstalledIds = (frame: GameFrame): string[] =>
 const getOrder = (frame: GameFrame): string[] =>
   (frame as any)?.core?.modules?.order ?? [];
 
-function makeLoadResult(plugin: Plugin, name: string) {
-  const cls = { plugin, name } as PluginClass;
+function makeLoadResult(plugin: Plugin) {
   return {
-    promise: Promise.resolve(cls),
-    result: cls,
+    promise: Promise.resolve(plugin),
+    result: plugin,
   };
 }
 
@@ -107,7 +106,7 @@ describe('Plugin Installer', () => {
 
     const frame1 = Composer.set(
       ['core', 'plugin_installer', 'pending'],
-      new Map([['user.resolved', makeLoadResult(testPlugin, 'TestPlugin')]])
+      new Map([['user.resolved', makeLoadResult(testPlugin)]])
     )(frame0);
 
     const frame2 = fullPipe(tick(frame1));
@@ -121,14 +120,14 @@ describe('Plugin Installer', () => {
     expect(getOrder(frame4)).toContain('user.resolved');
   });
 
-  it('should register plugin class on sdk by name', () => {
-    const testPlugin: Plugin = { id: 'user.sdk' };
+  it('should register plugin on sdk by name', () => {
+    const testPlugin: Plugin = { id: 'user.sdk', name: 'TestPlugin' };
 
     const frame0 = fullPipe(makeFrame());
 
     const frame1 = Composer.set(
       ['core', 'plugin_installer', 'pending'],
-      new Map([['user.sdk', makeLoadResult(testPlugin, 'TestPlugin')]])
+      new Map([['user.sdk', makeLoadResult(testPlugin)]])
     )(frame0);
 
     const frame2 = fullPipe(tick(frame1));

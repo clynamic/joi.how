@@ -6,6 +6,7 @@ export * from './HpynoSettings';
 export * from './ImageSettings';
 export * from './PaceSettings';
 export * from './PlayerSettings';
+export * from './PluginSettings';
 export * from './ServiceSettings';
 export * from './TradeSettings';
 export * from './VibratorSettings';

@@ -5,8 +5,8 @@ import { Events } from '../pipes/Events';
 import { ModuleManager } from '../modules/ModuleManager';
 import {
   pluginPaths,
+  type Plugin,
   type PluginId,
-  type PluginClass,
   type PluginRegistry,
   type EnabledMap,
 } from './Plugins';
@@ -27,7 +27,7 @@ const storageKey = {
 };
 
 export type PluginManagerAPI = {
-  register: PipeTransformer<[PluginClass]>;
+  register: PipeTransformer<[Plugin]>;
   unregister: PipeTransformer<[PluginId]>;
   enable: PipeTransformer<[PluginId]>;
   disable: PipeTransformer<[PluginId]>;
@@ -41,8 +41,8 @@ type PluginManagerState = PluginManagerAPI & {
 const pm = pluginPaths<PluginManagerState>(PLUGIN_NAMESPACE);
 
 export class PluginManager {
-  static register(pluginClass: PluginClass): Pipe {
-    return Composer.bind(pm, ({ register }) => register(pluginClass));
+  static register(plugin: Plugin): Pipe {
+    return Composer.bind(pm, ({ register }) => register(plugin));
   }
 
   static unregister(id: PluginId): Pipe {
@@ -106,11 +106,11 @@ const enableDisablePipe: Pipe = Composer.pipe(
 );
 
 const reconcilePipe: Pipe = Composer.pipe(
-  Events.handle<PluginClass>(eventType.register, event =>
+  Events.handle<Plugin>(eventType.register, event =>
     Composer.do(({ over }) => {
       over(pm.registry, registry => ({
         ...registry,
-        [event.payload.plugin.id]: event.payload,
+        [event.payload.id]: event.payload,
       }));
     })
   ),
@@ -163,9 +163,9 @@ const reconcilePipe: Pipe = Composer.pipe(
       }
 
       for (const id of toLoad) {
-        const cls = registry[id];
-        if (cls?.plugin) {
-          pipe(ModuleManager.load({ ...cls.plugin, name: cls.name }));
+        const plugin = registry[id];
+        if (plugin) {
+          pipe(ModuleManager.load(plugin));
         }
       }
 

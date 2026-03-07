@@ -2,13 +2,13 @@ import { Composer } from '../Composer';
 import { Pipe } from '../State';
 import { Storage } from '../pipes/Storage';
 import { PluginManager } from './PluginManager';
-import { pluginPaths, type PluginId, type PluginClass } from './Plugins';
+import { pluginPaths, type Plugin, type PluginId } from './Plugins';
 
 const PLUGIN_NAMESPACE = 'core.plugin_installer';
 
 type PluginLoad = {
-  promise: Promise<PluginClass>;
-  result?: PluginClass;
+  promise: Promise<Plugin>;
+  result?: Plugin;
   error?: Error;
 };
 
@@ -25,21 +25,19 @@ const storageKey = {
   code: (id: PluginId) => `${PLUGIN_NAMESPACE}.code/${id}`,
 };
 
-async function load(code: string): Promise<PluginClass> {
+async function load(code: string): Promise<Plugin> {
   const blob = new Blob([code], { type: 'text/javascript' });
   const url = URL.createObjectURL(blob);
 
   try {
     const module = await import(/* @vite-ignore */ url);
-    const cls = module.default;
+    const exported = module.default;
 
-    if (!cls?.plugin?.id) {
-      throw new Error(
-        'Plugin must export a default class with a static plugin field'
-      );
-    }
+    if (exported?.id) return exported as Plugin;
 
-    return cls;
+    throw new Error(
+      'Plugin must export a default object with an id field'
+    );
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -100,7 +98,7 @@ const resolvePipe: Pipe = Composer.do(({ get, set, over, pipe }) => {
   const pending = get(ins.pending);
   if (!pending?.size) return;
 
-  const resolved: PluginClass[] = [];
+  const resolved: Plugin[] = [];
   const failed: PluginId[] = [];
   const remaining = new Map<PluginId, PluginLoad>();
 
@@ -122,7 +120,7 @@ const resolvePipe: Pipe = Composer.do(({ get, set, over, pipe }) => {
     pipe(...resolved.map(PluginManager.register));
     over(ins.installed, (ids = []) => [
       ...(Array.isArray(ids) ? ids : []),
-      ...resolved.map(cls => cls.plugin.id),
+      ...resolved.map(plugin => plugin.id),
     ]);
   }
 
