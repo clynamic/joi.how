@@ -1,8 +1,11 @@
 import styled from 'styled-components';
-import { GamePhase, Stroke, useGameValue } from '../GameProvider';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { defaultTransition, useLooping } from '../../utils';
+import { defaultTransition } from '../../utils';
+import { useGameFrame } from '../hooks';
+import Phase, { GamePhase } from '../plugins/phase';
+import Stroke, { StrokeDirection } from '../plugins/stroke';
+import Pace from '../plugins/pace';
 
 const StyledGameMeter = styled.div`
   pointer-events: none;
@@ -22,70 +25,33 @@ enum MeterColor {
 }
 
 export const GameMeter = () => {
-  const [stroke, setStroke] = useGameValue('stroke');
-  const [phase] = useGameValue('phase');
-  const [pace] = useGameValue('pace');
+  const { stroke } = useGameFrame(Stroke.paths) ?? {};
+  const { current: phase } = useGameFrame(Phase.paths) ?? {};
+  const { pace } = useGameFrame(Pace.paths) ?? {};
 
   const switchDuration = useMemo(() => {
-    if (pace === 0) return 0;
+    if (!pace || pace === 0) return 0;
     return (1 / pace) * 1000;
   }, [pace]);
 
-  const updateStroke = useCallback(() => {
-    setStroke(stroke => {
-      switch (stroke) {
-        case Stroke.up:
-          return Stroke.down;
-        case Stroke.down:
-          return Stroke.up;
-      }
-    });
-  }, [setStroke]);
-
-  useLooping(
-    updateStroke,
-    switchDuration,
-    [GamePhase.active, GamePhase.finale].includes(phase) && pace > 0
-  );
-
   const size = useMemo(() => {
-    switch (phase) {
-      case GamePhase.active:
-      case GamePhase.finale:
-        return (() => {
-          switch (stroke) {
-            case Stroke.up:
-              return 1;
-            case Stroke.down:
-              return 0.6;
-          }
-        })();
+    if (phase === GamePhase.active || phase === GamePhase.finale) {
+      return stroke === StrokeDirection.up ? 1 : 0.6;
     }
     return 0;
   }, [phase, stroke]);
 
   const duration = useMemo(() => {
-    switch (phase) {
-      case GamePhase.active:
-      case GamePhase.finale:
-        if (pace >= 5) {
-          return 100;
-        }
-        if (pace >= 3) {
-          return 250;
-        }
-        return 550;
+    if (phase === GamePhase.active || phase === GamePhase.finale) {
+      if (pace && pace >= 5) return 100;
+      if (pace && pace >= 3) return 250;
+      return 550;
     }
     return 0;
   }, [phase, pace]);
 
   const color = useMemo(() => {
-    switch (stroke) {
-      case Stroke.up:
-        return MeterColor.light;
-      case Stroke.down:
-        return MeterColor.dark;
-    }
+    return stroke === StrokeDirection.up ? MeterColor.light : MeterColor.dark;
   }, [stroke]);
 
   return (

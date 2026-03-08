@@ -1,100 +1,124 @@
-import { useCallback } from 'react';
-import { createStateProvider } from '../utils';
-import { ImageItem } from '../types';
+import { useEffect, useRef, useState, ReactNode, useCallback } from 'react';
+import { createContext } from 'use-context-selector';
+import { GameEngine, Pipe, GameFrame } from '../engine';
+import { Events } from '../engine/pipes/Events';
+import { Scheduler } from '../engine/pipes/Scheduler';
+import { Perf } from '../engine/pipes/Perf';
+import { Errors } from '../engine/pipes/Errors';
+import { Piper } from '../engine/Piper';
+import { Composer } from '../engine/Composer';
 
-export enum Paws {
-  left = 'left',
-  right = 'right',
-  both = 'both',
-  none = 'none',
-}
-
-export const PawLabels: Record<Paws, string> = {
-  [Paws.left]: 'Left',
-  [Paws.right]: 'Right',
-  [Paws.both]: 'Both',
-  [Paws.none]: 'Off',
+type GameEngineContextValue = {
+  /**
+   * The current game frame containing all plugin data and timing.
+   */
+  frame: GameFrame | null;
+  /**
+   * Queue a one-shot pipe to run in the next tick only.
+   */
+  injectImpulse: (pipe: Pipe) => void;
 };
 
-export enum Stroke {
-  up = 'up',
-  down = 'down',
-}
+// eslint-disable-next-line react-refresh/only-export-components
+export const GameEngineContext = createContext<
+  GameEngineContextValue | undefined
+>(undefined);
 
-export enum GamePhase {
-  pause = 'pause',
-  warmup = 'warmup',
-  active = 'active',
-  break = 'break',
-  finale = 'finale',
-  climax = 'climax',
-}
-
-export interface GameMessagePrompt {
-  title: string;
-  onClick: () => void | Promise<void>;
-}
-
-export interface GameMessage {
-  id: string;
-  title: string;
-  description?: string;
-  prompts?: GameMessagePrompt[];
-  duration?: number;
-}
-
-export interface GameState {
-  pace: number;
-  intensity: number;
-  currentImage?: ImageItem;
-  seenImages: ImageItem[];
-  nextImages: ImageItem[];
-  currentHypno: number;
-  paws: Paws;
-  stroke: Stroke;
-  phase: GamePhase;
-  edged: boolean;
-  messages: GameMessage[];
-}
-
-export const initialGameState: GameState = {
-  pace: 0,
-  intensity: 0,
-  currentImage: undefined,
-  seenImages: [],
-  nextImages: [],
-  currentHypno: 0,
-  paws: Paws.none,
-  stroke: Stroke.down,
-  phase: GamePhase.warmup,
-  edged: false,
-  messages: [],
+type Props = {
+  children: ReactNode;
+  pipes?: Pipe[];
 };
 
-export const {
-  Provider: GameProvider,
-  useProvider: useGame,
-  useProviderSelector: useGameValue,
-} = createStateProvider<GameState>({
-  defaultData: initialGameState,
-});
+export function GameEngineProvider({ children, pipes = [] }: Props) {
+  const engineRef = useRef<GameEngine | null>(null);
 
-export const useSendMessage = () => {
-  const [, setMessages] = useGameValue('messages');
+  const [frame, setFrame] = useState<GameFrame | null>(null);
 
-  return useCallback(
-    (message: Partial<GameMessage> & { id: string }) => {
-      setMessages(messages => {
-        const previous = messages.find(m => m.id === message.id);
-        return [
-          ...messages.filter(m => m.id !== message.id),
-          {
-            ...previous,
-            ...message,
-          } as GameMessage,
-        ];
-      });
-    },
-    [setMessages]
+  const pendingImpulseRef = useRef<Pipe[]>([]);
+  const activeImpulseRef = useRef<Pipe[]>([]);
+
+  useEffect(() => {
+    // To inject one-shot pipes (impulses) into the engine,
+    // we use the pending ref to stage them, and the active ref to apply them.
+    const impulsePipe: Pipe = Composer.chain(c =>
+      c.pipe(...activeImpulseRef.current)
+    );
+
+    engineRef.current = new GameEngine(
+      {},
+      Piper([
+        impulsePipe,
+        Events.pipe,
+        Scheduler.pipe,
+        Perf.pipe,
+        Errors.pipe,
+        ...pipes,
+      ])
+    );
+
+    const STEP = 16;
+    const MAX_TICKS_PER_FRAME = 4;
+    let accumulator = 0;
+    let lastWallTime: number | null = null;
+    let frameId: number;
+
+    const loop = () => {
+      if (!engineRef.current) return;
+
+      const now = performance.now();
+
+      if (document.hidden || lastWallTime === null) {
+        lastWallTime = now;
+        frameId = requestAnimationFrame(loop);
+        return;
+      }
+
+      accumulator += now - lastWallTime;
+      lastWallTime = now;
+
+      let ticked = false;
+      let ticks = 0;
+
+      while (accumulator >= STEP && ticks < MAX_TICKS_PER_FRAME) {
+        if (!ticked) {
+          activeImpulseRef.current = pendingImpulseRef.current;
+          pendingImpulseRef.current = [];
+          ticked = true;
+        }
+
+        engineRef.current.tick();
+        accumulator -= STEP;
+        ticks++;
+      }
+
+      if (ticks >= MAX_TICKS_PER_FRAME) {
+        accumulator = 0;
+      }
+
+      if (ticked) {
+        setFrame(engineRef.current.getFrame());
+      }
+
+      frameId = requestAnimationFrame(loop);
+    };
+
+    frameId = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      engineRef.current = null;
+      pendingImpulseRef.current = [];
+      activeImpulseRef.current = [];
+    };
+  }, [pipes]);
+
+  const injectImpulse = useCallback((pipe: Pipe) => {
+    pendingImpulseRef.current.push(pipe);
+  }, []);
+
+  return (
+    <GameEngineContext.Provider value={{ frame, injectImpulse }}>
+      {children}
+    </GameEngineContext.Provider>
   );
-};
+}

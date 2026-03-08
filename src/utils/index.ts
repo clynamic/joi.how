@@ -1,6 +1,6 @@
 export * from './animation';
+export * from './dialogNesting';
 export * from './fullscreen';
-export * from './images';
 export * from './intensity';
 export * from './localstorage';
 export * from './looping';
@@ -12,4 +12,5 @@ export * from './sound';
 export * from './state';
 export * from './translate';
 export * from './vibrator';
+export * from './time';
 export * from './wait';

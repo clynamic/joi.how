@@ -1,19 +1,25 @@
 import { useEffect, useState } from 'react';
-import { GamePhase, Stroke, useGameValue } from '../GameProvider';
 import { useAutoRef, useVibratorValue, VibrationMode, wait } from '../../utils';
 import { useSetting } from '../../settings';
+import { useGameFrame } from '../hooks';
+import { GamePhase } from '../plugins/phase';
+import Phase from '../plugins/phase';
+import { StrokeDirection } from '../plugins/stroke';
+import Stroke from '../plugins/stroke';
+import Pace from '../plugins/pace';
+import Intensity from '../plugins/intensity';
 
 export const GameVibrator = () => {
-  const [stroke] = useGameValue('stroke');
-  const [intensity] = useGameValue('intensity');
-  const [pace] = useGameValue('pace');
-  const [phase] = useGameValue('phase');
+  const { stroke } = useGameFrame(Stroke.paths) ?? {};
+  const { intensity } = useGameFrame(Intensity.paths) ?? {};
+  const { pace } = useGameFrame(Pace.paths) ?? {};
+  const { current: phase } = useGameFrame(Phase.paths) ?? {};
   const [mode] = useSetting('vibrations');
   const [devices] = useVibratorValue('devices');
 
   const data = useAutoRef({
-    intensity,
-    pace,
+    intensity: (intensity ?? 0) * 100,
+    pace: pace ?? 1,
     devices,
     mode,
   });
@@ -23,7 +29,7 @@ export const GameVibrator = () => {
   useEffect(() => {
     const { intensity, pace, devices, mode } = data.current;
     switch (stroke) {
-      case Stroke.up:
+      case StrokeDirection.up:
         switch (mode) {
           case VibrationMode.constant: {
             const strength = intensity / 100;
@@ -38,7 +44,7 @@ export const GameVibrator = () => {
           }
         }
         break;
-      case Stroke.down:
+      case StrokeDirection.down:
         break;
     }
   }, [data, stroke]);
@@ -46,7 +52,7 @@ export const GameVibrator = () => {
   useEffect(() => {
     const { devices, mode } = data.current;
     if (currentPhase == phase) return;
-    if ([GamePhase.break, GamePhase.pause].includes(phase)) {
+    if (phase === GamePhase.break) {
       devices.forEach(device => device.setVibration(0));
     }
     if (phase === GamePhase.climax) {

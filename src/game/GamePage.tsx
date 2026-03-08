@@ -1,20 +1,14 @@
 import styled from 'styled-components';
-import {
-  GameHypno,
-  GameImages,
-  GameMeter,
-  GameIntensity,
-  GameSound,
-  GameInstructions,
-  GamePace,
-  GameEvents,
-  GameMessages,
-  GameWarmup,
-  GameEmergencyStop,
-  GameSettings,
-  GameVibrator,
-} from './components';
-import { GameProvider } from './GameProvider';
+import { GameMessages } from './components/GameMessages';
+import { GameImages } from './components/GameImages';
+import { GameMeter } from './components/GameMeter';
+import { GameHypno } from './components/GameHypno';
+import { GameSound } from './components/GameSound';
+import { GameVibrator } from './components/GameVibrator';
+import { GameInstructions } from './components/GameInstructions';
+import { GameEmergencyStop } from './components/GameEmergencyStop';
+import { GamePauseMenu } from './components/GamePauseMenu';
+import { GameResume } from './components/GameResume';
 
 const StyledGamePage = styled.div`
   position: relative;
@@ -26,10 +20,6 @@ const StyledGamePage = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-`;
-
-const StyledLogicElements = styled.div`
-  // these elements have no visual representation. This style is merely to group them.
 `;
 
 const StyledTopBar = styled.div`
@@ -82,30 +72,23 @@ const StyledBottomBar = styled.div`
 
 export const GamePage = () => {
   return (
-    <GameProvider>
-      <StyledGamePage>
-        <StyledLogicElements>
-          <GameWarmup />
-          <GameIntensity />
-          <GamePace />
-          <GameSound />
-          <GameVibrator />
-          <GameEvents />
-        </StyledLogicElements>
-        <GameImages />
-        <StyledTopBar>
-          <GameInstructions />
-          <GameMessages />
-        </StyledTopBar>
-        <StyledCenter>
-          <GameMeter />
-          <GameHypno />
-        </StyledCenter>
-        <StyledBottomBar>
-          <GameSettings />
-          <GameEmergencyStop />
-        </StyledBottomBar>
-      </StyledGamePage>
-    </GameProvider>
+    <StyledGamePage className='game-page'>
+      <GameImages />
+      <StyledTopBar>
+        <GameInstructions />
+        <GameMessages />
+      </StyledTopBar>
+      <StyledCenter>
+        <GameMeter />
+        <GameHypno />
+      </StyledCenter>
+      <StyledBottomBar>
+        <GamePauseMenu />
+        <GameEmergencyStop />
+      </StyledBottomBar>
+      <GameResume />
+      <GameSound />
+      <GameVibrator />
+    </StyledGamePage>
   );
 };

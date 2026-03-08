@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { PawLabels, useGameValue } from '../GameProvider';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faFire,
@@ -10,9 +9,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useSetting } from '../../settings';
 import { useMemo } from 'react';
-import { GameEvent } from '../../types';
+import { DiceEvent } from '../../types';
 import { ProgressBar } from '../../common';
 import { WaDivider } from '@awesome.me/webawesome/dist/react';
+import { useGameFrame } from '../hooks';
+import Pace from '../plugins/pace';
+import Intensity from '../plugins/intensity';
+import { Paws, PawLabels, pawsPath } from '../plugins/dealer';
 
 const StyledGameInstructions = styled.div`
   display: flex;
@@ -60,68 +63,84 @@ const StyledIntensityMeter = styled.div`
   gap: 4px;
 `;
 
-export const GameInstructions = () => {
-  const [pace] = useGameValue('pace');
-  const [intensity] = useGameValue('intensity');
+const PaceDisplay = () => {
+  const { pace = 0 } = useGameFrame(Pace.paths) ?? {};
   const [maxPace] = useSetting('maxPace');
   const paceSection = useMemo(() => maxPace / 3, [maxPace]);
 
-  const [paws] = useGameValue('paws');
+  return (
+    <StyledPaceIcons>
+      <StyledActiveIcon $active={pace <= paceSection}>
+        <FontAwesomeIcon icon={faPerson} />
+      </StyledActiveIcon>
+      <StyledActiveIcon $active={pace > paceSection && pace <= paceSection * 2}>
+        <FontAwesomeIcon icon={faPersonWalking} />
+      </StyledActiveIcon>
+      <StyledActiveIcon $active={pace > paceSection * 2}>
+        <FontAwesomeIcon icon={faPersonRunning} />
+      </StyledActiveIcon>
+      <StyledInfoText>
+        <strong>{parseFloat(pace.toFixed(2))}</strong> b/s
+      </StyledInfoText>
+    </StyledPaceIcons>
+  );
+};
+
+const GripDisplay = () => {
+  const paws = useGameFrame(pawsPath) ?? Paws.both;
+
+  return (
+    <StyledGripIcons>
+      <StyledActiveIcon $active={paws === Paws.left || paws === Paws.both}>
+        <FontAwesomeIcon style={{ transform: 'scaleX(-1)' }} icon={faHand} />
+      </StyledActiveIcon>
+      <StyledActiveIcon $active={paws === Paws.right || paws === Paws.both}>
+        <FontAwesomeIcon icon={faHand} />
+      </StyledActiveIcon>
+      <StyledInfoText>
+        <strong>{PawLabels[paws]}</strong>
+      </StyledInfoText>
+    </StyledGripIcons>
+  );
+};
+
+const IntensityDisplay = () => {
+  const { intensity = 0 } = useGameFrame(Intensity.paths) ?? {};
+  const intensityPct = Math.round(intensity * 100);
+
+  return (
+    <StyledIntensityMeter>
+      <ProgressBar
+        progress={intensityPct}
+        direction='vertical'
+        background='rgba(255, 255, 255, 0.3)'
+        color='#fff'
+      />
+      <FontAwesomeIcon
+        icon={faFire}
+        color={`rgb(255, ${255 - intensity * 255}, ${255 - intensity * 255})`}
+      />
+    </StyledIntensityMeter>
+  );
+};
+
+export const GameInstructions = () => {
   const [events] = useSetting('events');
   const useRandomGrip = useMemo(
-    () => events.includes(GameEvent.randomGrip),
+    () => events.includes(DiceEvent.randomGrip),
     [events]
   );
 
   return (
     <StyledGameInstructions>
-      <StyledPaceIcons>
-        <StyledActiveIcon $active={pace <= paceSection}>
-          <FontAwesomeIcon icon={faPerson} />
-        </StyledActiveIcon>
-        <StyledActiveIcon
-          $active={pace > paceSection && pace <= paceSection * 2}
-        >
-          <FontAwesomeIcon icon={faPersonWalking} />
-        </StyledActiveIcon>
-        <StyledActiveIcon $active={pace > paceSection * 2}>
-          <FontAwesomeIcon icon={faPersonRunning} />
-        </StyledActiveIcon>
-        <StyledInfoText>
-          <strong>{pace}</strong> b/s
-        </StyledInfoText>
-      </StyledPaceIcons>
+      <PaceDisplay />
       {useRandomGrip && (
         <>
           <WaDivider orientation='vertical' style={{ alignSelf: 'center' }} />
-          <StyledGripIcons>
-            <StyledActiveIcon $active={paws === 'left' || paws === 'both'}>
-              <FontAwesomeIcon
-                style={{ transform: 'scaleX(-1)' }}
-                icon={faHand}
-              />
-            </StyledActiveIcon>
-            <StyledActiveIcon $active={paws === 'right' || paws === 'both'}>
-              <FontAwesomeIcon icon={faHand} />
-            </StyledActiveIcon>
-            <StyledInfoText>
-              <strong>{PawLabels[paws]}</strong>
-            </StyledInfoText>
-          </StyledGripIcons>
+          <GripDisplay />
         </>
       )}
-      <StyledIntensityMeter>
-        <ProgressBar
-          progress={intensity}
-          direction='vertical'
-          background='rgba(255, 255, 255, 0.3)'
-          color='#fff'
-        />
-        <FontAwesomeIcon
-          icon={faFire}
-          color={`rgb(255, ${255 - (intensity / 100) * 255}, ${255 - (intensity / 100) * 255})`}
-        />
-      </StyledIntensityMeter>
+      <IntensityDisplay />
     </StyledGameInstructions>
   );
 };
