@@ -15,12 +15,22 @@ const StyledTitle = styled(ContentSection)`
   & h1 {
     font-size: 3rem;
     margin-bottom: 32px;
+
+    @media (max-width: 600px) {
+      font-size: 2.2rem;
+      margin-bottom: 12px;
+    }
   }
 
   & img {
     padding: 40px 0 30px 0;
     width: 200px;
     aspect-ratio: 1;
+
+    @media (max-width: 600px) {
+      padding: 16px 0 12px 0;
+      width: 140px;
+    }
   }
 
   & abbr {

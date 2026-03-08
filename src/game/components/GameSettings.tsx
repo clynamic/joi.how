@@ -34,11 +34,24 @@ const StyledGameSettings = styled.div`
   padding: var(--wa-space-2xs);
 `;
 
+const StyledGameSettingsDialogWrapper = styled(WaDialog)`
+  @media (max-width: 600px) {
+    &::part(body) {
+      padding: var(--wa-space-2xs);
+    }
+  }
+`;
+
 const StyledGameSettingsDialog = styled.div`
   overflow: auto;
   max-width: 920px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+  gap: var(--wa-space-m);
+
+  @media (max-width: 600px) {
+    gap: var(--wa-space-xs);
+  }
 `;
 
 const GameSettingsDialogContent = memo(() => (
@@ -124,7 +137,7 @@ export const GameSettings = () => {
       >
         <WaIcon name={fullscreen ? 'compress' : 'expand'} />
       </WaButton>
-      <WaDialog
+      <StyledGameSettingsDialogWrapper
         lightDismiss
         open={open}
         onWaAfterHide={() => onOpen(false)}
@@ -134,7 +147,7 @@ export const GameSettings = () => {
         }}
       >
         {open && <GameSettingsDialogContent />}
-      </WaDialog>
+      </StyledGameSettingsDialogWrapper>
     </StyledGameSettings>
   );
 };

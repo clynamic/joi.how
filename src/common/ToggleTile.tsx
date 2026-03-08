@@ -30,6 +30,8 @@ export class JoiToggleTileElement extends LitElement {
       margin: var(--wa-space-2xs) 0;
       padding: var(--wa-space-xs) var(--wa-space-s);
 
+      text-align: left;
+
       transition:
         opacity var(--wa-transition-normal),
         background var(--wa-transition-normal);

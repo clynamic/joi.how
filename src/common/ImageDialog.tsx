@@ -20,11 +20,15 @@ const StyledImageDialog = styled(WaDialog)`
     background-color: transparent;
   }
 
+  &::part(body) {
+    padding: var(--wa-space-2xs);
+  }
+
   wa-card {
     background-color: var(--wa-color-surface-raised);
   }
   wa-card::part(body) {
-    padding: var(--wa-space-xs);
+    padding: var(--wa-space-2xs);
   }
 `;
 

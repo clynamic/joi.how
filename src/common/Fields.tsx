@@ -19,10 +19,14 @@ const StyledFields = styled.fieldset`
   border-left: 2px solid var(--legend-background);
   border-radius: unset;
 
-  margin: var(--wa-space-m);
+  margin: 0;
   padding: var(--wa-space-s);
 
   position: relative;
+
+  @media (max-width: 600px) {
+    padding: var(--wa-space-xs);
+  }
 `;
 
 const StyledFieldsLegend = styled.legend`

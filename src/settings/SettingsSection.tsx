@@ -17,6 +17,11 @@ import { ContentSection } from '../common';
 const StyledSettingsSection = styled(ContentSection)`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+  gap: var(--wa-space-m);
+
+  @media (max-width: 600px) {
+    gap: var(--wa-space-xs);
+  }
 `;
 
 export const SettingsSection = () => {
