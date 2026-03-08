@@ -8,7 +8,6 @@ const PLUGIN_ID = 'core.images';
 
 export type ImageState = {
   currentImage?: ImageItem;
-  seenImages: string[];
   nextImages: ImageItem[];
 };
 
@@ -42,41 +41,19 @@ const Image = definePlugin({
 
   activate: Composer.set(image, {
     currentImage: undefined,
-    seenImages: [],
     nextImages: [],
   }),
 
   update: Composer.pipe(
     Events.handle<ImageItem>(eventType.pushNext, event =>
-      Composer.over(
-        image,
-        ({ currentImage, seenImages = [], nextImages = [] }) => {
-          const newImage = event.payload;
-          const next = [...nextImages];
-          const seen = [...seenImages];
-
-          if (currentImage) {
-            const existingIndex = seen.indexOf(currentImage.id);
-            if (existingIndex !== -1) {
-              seen.splice(existingIndex, 1);
-            }
-            seen.unshift(currentImage.id);
-          }
-
-          if (seen.length > 500) {
-            seen.pop();
-          }
-
-          next.push(newImage);
-          const newCurrent = next.shift();
-
-          return {
-            currentImage: newCurrent,
-            seenImages: seen,
-            nextImages: next,
-          };
-        }
-      )
+      Composer.over(image, ({ nextImages = [] }) => {
+        const next = [...nextImages, event.payload];
+        const newCurrent = next.shift();
+        return {
+          currentImage: newCurrent,
+          nextImages: next,
+        };
+      })
     ),
 
     Events.handle<ImageItem[]>(eventType.setNextImages, event =>
