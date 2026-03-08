@@ -1,18 +1,22 @@
-import { definePlugin } from '../../engine/plugins/Plugins';
+import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine';
 import { Events } from '../../engine/pipes/Events';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { ImageItem } from '../../types';
-import Image, { ImageState } from './image';
+import Image from './image';
 import { IntensityState } from './intensity';
 import Rand from './rand';
 
 const PLUGIN_ID = 'core.random_images';
 
+type RandomImagesState = {
+  seenImages: string[];
+};
+
+const state = pluginPaths<RandomImagesState>(PLUGIN_ID);
 const images = typedPath<ImageItem[]>(['images']);
 const intensityState = typedPath<IntensityState>(['core.intensity']);
-const imageState = typedPath<ImageState>(['core.images']);
 
 const eventType = Events.getKeys(PLUGIN_ID, 'schedule_next');
 
@@ -28,27 +32,32 @@ const RandomImages = definePlugin({
     name: 'RandomImages',
   },
 
-  activate: Composer.do(({ get, pipe }) => {
-    const imgs = get(images);
-    if (!imgs || imgs.length === 0) return;
+  activate: Composer.pipe(
+    Composer.set(state, { seenImages: [] }),
+    Composer.do(({ get, pipe }) => {
+      const imgs = get(images);
+      if (!imgs || imgs.length === 0) return;
 
-    pipe(
-      Rand.shuffle(imgs, shuffled => {
-        const initial = shuffled.slice(0, Math.min(3, imgs.length));
-        return Composer.pipe(
-          ...initial.map(img => Image.pushNextImage(img)),
-          Events.dispatch({ type: eventType.scheduleNext })
-        );
-      })
-    );
-  }),
+      pipe(
+        Rand.shuffle(imgs, shuffled => {
+          const initial = shuffled.slice(0, Math.min(3, imgs.length));
+          return Composer.pipe(
+            ...initial.map(img => Image.pushNextImage(img)),
+            Events.dispatch({ type: eventType.scheduleNext })
+          );
+        })
+      );
+    })
+  ),
+
+  deactivate: Composer.set(state, undefined),
 
   update: Events.handle(eventType.scheduleNext, () =>
     Composer.do(({ get, pipe }) => {
       const imgs = get(images);
       if (!imgs || imgs.length === 0) return;
 
-      const { seenImages = [] } = get(imageState);
+      const { seenImages = [] } = get(state);
       const { intensity = 0 } = get(intensityState);
 
       const imagesWithDistance = imgs.map(image => {
@@ -78,7 +87,18 @@ const RandomImages = definePlugin({
 
           const randomImage = imagesWithDistance[selectedIndex].image;
 
+          const seen = [...seenImages];
+          const existingIndex = seen.indexOf(randomImage.id);
+          if (existingIndex !== -1) {
+            seen.splice(existingIndex, 1);
+          }
+          seen.unshift(randomImage.id);
+          if (seen.length > 500) {
+            seen.pop();
+          }
+
           return Composer.pipe(
+            Composer.set(state, { seenImages: seen }),
             Image.pushNextImage(randomImage),
             Scheduler.schedule({
               id: scheduleId,

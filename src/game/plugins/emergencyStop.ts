@@ -9,7 +9,7 @@ import Pace from './pace';
 import { IntensityState } from './intensity';
 import { Settings } from '../../settings';
 
-const PLUGIN_ID = 'core.emergencyStop';
+const PLUGIN_ID = 'core.emergency_stop';
 
 const intensityState = typedPath<IntensityState>(['core.intensity']);
 const settings = typedPath<Settings>(['settings']);
