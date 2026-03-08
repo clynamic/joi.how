@@ -14,6 +14,7 @@ export type PaceState = {
   prevMinPace: number;
   prevPace: number;
   history: PaceEntry[];
+  lastRecorded: number;
 };
 
 const pace = pluginPaths<PaceState>(PLUGIN_ID);
@@ -40,6 +41,7 @@ const Pace = definePlugin({
       prevMinPace: s.minPace,
       prevPace: s.minPace,
       history: [{ time: 0, pace: s.minPace }],
+      lastRecorded: 0,
     })
   ),
 
@@ -53,12 +55,15 @@ const Pace = definePlugin({
     }
 
     if (state.pace !== state.prevPace) {
-      const { elapsed } = get(Clock.paths) ?? { elapsed: 0 };
       set(pace.prevPace, state.pace);
-      over(pace.history, (h: PaceEntry[]) => [
-        ...h,
-        { time: elapsed, pace: state.pace },
-      ]);
+      const { elapsed } = get(Clock.paths) ?? { elapsed: 0 };
+      if (elapsed - state.lastRecorded >= 1000) {
+        set(pace.lastRecorded, elapsed);
+        over(pace.history, (h: PaceEntry[]) => [
+          ...h,
+          { time: elapsed, pace: state.pace },
+        ]);
+      }
     }
   }),
 

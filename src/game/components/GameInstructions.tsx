@@ -80,7 +80,7 @@ const PaceDisplay = () => {
         <FontAwesomeIcon icon={faPersonRunning} />
       </StyledActiveIcon>
       <StyledInfoText>
-        <strong>{pace}</strong> b/s
+        <strong>{parseFloat(pace.toFixed(2))}</strong> b/s
       </StyledInfoText>
     </StyledPaceIcons>
   );
