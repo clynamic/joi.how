@@ -140,7 +140,17 @@ export const GameSettings = () => {
       <StyledGameSettingsDialogWrapper
         lightDismiss
         open={open}
-        onWaAfterHide={() => onOpen(false)}
+        onWaHide={e => {
+          if (
+            e.target === e.currentTarget &&
+            (e.currentTarget as HTMLElement)?.querySelector('wa-dialog[open]')
+          )
+            e.preventDefault();
+        }}
+        onWaAfterHide={e => {
+          if (e.target !== e.currentTarget) return;
+          onOpen(false);
+        }}
         label={'Game Settings'}
         style={{
           '--width': '920px',
