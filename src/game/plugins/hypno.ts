@@ -5,7 +5,7 @@ import { GameTiming } from '../../engine/State';
 import { GamePhase, PhaseState } from './phase';
 import Pause from './pause';
 import { IntensityState } from './intensity';
-import { Settings } from '../../settings';
+import { Settings } from '../../settings/Settings';
 import { GameHypnoType, HypnoPhrases } from '../../types';
 import Rand from './rand';
 

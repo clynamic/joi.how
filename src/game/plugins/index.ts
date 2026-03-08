@@ -3,6 +3,7 @@ import { Composer } from '../../engine/Composer';
 import { Pipe } from '../../engine/State';
 import PluginInstaller from '../../engine/plugins/PluginInstaller';
 import Scene from './scene';
+import Mode from './mode';
 import Debug from './debug';
 import Fps from './fps';
 import Intensity from './intensity';
@@ -24,6 +25,7 @@ import Clock from './clock';
 const plugins = [
   Scene,
   Phase,
+  Mode,
   Rand,
   Messages,
   Image,

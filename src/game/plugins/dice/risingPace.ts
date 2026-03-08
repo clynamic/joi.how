@@ -1,15 +1,9 @@
 import { Composer } from '../../../engine/Composer';
+import { Module } from '../../../engine/modules/Module';
 import { Sequence } from '../../Sequence';
 import Pace from '../pace';
-import { DiceEvent } from '../../../types';
 import { intensityToPaceRange, round } from '../../../utils';
-import {
-  PLUGIN_ID,
-  intensityState,
-  settings,
-  outcomeDone,
-  DiceOutcome,
-} from './types';
+import { PLUGIN_ID, intensityState, settings, outcomeDone } from './types';
 import { doRandomPace } from './randomPace';
 
 type RisingPacePayload = {
@@ -20,9 +14,9 @@ type RisingPacePayload = {
 
 const seq = Sequence.for(PLUGIN_ID, 'risingPace');
 
-export const risingPaceOutcome: DiceOutcome = {
-  id: DiceEvent.risingPace,
-  check: frame => Composer.get(intensityState)(frame).intensity * 100 >= 30,
+export const risingPaceModule: Module = {
+  id: `${PLUGIN_ID}.rising_pace`,
+  ordering: { loadAfter: [PLUGIN_ID] },
   update: Composer.pipe(
     seq.on(() =>
       Composer.bind(intensityState, ist =>

@@ -1,7 +1,7 @@
 import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
 import { typedPath } from '../../engine/Lens';
-import { Settings } from '../../settings';
+import { Settings } from '../../settings/Settings';
 import { GameTiming } from '../../engine/State';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';

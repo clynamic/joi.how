@@ -1,7 +1,7 @@
 import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { typedPath } from '../../engine/Lens';
-import { Settings } from '../../settings';
+import { Settings } from '../../settings/Settings';
 import { Composer } from '../../engine';
 import Clock from './clock';
 

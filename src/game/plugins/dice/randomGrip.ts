@@ -1,9 +1,9 @@
 import { Composer } from '../../../engine/Composer';
 import { typedPath } from '../../../engine/Lens';
+import { Module } from '../../../engine/modules/Module';
 import { Sequence } from '../../Sequence';
-import { DiceEvent } from '../../../types';
 import Rand from '../rand';
-import { PLUGIN_ID, outcomeDone, DiceOutcome } from './types';
+import { PLUGIN_ID, outcomeDone } from './types';
 
 export enum Paws {
   left = 'left',
@@ -23,9 +23,11 @@ const allPaws = Object.values(Paws);
 
 const seq = Sequence.for(PLUGIN_ID, 'randomGrip');
 
-export const randomGripOutcome: DiceOutcome = {
-  id: DiceEvent.randomGrip,
+export const randomGripModule: Module = {
+  id: `${PLUGIN_ID}.random_grip`,
+  ordering: { loadAfter: [PLUGIN_ID] },
   activate: Rand.pick(allPaws, paw => Composer.set(pawsPath, paw)),
+  deactivate: Composer.set(pawsPath, undefined),
   update: Composer.pipe(
     seq.on(() =>
       Composer.bind(pawsPath, currentPaws =>

@@ -1,20 +1,15 @@
 import { Composer } from '../../../engine/Composer';
+import { Module } from '../../../engine/modules/Module';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
-import { DiceEvent, CleanUpDescriptions } from '../../../types';
-import {
-  PLUGIN_ID,
-  intensityState,
-  settings,
-  outcomeDone,
-  DiceOutcome,
-} from './types';
+import { CleanUpDescriptions } from '../../../types';
+import { PLUGIN_ID, settings, outcomeDone } from './types';
 
 const seq = Sequence.for(PLUGIN_ID, 'cleanUp');
 
-export const cleanUpOutcome: DiceOutcome = {
-  id: DiceEvent.cleanUp,
-  check: frame => Composer.get(intensityState)(frame).intensity * 100 >= 75,
+export const cleanUpModule: Module = {
+  id: `${PLUGIN_ID}.clean_up`,
+  ordering: { loadAfter: [PLUGIN_ID] },
   update: Composer.pipe(
     seq.on(() =>
       Composer.bind(settings, s =>
