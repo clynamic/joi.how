@@ -7,7 +7,7 @@ import Phase, { GamePhase } from './phase';
 import Pause from './pause';
 import Pace from './pace';
 import { IntensityState } from './intensity';
-import { Settings } from '../../settings';
+import { Settings } from '../../settings/Settings';
 
 const PLUGIN_ID = 'core.emergency_stop';
 

@@ -3,6 +3,7 @@ import { Composer } from '../../engine';
 import { Events } from '../../engine/pipes/Events';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
+import { Pipe } from '../../engine/State';
 import { ImageItem } from '../../types';
 import Image from './image';
 import { IntensityState } from './intensity';
@@ -32,9 +33,8 @@ const RandomImages = definePlugin({
     name: 'RandomImages',
   },
 
-  activate: Composer.pipe(
-    Composer.set(state, { seenImages: [] }),
-    Composer.do(({ get, pipe }) => {
+  start(): Pipe {
+    return Composer.do(({ get, pipe }) => {
       const imgs = get(images);
       if (!imgs || imgs.length === 0) return;
 
@@ -47,8 +47,14 @@ const RandomImages = definePlugin({
           );
         })
       );
-    })
-  ),
+    });
+  },
+
+  stop(): Pipe {
+    return Scheduler.cancel(scheduleId);
+  },
+
+  activate: Composer.set(state, { seenImages: [] }),
 
   deactivate: Composer.set(state, undefined),
 

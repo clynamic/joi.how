@@ -4,7 +4,7 @@ import { Events } from '../../engine/pipes/Events';
 import Messages from './messages';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
-import { Settings } from '../../settings';
+import { Settings } from '../../settings/Settings';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
 

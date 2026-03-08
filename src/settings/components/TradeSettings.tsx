@@ -1,5 +1,6 @@
 import { Fields, JoiStack, SettingsDescription, Space } from '../../common';
-import { Settings, useSettings } from '../SettingsProvider';
+import type { Settings } from '../Settings';
+import { useSettings } from '../SettingsProvider';
 import { ImageItem, ImageServiceType } from '../../types';
 import { useImages } from '../ImageProvider';
 import { ChangeEvent } from 'react';

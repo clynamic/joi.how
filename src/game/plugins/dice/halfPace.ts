@@ -1,29 +1,19 @@
 import { Composer } from '../../../engine/Composer';
+import { Module } from '../../../engine/modules/Module';
 import { Sequence } from '../../Sequence';
 import Pace from '../pace';
 import Rand from '../rand';
-import { DiceEvent } from '../../../types';
 import { round } from '../../../utils';
-import {
-  PLUGIN_ID,
-  paceState,
-  intensityState,
-  settings,
-  outcomeDone,
-  DiceOutcome,
-} from './types';
+import { PLUGIN_ID, paceState, settings, outcomeDone } from './types';
 import { doRandomPace } from './randomPace';
 
 type HalfPacePayload = { portion: number };
 
 const seq = Sequence.for(PLUGIN_ID, 'halfPace');
 
-export const halfPaceOutcome: DiceOutcome = {
-  id: DiceEvent.halfPace,
-  check: frame => {
-    const i = Composer.get(intensityState)(frame).intensity * 100;
-    return i >= 10 && i <= 50;
-  },
+export const halfPaceModule: Module = {
+  id: `${PLUGIN_ID}.half_pace`,
+  ordering: { loadAfter: [PLUGIN_ID] },
   update: Composer.pipe(
     seq.on(() =>
       Composer.do(({ get, pipe }) => {

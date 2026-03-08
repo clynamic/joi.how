@@ -1,47 +1,8 @@
 import { useCallback } from 'react';
-import { DiceEvent, GameHypnoType, PlayerBody, PlayerGender } from '../types';
-import { createLocalStorageProvider, VibrationMode } from '../utils';
+import { createLocalStorageProvider } from '../utils';
 import { interpolateWith } from '../utils/translate';
-
-export interface Settings {
-  gameDuration: number;
-  warmupDuration: number;
-  climaxChance: number;
-  ruinChance: number;
-  minPace: number;
-  maxPace: number;
-  steepness: number;
-  timeshift: number;
-  events: DiceEvent[];
-  hypno: GameHypnoType;
-  gender: PlayerGender;
-  body: PlayerBody;
-  highRes: boolean;
-  videoSound: boolean;
-  vibrations: VibrationMode;
-  imageDuration: number;
-  intenseImages: boolean;
-}
-
-export const defaultSettings: Settings = {
-  gameDuration: 900,
-  warmupDuration: 0,
-  climaxChance: 100,
-  ruinChance: 0,
-  minPace: 1,
-  maxPace: 5,
-  steepness: 0.5,
-  timeshift: 0.5,
-  events: Object.values(DiceEvent),
-  hypno: GameHypnoType.joi,
-  gender: PlayerGender.male,
-  body: PlayerBody.penis,
-  highRes: false,
-  videoSound: false,
-  vibrations: VibrationMode.thump,
-  imageDuration: 20,
-  intenseImages: true,
-};
+import type { Settings } from './Settings';
+import { defaultSettings } from './Settings';
 
 const settingsStorageKey = 'settings';
 

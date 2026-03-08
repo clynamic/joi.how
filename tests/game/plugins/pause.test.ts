@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
 import { Events } from '../../../src/engine/pipes/Events';
 import { Scheduler, ScheduledEvent } from '../../../src/engine/pipes/Scheduler';
@@ -58,10 +58,6 @@ function unpauseAndWait(frame: GameFrame): GameFrame {
 }
 
 describe('Pause + Scheduler resume', () => {
-  beforeEach(() => {
-    localStorage.clear();
-  });
-
   it('should schedule an event and have it tick down', () => {
     let frame = bootstrap();
 

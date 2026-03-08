@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useSetting } from '../../settings';
 import { motion } from 'framer-motion';
 import { JoiImage } from '../../common';
-import { useImagePreloader } from '../../utils';
+import { useImagePreloader } from './useImagePreloader';
 import { ImageSize, ImageType } from '../../types';
 import { useGameFrame } from '../hooks';
 import Image from '../plugins/image';

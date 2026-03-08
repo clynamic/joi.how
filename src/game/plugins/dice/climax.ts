@@ -1,20 +1,13 @@
 import { Composer } from '../../../engine/Composer';
 import { typedPath } from '../../../engine/Lens';
+import { Module } from '../../../engine/modules/Module';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
 import Scene from '../scene';
 import Pace from '../pace';
 import Rand from '../rand';
-import { DiceEvent } from '../../../types';
 import { IntensityState } from '../intensity';
-import {
-  PLUGIN_ID,
-  intensityState,
-  settings,
-  outcomeDone,
-  DiceOutcome,
-} from './types';
-import { edged } from './edge';
+import { PLUGIN_ID, intensityState, settings, outcomeDone } from './types';
 
 export type ClimaxResultType = 'climax' | 'denied' | 'ruined' | null;
 
@@ -28,18 +21,38 @@ type ClimaxEndPayload = { countdown: number; denied?: boolean; ruin?: boolean };
 
 const seq = Sequence.for(PLUGIN_ID, 'climax');
 
-export const climaxOutcome: DiceOutcome = {
-  id: DiceEvent.climax,
-  check: frame => {
-    const i = Composer.get(intensityState)(frame).intensity * 100;
-    const s = Composer.get(settings)(frame);
-    return (
-      i >= 100 &&
-      (!s.events.includes(DiceEvent.edge) || !!Composer.get(edged)(frame))
-    );
-  },
+export const climaxModule: Module = {
+  id: `${PLUGIN_ID}.climax`,
+  ordering: { loadAfter: [PLUGIN_ID] },
+  deactivate: Composer.set(climax, undefined),
   update: Composer.pipe(
     seq.on(() =>
+      Composer.bind(settings, s =>
+        Composer.pipe(
+          Pace.setPace(s.minPace),
+          seq.message({
+            title: `You should be getting close to the edge. Don't cum yet.`,
+            duration: 10000,
+          }),
+          seq.after(10000, 'edgePush')
+        )
+      )
+    ),
+
+    seq.on('edgePush', () =>
+      Composer.bind(settings, s =>
+        Composer.pipe(
+          Pace.setPace(s.maxPace),
+          seq.message({
+            title: `Keep going!`,
+            duration: 20000,
+          }),
+          seq.after(20000, 'finale')
+        )
+      )
+    ),
+
+    seq.on('finale', () =>
       Composer.pipe(
         Phase.setPhase(GamePhase.finale),
         seq.message({

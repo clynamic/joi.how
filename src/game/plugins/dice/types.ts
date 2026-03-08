@@ -1,10 +1,10 @@
-import { Pipe, GameFrame } from '../../../engine/State';
+import { Pipe } from '../../../engine/State';
 import { Events } from '../../../engine/pipes/Events';
 import { pluginPaths } from '../../../engine/plugins/Plugins';
 import { typedPath } from '../../../engine/Lens';
 import { IntensityState } from '../intensity';
 import { PaceState } from '../pace';
-import { Settings } from '../../../settings';
+import { Settings } from '../../../settings/Settings';
 import { DiceEvent } from '../../../types';
 
 export const PLUGIN_ID = 'core.dice';
@@ -23,10 +23,3 @@ export const settings = typedPath<Settings>(['settings']);
 
 export const OUTCOME_DONE = Events.getKey(PLUGIN_ID, 'outcome.done');
 export const outcomeDone = (): Pipe => Events.dispatch({ type: OUTCOME_DONE });
-
-export type DiceOutcome = {
-  id: DiceEvent;
-  check?: (frame: GameFrame) => boolean;
-  activate?: Pipe;
-  update: Pipe;
-};
