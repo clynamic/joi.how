@@ -71,19 +71,17 @@ const PluginInstaller = definePlugin({
   name: 'PluginInstaller',
 
   activate: Composer.do(({ set, over }) => {
-    const installedIds = getInstalledIds();
-    const disabledIds = getDisabledIds();
+    const installed = getInstalledIds();
+    const disabled = getDisabledIds();
 
     const meta: MetaMap = JSON.parse(
       localStorage.getItem(storageKey.meta) ?? '{}'
     );
 
-    set(ins.installed, installedIds);
-    set(ins.disabled, disabledIds);
-    set(ins.meta, meta);
+    set(ins, { installed, disabled, failed: [], meta });
 
-    for (const id of installedIds) {
-      if (disabledIds.includes(id)) continue;
+    for (const id of installed) {
+      if (disabled.includes(id)) continue;
 
       const rawCode = localStorage.getItem(storageKey.code(id));
       if (!rawCode) {
