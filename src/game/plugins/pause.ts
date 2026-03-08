@@ -84,8 +84,8 @@ const Pause = definePlugin({
           ),
           Composer.pipe(
             Composer.set(paths.gen, next),
-            Composer.set(paths.countdown, 3),
-            seq.after(1000, 'countdown', { remaining: 2, gen: next })
+            Composer.set(paths.countdown, 4),
+            seq.after(1000, 'countdown', { remaining: 3, gen: next })
           )
         );
       })

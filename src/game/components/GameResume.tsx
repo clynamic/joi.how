@@ -20,7 +20,7 @@ const StyledNumber = styled(motion.div)`
 `;
 
 const display = (countdown: number) =>
-  countdown === 3 ? 'Ready?' : `${countdown}`;
+  countdown === 4 ? 'Ready?' : `${countdown}`;
 
 export const GameResume = () => {
   const { countdown } = useGameFrame(Pause.paths) ?? {};
