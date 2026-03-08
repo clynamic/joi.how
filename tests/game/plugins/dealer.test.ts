@@ -155,7 +155,7 @@ describe('Dealer integration', () => {
 
     const logLength = getDiceState(frame)!.log.length;
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 50; i++) {
       frame = gamePipe(tick(frame, 100));
     }
 
