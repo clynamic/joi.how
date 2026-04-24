@@ -1,38 +1,8 @@
-import { faPause } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import styled from 'styled-components';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useCallback } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { defaultTransition, wait } from '../../utils';
+import { wait } from '../../utils';
 import { useSetting } from '../../settings';
-
-const StyledGameEmergencyStop = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const StyledStopButton = motion(styled.button`
-  display: flex;
-
-  align-items: center;
-
-  padding: 16px 12px;
-  gap: 8px;
-
-  border-radius: var(--border-radius) 0 0 0;
-  opacity: 0.8;
-  background: #a52727;
-  color: #fff;
-  font-size: 1rem;
-
-  cursor: pointer;
-
-  transition: filter 0.2s;
-  &:hover {
-    filter: brightness(1.4);
-  }
-`);
+import { WaButton, WaIcon } from '@awesome.me/webawesome/dist/react';
 
 export const GameEmergencyStop = () => {
   const [phase, setPhase] = useGameValue('phase');
@@ -79,25 +49,22 @@ export const GameEmergencyStop = () => {
   }, [intensity, minPace, sendMessage, setIntensity, setPace, setPhase]);
 
   return (
-    <StyledGameEmergencyStop>
-      <AnimatePresence>
-        {phase === GamePhase.active && (
-          <StyledStopButton
-            key='stopAction'
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={defaultTransition}
-            exit={{ opacity: 0 }}
-            onClick={onStop}
-          >
-            <p>Too close</p>
-            <FontAwesomeIcon
-              style={{ fontSize: 'var(--icon-size)' }}
-              icon={faPause}
-            />
-          </StyledStopButton>
-        )}
-      </AnimatePresence>
-    </StyledGameEmergencyStop>
+    <>
+      {phase === GamePhase.active && (
+        <WaButton
+          size='large'
+          variant='danger'
+          onClick={onStop}
+          style={
+            {
+              '--wa-form-control-height': '40px',
+            } as React.CSSProperties
+          }
+        >
+          <p>Too close</p>
+          <WaIcon slot='end' name='pause' />
+        </WaButton>
+      )}
+    </>
   );
 };

@@ -1,9 +1,9 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  Divider,
-  SettingsTile,
+  Fields,
   SettingsDescription,
-  ToggleTile,
+  SettingsDivider,
+  JoiToggleTile,
 } from '../../common';
 import {
   PlayerBody,
@@ -25,16 +25,19 @@ export const PlayerSettings = () => {
   const [body, setBody] = useSetting('body');
 
   return (
-    <SettingsTile label={'Player'}>
+    <Fields label={'Player'}>
       <SettingsDescription>Select your gender</SettingsDescription>
       {Object.keys(PlayerGender).map(key => {
         const current = PlayerGender[key as keyof typeof PlayerGender];
         return (
-          <ToggleTile
+          <JoiToggleTile
             key={current}
             value={gender === current}
             onClick={() => setGender(current)}
-            trailing={
+          >
+            <h6 className='subtitle'>{PlayerGenderLabels[current]}</h6>
+            <p className='caption'>{PlayerGenderDescriptions[current]}</p>
+            <p slot='trailing'>
               <FontAwesomeIcon
                 style={{ aspectRatio: 1 }}
                 icon={(() => {
@@ -48,38 +51,37 @@ export const PlayerSettings = () => {
                   }
                 })()}
               />
-            }
-          >
-            <strong>{PlayerGenderLabels[current]}</strong>
-            <p>{PlayerGenderDescriptions[current]}</p>
-          </ToggleTile>
+            </p>
+          </JoiToggleTile>
         );
       })}
-      <Divider />
+      <SettingsDivider />
       <SettingsDescription>Select your body</SettingsDescription>
       {Object.keys(PlayerBody).map(key => {
         const current = PlayerBody[key as keyof typeof PlayerBody];
         return (
-          <ToggleTile
+          <JoiToggleTile
             key={current}
             value={body === current}
             onClick={() => setBody(current)}
-            trailing={(() => {
-              switch (current) {
-                case PlayerBody.penis:
-                  return '🍆';
-                case PlayerBody.vagina:
-                  return '🍑';
-                case PlayerBody.neuter:
-                  return '🥝';
-              }
-            })()}
           >
-            <strong>{PlayerBodyLabels[current]}</strong>
-            <p>{PlayerBodyDescriptions[current]}</p>
-          </ToggleTile>
+            <h6 className='subtitle2'>{PlayerBodyLabels[current]}</h6>
+            <p className='caption'>{PlayerBodyDescriptions[current]}</p>
+            <p slot='trailing'>
+              {(() => {
+                switch (current) {
+                  case PlayerBody.penis:
+                    return '🍆';
+                  case PlayerBody.vagina:
+                    return '🍑';
+                  case PlayerBody.neuter:
+                    return '🥝';
+                }
+              })()}
+            </p>
+          </JoiToggleTile>
         );
       })}
-    </SettingsTile>
+    </Fields>
   );
 };

@@ -1,10 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  SettingsTile,
-  SettingsDescription,
-  ToggleTile,
-  ToggleTileType,
-} from '../../common';
+import { Fields, SettingsDescription, JoiToggleTile } from '../../common';
 import {
   GameHypnoType,
   GameHypnoDescriptions,
@@ -23,36 +18,38 @@ export const HypnoSettings = () => {
   const [hypno, setHypno] = useSetting('hypno');
 
   return (
-    <SettingsTile label={'Hypno'} role='radiogroup'>
+    <Fields label={'Hypno'} role='radiogroup'>
       <SettingsDescription>Choose a hypno text set</SettingsDescription>
       {Object.keys(GameHypnoType).map(key => {
         const current = GameHypnoType[key as keyof typeof GameHypnoType];
         return (
-          <ToggleTile
+          <JoiToggleTile
             key={current}
             value={hypno === current}
-            onClick={() => setHypno(current)}
-            type={ToggleTileType.radio}
-            trailing={(() => {
-              switch (current) {
-                case GameHypnoType.off:
-                  return <FontAwesomeIcon icon={faPowerOff} />;
-                case GameHypnoType.joi:
-                  return <FontAwesomeIcon icon={faOtter} />;
-                case GameHypnoType.breeding:
-                  return <FontAwesomeIcon icon={faCow} />;
-                case GameHypnoType.maledom:
-                  return <FontAwesomeIcon icon={faDog} />;
-                case GameHypnoType.femdom:
-                  return <FontAwesomeIcon icon={faCat} />;
-              }
-            })()}
+            onChange={() => setHypno(current)}
+            type={'radio'}
           >
-            <strong>{GameHypnoLabels[current]}</strong>
-            <p>{GameHypnoDescriptions[current]}</p>
-          </ToggleTile>
+            <h6 className='subtitle'>{GameHypnoLabels[current]}</h6>
+            <p className='caption'>{GameHypnoDescriptions[current]}</p>
+            <span slot='trailing'>
+              {(() => {
+                switch (current) {
+                  case GameHypnoType.off:
+                    return <FontAwesomeIcon icon={faPowerOff} />;
+                  case GameHypnoType.joi:
+                    return <FontAwesomeIcon icon={faOtter} />;
+                  case GameHypnoType.breeding:
+                    return <FontAwesomeIcon icon={faCow} />;
+                  case GameHypnoType.maledom:
+                    return <FontAwesomeIcon icon={faDog} />;
+                  case GameHypnoType.femdom:
+                    return <FontAwesomeIcon icon={faCat} />;
+                }
+              })()}
+            </span>
+          </JoiToggleTile>
         );
       })}
-    </SettingsTile>
+    </Fields>
   );
 };

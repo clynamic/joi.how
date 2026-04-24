@@ -1,11 +1,6 @@
 import { GameEvent, GameEventDescriptions, GameEventLabels } from '../../types';
 import { useCallback } from 'react';
-import {
-  SettingsTile,
-  SettingsDescription,
-  ToggleTile,
-  ToggleTileType,
-} from '../../common';
+import { Fields, JoiToggleTile, SettingsDescription } from '../../common';
 import { useSetting } from '../SettingsProvider';
 
 export const EventSettings = () => {
@@ -23,24 +18,24 @@ export const EventSettings = () => {
   );
 
   return (
-    <SettingsTile label={'Events'}>
+    <Fields label={'Events'}>
       <SettingsDescription>
         Check the events you want to occur during the game
       </SettingsDescription>
       {Object.keys(GameEvent).map(key => {
         const event = GameEvent[key as keyof typeof GameEvent];
         return (
-          <ToggleTile
+          <JoiToggleTile
             key={event}
             value={events.includes(event)}
             onClick={() => toggleEvent(event)}
-            type={ToggleTileType.check}
+            type={'check'}
           >
-            <strong>{GameEventLabels[event]}</strong>
-            <p>{GameEventDescriptions[event]}</p>
-          </ToggleTile>
+            <h6 className='subtitle'>{GameEventLabels[event]}</h6>
+            <p className='caption'>{GameEventDescriptions[event]}</p>
+          </JoiToggleTile>
         );
       })}
-    </SettingsTile>
+    </Fields>
   );
 };

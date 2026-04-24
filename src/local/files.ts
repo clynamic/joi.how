@@ -20,14 +20,20 @@ export const itemExtensions = [
   'svg',
   'mp4',
   'webm',
+  'mov',
+  'avi',
+  'mkv',
 ];
 
-export const videoExtensions = ['mp4', 'webm'];
+export const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv'];
 
 export const imageTypeFromExtension = (extension: string): ImageType => {
   switch (extension) {
     case 'webm':
     case 'mp4':
+    case 'mov':
+    case 'avi':
+    case 'mkv':
       return ImageType.video;
     case 'gif':
       return ImageType.gif;

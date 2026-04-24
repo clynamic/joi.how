@@ -23,7 +23,9 @@ export const intensityToPace = (
   const roots = polynomialRoot(-intensity, c, b, a);
   const t = roots.find(
     (root): root is number => typeof root === 'number' && root >= 0 && root <= 1
-  )!;
+  );
+
+  if (t === undefined) return min;
 
   return (-2 * t * t * t + 3 * t * t) * (max - min) + min;
 };

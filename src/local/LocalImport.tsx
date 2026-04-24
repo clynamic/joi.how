@@ -1,32 +1,17 @@
 import { useState } from 'react';
-import styled from 'styled-components';
-import {
-  SettingsDescription,
-  Space,
-  Button,
-  SettingsInfo,
-  Spinner,
-} from '../common';
+import { SettingsDescription, Space, SettingsGrid, JoiStack } from '../common';
 import { useImages } from '../settings';
 import { AnimatePresence } from 'framer-motion';
 import { discoverImageFiles, imageTypeFromExtension } from './files';
-import { LocalImageRequest, useLocalImages } from './LocalProvider';
+import { useLocalImages } from './LocalProvider';
 import { ImageServiceType } from '../types';
 import { chunk } from 'lodash';
-
-const StyledLocalImport = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-`;
-
-const StyledLoadingHint = styled(SettingsInfo)`
-  grid-column: 1 / -1;
-  justify-self: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-`;
+import {
+  WaButton,
+  WaIcon,
+  WaProgressBar,
+} from '@awesome.me/webawesome/dist/react';
+import { LocalImageRequest } from './LocalImageService';
 
 export const LocalImport = () => {
   const [loading, setLoading] = useState(false);
@@ -85,38 +70,35 @@ export const LocalImport = () => {
   };
 
   return (
-    <StyledLocalImport>
+    <SettingsGrid>
       <SettingsDescription>Add images from your device</SettingsDescription>
       <Space size='medium' />
       <input
         type='file'
         multiple
-        accept='image/*'
+        accept='image/*,video/*'
         style={{ display: 'none' }}
         id='filePicker'
         onChange={select}
       />
-      <Button
-        style={{ gridColumn: '1 / -1', justifySelf: 'center' }}
+      <WaButton
+        style={{ justifySelf: 'center' }}
         onClick={() => document.getElementById('filePicker')?.click()}
         disabled={loading}
       >
-        Select Files
-      </Button>
+        <span>Select Files</span>
+        <WaIcon slot='end' name='upload' />
+      </WaButton>
       <Space size='small' />
       <AnimatePresence>
         {files && (
-          <StyledLoadingHint>
-            <Spinner />
-            <p>
-              {progress !== undefined
-                ? `${progress} / ${files.length} processed`
-                : `${files.length} discovered`}
-            </p>
-          </StyledLoadingHint>
+          <JoiStack direction='column'>
+            <span>{`${progress ?? 0} / ${files.length} files processed`}</span>
+            <WaProgressBar value={((progress ?? 1) / files.length) * 100} />
+          </JoiStack>
         )}
       </AnimatePresence>
       <Space size='small' />
-    </StyledLocalImport>
+    </SettingsGrid>
   );
 };

@@ -1,43 +1,19 @@
-import { ContentSection, Dialog } from '../../common';
+import { JoiStack, Space } from '../../common';
 import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBan, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useHomeValue } from '../HomeProvider';
+import { WaButton, WaDialog, WaIcon } from '@awesome.me/webawesome/dist/react';
 
-const StyledAgeWarning = styled.div`
-  font-size: 1rem;
-  max-width: 400px;
-  margin: 0 auto;
-`;
-
-const StyledAgeWarningChoice = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 16px;
-`;
-
-const StyledAgeWarningButton = styled.button`
-  display: flex;
-  gap: 8px;
-
-  background: var(--button-background);
-  color: var(--button-color);
-
-  border-radius: var(--border-radius);
-  padding: 8px;
-
-  transition: var(--hover-transition);
-
-  &:hover {
-    background: var(--primary);
+const StyledAgeWarningDialog = styled(WaDialog)`
+  &::part(dialog) {
+    box-shadow: none;
   }
 
-  &:enabled {
-    cursor: pointer;
+  &::part(dialog)::backdrop {
+    backdrop-filter: blur(20px);
   }
-  &:disabled {
-    cursor: not-allowed;
+
+  &::part(close-button) {
+    display: none;
   }
 `;
 
@@ -45,38 +21,27 @@ export const AgeWarning = () => {
   const [ageCheckConfirm, setAgeCheckConfirm] = useHomeValue('ageCheckConfirm');
 
   return (
-    <Dialog
+    <StyledAgeWarningDialog
       open={!ageCheckConfirm}
-      onOpenChange={setAgeCheckConfirm}
-      closable={false}
-      title={'Age Warning'}
-      barrierColor='var(--card-background)'
-      content={
-        <StyledAgeWarning>
-          <ContentSection style={{ margin: 0 }}>
-            <p>
-              This app is meant for adults only, and should not be used by
-              anyone under the age of 18.
-            </p>
-            <StyledAgeWarningChoice>
-              <StyledAgeWarningButton
-                onClick={() => {
-                  window.location.href = 'https://www.google.com';
-                }}
-              >
-                <p>I am not 18</p>
-                <FontAwesomeIcon icon={faBan} />
-              </StyledAgeWarningButton>
-              <StyledAgeWarningButton onClick={() => setAgeCheckConfirm(true)}>
-                <p>I am 18 or older</p>
-                <FontAwesomeIcon icon={faCheck} />
-              </StyledAgeWarningButton>
-            </StyledAgeWarningChoice>
-          </ContentSection>
-        </StyledAgeWarning>
-      }
+      onWaHide={() => setAgeCheckConfirm(true)}
+      className='dialog-deny-close'
+      label={'Age Confirmation'}
     >
-      <div style={{ display: 'none' }} />
-    </Dialog>
+      <p>
+        This app is meant for adults only. By clicking "I am an adult", you
+        confirm that you are at least 18 years old.
+      </p>
+      <Space size='large' />
+      <JoiStack direction='row' justifyContent='flex-end' spacing={2}>
+        <WaButton href='https://www.google.com' variant='danger'>
+          <span>I am not an adult</span>
+          <WaIcon slot='end' name={'ban'} />
+        </WaButton>
+        <WaButton onClick={() => setAgeCheckConfirm(true)}>
+          <span>I am an adult</span>
+          <WaIcon slot='end' name={'check'} />
+        </WaButton>
+      </JoiStack>
+    </StyledAgeWarningDialog>
   );
 };

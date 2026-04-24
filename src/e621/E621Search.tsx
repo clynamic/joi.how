@@ -1,30 +1,19 @@
-import styled from 'styled-components';
 import {
-  Dropdown,
-  IconButton,
   Measure,
   SettingsLabel,
-  Slider,
   Space,
-  TextInput,
-  Surrounded,
-  ToggleTile,
-  ToggleTileType,
-  TextArea,
   SettingsInfo,
-  Spinner,
-  Button,
   StyledMeasure,
   SettingsDescription,
+  JoiToggleTile,
+  SettingsRow,
+  SettingsGrid,
+  JoiStack,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
 import { E621Service } from './E621Service';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faInfoCircle,
-  faSync,
-  faUser,
-} from '@fortawesome/free-solid-svg-icons';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { useImages } from '../settings';
 import {
   E621SortOrder,
@@ -34,11 +23,16 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { E621CredentialsInput } from './E621Credentials';
 import { defaultTransition } from '../utils';
-
-const StyledE621Search = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-`;
+import {
+  WaButton,
+  WaIcon,
+  WaTooltip,
+  WaSlider,
+  WaInput,
+  WaSelect,
+  WaOption,
+  WaTextarea,
+} from '@awesome.me/webawesome/dist/react';
 
 export const E621Search = () => {
   const [loading, setLoading] = useState(false);
@@ -93,71 +87,86 @@ export const E621Search = () => {
   }, [credentials, setCredentials, addingCredentials, setAddingCredentials]);
 
   return (
-    <StyledE621Search>
+    <SettingsGrid>
       <SettingsDescription>Add images from e621</SettingsDescription>
-      <SettingsLabel htmlFor='tags'>Tags</SettingsLabel>
-      <TextInput
-        id='tags'
-        value={tags}
-        onChange={setTags}
-        onSubmit={runSearch}
-        placeholder='Enter tags...'
-        style={{ gridColumn: '2 / -1' }}
-        disabled={loading}
-      />
+      <SettingsRow>
+        <SettingsLabel htmlFor='tags'>Tags</SettingsLabel>
+        <WaInput
+          id='tags'
+          className='joi-wide'
+          value={tags}
+          onInput={e => setTags(e.currentTarget.value || '')}
+          onSubmit={runSearch}
+          placeholder='e.g. dragon huge_penis'
+          disabled={loading}
+        />
+      </SettingsRow>
       <Space size='medium' />
-      <SettingsLabel htmlFor='order'>Order</SettingsLabel>
-      <Dropdown
-        id='order'
-        value={order}
-        onChange={(value: string) => setOrder(value as E621SortOrder)}
-        options={Object.values(E621SortOrder).map(value => ({
-          value,
-          label: e621SortOrderLabels[value],
-        }))}
-        style={{ gridColumn: '2 / -1' }}
-        disabled={loading}
-      />
+      <SettingsRow>
+        <SettingsLabel htmlFor='order'>Order</SettingsLabel>
+        <WaSelect
+          id='order'
+          className='joi-wide'
+          value={order}
+          onInput={e => setOrder(e.currentTarget.value as E621SortOrder)}
+          disabled={loading}
+        >
+          {Object.values(E621SortOrder).map(value => (
+            <WaOption key={value} value={value}>
+              {e621SortOrderLabels[value]}
+            </WaOption>
+          ))}
+        </WaSelect>
+      </SettingsRow>
       <Space size='medium' />
-      <SettingsLabel htmlFor='limit'>Count</SettingsLabel>
-      <Slider
-        id='limit'
-        value={limit}
-        onChange={setLimit}
-        min={1}
-        max={200}
-        step={1}
-      />
-      <Measure value={limit} chars={3} unit='posts' />
+      <SettingsRow>
+        <SettingsLabel htmlFor='limit'>Count</SettingsLabel>
+        <WaSlider
+          id='limit'
+          value={limit}
+          onInput={e => setLimit(parseFloat(e.currentTarget.value.toString()))}
+          min={1}
+          max={200}
+          step={1}
+          style={{ width: '100%' }}
+        />
+        <Measure value={limit} chars={3} unit='posts' />
+      </SettingsRow>
       <Space size='medium' />
-      <SettingsLabel htmlFor='minScore'>Score</SettingsLabel>
-      <Slider
-        id='minScore'
-        value={minScore ?? -1}
-        onChange={value => {
-          setMinScore(value === -1 ? undefined : value);
-        }}
-        min={-1}
-        max={50}
-        step={1}
-      />
-      {minScore == undefined || minScore === -1 ? (
-        <StyledMeasure>
-          <strong>any</strong>
-        </StyledMeasure>
-      ) : (
-        <Measure value={minScore ?? -1} chars={3} unit='votes' />
-      )}
+      <SettingsRow>
+        <SettingsLabel htmlFor='minScore'>Score</SettingsLabel>
+        <WaSlider
+          id='minScore'
+          value={minScore ?? -1}
+          onInput={e => {
+            const value = parseFloat(e.currentTarget.value.toString());
+            setMinScore(value === -1 ? undefined : value);
+          }}
+          min={-1}
+          max={50}
+          step={1}
+          style={{ width: '100%' }}
+        />
+        {minScore == undefined || minScore === -1 ? (
+          <StyledMeasure>
+            <strong>any</strong>
+          </StyledMeasure>
+        ) : (
+          <Measure value={minScore ?? -1} chars={3} unit='votes' />
+        )}
+      </SettingsRow>
       <Space size='medium' />
-      <ToggleTile
-        style={{ opacity: 1 }}
-        type={ToggleTileType.check}
+      <JoiToggleTile
+        style={{ '--tile-inactive-opacity': 1 } as React.CSSProperties}
+        type={'check'}
         value={!!credentials || addingCredentials}
         onClick={onToggleCredentials}
       >
-        <strong>Credentials</strong>
-        <p>Use your e621 account to access restricted content</p>
-      </ToggleTile>
+        <h6 className='subtitle'>Credentials</h6>
+        <p className='caption'>
+          Use your e621 account to access restricted content
+        </p>
+      </JoiToggleTile>
       <AnimatePresence>
         {/* 
         Toggling this rapidly will lead to it being stuck open. 
@@ -168,7 +177,6 @@ export const E621Search = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ gridColumn: '1 / -1' }}
             transition={defaultTransition}
           >
             <E621CredentialsInput
@@ -189,7 +197,6 @@ export const E621Search = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ gridColumn: '1 / -1' }}
             transition={defaultTransition}
           >
             <SettingsInfo>
@@ -201,59 +208,56 @@ export const E621Search = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <ToggleTile
-        style={{ opacity: 1 }}
-        type={ToggleTileType.check}
+      <JoiToggleTile
+        style={{ '--tile-inactive-opacity': 1 } as React.CSSProperties}
+        type={'check'}
         value={enableBlacklist}
         onClick={() => setEnableBlacklist(!enableBlacklist)}
       >
-        <strong>Enable blacklist</strong>
-        <p>Hide posts with specific tags</p>
-      </ToggleTile>
+        <h6 className='subtitle'>Enable blacklist</h6>
+        <p className='caption'>Hide posts with specific tags</p>
+      </JoiToggleTile>
       <AnimatePresence>
         {enableBlacklist && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ gridColumn: '1 / -1' }}
             transition={defaultTransition}
           >
-            <Surrounded
-              trailing={
-                <>
-                  <IconButton
-                    style={{ fontSize: '1rem' }}
-                    tooltip='View blacklist help'
-                    onClick={() =>
-                      window.open('https://e621.net/help/blacklist')
-                    }
-                    icon={<FontAwesomeIcon icon={faInfoCircle} />}
-                  />
-                  <IconButton
-                    style={{ fontSize: '1rem' }}
-                    tooltip='Download blacklist from e621'
-                    onClick={
-                      credentials
-                        ? () =>
-                            e621Service
-                              .getBlacklist(credentials)
-                              .then(setBlacklist)
-                        : undefined
-                    }
-                    icon={<FontAwesomeIcon icon={faSync} />}
-                  />
-                </>
-              }
-            >
+            <WaTooltip for='blacklist-info'>View blacklist help</WaTooltip>
+            <WaTooltip for='blacklist-refresh'>
+              Download blacklist from e621
+            </WaTooltip>
+            <JoiStack direction='row' justifyContent='space-between'>
               <SettingsInfo>Blacklist</SettingsInfo>
-            </Surrounded>
-            <TextArea
+              <JoiStack direction='row'>
+                <WaButton
+                  id='blacklist-info'
+                  href='https://e621.net/help/blacklist'
+                  target='_blank'
+                  size='small'
+                >
+                  <WaIcon name='info-circle' />
+                </WaButton>
+                <WaButton
+                  id='blacklist-refresh'
+                  size='small'
+                  disabled={!credentials}
+                  onClick={() =>
+                    e621Service.getBlacklist(credentials!).then(setBlacklist)
+                  }
+                >
+                  <WaIcon name='sync' />
+                </WaButton>
+              </JoiStack>
+            </JoiStack>
+            <WaTextarea
               style={{ resize: 'vertical' }}
               value={blacklist?.join('\n') ?? ''}
-              onChange={(value: string) =>
+              onInput={e =>
                 setBlacklist(
-                  value
+                  (e.currentTarget.value || '')
                     .split('\n')
                     .map(tag => tag.trim())
                     .filter(tag => tag)
@@ -265,17 +269,17 @@ export const E621Search = () => {
         )}
       </AnimatePresence>
       <Space size='medium' />
-      <Button
+      <WaButton
         onClick={runSearch}
-        disabled={loading}
         style={{
-          gridColumn: '1 / -1',
           justifySelf: 'center',
         }}
+        loading={loading}
       >
-        {loading ? <Spinner /> : <strong>Search & Add</strong>}
-      </Button>
+        <p>Search & Add</p>
+        <WaIcon slot='end' name='search' />
+      </WaButton>
       <Space size='medium' />
-    </StyledE621Search>
+    </SettingsGrid>
   );
 };

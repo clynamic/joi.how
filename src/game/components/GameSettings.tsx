@@ -1,8 +1,5 @@
 import styled from 'styled-components';
-import { Dialog, IconButton, VerticalDivider } from '../../common';
-import { faCog, faCompress, faExpand } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import {
   BoardSettings,
   ClimaxSettings,
@@ -16,6 +13,12 @@ import {
 } from '../../settings';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useFullscreen, useLooping } from '../../utils';
+import {
+  WaButton,
+  WaDialog,
+  WaDivider,
+  WaIcon,
+} from '@awesome.me/webawesome/dist/react';
 
 const StyledGameSettings = styled.div`
   display: flex;
@@ -28,43 +31,42 @@ const StyledGameSettings = styled.div`
   background: var(--overlay-background);
   color: var(--overlay-color);
 
-  padding: 8px;
+  padding: var(--wa-space-2xs);
 `;
 
-interface GameSettingsDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+const StyledGameSettingsDialogWrapper = styled(WaDialog)`
+  @media (max-width: 600px) {
+    &::part(body) {
+      padding: var(--wa-space-2xs);
+    }
+  }
+`;
 
 const StyledGameSettingsDialog = styled.div`
   overflow: auto;
   max-width: 920px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+  gap: var(--wa-space-m);
+
+  @media (max-width: 600px) {
+    gap: var(--wa-space-xs);
+  }
 `;
 
-const GameSettingsDialog: React.FC<GameSettingsDialogProps> = props => {
-  return (
-    <Dialog
-      dismissable
-      {...props}
-      title={'Game Settings'}
-      content={
-        <StyledGameSettingsDialog>
-          <PaceSettings />
-          <DurationSettings />
-          <PlayerSettings />
-          <EventSettings />
-          <HypnoSettings />
-          <ClimaxSettings />
-          <BoardSettings />
-          <VibratorSettings />
-          <ImageSettings />
-        </StyledGameSettingsDialog>
-      }
-    />
-  );
-};
+const GameSettingsDialogContent = memo(() => (
+  <StyledGameSettingsDialog>
+    <PaceSettings />
+    <DurationSettings />
+    <PlayerSettings />
+    <EventSettings />
+    <HypnoSettings />
+    <ClimaxSettings />
+    <BoardSettings />
+    <VibratorSettings />
+    <ImageSettings />
+  </StyledGameSettingsDialog>
+));
 
 export const GameSettings = () => {
   const [open, setOpen] = useState(false);
@@ -119,18 +121,43 @@ export const GameSettings = () => {
 
   return (
     <StyledGameSettings>
-      <IconButton
-        aria-label='Settings'
-        onClick={() => onOpen(true)}
-        icon={<FontAwesomeIcon icon={faCog} />}
+      <WaButton aria-label='Settings' size='large' onClick={() => onOpen(true)}>
+        <WaIcon name='gear' />
+      </WaButton>
+      <WaDivider
+        orientation='vertical'
+        style={{
+          '--spacing': 'var(--wa-space-xs)',
+        }}
       />
-      <VerticalDivider />
-      <IconButton
+      <WaButton
         aria-label='Fullscreen'
+        size='large'
         onClick={() => setFullscreen(fullscreen => !fullscreen)}
-        icon={<FontAwesomeIcon icon={fullscreen ? faCompress : faExpand} />}
-      />
-      <GameSettingsDialog open={open} onOpenChange={onOpen} />
+      >
+        <WaIcon name={fullscreen ? 'compress' : 'expand'} />
+      </WaButton>
+      <StyledGameSettingsDialogWrapper
+        lightDismiss
+        open={open}
+        onWaHide={e => {
+          if (
+            e.target === e.currentTarget &&
+            (e.currentTarget as HTMLElement)?.querySelector('wa-dialog[open]')
+          )
+            e.preventDefault();
+        }}
+        onWaAfterHide={e => {
+          if (e.target !== e.currentTarget) return;
+          onOpen(false);
+        }}
+        label={'Game Settings'}
+        style={{
+          '--width': '920px',
+        }}
+      >
+        {open && <GameSettingsDialogContent />}
+      </StyledGameSettingsDialogWrapper>
     </StyledGameSettings>
   );
 };

@@ -27,19 +27,69 @@
   color-scheme: dark;
 }
 
-* {
-  box-sizing: border-box;
+:root {
+  --wa-color-surface-default: var(--background);
+  --wa-color-surface-raised: var(--card-background);
+  --wa-color-surface-lowered: var(--section-background);
+  --wa-color-text-normal: var(--text-color);
+  --wa-color-text-quiet: #b9bad6;
+  --wa-color-text-link: var(--primary);
+
+  --wa-color-overlay-modal: var(--overlay-background);
+
+  --wa-color-brand-fill-normal: var(--primary);
+  --wa-color-brand-on-normal: var(--text-color);
+  --wa-color-brand-border-normal: var(--primary);
+
+  --wa-color-neutral-fill-quiet: var(--button-background);
+  --wa-color-neutral-on-quiet: var(--button-color);
+
+  --wa-font-family-body: 'Helvetica Neue', Helvetica, sans-serif;
+  --wa-font-family-heading: var(--wa-font-family-body);
+
+  --wa-border-radius-scale: 0.6;
+
+  --wa-color-brand: var(--primary);
+
+  --wa-color-brand-95: color-mix(in oklch, white 95%, var(--wa-color-brand));
+  --wa-color-brand-90: color-mix(in oklch, white 90%, var(--wa-color-brand));
+  --wa-color-brand-85: color-mix(in oklch, white 85%, var(--wa-color-brand));
+  --wa-color-brand-80: color-mix(in oklch, white 80%, var(--wa-color-brand));
+  --wa-color-brand-75: color-mix(in oklch, white 75%, var(--wa-color-brand));
+  --wa-color-brand-70: color-mix(in oklch, white 70%, var(--wa-color-brand));
+  --wa-color-brand-65: color-mix(in oklch, white 65%, var(--wa-color-brand));
+  --wa-color-brand-60: color-mix(in oklch, white 60%, var(--wa-color-brand));
+  --wa-color-brand-55: color-mix(in oklch, white 55%, var(--wa-color-brand));
+  --wa-color-brand-50: var(--wa-color-brand);
+  --wa-color-brand-45: color-mix(in oklch, black 10%, var(--wa-color-brand));
+  --wa-color-brand-40: color-mix(in oklch, black 20%, var(--wa-color-brand));
+  --wa-color-brand-35: color-mix(in oklch, black 30%, var(--wa-color-brand));
+  --wa-color-brand-30: color-mix(in oklch, black 40%, var(--wa-color-brand));
+  --wa-color-brand-25: color-mix(in oklch, black 50%, var(--wa-color-brand));
+  --wa-color-brand-20: color-mix(in oklch, black 60%, var(--wa-color-brand));
+  --wa-color-brand-15: color-mix(in oklch, black 70%, var(--wa-color-brand));
+  --wa-color-brand-10: color-mix(in oklch, black 80%, var(--wa-color-brand));
+  --wa-color-brand-05: color-mix(in oklch, black 90%, var(--wa-color-brand));
+
+  --wa-tooltip-background-color: var(--overlay-background);
+  --wa-tooltip-content-color: var(--wa-color-text-normal);
+
+  --wa-color-neutral-fill-loud: var(--button-background);
+  --wa-color-fill-loud: var(--wa-color-neutral-fill-loud);
+
+  --wa-form-control-border-color: var(--wa-color-brand);
+  --wa-form-control-height: 2rem;
+  --wa-form-control-padding-inline: var(--wa-space-xs);
+
+  --wa-focus-ring-width: 1px;
+  --wa-color-focus: color-mix(in oklch, white 40%, var(--wa-color-brand));
 }
 
+/* #region root sizing */
+
 body {
-  margin: 0;
-  padding: 0;
   height: 100vh;
   height: 100dvh;
-
-  font-family: 'Helvetica Neue', 'Helvetica', sans-serif;
-  background: var(--background);
-  color: var(--text-color);
 }
 
 #root {
@@ -47,25 +97,90 @@ body {
   width: 100%;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin: 0;
-  padding: 0;
+/* #endregion */
+
+/* #region utility classes */
+
+.joi-wide {
+  width: 100%;
 }
 
-p {
-  margin: 0;
-  padding: 0;
+/* #endregion */
+
+/* #region overrides */
+
+@layer overrides {
+  address,
+  audio,
+  blockquote,
+  dd,
+  details,
+  dl,
+  fieldset,
+  figure,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  hr,
+  iframe,
+  ol,
+  p,
+  pre,
+  table,
+  ul,
+  video {
+    margin-block-end: unset;
+  }
 }
 
-a {
-  color: inherit;
+@layer wa-native, overrides;
+
+/* #endregion */
+
+/* #region button */
+
+wa-button::part(base) {
+  transition: background var(--wa-transition-normal);
 }
 
-button {
-  border: unset;
+wa-button::part(base):hover {
+  background: var(--wa-color-brand);
 }
+
+wa-button:has(wa-icon:only-child)::part(base) {
+  background: transparent;
+}
+
+wa-button[size='small']:has(wa-icon:only-child)::part(base) {
+  font-size: var(--wa-font-size-xs);
+}
+
+wa-button[size='small']:has(wa-icon:only-child) wa-icon {
+  font-size: var(--wa-font-size-m);
+}
+
+wa-button:has(wa-icon:only-child)::part(base):hover {
+  background: var(--wa-color-brand);
+}
+
+/* #endregion */
+
+/* #region slider */
+
+wa-slider {
+  --thumb-width: 1.2em;
+  --thumb-height: 1.2em;
+}
+
+wa-slider::part(track) {
+  background: var(--wa-color-surface-default);
+}
+
+wa-slider::part(thumb) {
+  border: none;
+}
+
+/* #endregion */

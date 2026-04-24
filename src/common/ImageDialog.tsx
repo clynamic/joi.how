@@ -1,18 +1,11 @@
-import {
-  faArrowUpRightFromSquare,
-  faTrash,
-  faCheckSquare,
-} from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
-import { ImageItem } from '../types';
-import { Dialog } from './Dialog';
-import { ImageSize } from './Image';
-import { ToggleTile } from './ToggleTile';
-import { Surrounded } from './Trailing';
-import styled from 'styled-components';
-import { StackedImage } from './StackedImage';
+import { JoiToggleTile } from './ToggleTile';
+import { useCallback, useEffect, useState } from 'react';
+import { ImageItem, ImageType } from '../types';
+import { JoiImage } from './JoiImage';
 import { useLocalImages } from '../local/LocalProvider';
+import styled from 'styled-components';
+import { WaDialog, WaCard, WaIcon } from '@awesome.me/webawesome/dist/react';
+import { JoiStack } from './JoiStack';
 
 export interface ImageDialogProps {
   image?: ImageItem;
@@ -22,34 +15,29 @@ export interface ImageDialogProps {
   loud?: boolean;
 }
 
-const StyledImageDialogContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 400px;
-  max-width: 100%;
-  max-height: 100%;
-  overflow: auto;
+const StyledImageDialog = styled(WaDialog)`
+  &::part(dialog) {
+    background-color: transparent;
+  }
+
+  &::part(body) {
+    padding: var(--wa-space-2xs);
+  }
+
+  wa-card {
+    background-color: var(--wa-color-surface-raised);
+  }
+  wa-card::part(body) {
+    padding: var(--wa-space-2xs);
+  }
 `;
 
-const StyledImageDialogImage = styled(StackedImage)`
-  max-height: 400px;
-  object-fit: contain;
-`;
-
-const StyledImageDialogActions = styled.div`
-  background: var(--card-background);
-  border-radius: var(--border-radius);
-  padding: 8px;
-  margin-top: 8px;
-`;
-
-export const ImageDialog: React.FC<PropsWithChildren<ImageDialogProps>> = ({
+export const ImageDialog: React.FC<ImageDialogProps> = ({
   image,
   onClose,
   onSelect,
   onDelete,
-  loud,
-  children,
+  loud = false,
 }) => {
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState<ImageItem | null>(null);
@@ -57,77 +45,78 @@ export const ImageDialog: React.FC<PropsWithChildren<ImageDialogProps>> = ({
 
   useEffect(() => {
     setVisible(!!image);
-    if (image) {
-      setCurrent(image);
-    }
+    if (image) setCurrent(image);
   }, [image]);
 
-  const onVisibleChange = useCallback(
-    (visible: boolean) => {
-      setVisible(visible);
-      if (!visible) {
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      setVisible(isOpen);
+      if (!isOpen) {
         setCurrent(null);
+        onClose?.();
       }
     },
-    [setVisible, setCurrent]
+    [onClose]
   );
 
   return (
-    <Dialog
-      dismissable
-      onVisibleChange={onVisibleChange}
-      background='transparent'
+    <StyledImageDialog
       open={visible}
-      onOpenChange={value => value || onClose?.()}
-      content={
-        current && (
-          <StyledImageDialogContent>
-            <StyledImageDialogImage
-              item={current}
-              size={ImageSize.full}
-              playable
-              loud={loud}
-            />
-            <StyledImageDialogActions>
-              <ToggleTile
-                onClick={async () =>
-                  window.open(await resolveUrl(current.source), '_blank')
-                }
-              >
-                <Surrounded
-                  trailing={<FontAwesomeIcon icon={faArrowUpRightFromSquare} />}
-                >
-                  <strong>Browse</strong>
-                  <p>Open source in new tab</p>
-                </Surrounded>
-              </ToggleTile>
-              <ToggleTile
-                onClick={() => {
-                  onSelect?.();
-                  onClose?.();
-                }}
-              >
-                <Surrounded trailing={<FontAwesomeIcon icon={faCheckSquare} />}>
-                  <strong>Select</strong>
-                  <p>Start multi-select here</p>
-                </Surrounded>
-              </ToggleTile>
-              <ToggleTile
-                onClick={() => {
-                  onDelete?.();
-                  onClose?.();
-                }}
-              >
-                <Surrounded trailing={<FontAwesomeIcon icon={faTrash} />}>
-                  <strong>Delete</strong>
-                  <p>Remove from library</p>
-                </Surrounded>
-              </ToggleTile>
-            </StyledImageDialogActions>
-          </StyledImageDialogContent>
-        )
-      }
-      children={children}
-    />
+      lightDismiss
+      onWaAfterHide={() => handleOpenChange(false)}
+    >
+      {current && (
+        <JoiStack>
+          <JoiImage
+            thumb={current.thumbnail}
+            preview={current.preview}
+            full={current.full}
+            kind={current.type === ImageType.video ? 'video' : 'image'}
+            playable={current.type === ImageType.video}
+            loud={loud}
+            objectFit='contain'
+            style={{ height: 400 }}
+            alt={`file #${current.id}`}
+          />
+          <WaCard appearance='filled'>
+            <JoiToggleTile
+              onChange={async () =>
+                window.open(await resolveUrl(current.source), '_blank')
+              }
+            >
+              <h6 className='subtitle'>Browse</h6>
+              <p className='caption'>Open source in new tab</p>
+              <WaIcon slot='trailing' name='arrow-up-right-from-square' />
+            </JoiToggleTile>
+
+            <JoiToggleTile
+              onChange={() => {
+                onSelect?.();
+                onClose?.();
+              }}
+            >
+              <h6 className='subtitle'>Select</h6>
+              <p className='caption'>Start multi-select here</p>
+              <span slot='trailing'>
+                <WaIcon name='square-check' />
+              </span>
+            </JoiToggleTile>
+
+            <JoiToggleTile
+              onChange={() => {
+                onDelete?.();
+                onClose?.();
+              }}
+            >
+              <h6 className='subtitle'>Delete</h6>
+              <p className='caption'>Remove from library</p>
+              <span slot='trailing'>
+                <WaIcon name='trash' />
+              </span>
+            </JoiToggleTile>
+          </WaCard>
+        </JoiStack>
+      )}
+    </StyledImageDialog>
   );
 };

@@ -6,7 +6,7 @@ import { GamePhase, useGameValue } from '../GameProvider';
 import { useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
-const StyledGameHypno = motion(styled.div`
+const StyledGameHypno = motion.create(styled.div`
   pointer-events: none;
   font-size: 4rem;
   font-weight: bold;

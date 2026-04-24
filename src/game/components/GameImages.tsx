@@ -2,9 +2,10 @@ import styled from 'styled-components';
 import { useImages, useSetting } from '../../settings';
 import { useGameValue } from '../GameProvider';
 import { motion } from 'framer-motion';
-import { useCallback, useEffect, useMemo } from 'react';
-import { ImageSize, StackedImage } from '../../common';
+import { JoiImage } from '../../common';
 import { useAutoRef, useImagePreloader, useLooping } from '../../utils';
+import { ImageSize, ImageType } from '../../types';
+import { useCallback, useMemo, useEffect } from 'react';
 
 const StyledGameImages = styled.div`
   position: absolute;
@@ -25,7 +26,7 @@ const StyledForegroundImage = styled.div`
   user-select: none;
 `;
 
-const StyledBackgroundImage = motion(styled.div`
+const StyledBackgroundImage = motion.create(styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -50,6 +51,8 @@ export const GameImages = () => {
   const [intensity] = useGameValue('intensity');
   const [videoSound] = useSetting('videoSound');
   const [highRes] = useSetting('highRes');
+  const [imageDuration] = useSetting('imageDuration');
+  const [intenseImages] = useSetting('intenseImages');
 
   useImagePreloader(nextImages, highRes ? ImageSize.full : ImageSize.preview);
 
@@ -89,8 +92,12 @@ export const GameImages = () => {
   }, [imagesTracker]);
 
   const switchDuration = useMemo(() => {
-    return Math.max((100 - intensity) * 80, 2000);
-  }, [intensity]);
+    if (intenseImages) {
+      const scaleFactor = Math.max((100 - intensity) / 100, 0.1);
+      return Math.max(imageDuration * scaleFactor * 1000, 1000);
+    }
+    return imageDuration * 1000;
+  }, [imageDuration, intenseImages, intensity]);
 
   useEffect(() => switchImage(), [switchImage]);
 
@@ -109,18 +116,26 @@ export const GameImages = () => {
               repeat: Infinity,
             }}
           >
-            <StackedImage item={currentImage} size={ImageSize.preview} />
+            <JoiImage
+              thumb={currentImage.thumbnail}
+              preview={currentImage.preview}
+              full=''
+              kind={currentImage.type === ImageType.video ? 'video' : 'image'}
+              objectFit='cover'
+            />
           </StyledBackgroundImage>
           <StyledForegroundImage>
-            <StackedImage
-              style={{
-                objectFit: 'contain',
-              }}
-              item={currentImage}
-              size={highRes ? ImageSize.full : ImageSize.preview}
-              playable
-              randomStart
+            <JoiImage
+              thumb={currentImage.thumbnail}
+              preview={currentImage.preview}
+              full={currentImage.full}
+              // We remove this for now.
+              // full={highRes ? currentImage.full : ''}
+              kind={currentImage.type === ImageType.video ? 'video' : 'image'}
+              playable={currentImage.type === ImageType.video}
               loud={videoSound}
+              randomStart={true}
+              objectFit='contain'
             />
           </StyledForegroundImage>
         </>

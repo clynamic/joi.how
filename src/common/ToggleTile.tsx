@@ -1,118 +1,145 @@
-/* eslint-disable react-refresh/only-export-components */
-import { PropsWithChildren } from 'react';
-import styled from 'styled-components';
-import { Surrounded } from './Trailing';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCircle,
-  faCircleDot,
-  faSquare,
-  faSquareCheck,
-} from '@fortawesome/free-regular-svg-icons';
+import '@awesome.me/webawesome/dist/components/card/card.js';
+import '@awesome.me/webawesome/dist/components/icon/icon.js';
+import { LitElement, html, css } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import React from 'react';
+import { createComponent, type EventName } from '@lit/react';
 
-interface StyledToggleTileProps {
-  $value: boolean;
-}
+export type JoiToggleTileType = 'none' | 'check' | 'radio';
 
-const StyledToggleTile = styled.button<StyledToggleTileProps>`
-  grid-column: 1 / -1;
-  width: 100%;
+@customElement('joi-toggle-tile')
+export class JoiToggleTileElement extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+      --wa-content-spacing: 0;
+      --tile-inactive-opacity: 0.3;
+    }
 
-  display: flex;
-  flex-direction: column;
+    .action {
+      display: block;
+      width: 100%;
+      cursor: pointer;
 
-  align-items: start;
-  text-align: start;
+      background: var(--wa-color-neutral-fill-quiet);
+      opacity: var(--tile-inactive-opacity);
 
-  background: var(--button-background);
-  color: var(--button-color);
+      border: none;
+      border-radius: var(--wa-border-radius-m);
 
-  border-radius: var(--border-radius);
+      margin: var(--wa-space-2xs) 0;
+      padding: var(--wa-space-xs) var(--wa-space-s);
 
-  opacity: ${({ $value }) => ($value ? 1 : 0.3)};
-  transition:
-    opacity 0.2s,
-    background 0.2s;
+      text-align: left;
 
-  &:hover {
-    background: var(--primary);
+      transition:
+        opacity var(--wa-transition-normal),
+        background var(--wa-transition-normal);
+    }
+
+    :host([value]) .action {
+      opacity: 1;
+    }
+
+    .action:hover {
+      background: var(--wa-color-brand);
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--wa-space-3xs);
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--wa-space-xs);
+    }
+
+    .trailing {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: calc(var(--wa-font-size-l) * 1.1);
+      padding: var(--wa-space-2xs);
+    }
+
+    ::slotted(.subtitle) {
+      margin: 0;
+      font-size: var(--wa-font-size-m);
+      font-weight: var(--wa-font-weight-semibold);
+    }
+
+    ::slotted(.caption) {
+      margin: 0;
+      font-size: var(--wa-font-size-s);
+      color: var(--wa-color-text-quiet);
+    }
+  `;
+
+  @property({ type: Boolean, reflect: true })
+  accessor value = true;
+
+  @property({ type: String, reflect: true })
+  accessor type: JoiToggleTileType = 'none';
+
+  @property({ type: Boolean, reflect: true })
+  accessor disabled = false;
+
+  private onClick = () => {
+    if (this.disabled) return;
+    if (this.type === 'check') this.value = !this.value;
+    if (this.type === 'radio') this.value = true;
+    this.dispatchEvent(
+      new CustomEvent('change', { detail: { value: this.value } })
+    );
+  };
+
+  renderTrailing() {
+    if (this.type === 'check') {
+      return html`
+        <slot name="trailing">
+          <wa-icon
+            variant="regular"
+            name=${this.value ? 'square-check' : 'square'}
+          ></wa-icon>
+        </slot>
+      `;
+    }
+    if (this.type === 'radio') {
+      return html`
+        <slot name="trailing">
+          <wa-icon
+            variant="regular"
+            name=${this.value ? 'circle-dot' : 'circle'}
+          ></wa-icon>
+        </slot>
+      `;
+    }
+    return html`<slot name="trailing"></slot>`;
   }
 
-  border: unset;
-
-  margin: 10px 0;
-  padding: 5px 10px;
-
-  cursor: pointer;
-
-  strong {
-    color: var(--text-color);
-    margin-bottom: 2px;
+  render() {
+    return html`
+      <button class="action" type="button" @click=${this.onClick}>
+        <div class="row">
+          <div class="content"><slot></slot></div>
+          <div class="trailing">${this.renderTrailing()}</div>
+        </div>
+      </button>
+    `;
   }
-
-  p {
-    color: var(--card-color);
-  }
-`;
-
-export enum ToggleTileType {
-  none = 'none',
-  check = 'check',
-  radio = 'radio',
 }
 
-export interface ToggleTileProps
-  extends React.HTMLAttributes<HTMLButtonElement> {
-  value?: boolean;
-  onClick?: () => void;
-  type?: ToggleTileType;
-  trailing?: React.ReactNode;
-}
-
-export const ToggleTile: React.FC<PropsWithChildren<ToggleTileProps>> = ({
-  children,
-  value = true,
-  onClick,
-  type = ToggleTileType.none,
-  trailing,
-  ...props
-}) => {
-  return (
-    <StyledToggleTile
-      $value={value}
-      role={(() => {
-        switch (type) {
-          case ToggleTileType.check:
-            return 'checkbox';
-          case ToggleTileType.radio:
-            return 'radio';
-          default:
-            return 'switch';
-        }
-      })()}
-      aria-checked={value}
-      onClick={onClick}
-      {...props}
-    >
-      <Surrounded
-        trailing={(() => {
-          if (trailing) {
-            return trailing;
-          }
-          switch (type) {
-            case ToggleTileType.check:
-              return (
-                <FontAwesomeIcon icon={value ? faSquareCheck : faSquare} />
-              );
-            case ToggleTileType.radio:
-              return <FontAwesomeIcon icon={value ? faCircleDot : faCircle} />;
-            default:
-              return null;
-          }
-        })()}
-      >
-        {children}
-      </Surrounded>
-    </StyledToggleTile>
-  );
-};
+export const JoiToggleTile = createComponent({
+  tagName: 'joi-toggle-tile',
+  elementClass: JoiToggleTileElement,
+  react: React,
+  events: {
+    onChange: 'change' as EventName<CustomEvent<{ value: boolean }>>,
+  },
+});

@@ -18,6 +18,8 @@ export interface Settings {
   body: PlayerBody;
   highRes: boolean;
   videoSound: boolean;
+  imageDuration: number;
+  intenseImages: boolean;
 }
 
 export const defaultSettings: Settings = {
@@ -35,6 +37,8 @@ export const defaultSettings: Settings = {
   body: PlayerBody.penis,
   highRes: false,
   videoSound: false,
+  imageDuration: 20,
+  intenseImages: true,
 };
 
 const settingsStorageKey = 'settings';

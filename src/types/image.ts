@@ -4,6 +4,12 @@ export enum ImageType {
   gif = 'gif',
 }
 
+export enum ImageSize {
+  thumbnail = 'thumbnail',
+  preview = 'preview',
+  full = 'full',
+}
+
 export interface ImageItem {
   thumbnail: string;
   preview: string;

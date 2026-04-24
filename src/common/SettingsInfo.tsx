@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
-export interface SettingsDescriptionProps
-  extends React.HTMLAttributes<HTMLElement> {
+export interface SettingsInfoProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
 }
 
@@ -17,7 +16,7 @@ const StyledSettingsInfo = styled.em`
   align-items: center;
 `;
 
-export const SettingsInfo: React.FC<SettingsDescriptionProps> = ({
+export const SettingsInfo: React.FC<SettingsInfoProps> = ({
   children,
   ...props
 }) => {

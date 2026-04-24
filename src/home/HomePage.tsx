@@ -20,6 +20,10 @@ const StyledHomePage = styled.div`
   margin: 0;
   padding: 16px;
 
+  @media (max-width: 600px) {
+    padding: 6px;
+  }
+
   & > * {
     max-width: 920px;
     width: 100%;

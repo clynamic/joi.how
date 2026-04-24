@@ -1,3 +1,6 @@
+import { ReactiveElement } from '@lit/reactive-element';
+ReactiveElement.disableWarning?.('change-in-update');
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './app/App.tsx';
@@ -6,6 +9,9 @@ import { SettingsProvider, ImageProvider } from './settings';
 import { E621Provider } from './e621';
 import { ToyClientProvider } from './toy';
 import { LocalImageProvider } from './local/LocalProvider.tsx';
+import { registerServiceWorker } from './utils/serviceWorker.ts';
+
+registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
