@@ -44,16 +44,15 @@ export class VibrationActuator
   implements VibrationActuatorSettings
 {
   mode: VibrateMode = VibrateMode.activeUp;
-  minIntensity: number = 0;
-  maxIntensity: number = 1.0;
-  intensityRange: number[] = [];
+  currentMinIntensity: number = 0;
+  currentMaxIntensity: number = 1.0;
+  intensityStepSize: number = 1;
+  absMinIntensity: number = 0;
+  absMaxIntensity: number = 1.0;
 
   constructor(attributes: GenericDeviceMessageAttributes) {
     super(attributes);
-    const intensityStep = 1.0 / attributes.StepCount;
-    for (let i = 0; i <= attributes.StepCount; ++i) {
-      this.intensityRange[i] = intensityStep * i;
-    }
+    this.intensityStepSize = 1.0 / attributes.StepCount;
   }
 
   setMode(newMode: VibrateMode) {
@@ -61,15 +60,15 @@ export class VibrationActuator
   }
 
   setMinIntensity(newMin: number) {
-    this.minIntensity = newMin;
+    this.currentMinIntensity = newMin;
   }
 
   setMaxIntensity(newMax: number) {
-    this.maxIntensity = newMax;
+    this.currentMaxIntensity = newMax;
   }
 
   override getOutput(stroke: Stroke, intensity: number) {
-    let output = this.minIntensity;
+    let output = this.currentMinIntensity;
     switch (this.mode) {
       case VibrateMode.activeUp:
         if (stroke == Stroke.up) {
@@ -92,8 +91,8 @@ export class VibrationActuator
   }
 
   mapToRange(input: number): number {
-    const slope = this.maxIntensity - this.minIntensity;
-    return this.minIntensity + slope * input;
+    const slope = this.currentMaxIntensity - this.currentMinIntensity;
+    return this.currentMinIntensity + slope * input;
   }
 }
 
@@ -102,16 +101,16 @@ export class LinearActuator
   implements LinearActuatorSettings
 {
   mode: LinearMode = LinearMode.normal;
-  minPosition: number = 0;
-  maxPosition: number = 1.0;
-  positionRange: number[] = [];
+  currentMinPosition: number = 0;
+  currentMaxPosition: number = 1.0;
+  positionStepSize: number = 1;
+  absMinPosition: number = 0;
+  absMaxPosition: number = 1.0;
 
   constructor(attributes: GenericDeviceMessageAttributes) {
     super(attributes);
-    const positionStep = 1.0 / attributes.StepCount;
-    for (let i = 0; i <= attributes.StepCount; ++i) {
-      this.positionRange[i] = positionStep * i;
-    }
+    this.positionStepSize = 1.0 / attributes.StepCount;
+
   }
 
   setMode(newMode: LinearMode) {
@@ -119,25 +118,25 @@ export class LinearActuator
   }
 
   setMinPosition(newMin: number) {
-    this.minPosition = newMin;
+    this.currentMinPosition = newMin;
   }
 
   setMaxPosition(newMax: number) {
-    this.maxPosition = newMax;
+    this.currentMaxPosition = newMax;
   }
 
   override getOutput(stroke: Stroke, intensity: number, pace: number) {
-    let targetPosition = this.minPosition;
+    let targetPosition = this.currentMinPosition;
     let movementTime = Math.round(1000.0 / pace);
     switch (this.mode) {
       case LinearMode.normal:
         if (stroke == Stroke.up) {
-          targetPosition = this.maxPosition;
+          targetPosition = this.currentMaxPosition;
         }
         break;
       case LinearMode.inverted:
         if (stroke == Stroke.down) {
-          targetPosition = this.maxPosition;
+          targetPosition = this.currentMaxPosition;
         }
         break;
       case LinearMode.alwaysOff:
@@ -156,12 +155,12 @@ export interface ToyActuatorSettings {
 
 export interface VibrationActuatorSettings {
   mode: VibrateMode;
-  minIntensity: number;
-  maxIntensity: number;
+  currentMinIntensity: number;
+  currentMaxIntensity: number;
 }
 
 export interface LinearActuatorSettings {
   mode: LinearMode;
-  minPosition: number;
-  maxPosition: number;
+  currentMinPosition: number;
+  currentMaxPosition: number;
 }

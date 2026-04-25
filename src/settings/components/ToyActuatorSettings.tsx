@@ -7,13 +7,14 @@ import {
   LinearMode,
   LinearModeLabels,
 } from '../../toy';
-import { PropsWithChildren, useState } from 'react';
-import { SettingsTile } from '../../common';
+import { FormEvent, PropsWithChildren, useState } from 'react';
+import { Fields } from '../../common';
 import { SettingsDescription } from '../../common/SettingsDescription';
-import { Dropdown } from '../../common/Dropdown';
+import { WaButton, WaDropdown, WaDropdownItem, WaSlider } from '@awesome.me/webawesome/dist/react';
 import { ActuatorType } from 'buttplug';
 import { Space } from '../../common/Space';
-import { SettingsLabel } from '../../common/SettingsLabel';
+import { WaSelectEvent } from '@awesome.me/webawesome/dist/events/select.js';
+import { WaSliderProps } from '@awesome.me/webawesome/dist/custom-elements-jsx.d.ts';
 
 export interface ToySettingsProps
   extends PropsWithChildren<React.HTMLAttributes<HTMLFieldSetElement>> {
@@ -24,7 +25,7 @@ export const ToyActuatorSettings: React.FC<ToySettingsProps> = ({
   toyActuator,
 }) => {
   return (
-    <SettingsTile
+    <Fields key={`${toyActuator.actuatorType} ${toyActuator.index + 1}`}
       label={`${toyActuator.actuatorType} ${toyActuator.index + 1}`}
     >
       {(() => {
@@ -37,7 +38,7 @@ export const ToyActuatorSettings: React.FC<ToySettingsProps> = ({
             return <UnknownActuatorSettings />;
         }
       })()}
-    </SettingsTile>
+    </Fields>
   );
 };
 
@@ -47,61 +48,57 @@ export const VibratorActuatorSettings: React.FC<ToySettingsProps> = ({
   const vibratorActuator = toyActuator as VibrationActuator;
   const descriptor = `${vibratorActuator.actuatorType}_${vibratorActuator.index}`;
   const [mode, setMode] = useState(vibratorActuator.mode);
-  const [min, setMin] = useState(vibratorActuator.minIntensity);
-  const [max, setMax] = useState(vibratorActuator.maxIntensity);
+  const [min, setMin] = useState(vibratorActuator.currentMinIntensity);
+  const [max, setMax] = useState(vibratorActuator.currentMaxIntensity);
 
   return (
     <div key={`${descriptor}_settings`}>
       <SettingsDescription>
         Select when this component will activate.
       </SettingsDescription>
-      <Dropdown
+      <WaDropdown
         id={`${descriptor}_mode`}
-        value={mode}
-        onChange={(value: string) => {
-          const newMode = value as VibrateMode;
-          setMode(newMode);
-          vibratorActuator.setMode(newMode);
-        }}
-        options={Object.values(VibrateMode).map(value => ({
-          value,
-          label: VibrateModeLabels[value],
-        }))}
-      />
+        children={
+          Array(<WaButton key={`${descriptor}_dropdown`} appearance='filled' slot='trigger' withCaret>{VibrateModeLabels[mode]}</WaButton>).concat(
+            Object.values(VibrateMode).map(mode => (
+              <WaDropdownItem value={mode} key={`${descriptor}_${VibrateModeLabels[mode]}`}>
+                {VibrateModeLabels[mode]}
+              </WaDropdownItem>)))
+        }
+        onWaSelect={(event: WaSelectEvent) => {
+          let newMode = (event.detail.item as HTMLInputElement).value as VibrateMode
+          setMode(newMode)
+          vibratorActuator.setMode(newMode)
+          }
+        }
+        ></WaDropdown>
       <Space size='medium' />
       <SettingsDescription>
         Change the range of intensity for this component.
       </SettingsDescription>
-      <SettingsLabel>From</SettingsLabel>
-      <Dropdown
-        id={`{${descriptor}_min}`}
-        value={`${min}`}
-        onChange={(value: string) => {
-          const newMin = +value;
-          if (newMin > vibratorActuator.maxIntensity) return;
-          setMin(newMin);
-          vibratorActuator.setMinIntensity(newMin);
+      <WaSlider
+        id={`{${descriptor}_range}`}
+        range={true}
+        min={vibratorActuator.absMinIntensity}
+        max={vibratorActuator.absMaxIntensity}
+        minValue={min}
+        maxValue={max}
+        step={vibratorActuator.intensityStepSize}
+        withTooltip={true}
+        valueFormatter={(value) => Intl.NumberFormat('en-US', {style: 'percent'}).format(value)}
+        onInput={(event: FormEvent) =>
+        {
+          let sliderProps = (event.target as WaSliderProps)
+          setMin(sliderProps.minValue as number)
+          setMax(sliderProps.maxValue as number)
+          vibratorActuator.setMinIntensity(sliderProps.minValue as number)
+          vibratorActuator.setMaxIntensity(sliderProps.maxValue as number)
         }}
-        options={vibratorActuator.intensityRange.map(value => ({
-          value: `${value}`,
-          label: `${(value * 100).toFixed(0)}%`,
-        }))}
-      />
-      <SettingsLabel>To</SettingsLabel>
-      <Dropdown
-        id={`{${descriptor}_max}`}
-        value={`${max}`}
-        onChange={(value: string) => {
-          const newMax = +value;
-          if (newMax < vibratorActuator.minIntensity) return;
-          setMax(newMax);
-          vibratorActuator.setMaxIntensity(newMax);
-        }}
-        options={vibratorActuator.intensityRange.map(value => ({
-          value: `${value}`,
-          label: `${(value * 100).toFixed(0)}%`,
-        }))}
-      />
+      >
+        <span slot='reference'>{vibratorActuator.absMinIntensity * 100}%</span>
+        <span slot='reference'>{vibratorActuator.absMaxIntensity * 100/2}%</span>
+        <span slot='reference'>{vibratorActuator.absMaxIntensity * 100}%</span>
+      </WaSlider>
     </div>
   );
 };
@@ -112,60 +109,56 @@ export const PositionActuatorSettings: React.FC<ToySettingsProps> = ({
   const linearActuator = toyActuator as LinearActuator;
   const descriptor = `${linearActuator.actuatorType}_${linearActuator.index}`;
   const [mode, setMode] = useState(linearActuator.mode);
-  const [min, setMin] = useState(linearActuator.minPosition);
-  const [max, setMax] = useState(linearActuator.maxPosition);
+  const [min, setMin] = useState(linearActuator.currentMinPosition);
+  const [max, setMax] = useState(linearActuator.currentMaxPosition);
 
   return (
     <div>
       <SettingsDescription>
         Select when this component will activate.
       </SettingsDescription>
-      <Dropdown
+      <WaDropdown
         id={`${descriptor}_mode`}
-        value={mode}
-        onChange={(value: string) => {
-          const newMode = value as LinearMode;
-          setMode(newMode);
-          linearActuator.setMode(newMode);
-        }}
-        options={Object.values(LinearMode).map(value => ({
-          value,
-          label: LinearModeLabels[value],
-        }))}
-      />
+        children={
+          Array(<WaButton key={`${descriptor}_dropdown`} appearance='filled' slot='trigger' withCaret>{LinearModeLabels[mode]}</WaButton>).concat(
+            Object.values(LinearMode).map(mode => (
+              <WaDropdownItem value={mode} key={`${descriptor}_${LinearModeLabels[mode]}`}>
+                {LinearModeLabels[mode]}
+              </WaDropdownItem>)))
+        }
+        onWaSelect={(event: WaSelectEvent) => {
+          let newMode = (event.detail.item as HTMLInputElement).value as LinearMode
+          setMode(newMode)
+          linearActuator.setMode(newMode)
+          }
+        }
+        ></WaDropdown>
       <SettingsDescription>
         Change the range of motion for this component.
       </SettingsDescription>
-      <SettingsLabel>From</SettingsLabel>
-      <Dropdown
-        id={`{${descriptor}_min}`}
-        value={`${min}`}
-        onChange={(value: string) => {
-          const newMin = +value;
-          if (newMin > linearActuator.maxPosition) return;
-          setMin(newMin);
-          linearActuator.setMinPosition(newMin);
+      <WaSlider
+        id={`{${descriptor}_range}`}
+        range={true}
+        min={linearActuator.absMinPosition}
+        max={linearActuator.absMaxPosition}
+        minValue={min}
+        maxValue={max}
+        step={linearActuator.positionStepSize}
+        withTooltip={true}
+        valueFormatter={(value) => Intl.NumberFormat('en-US', {style: 'percent'}).format(value)}
+        onInput={(event: FormEvent) =>
+        {
+          let sliderProps = (event.target as WaSliderProps)
+          setMin(sliderProps.minValue as number)
+          setMax(sliderProps.maxValue as number)
+          linearActuator.setMinPosition(sliderProps.minValue as number)
+          linearActuator.setMaxPosition(sliderProps.maxValue as number)
         }}
-        options={linearActuator.positionRange.map(value => ({
-          value: `${value}`,
-          label: `${(value * 100).toFixed(0)}%`,
-        }))}
-      />
-      <SettingsLabel>To</SettingsLabel>
-      <Dropdown
-        id={`{${descriptor}_max}`}
-        value={`${max}`}
-        onChange={(value: string) => {
-          const newMax = +value;
-          if (newMax < linearActuator.minPosition) return;
-          setMax(newMax);
-          linearActuator.setMaxPosition(newMax);
-        }}
-        options={linearActuator.positionRange.map(value => ({
-          value: `${value}`,
-          label: `${(value * 100).toFixed(0)}%`,
-        }))}
-      />
+      >
+        <span slot='reference'>{linearActuator.absMinPosition * 100}%</span>
+        <span slot='reference'>{linearActuator.absMaxPosition * 100/2}%</span>
+        <span slot='reference'>{linearActuator.absMaxPosition * 100}%</span>
+      </WaSlider>
     </div>
   );
 };
