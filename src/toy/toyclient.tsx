@@ -7,8 +7,11 @@ import { ToyActuator, VibrationActuator, LinearActuator } from './toyactuator';
 import { Stroke } from '../game/GameProvider';
 import { wait, createStateProvider } from '../utils';
 
+let index = 0;
+
 export class ToyClient {
   actuators: ToyActuator[] = [];
+  index: number = 0;
 
   constructor(private readonly device: ButtplugClientDevice) {
     device.vibrateAttributes.forEach(
@@ -27,6 +30,7 @@ export class ToyClient {
       attribute =>
         (this.actuators = [...this.actuators, new ToyActuator(attribute)])
     );
+    this.index = index++
   }
 
   async actuate(stroke: Stroke, intensity: number, pace: number) {
