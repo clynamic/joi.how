@@ -30,7 +30,7 @@ export class ToyClient {
       attribute =>
         (this.actuators = [...this.actuators, new ToyActuator(attribute)])
     );
-    this.index = index++
+    this.index = index++;
   }
 
   async actuate(stroke: Stroke, intensity: number, pace: number) {
