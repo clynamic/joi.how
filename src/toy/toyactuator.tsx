@@ -110,7 +110,6 @@ export class LinearActuator
   constructor(attributes: GenericDeviceMessageAttributes) {
     super(attributes);
     this.positionStepSize = 1.0 / attributes.StepCount;
-
   }
 
   setMode(newMode: LinearMode) {
