@@ -25,7 +25,7 @@ export const GameToyClient = () => {
     devices.forEach(device => {
       device.actuate(stroke, intensity, pace, maxPace);
     });
-  }, [data, stroke]);
+  }, [data, stroke, maxPace]);
 
   useEffect(() => {
     const { devices } = data.current;
