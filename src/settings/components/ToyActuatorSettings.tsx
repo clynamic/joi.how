@@ -6,6 +6,9 @@ import {
   LinearActuator,
   LinearMode,
   LinearModeLabels,
+  OscillateActuator,
+  OscillateModeLabels,
+  OscillateMode,
 } from '../../toy';
 import { FormEvent, PropsWithChildren, useState } from 'react';
 import { Fields } from '../../common';
@@ -41,6 +44,8 @@ export const ToyActuatorSettings: React.FC<ToySettingsProps> = ({
             return <VibratorActuatorSettings toyActuator={toyActuator} />;
           case ActuatorType.Position:
             return <PositionActuatorSettings toyActuator={toyActuator} />;
+          case ActuatorType.Oscillate:
+            return <OscillateActuatorSettings toyActuator={toyActuator} />;
           default:
             return <UnknownActuatorSettings />;
         }
@@ -195,6 +200,81 @@ export const PositionActuatorSettings: React.FC<ToySettingsProps> = ({
           {(linearActuator.absMaxPosition * 100) / 2}%
         </span>
         <span slot='reference'>{linearActuator.absMaxPosition * 100}%</span>
+      </WaSlider>
+    </div>
+  );
+};
+
+export const OscillateActuatorSettings: React.FC<ToySettingsProps> = ({
+  toyActuator,
+}) => {
+  const oscillateActuator = toyActuator as OscillateActuator;
+  const descriptor = `${oscillateActuator.actuatorType}_${oscillateActuator.index}`;
+  const [mode, setMode] = useState(oscillateActuator.mode);
+  const [min, setMin] = useState(oscillateActuator.currentMinSpeed);
+  const [max, setMax] = useState(oscillateActuator.currentMaxSpeed);
+
+  return (
+    <div>
+      <SettingsDescription>
+        Select how this component's speed will be calculated.
+      </SettingsDescription>
+      <WaDropdown
+        id={`${descriptor}_mode`}
+        children={Array(
+          <WaButton
+            key={`${descriptor}_dropdown`}
+            appearance='filled'
+            slot='trigger'
+            withCaret
+          >
+            {OscillateModeLabels[mode]}
+          </WaButton>
+        ).concat(
+          Object.values(OscillateMode).map(mode => (
+            <WaDropdownItem
+              value={mode}
+              key={`${descriptor}_${OscillateModeLabels[mode]}`}
+            >
+              {OscillateModeLabels[mode]}
+            </WaDropdownItem>
+          ))
+        )}
+        onWaSelect={(event: WaSelectEvent) => {
+          const newMode = (event.detail.item as HTMLInputElement)
+            .value as OscillateMode;
+          setMode(newMode);
+          oscillateActuator.setMode(newMode);
+        }}
+      ></WaDropdown>
+      <SettingsDescription>
+        Change the range of speed for this component.
+      </SettingsDescription>
+      <WaSlider
+        id={`{${descriptor}_range}`}
+        range={true}
+        min={oscillateActuator.absMinSpeed}
+        max={oscillateActuator.absMaxSpeed}
+        minValue={min}
+        maxValue={max}
+        step={oscillateActuator.speedStepSize}
+        withTooltip={true}
+        valueFormatter={value =>
+          Intl.NumberFormat('en-US', { style: 'percent' }).format(value)
+        }
+        onInput={(event: FormEvent) => {
+          const sliderProps = event.target as WaSliderProps;
+          setMin(sliderProps.minValue as number);
+          setMax(sliderProps.maxValue as number);
+          oscillateActuator.setMinPosition(sliderProps.minValue as number);
+          oscillateActuator.setMaxPosition(sliderProps.maxValue as number);
+        }}
+      >
+        <span slot='reference'>{oscillateActuator.absMinSpeed * 100}%</span>
+        <span slot='reference'>
+          {(oscillateActuator.absMaxSpeed * 100) / 2}%
+        </span>
+        <span slot='reference'>{oscillateActuator.absMaxSpeed * 100}%</span>
       </WaSlider>
     </div>
   );
