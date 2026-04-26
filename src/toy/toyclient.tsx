@@ -3,7 +3,12 @@ import {
   type ButtplugClientDevice,
   ActuatorType,
 } from 'buttplug';
-import { ToyActuator, VibrationActuator, LinearActuator } from './toyactuator';
+import {
+  ToyActuator,
+  VibrationActuator,
+  LinearActuator,
+  OscillateActuator,
+} from './toyactuator';
 import { Stroke } from '../game/GameProvider';
 import { wait, createStateProvider } from '../utils';
 
@@ -24,7 +29,7 @@ export class ToyClient {
     );
     device.oscillateAttributes.forEach(
       attribute =>
-        (this.actuators = [...this.actuators, new ToyActuator(attribute)])
+        (this.actuators = [...this.actuators, new OscillateActuator(attribute)])
     );
     device.rotateAttributes.forEach(
       attribute =>
@@ -33,9 +38,15 @@ export class ToyClient {
     this.index = index++;
   }
 
-  async actuate(stroke: Stroke, intensity: number, pace: number) {
+  async actuate(
+    stroke: Stroke,
+    intensity: number,
+    pace: number,
+    maxPace: number
+  ) {
     const vibrationArray: number[] = [];
     const linearArray: [number, number][] = [];
+    const oscillateArray: number[] = [];
     this.actuators.forEach(actuator => {
       switch (actuator.actuatorType) {
         case ActuatorType.Vibrate:
@@ -52,6 +63,13 @@ export class ToyClient {
             pace
           ) as [number, number];
           break;
+        case ActuatorType.Oscillate:
+          oscillateArray[actuator.index] = actuator.getOutput?.(
+            stroke,
+            intensity,
+            pace / maxPace
+          ) as number;
+          break;
         default:
           break;
       }
@@ -61,6 +79,9 @@ export class ToyClient {
     }
     if (linearArray.length > 0) {
       this.device.linear(linearArray);
+    }
+    if (oscillateArray.length > 0) {
+      this.device.oscillate(oscillateArray);
     }
   }
 

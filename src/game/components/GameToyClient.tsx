@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { GamePhase, useGameValue } from '../GameProvider';
 import { useAutoRef } from '../../utils';
 import { useToyClientValue } from '../../toy';
+import { useSetting } from '../../settings';
 
 export const GameToyClient = () => {
   const [stroke] = useGameValue('stroke');
   const [intensity] = useGameValue('intensity');
   const [pace] = useGameValue('pace');
+  const [maxPace] = useSetting('maxPace');
   const [phase] = useGameValue('phase');
   const [devices] = useToyClientValue('devices');
 
@@ -21,7 +23,7 @@ export const GameToyClient = () => {
   useEffect(() => {
     const { intensity, pace, devices } = data.current;
     devices.forEach(device => {
-      device.actuate(stroke, intensity, pace);
+      device.actuate(stroke, intensity, pace, maxPace);
     });
   }, [data, stroke]);
 
