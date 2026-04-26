@@ -85,7 +85,7 @@ export const VibratorActuatorSettings: React.FC<ToySettingsProps> = ({
           ))
         )}
         onWaSelect={(event: WaSelectEvent) => {
-          let newMode = (event.detail.item as HTMLInputElement)
+          const newMode = (event.detail.item as HTMLInputElement)
             .value as VibrateMode;
           setMode(newMode);
           vibratorActuator.setMode(newMode);
@@ -108,7 +108,7 @@ export const VibratorActuatorSettings: React.FC<ToySettingsProps> = ({
           Intl.NumberFormat('en-US', { style: 'percent' }).format(value)
         }
         onInput={(event: FormEvent) => {
-          let sliderProps = event.target as WaSliderProps;
+          const sliderProps = event.target as WaSliderProps;
           setMin(sliderProps.minValue as number);
           setMax(sliderProps.maxValue as number);
           vibratorActuator.setMinIntensity(sliderProps.minValue as number);
@@ -161,7 +161,7 @@ export const PositionActuatorSettings: React.FC<ToySettingsProps> = ({
           ))
         )}
         onWaSelect={(event: WaSelectEvent) => {
-          let newMode = (event.detail.item as HTMLInputElement)
+          const newMode = (event.detail.item as HTMLInputElement)
             .value as LinearMode;
           setMode(newMode);
           linearActuator.setMode(newMode);
@@ -183,7 +183,7 @@ export const PositionActuatorSettings: React.FC<ToySettingsProps> = ({
           Intl.NumberFormat('en-US', { style: 'percent' }).format(value)
         }
         onInput={(event: FormEvent) => {
-          let sliderProps = event.target as WaSliderProps;
+          const sliderProps = event.target as WaSliderProps;
           setMin(sliderProps.minValue as number);
           setMax(sliderProps.maxValue as number);
           linearActuator.setMinPosition(sliderProps.minValue as number);
