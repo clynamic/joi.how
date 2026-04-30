@@ -9,7 +9,7 @@ import {
   ImageSettings,
   PaceSettings,
   PlayerSettings,
-  VibratorSettings,
+  ToyListSettings,
 } from '../../settings';
 import { GamePhase, useGameValue, useSendMessage } from '../GameProvider';
 import { useFullscreen, useLooping } from '../../utils';
@@ -63,7 +63,7 @@ const GameSettingsDialogContent = memo(() => (
     <HypnoSettings />
     <ClimaxSettings />
     <BoardSettings />
-    <VibratorSettings />
+    <ToyListSettings />
     <ImageSettings />
   </StyledGameSettingsDialog>
 ));

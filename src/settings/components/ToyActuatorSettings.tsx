@@ -11,18 +11,21 @@ import {
   OscillateMode,
 } from '../../toy';
 import { FormEvent, PropsWithChildren, useState } from 'react';
-import { Fields } from '../../common';
+import { defaultTransition } from '../../utils';
+import { SettingsGrid, SettingsRow } from '../../common';
 import { SettingsDescription } from '../../common/SettingsDescription';
 import {
   WaButton,
   WaDropdown,
   WaDropdownItem,
+  WaIcon,
   WaSlider,
 } from '@awesome.me/webawesome/dist/react';
 import { ActuatorType } from 'buttplug';
 import { Space } from '../../common/Space';
 import { WaSelectEvent } from '@awesome.me/webawesome/dist/events/select.js';
 import { WaSliderProps } from '@awesome.me/webawesome/dist/custom-elements-jsx.d.ts';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export interface ToySettingsProps extends PropsWithChildren<
   React.HTMLAttributes<HTMLFieldSetElement>
@@ -33,24 +36,57 @@ export interface ToySettingsProps extends PropsWithChildren<
 export const ToyActuatorSettings: React.FC<ToySettingsProps> = ({
   toyActuator,
 }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [icon, setIcon] = useState('angle-right');
   return (
-    <Fields
-      key={`${toyActuator.actuatorType} ${toyActuator.index + 1}`}
-      label={`${toyActuator.actuatorType} ${toyActuator.index + 1}`}
-    >
-      {(() => {
-        switch (toyActuator.actuatorType) {
-          case ActuatorType.Vibrate:
-            return <VibratorActuatorSettings toyActuator={toyActuator} />;
-          case ActuatorType.Position:
-            return <PositionActuatorSettings toyActuator={toyActuator} />;
-          case ActuatorType.Oscillate:
-            return <OscillateActuatorSettings toyActuator={toyActuator} />;
-          default:
-            return <UnknownActuatorSettings />;
-        }
-      })()}
-    </Fields>
+    <div>
+      <WaButton
+        onClick={() => {
+          if (expanded) setIcon('angle-right');
+          else setIcon('angle-down');
+          setExpanded(!expanded);
+        }}
+      >
+        <WaIcon name={icon} slot='start'></WaIcon>
+        {`${toyActuator.actuatorType} ${toyActuator.index + 1}`}
+      </WaButton>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={defaultTransition}
+          >
+            <SettingsGrid
+              key={`${toyActuator.actuatorType} ${toyActuator.index + 1}`}
+            >
+              <SettingsRow>
+                {(() => {
+                  switch (toyActuator.actuatorType) {
+                    case ActuatorType.Vibrate:
+                      return (
+                        <VibratorActuatorSettings toyActuator={toyActuator} />
+                      );
+                    case ActuatorType.Position:
+                      return (
+                        <PositionActuatorSettings toyActuator={toyActuator} />
+                      );
+                    case ActuatorType.Oscillate:
+                      return (
+                        <OscillateActuatorSettings toyActuator={toyActuator} />
+                      );
+                    default:
+                      return <UnknownActuatorSettings />;
+                  }
+                })()}
+              </SettingsRow>
+              <Space size='small' />
+            </SettingsGrid>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

@@ -9,7 +9,7 @@ import {
   ServiceSettings,
   ImageSettings,
   BoardSettings,
-  VibratorSettings,
+  ToyListSettings,
   TradeSettings,
 } from './components';
 import { ContentSection } from '../common';
@@ -36,7 +36,7 @@ export const SettingsSection = () => {
       <BoardSettings />
       <ServiceSettings />
       <ImageSettings />
-      <VibratorSettings />
+      <ToyListSettings />
       <TradeSettings />
     </StyledSettingsSection>
   );

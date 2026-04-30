@@ -32,7 +32,7 @@ const StyledDeviceList = styled.ul`
   margin: 0;
 `;
 
-export const VibratorSettings = () => {
+export const ToyListSettings = () => {
   const [client, setClient] = useToyClientValue('client');
   const [connection, setConnection] = useToyClientValue('connection');
   const [devices, setDevices] = useToyClientValue('devices');
@@ -137,9 +137,9 @@ export const VibratorSettings = () => {
             )}
           </SettingsInfo>
         </JoiStack>
-        <WaTooltip for='vibrator-settings-toggle'>Settings</WaTooltip>
+        <WaTooltip for='toy-settings-toggle'>Settings</WaTooltip>
         <WaButton
-          id='vibrator-settings-toggle'
+          id='toy-settings-toggle'
           onClick={() => setExpanded(!expanded)}
           disabled={loading}
         >
