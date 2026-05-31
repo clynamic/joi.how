@@ -205,9 +205,6 @@ export class OscillateActuator
         output = 0;
         break;
     }
-    console.log(`Intensity: ${intensity}`);
-    console.log(`Pace: ${paceRatio}`);
-    console.log(`Output: ${output}`);
     return output;
   }
 
