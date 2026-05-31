@@ -1,3 +1,14 @@
+## 2.7.0 - 2026-05-31
+
+### Added
+
+- Stroker and oscillator support
+- Per-component toy controls
+
+### Fixed
+
+- Duplicate toys after reconnecting
+
 ## 2.6.0 - 2025-08-29
 
 ### Added
