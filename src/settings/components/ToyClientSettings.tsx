@@ -30,6 +30,14 @@ const StyledDeviceList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-s);
+
+  li {
+    margin-inline-start: 0;
+  }
 `;
 
 export const ToyListSettings = () => {
