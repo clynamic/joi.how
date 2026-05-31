@@ -16,14 +16,13 @@ import { SettingsGrid, SettingsRow } from '../../common';
 import { SettingsDescription } from '../../common/SettingsDescription';
 import {
   WaButton,
-  WaDropdown,
-  WaDropdownItem,
   WaIcon,
+  WaOption,
+  WaSelect,
   WaSlider,
 } from '@awesome.me/webawesome/dist/react';
 import { ActuatorType } from 'buttplug';
 import { Space } from '../../common/Space';
-import { WaSelectEvent } from '@awesome.me/webawesome/dist/events/select.js';
 import { WaSliderProps } from '@awesome.me/webawesome/dist/custom-elements-jsx.d.ts';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -104,34 +103,22 @@ export const VibratorActuatorSettings: React.FC<ToySettingsProps> = ({
       <SettingsDescription>
         Select when this component will activate.
       </SettingsDescription>
-      <WaDropdown
+      <WaSelect
         id={`${descriptor}_mode`}
-        children={Array(
-          <WaButton
-            key={`${descriptor}_dropdown`}
-            appearance='filled'
-            slot='trigger'
-            withCaret
-          >
-            {VibrateModeLabels[mode]}
-          </WaButton>
-        ).concat(
-          Object.values(VibrateMode).map(mode => (
-            <WaDropdownItem
-              value={mode}
-              key={`${descriptor}_${VibrateModeLabels[mode]}`}
-            >
-              {VibrateModeLabels[mode]}
-            </WaDropdownItem>
-          ))
-        )}
-        onWaSelect={(event: WaSelectEvent) => {
-          const newMode = (event.detail.item as HTMLInputElement)
-            .value as VibrateMode;
+        className='joi-wide'
+        value={mode}
+        onInput={event => {
+          const newMode = event.currentTarget.value as VibrateMode;
           setMode(newMode);
           vibratorActuator.setMode(newMode);
         }}
-      ></WaDropdown>
+      >
+        {Object.values(VibrateMode).map(value => (
+          <WaOption value={value} key={`${descriptor}_${value}`}>
+            {VibrateModeLabels[value]}
+          </WaOption>
+        ))}
+      </WaSelect>
       <Space size='medium' />
       <SettingsDescription>
         Change the range of intensity for this component.
@@ -180,34 +167,22 @@ export const PositionActuatorSettings: React.FC<ToySettingsProps> = ({
       <SettingsDescription>
         Select when this component will activate.
       </SettingsDescription>
-      <WaDropdown
+      <WaSelect
         id={`${descriptor}_mode`}
-        children={Array(
-          <WaButton
-            key={`${descriptor}_dropdown`}
-            appearance='filled'
-            slot='trigger'
-            withCaret
-          >
-            {LinearModeLabels[mode]}
-          </WaButton>
-        ).concat(
-          Object.values(LinearMode).map(mode => (
-            <WaDropdownItem
-              value={mode}
-              key={`${descriptor}_${LinearModeLabels[mode]}`}
-            >
-              {LinearModeLabels[mode]}
-            </WaDropdownItem>
-          ))
-        )}
-        onWaSelect={(event: WaSelectEvent) => {
-          const newMode = (event.detail.item as HTMLInputElement)
-            .value as LinearMode;
+        className='joi-wide'
+        value={mode}
+        onInput={event => {
+          const newMode = event.currentTarget.value as LinearMode;
           setMode(newMode);
           linearActuator.setMode(newMode);
         }}
-      ></WaDropdown>
+      >
+        {Object.values(LinearMode).map(value => (
+          <WaOption value={value} key={`${descriptor}_${value}`}>
+            {LinearModeLabels[value]}
+          </WaOption>
+        ))}
+      </WaSelect>
       <SettingsDescription>
         Change the range of motion for this component.
       </SettingsDescription>
@@ -255,34 +230,22 @@ export const OscillateActuatorSettings: React.FC<ToySettingsProps> = ({
       <SettingsDescription>
         Select how this component's speed will be calculated.
       </SettingsDescription>
-      <WaDropdown
+      <WaSelect
         id={`${descriptor}_mode`}
-        children={Array(
-          <WaButton
-            key={`${descriptor}_dropdown`}
-            appearance='filled'
-            slot='trigger'
-            withCaret
-          >
-            {OscillateModeLabels[mode]}
-          </WaButton>
-        ).concat(
-          Object.values(OscillateMode).map(mode => (
-            <WaDropdownItem
-              value={mode}
-              key={`${descriptor}_${OscillateModeLabels[mode]}`}
-            >
-              {OscillateModeLabels[mode]}
-            </WaDropdownItem>
-          ))
-        )}
-        onWaSelect={(event: WaSelectEvent) => {
-          const newMode = (event.detail.item as HTMLInputElement)
-            .value as OscillateMode;
+        className='joi-wide'
+        value={mode}
+        onInput={event => {
+          const newMode = event.currentTarget.value as OscillateMode;
           setMode(newMode);
           oscillateActuator.setMode(newMode);
         }}
-      ></WaDropdown>
+      >
+        {Object.values(OscillateMode).map(value => (
+          <WaOption value={value} key={`${descriptor}_${value}`}>
+            {OscillateModeLabels[value]}
+          </WaOption>
+        ))}
+      </WaSelect>
       <SettingsDescription>
         Change the range of speed for this component.
       </SettingsDescription>
