@@ -265,8 +265,8 @@ export const OscillateActuatorSettings: React.FC<ToySettingsProps> = ({
           const sliderProps = event.target as WaSliderProps;
           setMin(sliderProps.minValue as number);
           setMax(sliderProps.maxValue as number);
-          oscillateActuator.setMinPosition(sliderProps.minValue as number);
-          oscillateActuator.setMaxPosition(sliderProps.maxValue as number);
+          oscillateActuator.setMinSpeed(sliderProps.minValue as number);
+          oscillateActuator.setMaxSpeed(sliderProps.maxValue as number);
         }}
       >
         <span slot='reference'>{oscillateActuator.absMinSpeed * 100}%</span>

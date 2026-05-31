@@ -181,11 +181,11 @@ export class OscillateActuator
     this.mode = newMode;
   }
 
-  setMinPosition(newMin: number) {
+  setMinSpeed(newMin: number) {
     this.currentMinSpeed = newMin;
   }
 
-  setMaxPosition(newMax: number) {
+  setMaxSpeed(newMax: number) {
     this.currentMaxSpeed = newMax;
   }
 
