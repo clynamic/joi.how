@@ -21,6 +21,7 @@ import EmergencyStop from './emergencyStop';
 import Hypno from './hypno';
 import Messages from './messages';
 import Clock from './clock';
+import Toy from './toy';
 
 const plugins = [
   Scene,
@@ -37,6 +38,7 @@ const plugins = [
   Stroke,
   Dealer,
   Warmup,
+  Toy,
   Hypno,
   RandomImages,
   EmergencyStop,

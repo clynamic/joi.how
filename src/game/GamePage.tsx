@@ -4,7 +4,6 @@ import { GameImages } from './components/GameImages';
 import { GameMeter } from './components/GameMeter';
 import { GameHypno } from './components/GameHypno';
 import { GameSound } from './components/GameSound';
-import { GameVibrator } from './components/GameVibrator';
 import { GameInstructions } from './components/GameInstructions';
 import { GameEmergencyStop } from './components/GameEmergencyStop';
 import { GamePauseMenu } from './components/GamePauseMenu';
@@ -88,7 +87,6 @@ export const GamePage = () => {
       </StyledBottomBar>
       <GameResume />
       <GameSound />
-      <GameVibrator />
     </StyledGamePage>
   );
 };

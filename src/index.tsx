@@ -7,7 +7,6 @@ import { App } from './app/App.tsx';
 import './index.css';
 import { SettingsProvider, ImageProvider } from './settings';
 import { E621Provider } from './e621';
-import { ToyClientProvider } from './toy';
 import { LocalImageProvider } from './local/LocalProvider.tsx';
 import { registerServiceWorker } from './utils/serviceWorker.ts';
 
@@ -18,11 +17,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <SettingsProvider>
       <ImageProvider>
         <LocalImageProvider>
-          <ToyClientProvider>
-            <E621Provider>
-              <App />
-            </E621Provider>
-          </ToyClientProvider>
+          <E621Provider>
+            <App />
+          </E621Provider>
         </LocalImageProvider>
       </ImageProvider>
     </SettingsProvider>

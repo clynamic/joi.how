@@ -1,2 +1,2 @@
-export * from './toyactuator';
-export * from './toyclient';
+export * from './ToyActuator';
+export * from './ToyClient';

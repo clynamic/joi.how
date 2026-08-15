@@ -1,5 +1,4 @@
 import { DiceEvent, GameHypnoType, PlayerBody, PlayerGender } from '../types';
-import { VibrationMode } from '../utils/vibrator';
 
 export interface Settings {
   gameDuration: number;
@@ -16,7 +15,6 @@ export interface Settings {
   body: PlayerBody;
   highRes: boolean;
   videoSound: boolean;
-  vibrations: VibrationMode;
   imageDuration: number;
   intenseImages: boolean;
 }
@@ -36,7 +34,6 @@ export const defaultSettings: Settings = {
   body: PlayerBody.penis,
   highRes: false,
   videoSound: false,
-  vibrations: VibrationMode.thump,
   imageDuration: 20,
   intenseImages: true,
 };

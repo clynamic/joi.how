@@ -8,4 +8,3 @@ export * from './GameMeter';
 export * from './GameResume';
 export * from './GamePauseMenu';
 export * from './GameSound';
-export * from './GameVibrator';

@@ -10,12 +10,7 @@ import {
   JoiStack,
 } from '../../common';
 import { defaultTransition } from '../../utils';
-import { useToyClientValue, ToyClient } from '../../toy';
-import {
-  ButtplugBrowserWebsocketClientConnector,
-  ButtplugClientDevice,
-  ButtplugClient,
-} from 'buttplug';
+import { ToyClient } from '../../toy';
 import styled from 'styled-components';
 import {
   WaButton,
@@ -25,6 +20,8 @@ import {
 } from '@awesome.me/webawesome/dist/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ToySettings } from './ToySettings';
+import Toy, { ToyState } from '../../game/plugins/toy';
+import { useGameFrame, useDispatchEvent } from '../../game/hooks';
 
 const StyledDeviceList = styled.ul`
   list-style: none;
@@ -41,75 +38,31 @@ const StyledDeviceList = styled.ul`
 `;
 
 export const ToyListSettings = () => {
-  const [client, setClient] = useToyClientValue('client');
-  const [connection, setConnection] = useToyClientValue('connection');
-  const [devices, setDevices] = useToyClientValue('devices');
-  const [error, setError] = useToyClientValue('error');
-  const [loading, setLoading] = useState(false);
+  const { connection, error, connecting } =
+    useGameFrame<ToyState>(Toy.paths) ?? {};
+  const { inject } = useDispatchEvent();
+  const loading = connecting ?? false;
 
   const [host, setHost] = useState('127.0.0.1');
   const [port, setPort] = useState(12345);
 
   const [expanded, setExpanded] = useState(false);
 
-  const onConnect = useCallback(async () => {
+  const onConnect = useCallback(() => {
     setExpanded(false);
-    setError(undefined);
-    setLoading(true);
 
     if (connection) {
-      try {
-        await client.disconnect();
-        setClient(new ButtplugClient('JOI.how'));
-      } catch (e) {
-        setError(String(e));
-      } finally {
-        setConnection(undefined);
-        setLoading(false);
-      }
+      inject(Toy.disconnect());
       return;
     }
 
-    try {
-      const isLocalhost =
-        host === 'localhost' || host === '127.0.0.1' || host === '::1';
-      const protocol = isLocalhost ? 'ws' : 'wss';
-      const url = `${protocol}://${host}:${port}`;
-      await client.connect(new ButtplugBrowserWebsocketClientConnector(url));
-      await client.startScanning();
-      client.devices.forEach(e =>
-        setDevices(devices => [...devices, new ToyClient(e)])
-      );
-      client.addListener('deviceadded', (device: ButtplugClientDevice) => {
-        setDevices(devices => [...devices, new ToyClient(device)]);
-      });
-      client.addListener('deviceremoved', (device: ButtplugClientDevice) => {
-        setDevices(devices => devices.filter(e => e.name !== device.name));
-      });
-      client.addListener('disconnect', () => {
-        client.removeListener('deviceadded');
-        client.removeListener('deviceremoved');
-        client.removeListener('disconnect');
-        setDevices([]);
-        setConnection(undefined);
-      });
-      setConnection(url);
-    } catch (e) {
-      setError(String(e ?? 'Unknown error'));
-      setConnection(undefined);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    client,
-    connection,
-    host,
-    port,
-    setClient,
-    setConnection,
-    setDevices,
-    setError,
-  ]);
+    const isLocalhost =
+      host === 'localhost' || host === '127.0.0.1' || host === '::1';
+    const protocol = isLocalhost ? 'ws' : 'wss';
+    inject(Toy.connect(`${protocol}://${host}:${port}`));
+  }, [connection, host, port, inject]);
+
+  const devices = Toy.devices();
 
   return (
     <Fields label={'Connect Devices'}>

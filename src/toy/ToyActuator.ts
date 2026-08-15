@@ -1,5 +1,5 @@
 import { type GenericDeviceMessageAttributes, ActuatorType } from 'buttplug';
-import { Stroke } from '../game/GameProvider';
+import { StrokeDirection } from '../game/plugins/stroke';
 
 export enum VibrateMode {
   alwaysOn = 'alwaysOn',
@@ -50,7 +50,7 @@ export class ToyActuator implements ToyActuatorSettings {
     this.index = attributes.Index;
   }
 
-  getOutput?(stroke: Stroke, intensity: number, pace: number): unknown;
+  getOutput?(stroke: StrokeDirection, intensity: number, pace: number): unknown;
 }
 
 export class VibrationActuator
@@ -81,16 +81,16 @@ export class VibrationActuator
     this.currentMaxIntensity = newMax;
   }
 
-  override getOutput(stroke: Stroke, intensity: number) {
+  override getOutput(stroke: StrokeDirection, intensity: number) {
     let output = this.currentMinIntensity;
     switch (this.mode) {
       case VibrateMode.activeUp:
-        if (stroke == Stroke.up) {
+        if (stroke == StrokeDirection.up) {
           output = this.mapToRange(intensity / 100);
         }
         break;
       case VibrateMode.activeDown:
-        if (stroke == Stroke.down) {
+        if (stroke == StrokeDirection.down) {
           output = this.mapToRange(intensity / 100);
         }
         break;
@@ -138,17 +138,21 @@ export class LinearActuator
     this.currentMaxPosition = newMax;
   }
 
-  override getOutput(stroke: Stroke, intensity: number, pace: number) {
+  override getOutput(
+    stroke: StrokeDirection,
+    intensity: number,
+    pace: number
+  ): [number, number] {
     let targetPosition = this.currentMinPosition;
     let movementTime = Math.round(1000.0 / pace);
     switch (this.mode) {
       case LinearMode.normal:
-        if (stroke == Stroke.up) {
+        if (stroke == StrokeDirection.up) {
           targetPosition = this.currentMaxPosition;
         }
         break;
       case LinearMode.inverted:
-        if (stroke == Stroke.down) {
+        if (stroke == StrokeDirection.down) {
           targetPosition = this.currentMaxPosition;
         }
         break;
@@ -189,7 +193,11 @@ export class OscillateActuator
     this.currentMaxSpeed = newMax;
   }
 
-  override getOutput(_stroke: Stroke, intensity: number, paceRatio: number) {
+  override getOutput(
+    _stroke: StrokeDirection,
+    intensity: number,
+    paceRatio: number
+  ) {
     let output = this.currentMinSpeed;
     switch (this.mode) {
       case OscillateMode.basedOnIntensity:
