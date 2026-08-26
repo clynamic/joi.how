@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, ReactNode, useCallback } from 'react';
 import { createContext } from 'use-context-selector';
 import { GameEngine, Pipe, GameFrame } from '../engine';
+import { Effects } from '../engine/pipes/Effects';
 import { Events } from '../engine/pipes/Events';
 import { Scheduler } from '../engine/pipes/Scheduler';
 import { Perf } from '../engine/pipes/Perf';
@@ -48,6 +49,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
       {},
       Piper([
         impulsePipe,
+        Effects.pipe,
         Events.pipe,
         Scheduler.pipe,
         Perf.pipe,
@@ -55,6 +57,8 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
         ...pipes,
       ])
     );
+
+    const inject = (pipe: Pipe) => pendingImpulseRef.current.push(pipe);
 
     const STEP = 16;
     const MAX_TICKS_PER_FRAME = 4;
@@ -86,7 +90,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
           ticked = true;
         }
 
-        engineRef.current.tick();
+        Effects.flush(engineRef.current.tick(), inject);
         accumulator -= STEP;
         ticks++;
       }

@@ -1,4 +1,5 @@
 import { Pipe } from '../State';
+import type { Performer } from '../pipes/Effects';
 
 export type ModuleId = string;
 
@@ -17,6 +18,8 @@ export type Module = {
   update?: Pipe;
   afterUpdate?: Pipe;
   deactivate?: Pipe;
+
+  effects?: Performer<unknown>[];
 };
 
 export type ModuleRegistry = Record<ModuleId, Module>;

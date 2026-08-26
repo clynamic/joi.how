@@ -1,4 +1,5 @@
 import { Composer } from './Composer';
+import { Effects } from './pipes/Effects';
 import { Events } from './pipes/Events';
 import { Scheduler } from './pipes/Scheduler';
 import { Storage } from './pipes/Storage';
@@ -10,6 +11,7 @@ export interface PluginSDK {}
 export interface SDK extends PluginSDK {
   debug: boolean;
   Composer: typeof Composer;
+  Effects: typeof Effects;
   Events: typeof Events;
   Scheduler: typeof Scheduler;
   Storage: typeof Storage;
@@ -19,6 +21,7 @@ export interface SDK extends PluginSDK {
 export const sdk: SDK = {
   debug: false,
   Composer,
+  Effects,
   Events,
   Scheduler,
   Storage,
