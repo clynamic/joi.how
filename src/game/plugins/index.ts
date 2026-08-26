@@ -16,6 +16,7 @@ import RandomImages from './randomImages';
 import Warmup from './warmup';
 import Stroke from './stroke';
 import Rand from './rand';
+import Sound from './sound';
 import Dealer from './dealer';
 import EmergencyStop from './emergencyStop';
 import Hypno from './hypno';
@@ -28,6 +29,7 @@ const plugins = [
   Phase,
   Mode,
   Rand,
+  Sound,
   Messages,
   Image,
   Debug,
