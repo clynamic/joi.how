@@ -7,6 +7,7 @@ import { ImageSize, ImageType } from '../../types';
 import { useGameFrame } from '../hooks';
 import Image from '../plugins/image';
 import Intensity from '../plugins/intensity';
+import { getImageSwitchDuration } from '../plugins/randomImages';
 
 const StyledGameImages = styled.div`
   position: absolute;
@@ -49,10 +50,15 @@ export const GameImages = () => {
   const { intensity } = useGameFrame(Intensity.paths);
   const [videoSound] = useSetting('videoSound');
   const [highRes] = useSetting('highRes');
+  const [imageDuration] = useSetting('imageDuration');
+  const [intenseImages] = useSetting('intenseImages');
 
   useImagePreloader(nextImages, highRes ? ImageSize.full : ImageSize.preview);
 
-  const switchDuration = Math.max((100 - intensity * 100) * 80, 2000);
+  const switchDuration = getImageSwitchDuration(
+    { imageDuration, intenseImages },
+    intensity
+  );
 
   return (
     <StyledGameImages>
@@ -79,7 +85,7 @@ export const GameImages = () => {
               thumb={currentImage.thumbnail}
               preview={currentImage.preview}
               full={
-                highRes && currentImage.type !== ImageType.video
+                highRes || currentImage.type === ImageType.video
                   ? currentImage.full
                   : undefined
               }

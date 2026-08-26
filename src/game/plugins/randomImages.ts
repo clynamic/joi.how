@@ -5,6 +5,7 @@ import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { Pipe } from '../../engine/State';
 import { ImageItem } from '../../types';
+import { Settings } from '../../settings/Settings';
 import Image from './image';
 import { IntensityState } from './intensity';
 import Rand from './rand';
@@ -18,13 +19,24 @@ type RandomImagesState = {
 const state = pluginPaths<RandomImagesState>(PLUGIN_ID);
 const images = typedPath<ImageItem[]>(['images']);
 const intensityState = typedPath<IntensityState>(['core.intensity']);
+const settings = typedPath<Settings>(['settings']);
 
 const eventType = Events.getKeys(PLUGIN_ID, 'schedule_next');
 
 const scheduleId = Scheduler.getKey(PLUGIN_ID, 'randomImageSwitch');
 
-const getImageSwitchDuration = (intensity: number): number => {
-  return Math.max((100 - intensity * 100) * 80, 2000);
+export type ImageSwitchSettings = Pick<
+  Settings,
+  'imageDuration' | 'intenseImages'
+>;
+
+export const getImageSwitchDuration = (
+  { imageDuration, intenseImages }: ImageSwitchSettings,
+  intensity: number
+): number => {
+  if (!intenseImages) return imageDuration * 1000;
+  const scale = Math.max(1 - intensity, 0.1);
+  return Math.max(imageDuration * scale * 1000, 1000);
 };
 
 const RandomImages = definePlugin({
@@ -65,6 +77,7 @@ const RandomImages = definePlugin({
 
       const { seenImages = [] } = get(state);
       const { intensity = 0 } = get(intensityState);
+      const s = get(settings);
 
       const imagesWithDistance = imgs.map(image => {
         const seenIndex = seenImages.indexOf(image.id);
@@ -108,7 +121,7 @@ const RandomImages = definePlugin({
             Image.pushNextImage(randomImage),
             Scheduler.schedule({
               id: scheduleId,
-              duration: getImageSwitchDuration(intensity),
+              duration: getImageSwitchDuration(s, intensity),
               event: { type: eventType.scheduleNext },
             })
           );
