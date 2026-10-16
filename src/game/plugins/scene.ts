@@ -18,7 +18,7 @@ const eventType = {
 };
 
 const Scene = definePlugin({
-  name: 'Scene',
+  sdk: 'Scene',
   id: PLUGIN_ID,
   meta: {
     name: 'Scene',

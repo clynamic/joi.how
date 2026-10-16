@@ -24,7 +24,7 @@ type CountdownPayload = { remaining: number; gen: number };
 const seq = Sequence.for(PLUGIN_ID, 'set');
 
 const Pause = definePlugin({
-  name: 'Pause',
+  sdk: 'Pause',
   id: PLUGIN_ID,
   meta: {
     name: 'Pause',

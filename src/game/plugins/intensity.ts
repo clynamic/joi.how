@@ -17,7 +17,7 @@ const timing = typedPath<GameTiming>([]);
 const settings = typedPath<Settings>(['settings']);
 
 const Intensity = definePlugin({
-  name: 'Intensity',
+  sdk: 'Intensity',
   id: PLUGIN_ID,
   meta: {
     name: 'Intensity',

@@ -18,7 +18,7 @@ const eventType = {
 };
 
 const Mode = definePlugin({
-  name: 'Mode',
+  sdk: 'Mode',
   id: PLUGIN_ID,
   meta: {
     name: 'Mode',

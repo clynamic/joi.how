@@ -24,7 +24,7 @@ const phaseState = typedPath<PhaseState>(['core.phase']);
 const paceState = typedPath<PaceState>(['core.pace']);
 
 const Stroke = definePlugin({
-  name: 'Stroke',
+  sdk: 'Stroke',
   id: PLUGIN_ID,
   meta: {
     name: 'Stroke',

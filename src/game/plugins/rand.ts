@@ -25,7 +25,7 @@ function advance(cursor: number): [number, number] {
 }
 
 const Rand = definePlugin({
-  name: 'Rand',
+  sdk: 'Rand',
   id: PLUGIN_ID,
   meta: {
     name: 'Rand',

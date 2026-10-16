@@ -140,16 +140,6 @@ const transitionPipe: Pipe = Composer.do(({ get, pipe, set }) => {
 
   if (toLoad.length === 0 && toUnload.length === 0) return;
 
-  for (const id of toUnload) {
-    const mod = registry[id];
-    if (mod?.name) delete (sdk as any)[mod.name];
-  }
-
-  for (const id of toLoad) {
-    const mod = registry[id];
-    if (mod?.name) (sdk as any)[mod.name] = mod;
-  }
-
   const unloadOrder = toUnload.filter(id => order.includes(id));
 
   const deactivates = unloadOrder
@@ -162,6 +152,11 @@ const transitionPipe: Pipe = Composer.do(({ get, pipe, set }) => {
   );
 
   const loadOrder = toLoad.filter(id => newOrder.includes(id));
+
+  for (const id of loadOrder) {
+    const mod = registry[id];
+    if (mod?.sdk && !(mod.sdk in sdk)) (sdk as any)[mod.sdk] = mod;
+  }
 
   const activates = loadOrder
     .map(id => wrapPhase(id, 'activate', registry[id]?.activate))

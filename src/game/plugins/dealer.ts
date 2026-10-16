@@ -87,7 +87,7 @@ const outcomes: OutcomeEntry[] = [
 const roll = Sequence.for(PLUGIN_ID, 'roll');
 
 const Dealer = definePlugin({
-  name: 'Dealer',
+  sdk: 'Dealer',
   id: PLUGIN_ID,
   meta: {
     name: 'Dealer',

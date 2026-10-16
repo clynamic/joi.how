@@ -66,7 +66,7 @@ const messageCue: Pipe = Composer.do(({ get, set, pipe }) => {
 });
 
 const Cues = definePlugin({
-  name: 'Cues',
+  sdk: 'Cues',
   id: PLUGIN_ID,
   meta: {
     name: 'Cues',

@@ -30,7 +30,7 @@ const paths = pluginPaths<MessageState>(PLUGIN_ID);
 const eventType = Events.getKeys(PLUGIN_ID, 'send_message', 'expire_message');
 
 const Messages = definePlugin({
-  name: 'Messages',
+  sdk: 'Messages',
   id: PLUGIN_ID,
   meta: {
     name: 'Messages',

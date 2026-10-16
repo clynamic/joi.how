@@ -21,7 +21,7 @@ const pace = pluginPaths<PaceState>(PLUGIN_ID);
 const settings = typedPath<Settings>(['settings']);
 
 const Pace = definePlugin({
-  name: 'Pace',
+  sdk: 'Pace',
   id: PLUGIN_ID,
   meta: {
     name: 'Pace',

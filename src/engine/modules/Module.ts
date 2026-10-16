@@ -10,7 +10,7 @@ export type ModuleOrdering = {
 
 export type Module = {
   id: ModuleId;
-  name?: string;
+  sdk?: string;
   ordering?: ModuleOrdering;
 
   activate?: Pipe;

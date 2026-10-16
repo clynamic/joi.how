@@ -21,7 +21,7 @@ const eventType = Events.getKeys(
 );
 
 const Image = definePlugin({
-  name: 'Image',
+  sdk: 'Image',
   id: PLUGIN_ID,
   meta: {
     name: 'Image',

@@ -1,5 +1,6 @@
 import { typedPath, TypedPath } from '../Lens';
 import type { Module } from '../modules/Module';
+import { registry } from '../registry';
 
 // TODO: make typedPath accept string and kill this thing.
 export function pluginPaths<T>(namespace: string): TypedPath<T> {
@@ -30,5 +31,6 @@ export type PluginRegistry = Record<PluginId, Plugin>;
 export function definePlugin<T extends Plugin & { [key: string]: unknown }>(
   plugin: T
 ): T {
+  if (plugin.sdk) registry[plugin.sdk] = plugin;
   return plugin;
 }

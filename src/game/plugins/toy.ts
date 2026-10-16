@@ -197,7 +197,7 @@ const ramp = (step: number): Pipe => {
 const hush = (): Pipe => Composer.pipe(stop.emit(), seq.cancel());
 
 const Toy = definePlugin({
-  name: 'Toy',
+  sdk: 'Toy',
   id: PLUGIN_ID,
   meta: {
     name: 'Toy',

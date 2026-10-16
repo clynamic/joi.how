@@ -114,7 +114,7 @@ const persistNow: Pipe = Composer.bind(ins, state =>
 
 const PluginInstaller = definePlugin({
   id: PLUGIN_ID,
-  name: 'PluginInstaller',
+  sdk: 'PluginInstaller',
 
   activate: Composer.pipe(
     Composer.set(ins, { installed: [], disabled: [], meta: {}, failed: [] }),

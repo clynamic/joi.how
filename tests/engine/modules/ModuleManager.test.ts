@@ -7,6 +7,7 @@ import { Module } from '../../../src/engine/modules/Module';
 import { Events } from '../../../src/engine/pipes/Events';
 import { Composer } from '../../../src/engine/Composer';
 import { Pipe, GameFrame } from '../../../src/engine/State';
+import { sdk } from '../../../src/engine/sdk';
 import { makeFrame, tick } from '../../utils';
 
 const gamePipe: Pipe = Composer.pipe(Events.pipe, moduleManagerPipe);
@@ -24,6 +25,27 @@ function load(module: Module): GameFrame {
 }
 
 describe('ModuleManager', () => {
+  describe('sdk publishing', () => {
+    it('should publish a plain module with an sdk name when it loads', () => {
+      const plain: Module = { id: 'mod.plain', sdk: 'PlainMod' };
+      expect((sdk as any).PlainMod).toBeUndefined();
+
+      load(plain);
+
+      expect((sdk as any).PlainMod).toBe(plain);
+    });
+
+    it('should not replace a plugin already published under that name', () => {
+      const first: Module = { id: 'mod.first', sdk: 'Taken' };
+      const second: Module = { id: 'mod.second', sdk: 'Taken' };
+
+      load(first);
+      load(second);
+
+      expect((sdk as any).Taken).toBe(first);
+    });
+  });
+
   describe('Load / Unload', () => {
     it('should load a module after event cycle', () => {
       const result = load({ id: 'test.mod' });

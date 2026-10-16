@@ -11,7 +11,7 @@ export type TonePayload = { frequency: number; delay: number };
 const tone = Effects.define<TonePayload>(PLUGIN_ID, 'tone');
 
 const Sound = definePlugin({
-  name: 'Sound',
+  sdk: 'Sound',
   id: PLUGIN_ID,
   meta: {
     name: 'Sound',

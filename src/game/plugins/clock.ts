@@ -12,7 +12,7 @@ export type ClockState = {
 const clock = pluginPaths<ClockState>(PLUGIN_ID);
 
 const Clock = definePlugin({
-  name: 'Clock',
+  sdk: 'Clock',
   id: PLUGIN_ID,
   meta: {
     name: 'Clock',

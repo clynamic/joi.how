@@ -26,7 +26,7 @@ const eventType = {
 };
 
 const Phase = definePlugin({
-  name: 'Phase',
+  sdk: 'Phase',
   id: PLUGIN_ID,
   meta: {
     name: 'Phase',
