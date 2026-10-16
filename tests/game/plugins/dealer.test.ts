@@ -163,6 +163,23 @@ describe('Dealer integration', () => {
     expect(getDiceState(frame)!.log.length).toBe(logLength);
   });
 
+  it('should offer each triggered outcome to onOutcome', () => {
+    const watcher = {
+      id: 'test.watch',
+      ordering: { loadAfter: [Dealer.id] },
+      update: Dealer.onOutcome(event =>
+        Composer.over(['seen'], (list: string[]) => [...list, event], [])
+      ),
+    };
+    let frame = withImpulse(ModuleManager.load(watcher))(tick(startGame(), 1));
+    frame = gamePipe(tick(frame, 1));
+    frame = runUntilBusy(frame);
+
+    const state = getDiceState(frame)!;
+    expect(state.log.length).toBeGreaterThan(0);
+    expect(frame.seen).toEqual(state.log.map(entry => entry.event));
+  });
+
   it('should stop triggering outcomes when mode leaves classic', () => {
     let frame = startGame();
 

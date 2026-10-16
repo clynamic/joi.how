@@ -98,6 +98,10 @@ const Dealer = definePlugin({
     return roll.dispatch('trigger', id);
   },
 
+  onOutcome(fn: (event: DiceEvent) => Pipe): Pipe {
+    return roll.on<DiceEvent>('trigger', event => fn(event.payload));
+  },
+
   activate: Composer.pipe(
     Composer.set(dice, { busy: false, log: [] }),
     ...outcomes.map(o => ModuleManager.load(o.module))

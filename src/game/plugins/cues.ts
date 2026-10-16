@@ -5,7 +5,7 @@ import { typedPath } from '../../engine/Lens';
 import { Pipe } from '../../engine/State';
 import Sound from './sound';
 import { GamePhase, PhaseState } from './phase';
-import { StrokeDirection, StrokeState } from './stroke';
+import Stroke, { StrokeDirection } from './stroke';
 import { GameMessage, MessageState } from './messages';
 
 const PLUGIN_ID = 'core.cues';
@@ -19,27 +19,17 @@ const CLIMAX_SWEEP = Array.from({ length: 15 }, (_, i) => 255 - i * 6);
 const CLIMAX_GAP = 400;
 
 type CuesState = {
-  stroke?: StrokeDirection;
   phase?: string;
   messages: GameMessage[];
 };
 
 const paths = pluginPaths<CuesState>(PLUGIN_ID);
-const strokeState = typedPath<StrokeState>(['core.stroke']);
 const phaseState = typedPath<PhaseState>(['core.phase']);
 const messageState = typedPath<MessageState>(['core.messages']);
 
-const strokeCue: Pipe = Composer.do(({ get, set, pipe }) => {
-  const state = get(paths);
-  const stroke = get(strokeState)?.stroke;
-  if (!state || !stroke || stroke === state.stroke) return;
-  set(paths.stroke, stroke);
-  pipe(
-    Sound.play(
-      stroke === StrokeDirection.up ? STROKE_UP_TONE : STROKE_DOWN_TONE
-    )
-  );
-});
+const strokeCue: Pipe = Stroke.onFlip(stroke =>
+  Sound.play(stroke === StrokeDirection.up ? STROKE_UP_TONE : STROKE_DOWN_TONE)
+);
 
 const phaseCue: Pipe = Composer.do(({ get, set, pipe }) => {
   const state = get(paths);
@@ -74,7 +64,6 @@ const Cues = definePlugin({
 
   activate: Composer.do(({ get, set }) => {
     set(paths, {
-      stroke: get(strokeState)?.stroke,
       phase: get(phaseState)?.current,
       messages: get(messageState)?.messages ?? [],
     });

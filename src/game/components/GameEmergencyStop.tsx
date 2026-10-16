@@ -3,15 +3,15 @@ import { WaButton, WaIcon } from '@awesome.me/webawesome/dist/react';
 import { useGameFrame } from '../hooks';
 import { useDispatchEvent } from '../hooks/UseDispatchEvent';
 import Phase, { GamePhase } from '../plugins/phase';
-import { Events } from '../../engine/pipes/Events';
+import EmergencyStop from '../plugins/emergencyStop';
 
 export const GameEmergencyStop = () => {
   const phase = useGameFrame(Phase.paths.current) ?? '';
-  const { dispatchEvent } = useDispatchEvent();
+  const { inject } = useDispatchEvent();
 
   const onStop = useCallback(() => {
-    dispatchEvent({ type: Events.getKey('core.emergencyStop', 'stop') });
-  }, [dispatchEvent]);
+    inject(EmergencyStop.trigger());
+  }, [inject]);
 
   return (
     <>

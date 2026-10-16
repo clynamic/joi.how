@@ -10,7 +10,9 @@ import {
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Cues from '../../../src/game/plugins/cues';
 import Messages from '../../../src/game/plugins/messages';
+import Pause from '../../../src/game/plugins/pause';
 import Phase, { GamePhase } from '../../../src/game/plugins/phase';
+import Stroke from '../../../src/game/plugins/stroke';
 import Sound from '../../../src/game/plugins/sound';
 import { makeFrame, tick } from '../../utils';
 
@@ -31,19 +33,34 @@ const tones = (frame: GameFrame): Tone[] =>
 const frequencies = (frame: GameFrame): number[] =>
   tones(frame).map(t => t.frequency);
 
-const setStroke = (stroke: string): Pipe =>
-  Composer.set(['core.stroke'], { stroke, timer: 0 });
-
 function bootstrap(): GameFrame {
   let frame = gamePipe(makeFrame());
+  frame = Composer.set(['core.pace'], { pace: 2 })(frame);
   frame = Composer.pipe(
     ModuleManager.load(Sound),
+    ModuleManager.load(Pause),
     ModuleManager.load(Phase),
     ModuleManager.load(Messages),
+    ModuleManager.load(Stroke),
     ModuleManager.load(Cues)
   )(frame);
   frame = gamePipe(tick(frame));
   return gamePipe(tick(frame));
+}
+
+function playing(): GameFrame {
+  let frame = step(bootstrap(), Pause.setPaused(false));
+  for (let i = 0; i < 60; i++) frame = gamePipe(tick(frame, 100));
+  return frame;
+}
+
+function collect(frame: GameFrame, ticks: number, ms: number): number[] {
+  const out: number[] = [];
+  for (let i = 0; i < ticks; i++) {
+    frame = gamePipe(tick(frame, ms));
+    out.push(...frequencies(frame));
+  }
+  return out;
 }
 
 function step(frame: GameFrame, impulse: Pipe = f => f): GameFrame {
@@ -51,22 +68,16 @@ function step(frame: GameFrame, impulse: Pipe = f => f): GameFrame {
 }
 
 describe('Cues', () => {
-  it('should play one tone per stroke direction', () => {
-    let frame = step(bootstrap(), setStroke('up'));
-    const up = frequencies(frame);
-    frame = step(frame, setStroke('down'));
-    const down = frequencies(frame);
+  it('should play one tone per stroke flip, by direction', () => {
+    const frame = step(playing(), Phase.setPhase(GamePhase.active));
 
-    expect(up).toEqual([425]);
-    expect(down).toEqual([625]);
+    expect(collect(frame, 12, 100)).toEqual([625, 425]);
   });
 
-  it('should stay quiet while the stroke holds', () => {
-    let frame = step(bootstrap(), setStroke('up'));
-    frame = step(frame);
-    frame = step(frame);
+  it('should play nothing while no stroke happens', () => {
+    const frame = step(playing(), Phase.setPhase(GamePhase.warmup));
 
-    expect(frequencies(frame)).toEqual([]);
+    expect(collect(frame, 12, 100)).toEqual([]);
   });
 
   it('should chime down on entering a break', () => {

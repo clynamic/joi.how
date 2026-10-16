@@ -1,7 +1,8 @@
 import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
 import { typedPath } from '../../engine/Lens';
-import { GameTiming } from '../../engine/State';
+import { Events } from '../../engine/pipes/Events';
+import { GameTiming, Pipe } from '../../engine/State';
 import { PhaseState, GamePhase } from './phase';
 import Pause from './pause';
 import { PaceState } from './pace';
@@ -23,11 +24,17 @@ const timing = typedPath<GameTiming>([]);
 const phaseState = typedPath<PhaseState>(['core.phase']);
 const paceState = typedPath<PaceState>(['core.pace']);
 
+const flipped = Events.define<StrokeDirection>(PLUGIN_ID, 'flipped');
+
 const Stroke = definePlugin({
   sdk: 'Stroke',
   id: PLUGIN_ID,
   meta: {
     name: 'Stroke',
+  },
+
+  onFlip(fn: (stroke: StrokeDirection) => Pipe): Pipe {
+    return flipped.handle(event => fn(event.payload));
   },
 
   activate: Composer.set(stroke, {
@@ -36,7 +43,7 @@ const Stroke = definePlugin({
   }),
 
   update: Pause.whenPlaying(
-    Composer.do(({ get, set }) => {
+    Composer.do(({ get, set, pipe }) => {
       const phase = get(phaseState)?.current;
       if (phase !== GamePhase.active && phase !== GamePhase.finale) return;
 
@@ -51,13 +58,12 @@ const Stroke = definePlugin({
       const elapsed = state.timer + delta;
 
       if (elapsed >= interval) {
-        set(stroke, {
-          stroke:
-            state.stroke === StrokeDirection.up
-              ? StrokeDirection.down
-              : StrokeDirection.up,
-          timer: elapsed - interval,
-        });
+        const next =
+          state.stroke === StrokeDirection.up
+            ? StrokeDirection.down
+            : StrokeDirection.up;
+        set(stroke, { stroke: next, timer: elapsed - interval });
+        pipe(flipped.dispatch(next));
       } else {
         set(stroke.timer, elapsed);
       }
