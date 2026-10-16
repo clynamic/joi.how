@@ -8,6 +8,20 @@ import { registry } from './registry';
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PluginSDK {}
 
+export type PluginIndexEntry = {
+  sdk: string;
+  id: string;
+  name?: string;
+  description?: string;
+  hooks: string[];
+  commands: string[];
+};
+
+export type SdkIndex = {
+  engine: string[];
+  plugins: PluginIndexEntry[];
+};
+
 export interface SDK extends PluginSDK {
   debug: boolean;
   Composer: typeof Composer;
@@ -16,6 +30,45 @@ export interface SDK extends PluginSDK {
   Scheduler: typeof Scheduler;
   pluginPaths: typeof pluginPaths;
   definePlugin: typeof definePlugin;
+  index: () => SdkIndex;
+}
+
+const LIFECYCLE = new Set([
+  'activate',
+  'beforeUpdate',
+  'update',
+  'afterUpdate',
+  'deactivate',
+]);
+
+const isHook = (name: string) => /^(on|when)[A-Z]/.test(name);
+
+function index(): SdkIndex {
+  const engine: string[] = [];
+  const plugins: PluginIndexEntry[] = [];
+  for (const [key, value] of Object.entries(sdk)) {
+    if (key === 'index') continue;
+    const mod = value as Record<string, unknown> | null;
+    if (!mod || typeof mod !== 'object' || typeof mod.id !== 'string') {
+      engine.push(key);
+      continue;
+    }
+    const methods = Object.keys(mod).filter(
+      name => typeof mod[name] === 'function' && !LIFECYCLE.has(name)
+    );
+    const meta = (mod.meta ?? {}) as { name?: string; description?: string };
+    plugins.push({
+      sdk: key,
+      id: mod.id,
+      ...(meta.name !== undefined && { name: meta.name }),
+      ...(meta.description !== undefined && { description: meta.description }),
+      hooks: methods.filter(isHook),
+      commands: methods.filter(name => !isHook(name)),
+    });
+  }
+  engine.sort();
+  plugins.sort((a, b) => a.sdk.localeCompare(b.sdk));
+  return { engine, plugins };
 }
 
 export const sdk: SDK = Object.assign(registry, {
@@ -26,6 +79,7 @@ export const sdk: SDK = Object.assign(registry, {
   Scheduler,
   pluginPaths,
   definePlugin,
+  index,
 }) as unknown as SDK;
 
 (globalThis as any).sdk = sdk;
