@@ -1,7 +1,7 @@
 import { Composer } from '../Composer';
 import { typedPath } from '../Lens';
 import { pluginPaths } from '../plugins/Plugins';
-import { GameTiming, Pipe } from '../State';
+import { GameFrame, GameTiming, Pipe } from '../State';
 import { Events, GameEvent } from './Events';
 import { Log } from './Log';
 
@@ -109,6 +109,11 @@ export class Scheduler {
       type: eventType.removeTimeline,
       payload: timeline,
     });
+  }
+
+  static remaining(frame: GameFrame, idOrPrefix: string): number | undefined {
+    const scheduled = Composer.get(scheduler.scheduled)(frame) ?? [];
+    return scheduled.find(entry => entry.id?.startsWith(idOrPrefix))?.duration;
   }
 
   static onRate(timeline: string, fn: (change: RateChange) => Pipe): Pipe {

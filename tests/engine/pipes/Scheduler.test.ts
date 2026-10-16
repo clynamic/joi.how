@@ -63,6 +63,21 @@ describe('Scheduler', () => {
     });
   });
 
+  describe('remaining', () => {
+    it('should report the time left on an entry by id or prefix', () => {
+      let frame = step(
+        basePipe(makeFrame()),
+        Composer.pipe(entry('ns/a', 100), entry('other/b', 500))
+      );
+      frame = step(frame);
+
+      expect(Scheduler.remaining(frame, 'ns/a')).toBe(84);
+      expect(Scheduler.remaining(frame, 'ns/')).toBe(84);
+      expect(Scheduler.remaining(frame, 'other/b')).toBe(484);
+      expect(Scheduler.remaining(frame, 'nope')).toBeUndefined();
+    });
+  });
+
   describe('timelines', () => {
     it('should run entries without a timeline at the tick step', () => {
       let frame = step(basePipe(makeFrame()), entry('a', 100));
