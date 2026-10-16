@@ -193,6 +193,47 @@ describe('Effects', () => {
       error.mockRestore();
     });
 
+    it('should reuse the performer map while modules are unchanged', () => {
+      const ping = Effects.define('test.plugin', 'ping');
+      const frame = load({
+        id: 'test.plugin',
+        effects: [ping.perform(() => undefined)],
+      });
+
+      const first = Effects.performers(frame);
+      const again = Effects.performers(basePipe(tick(frame)));
+      const after = Effects.performers(
+        basePipe(tick(ModuleManager.load({ id: 'test.other' })(frame)))
+      );
+
+      expect(again).toBe(first);
+      expect(after).not.toBe(first);
+      expect(after.has('test.plugin/ping')).toBe(true);
+    });
+
+    it('should report each performance to the observer', () => {
+      const ping = Effects.define<number>('test.plugin', 'ping');
+      const seen: [string, string, number][] = [];
+      const frame = load({
+        id: 'test.plugin',
+        effects: [
+          ping.perform(ms => {
+            const end = performance.now() + ms;
+            while (performance.now() < end);
+          }),
+        ],
+      });
+
+      Effects.flush(ping.emit(2)(frame), noInject, (owner, type, duration) =>
+        seen.push([owner, type, duration])
+      );
+
+      expect(seen).toHaveLength(1);
+      expect(seen[0][0]).toBe('test.plugin');
+      expect(seen[0][1]).toBe('test.plugin/ping');
+      expect(seen[0][2]).toBeGreaterThanOrEqual(1.5);
+    });
+
     it('should work with plain objects and no helpers', () => {
       const seen: unknown[] = [];
 

@@ -11,6 +11,8 @@ export type Effect<T = unknown> = { type: EffectKey<T>; payload: T };
 
 export type Inject = (pipe: Pipe) => void;
 
+export type Observe = (owner: string, type: string, duration: number) => void;
+
 export type Performer<T> = {
   type: EffectKey<T>;
   perform(payload: T, inject: Inject): void;
@@ -33,6 +35,14 @@ type ModuleState = {
 };
 
 type Owned = { performer: Performer<unknown>; owner: string };
+
+type Cached = {
+  registry: Record<ModuleId, Module>;
+  order: ModuleId[];
+  found: Map<string, Owned>;
+};
+
+let cached: Cached | null = null;
 
 const PLUGIN_NAMESPACE = 'core.effects';
 
@@ -76,6 +86,14 @@ export class Effects {
       order = [],
       retired = [],
     } = Composer.get(modules)(frame) ?? {};
+    if (
+      cached &&
+      cached.registry === registry &&
+      cached.order === order &&
+      retired.length === 0
+    ) {
+      return cached.found;
+    }
     const found = new Map<string, Owned>();
     for (const { performer, owner } of engine) {
       found.set(performer.type, { performer, owner });
@@ -92,10 +110,11 @@ export class Effects {
           found.set(performer.type, { performer, owner: module.id });
       }
     }
+    cached = retired.length === 0 ? { registry, order, found } : null;
     return found;
   }
 
-  static flush(frame: GameFrame, inject: Inject): void {
+  static flush(frame: GameFrame, inject: Inject, observe?: Observe): void {
     const queue = Composer.get(effects.queue)(frame) ?? [];
     if (queue.length === 0) return;
 
@@ -111,7 +130,10 @@ export class Effects {
         continue;
       }
       try {
+        const before = observe ? performance.now() : 0;
         owned.performer.perform(effect.payload, inject);
+        if (observe)
+          observe(owned.owner, effect.type, performance.now() - before);
       } catch (error) {
         inject(
           Log.error(owned.owner, 'effect {type} failed: {error}', {
