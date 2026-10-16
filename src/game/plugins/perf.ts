@@ -1,6 +1,7 @@
 import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import type { PluginPerfEntry } from '../../engine/pipes/Perf';
 import { Composer } from '../../engine/Composer';
+import { Effects } from '../../engine/pipes/Effects';
 import { Perf } from '../../engine/pipes/Perf';
 import Debug from './debug';
 
@@ -8,15 +9,32 @@ const PLUGIN_ID = 'core.perf_overlay';
 const ELEMENT_ATTR = 'data-plugin-id';
 const STYLE_ID = `${PLUGIN_ID}-styles`;
 
-type PerfOverlayContext = {
-  el: HTMLElement;
+type PerfOverlayState = {
+  visible: boolean;
 };
 
-const po = pluginPaths<PerfOverlayContext>(PLUGIN_ID);
+export type PerfRow = {
+  id: string;
+  phase: string;
+  avg: number;
+};
+
+export type PerfView = {
+  rows: PerfRow[];
+  budget: number;
+};
+
+const po = pluginPaths<PerfOverlayState>(PLUGIN_ID);
+
+const view = Effects.define<PerfView>(PLUGIN_ID, 'view');
+const hide = Effects.define(PLUGIN_ID, 'hide');
+const unmount = Effects.define(PLUGIN_ID, 'unmount');
 
 const COLOR_OK = [0x4a, 0xde, 0x80] as const;
 const COLOR_WARN = [0xfa, 0xcc, 0x15] as const;
 const COLOR_OVER = [0xf8, 0x71, 0x71] as const;
+
+let el: HTMLElement | null = null;
 
 function lerpRgb(
   a: readonly number[],
@@ -49,103 +67,124 @@ function formatLine(
   return `<span style="color:${color}">${name}${ph}${a}</span>`;
 }
 
+export function collectRows(
+  plugins: Record<string, any>,
+  skip: string
+): PerfRow[] {
+  const rows: PerfRow[] = [];
+  const walk = (node: Record<string, any>, prefix: string[]) => {
+    for (const [key, value] of Object.entries(node)) {
+      if (!value || typeof value !== 'object') continue;
+      if ('lastTick' in value) {
+        const id = prefix.join('.');
+        if (id === skip) continue;
+        rows.push({ id, phase: key, avg: (value as PluginPerfEntry).avg });
+      } else {
+        walk(value, [...prefix, key]);
+      }
+    }
+  };
+  walk(plugins, []);
+  return rows;
+}
+
+function mount(): HTMLElement {
+  if (el) return el;
+
+  const style =
+    document.getElementById(STYLE_ID) ?? document.createElement('style');
+  style.id = STYLE_ID;
+  style.textContent = `
+    [${ELEMENT_ATTR}="${PLUGIN_ID}"] {
+      position: fixed;
+      top: 42px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      font-family: monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      z-index: 9999;
+      pointer-events: none;
+      white-space: pre;
+      border-radius: 4px;
+    }
+  `;
+  if (!style.parentNode) document.head.appendChild(style);
+
+  document.querySelector(`[${ELEMENT_ATTR}="${PLUGIN_ID}"]`)?.remove();
+
+  el = document.createElement('div');
+  el.setAttribute(ELEMENT_ATTR, PLUGIN_ID);
+  document.body.appendChild(el);
+  return el;
+}
+
+function paint({ rows, budget }: PerfView) {
+  const target = mount();
+  target.style.display = '';
+
+  const lines = rows.map(r => formatLine(r.id, r.phase, r.avg, budget));
+
+  if (rows.length > 0) {
+    const totalAvg = rows.reduce((sum, r) => sum + r.avg, 0);
+    const totalColor = budgetColor(totalAvg, budget * rows.length);
+    lines.push('');
+    lines.push(
+      `<span style="color:${totalColor}">${'frame'.padEnd(35)}${`${totalAvg.toFixed(2)}ms`.padStart(8)}</span>`
+    );
+  }
+
+  target.innerHTML =
+    lines.length > 0
+      ? lines.join('\n')
+      : '<span style="color:#888">no plugin data</span>';
+}
+
+function conceal() {
+  if (el) el.style.display = 'none';
+}
+
+function teardown() {
+  el?.remove();
+  el = null;
+}
+
 const PerfOverlay = definePlugin({
   id: PLUGIN_ID,
   meta: {
     name: 'Performance Overlay',
   },
 
-  activate: Composer.do(({ get, set }) => {
-    const style =
-      document.getElementById(STYLE_ID) ?? document.createElement('style');
-    style.id = STYLE_ID;
-    style.textContent = `
-      [${ELEMENT_ATTR}="${PLUGIN_ID}"] {
-        position: fixed;
-        top: 42px;
-        right: 8px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 8px 12px;
-        font-family: monospace;
-        font-size: 11px;
-        line-height: 1.4;
-        z-index: 9999;
-        pointer-events: none;
-        white-space: pre;
-        border-radius: 4px;
-      }
-    `;
-    if (!style.parentNode) document.head.appendChild(style);
+  activate: Composer.set(po, { visible: false }),
 
-    const existing = document.querySelector(`[${ELEMENT_ATTR}="${PLUGIN_ID}"]`);
-    if (existing) existing.remove();
+  update: Composer.do(({ get, set, pipe }) => {
+    const state = get(po);
+    if (!state) return;
 
-    const el = document.createElement('div');
-    el.setAttribute(ELEMENT_ATTR, PLUGIN_ID);
-
-    const visible = get(Debug.paths.visible);
-    el.style.display = visible ? '' : 'none';
-
-    document.body.appendChild(el);
-    set(po, { el });
-  }),
-
-  update: Composer.do(({ get }) => {
-    const el = get(po)?.el;
-    if (!el) return;
-
-    const visible = get(Debug.paths.visible);
-    el.style.display = visible ? '' : 'none';
-    if (!visible) return;
-
-    const ctx = get(Perf.paths);
-    if (!ctx) return;
-
-    const { plugins, config } = ctx;
-    const lines: string[] = [];
-
-    let totalAvg = 0;
-
-    const walk = (node: Record<string, any>, prefix: string[]) => {
-      for (const [key, value] of Object.entries(node)) {
-        if (!value || typeof value !== 'object') continue;
-        if ('lastTick' in value) {
-          const id = prefix.join('.');
-          if (id === PLUGIN_ID) continue;
-          const entry = value as PluginPerfEntry;
-          totalAvg += entry.avg;
-          lines.push(formatLine(id, key, entry.avg, config.pluginBudget));
-        } else {
-          walk(value, [...prefix, key]);
-        }
-      }
-    };
-
-    walk(plugins as Record<string, any>, []);
-
-    if (lines.length > 0) {
-      const totalColor = budgetColor(
-        totalAvg,
-        config.pluginBudget * lines.length
+    const visible = !!get(Debug.paths.visible);
+    if (visible) {
+      const perf = get(Perf.paths);
+      pipe(
+        view.emit({
+          rows: collectRows(perf?.plugins ?? {}, PLUGIN_ID),
+          budget: perf?.config.pluginBudget ?? 0,
+        })
       );
-      lines.push('');
-      lines.push(
-        `<span style="color:${totalColor}">${'frame'.padEnd(35)}${`${totalAvg.toFixed(2)}ms`.padStart(8)}</span>`
-      );
+    } else if (state.visible) {
+      pipe(hide.emit());
     }
-
-    el.innerHTML =
-      lines.length > 0
-        ? lines.join('\n')
-        : '<span style="color:#888">no plugin data</span>';
+    if (visible !== state.visible) set(po.visible, visible);
   }),
 
-  deactivate: Composer.do(({ get, set }) => {
-    const el = get(po)?.el;
-    if (el) el.remove();
-    set(po, undefined);
-  }),
+  deactivate: Composer.pipe(unmount.emit(), Composer.set(po, undefined)),
+
+  effects: [
+    view.perform(payload => paint(payload)),
+    hide.perform(() => conceal()),
+    unmount.perform(() => teardown()),
+  ],
 });
 
 export default PerfOverlay;
