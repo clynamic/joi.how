@@ -16,6 +16,7 @@ const image = pluginPaths<ImageState>(PLUGIN_ID);
 const eventType = Events.getKeys(
   PLUGIN_ID,
   'push_next',
+  'advance',
   'set_image',
   'set_next_images'
 );
@@ -29,6 +30,10 @@ const Image = definePlugin({
 
   pushNextImage(img: ImageItem): Pipe {
     return Events.dispatch({ type: eventType.pushNext, payload: img });
+  },
+
+  advance(): Pipe {
+    return Events.dispatch({ type: eventType.advance });
   },
 
   setCurrentImage(img: ImageItem | undefined): Pipe {
@@ -46,13 +51,17 @@ const Image = definePlugin({
 
   update: Composer.pipe(
     Events.handle<ImageItem>(eventType.pushNext, event =>
-      Composer.over(image, ({ nextImages = [] }) => {
-        const next = [...nextImages, event.payload];
-        const newCurrent = next.shift();
-        return {
-          currentImage: newCurrent,
-          nextImages: next,
-        };
+      Composer.over(image, state => ({
+        ...state,
+        nextImages: [...(state.nextImages ?? []), event.payload],
+      }))
+    ),
+
+    Events.handle(eventType.advance, () =>
+      Composer.over(image, state => {
+        const [head, ...rest] = state.nextImages ?? [];
+        if (head === undefined) return state;
+        return { ...state, currentImage: head, nextImages: rest };
       })
     ),
 

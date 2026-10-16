@@ -5,7 +5,7 @@ import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { Pipe } from '../../engine/State';
 import { ImageItem } from '../../types';
-import { Settings } from '../../settings/Settings';
+import { defaultSettings, Settings } from '../../settings/Settings';
 import { PLAY_TIMELINE } from '../timelines';
 import Image from './image';
 import { IntensityState } from './intensity';
@@ -35,9 +35,11 @@ export const getImageSwitchDuration = (
   { imageDuration, intenseImages }: ImageSwitchSettings,
   intensity: number
 ): number => {
-  if (!intenseImages) return imageDuration * 1000;
-  const scale = Math.max(1 - intensity, 0.1);
-  return Math.max(imageDuration * scale * 1000, 1000);
+  const seconds = Number.isFinite(imageDuration)
+    ? imageDuration
+    : defaultSettings.imageDuration;
+  const scale = intenseImages ? Math.max(1 - intensity, 0.1) : 1;
+  return Math.max(seconds * scale * 1000, 1000);
 };
 
 const RandomImages = definePlugin({
@@ -55,6 +57,7 @@ const RandomImages = definePlugin({
         Rand.shuffle(imgs, shuffled => {
           const initial = shuffled.slice(0, Math.min(3, imgs.length));
           return Composer.pipe(
+            Composer.set(state, { seenImages: initial.map(img => img.id) }),
             ...initial.map(img => Image.pushNextImage(img)),
             Events.dispatch({ type: eventType.scheduleNext })
           );
@@ -119,6 +122,7 @@ const RandomImages = definePlugin({
 
           return Composer.pipe(
             Composer.set(state, { seenImages: seen }),
+            Image.advance(),
             Image.pushNextImage(randomImage),
             Scheduler.schedule({
               id: scheduleId,
