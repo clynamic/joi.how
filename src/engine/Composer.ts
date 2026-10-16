@@ -270,9 +270,9 @@ export class Composer<T extends object> {
         (scope as any)[key] = (c as any)[key].bind(c);
       }
 
-      if (import.meta.env.DEV) {
-        let sealed = false;
+      let sealed = false;
 
+      if (import.meta.env.DEV) {
         // throw if scope is used after block returns (leaked references)
         for (const key of Object.keys(scope)) {
           const method = (scope as any)[key];
@@ -282,17 +282,15 @@ export class Composer<T extends object> {
             return method(...args);
           };
         }
-
-        const result: unknown = fn(scope);
-
-        // catch async callbacks that would silently lose writes
-        if (result && typeof (result as any).then === 'function') {
-          throw new Error('Composer.do() callback must not be async');
-        }
-        sealed = true;
-      } else {
-        fn(scope);
       }
+
+      const result: unknown = fn(scope);
+
+      // catch async callbacks that would silently lose writes
+      if (result && typeof (result as any).then === 'function') {
+        throw new Error('Composer.do() callback must not be async');
+      }
+      sealed = true;
 
       return c.get();
     };

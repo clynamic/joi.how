@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { Composer } from '../../src/engine/Composer';
 
 describe('Composer', () => {
@@ -481,6 +481,18 @@ describe('Composer', () => {
         });
 
         expect(() => run({})).toThrow('got 2');
+      });
+
+      it('should refuse an async callback outside dev as well', () => {
+        vi.stubEnv('DEV', false);
+        try {
+          const fn = Composer.do<{ x: number }>((async (scope: any) => {
+            scope.set('x', 1);
+          }) as any);
+          expect(() => fn({ x: 0 })).toThrow('must not be async');
+        } finally {
+          vi.unstubAllEnvs();
+        }
       });
 
       it('should throw if scope is used after block completes', () => {
