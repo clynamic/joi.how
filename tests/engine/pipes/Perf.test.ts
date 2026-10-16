@@ -163,6 +163,27 @@ describe('Perf', () => {
     });
   });
 
+  describe('Perf.record', () => {
+    it('should accumulate samples, average and max for a phase', () => {
+      const frame0 = basePipe(makeFrame());
+      const frame1 = Perf.record('test.plugin', 'perform tone', 3)(frame0);
+      const frame2 = Perf.record(
+        'test.plugin',
+        'perform tone',
+        5
+      )(tick(frame1));
+
+      const entry = getEntry(frame2, 'test.plugin', 'perform tone');
+      expect(entry).toMatchObject({
+        last: 5,
+        avg: 4,
+        max: 5,
+        samples: [3, 5],
+        lastTick: 1,
+      });
+    });
+  });
+
   describe('over budget events', () => {
     it('should dispatch over_budget event when plugin exceeds budget', () => {
       const slow: Pipe = frame => {

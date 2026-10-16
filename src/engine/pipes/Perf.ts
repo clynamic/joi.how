@@ -86,7 +86,7 @@ function pruneExpired(
 
 export class Perf {
   static withTiming(id: PluginId, phase: string, pluginPipe: Pipe): Pipe {
-    return Composer.do(({ get, set, pipe }) => {
+    return Composer.do(({ pipe }) => {
       if (!sdk.debug) {
         pipe(pluginPipe);
         return;
@@ -95,8 +95,12 @@ export class Perf {
       const before = performance.now();
       pipe(pluginPipe);
       const after = performance.now();
-      const duration = after - before;
+      pipe(Perf.record(id, phase, after - before));
+    });
+  }
 
+  static record(id: PluginId, phase: string, duration: number): Pipe {
+    return Composer.do(({ get, set, pipe }) => {
       const tick = get(frameTiming.tick) ?? 0;
       const entryPath = perf.plugins[id][phase];
       const entry = get(entryPath);

@@ -8,6 +8,7 @@ import { Perf } from '../engine/pipes/Perf';
 import { Errors } from '../engine/pipes/Errors';
 import { Piper } from '../engine/Piper';
 import { Impulses } from '../engine/Impulses';
+import { sdk } from '../engine/sdk';
 
 type GameEngineContextValue = {
   /**
@@ -54,6 +55,8 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
     );
 
     const inject = (pipe: Pipe) => impulses.push(pipe);
+    const observe = (owner: string, type: string, duration: number) =>
+      inject(Perf.record(owner, `perform ${type.split('/').pop()}`, duration));
 
     const STEP = 16;
     const MAX_TICKS_PER_FRAME = 4;
@@ -80,7 +83,11 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
 
       while (accumulator >= STEP && ticks < MAX_TICKS_PER_FRAME) {
         ticked = true;
-        Effects.flush(engineRef.current.tick(), inject);
+        Effects.flush(
+          engineRef.current.tick(),
+          inject,
+          sdk.debug ? observe : undefined
+        );
         accumulator -= STEP;
         ticks++;
       }
