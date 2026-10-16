@@ -17,6 +17,7 @@ import Warmup from './warmup';
 import Stroke from './stroke';
 import Rand from './rand';
 import Sound from './sound';
+import Cues from './cues';
 import Dealer from './dealer';
 import EmergencyStop from './emergencyStop';
 import Hypno from './hypno';
@@ -44,6 +45,7 @@ const plugins = [
   Hypno,
   RandomImages,
   EmergencyStop,
+  Cues,
   Fps,
   PerfOverlay,
 ];

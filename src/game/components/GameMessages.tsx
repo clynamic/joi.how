@@ -1,14 +1,11 @@
-import { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled from 'styled-components';
 import { useTranslate } from '../../settings';
 
-import { defaultTransition, playTone } from '../../utils';
-import { GameMessage } from '../plugins/messages';
+import { defaultTransition } from '../../utils';
 import Messages from '../plugins/messages';
 import { useGameFrame } from '../hooks/UseGameFrame';
 
-import _ from 'lodash';
 import { useDispatchEvent } from '../hooks/UseDispatchEvent';
 
 const StyledGameMessages = styled.div`
@@ -63,23 +60,6 @@ export const GameMessages = () => {
   const { messages } = useGameFrame(Messages.paths);
   const { dispatchEvent } = useDispatchEvent();
   const translate = useTranslate();
-
-  const prevMessagesRef = useRef<GameMessage[]>([]);
-
-  useEffect(() => {
-    const prevMessages = prevMessagesRef.current;
-
-    const changed = messages?.some(newMsg => {
-      const oldMsg = prevMessages.find(prev => prev.id === newMsg.id);
-      return !oldMsg || !_.isEqual(oldMsg, newMsg);
-    });
-
-    if (changed) {
-      playTone(200);
-    }
-
-    prevMessagesRef.current = messages ?? [];
-  }, [messages]);
 
   return (
     <StyledGameMessages>
