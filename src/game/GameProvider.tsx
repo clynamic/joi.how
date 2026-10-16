@@ -7,7 +7,7 @@ import { Scheduler } from '../engine/pipes/Scheduler';
 import { Perf } from '../engine/pipes/Perf';
 import { Errors } from '../engine/pipes/Errors';
 import { Piper } from '../engine/Piper';
-import { Composer } from '../engine/Composer';
+import { Impulses } from '../engine/Impulses';
 
 type GameEngineContextValue = {
   /**
@@ -35,21 +35,16 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
 
   const [frame, setFrame] = useState<GameFrame | null>(null);
 
-  const pendingImpulseRef = useRef<Pipe[]>([]);
-  const activeImpulseRef = useRef<Pipe[]>([]);
+  const impulsesRef = useRef(new Impulses());
 
   useEffect(() => {
-    // To inject one-shot pipes (impulses) into the engine,
-    // we use the pending ref to stage them, and the active ref to apply them.
-    const impulsePipe: Pipe = Composer.chain(c =>
-      c.pipe(...activeImpulseRef.current)
-    );
+    const impulses = impulsesRef.current;
 
     engineRef.current = new GameEngine(
       {},
       Piper([
         Effects.pipe,
-        impulsePipe,
+        impulses.pipe,
         Events.pipe,
         Scheduler.pipe,
         Perf.pipe,
@@ -58,7 +53,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
       ])
     );
 
-    const inject = (pipe: Pipe) => pendingImpulseRef.current.push(pipe);
+    const inject = (pipe: Pipe) => impulses.push(pipe);
 
     const STEP = 16;
     const MAX_TICKS_PER_FRAME = 4;
@@ -84,12 +79,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
       let ticks = 0;
 
       while (accumulator >= STEP && ticks < MAX_TICKS_PER_FRAME) {
-        if (!ticked) {
-          activeImpulseRef.current = pendingImpulseRef.current;
-          pendingImpulseRef.current = [];
-          ticked = true;
-        }
-
+        ticked = true;
         Effects.flush(engineRef.current.tick(), inject);
         accumulator -= STEP;
         ticks++;
@@ -111,13 +101,12 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
     return () => {
       cancelAnimationFrame(frameId);
       engineRef.current = null;
-      pendingImpulseRef.current = [];
-      activeImpulseRef.current = [];
+      impulses.clear();
     };
   }, [pipes]);
 
   const injectImpulse = useCallback((pipe: Pipe) => {
-    pendingImpulseRef.current.push(pipe);
+    impulsesRef.current.push(pipe);
   }, []);
 
   return (
