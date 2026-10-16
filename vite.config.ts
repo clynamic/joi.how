@@ -28,6 +28,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
+    exclude: ['**/node_modules/**', 'scratch/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
