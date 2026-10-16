@@ -196,6 +196,22 @@ export class Composer<T extends object> {
       _bind(obj, path, (fn: A) => fn(...args));
   }
 
+  take<A>(cps: (fn: (value: A) => (obj: T) => T) => (obj: T) => T): A {
+    let value: A | undefined;
+    let calls = 0;
+    this.pipe(
+      cps(v => {
+        value = v;
+        calls++;
+        return obj => obj;
+      })
+    );
+    if (calls !== 1) {
+      throw new Error(`take expected exactly one value, got ${calls}`);
+    }
+    return value as A;
+  }
+
   /**
    * Runs a composer function when the condition is true.
    */

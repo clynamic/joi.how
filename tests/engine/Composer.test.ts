@@ -451,6 +451,38 @@ describe('Composer', () => {
         }).toThrow('must not be async');
       });
 
+      it('should take the value a continuation pipe produces', () => {
+        const draw = (fn: (value: number) => (obj: any) => any) => (obj: any) =>
+          fn(obj.cursor)({ ...obj, cursor: obj.cursor + 1 });
+        const run = Composer.do<any>(({ take, set }) => {
+          const a = take(draw);
+          const b = take(draw);
+          set('sum', a + b);
+        });
+
+        expect(run({ cursor: 5 })).toEqual({ cursor: 7, sum: 11 });
+      });
+
+      it('should throw when the continuation never runs', () => {
+        const skip = () => (obj: any) => obj;
+        const run = Composer.do<any>(({ take }) => {
+          take(skip);
+        });
+
+        expect(() => run({})).toThrow('got 0');
+      });
+
+      it('should throw when the continuation runs twice', () => {
+        const twice =
+          (fn: (value: number) => (obj: any) => any) => (obj: any) =>
+            fn(2)(fn(1)(obj));
+        const run = Composer.do<any>(({ take }) => {
+          take(twice);
+        });
+
+        expect(() => run({})).toThrow('got 2');
+      });
+
       it('should throw if scope is used after block completes', () => {
         let leaked: any;
         const fn = Composer.do<{ x: number }>(scope => {
