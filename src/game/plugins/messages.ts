@@ -22,7 +22,10 @@ export type PartialGameMessage = Partial<GameMessage> & Pick<GameMessage, 'id'>;
 
 export type MessageState = {
   messages: GameMessage[];
+  versions: Record<string, number>;
 };
+
+type ExpirePayload = { id: string; version: number };
 
 const PLUGIN_ID = 'core.messages';
 
@@ -44,17 +47,17 @@ const Messages = definePlugin({
     });
   },
 
-  activate: Composer.set(paths, { messages: [] }),
+  activate: Composer.set(paths, { messages: [], versions: {} }),
 
   update: Composer.pipe(
     Events.handle<PartialGameMessage>(eventType.sendMessage, event =>
       Composer.pipe(
-        Composer.over(paths, ({ messages }) => {
+        Composer.over(paths, ({ messages, versions = {} }) => {
           const patch = event.payload;
           const index = messages.findIndex(m => m.id === patch.id);
           const existing = messages[index];
 
-          if (!existing && !patch.title) return { messages };
+          if (!existing && !patch.title) return { messages, versions };
 
           const updated = [...messages];
           updated[index < 0 ? updated.length : index] = {
@@ -62,13 +65,20 @@ const Messages = definePlugin({
             ...patch,
           };
 
-          return { messages: updated };
+          return {
+            messages: updated,
+            versions: {
+              ...versions,
+              [patch.id]: (versions[patch.id] ?? 0) + 1,
+            },
+          };
         }),
 
         Composer.do(({ get, pipe }) => {
-          const { messages } = get(paths);
+          const { messages, versions } = get(paths);
           const messageId = event.payload.id;
           const updated = messages.find(m => m.id === messageId);
+          const version = versions[messageId] ?? 0;
           const scheduleId = Scheduler.getKey(
             PLUGIN_ID,
             `message/${messageId}`
@@ -82,7 +92,7 @@ const Messages = definePlugin({
                 timeline: PLAY_TIMELINE,
                 event: {
                   type: eventType.expireMessage,
-                  payload: updated.id,
+                  payload: { id: updated.id, version },
                 },
               })
             );
@@ -93,10 +103,12 @@ const Messages = definePlugin({
       )
     ),
 
-    Events.handle<string>(eventType.expireMessage, event =>
-      Composer.over(paths, ({ messages }) => ({
-        messages: messages.filter(m => m.id !== event.payload),
-      }))
+    Events.handle<ExpirePayload>(eventType.expireMessage, event =>
+      Composer.over(paths, state => {
+        const { id, version } = event.payload;
+        if ((state.versions ?? {})[id] !== version) return state;
+        return { ...state, messages: state.messages.filter(m => m.id !== id) };
+      })
     )
   ),
 
