@@ -6,6 +6,7 @@ import {
   type PluginMeta,
 } from './Plugins';
 import { Composer } from '../Composer';
+import { Effects, type Inject } from '../pipes/Effects';
 import { Pipe } from '../State';
 import { ModuleManager } from '../modules/ModuleManager';
 
@@ -13,12 +14,16 @@ const PLUGIN_ID = 'core.plugin_installer';
 
 type MetaMap = Record<PluginId, PluginMeta>;
 
+export type InstallFailure = { id?: PluginId; message: string };
+
 type InstallerState = {
   installed: PluginId[];
   disabled: PluginId[];
   meta: MetaMap;
-  failed: PluginId[];
+  failed: InstallFailure[];
 };
+
+type Snapshot = Pick<InstallerState, 'installed' | 'disabled' | 'meta'>;
 
 const ins = pluginPaths<InstallerState>(PLUGIN_ID);
 
@@ -29,16 +34,18 @@ const storageKey = {
   meta: `${PLUGIN_ID}.meta`,
 };
 
-function getInstalledIds(): PluginId[] {
-  return JSON.parse(localStorage.getItem(storageKey.installed) ?? '[]');
-}
+const restore = Effects.define(PLUGIN_ID, 'restore');
+const persist = Effects.define<Snapshot>(PLUGIN_ID, 'persist');
+const storeCode = Effects.define<{ id: PluginId; code: string }>(
+  PLUGIN_ID,
+  'store_code'
+);
+const dropCode = Effects.define<{ id: PluginId }>(PLUGIN_ID, 'drop_code');
+const compile = Effects.define<{ code: string }>(PLUGIN_ID, 'compile');
+const revive = Effects.define<{ id: PluginId }>(PLUGIN_ID, 'revive');
 
-function getDisabledIds(): PluginId[] {
-  return JSON.parse(localStorage.getItem(storageKey.disabled) ?? '[]');
-}
-
-function setDisabledIds(ids: PluginId[]) {
-  localStorage.setItem(storageKey.disabled, JSON.stringify(ids));
+function readJson<T>(key: string, fallback: T): T {
+  return JSON.parse(localStorage.getItem(key) ?? JSON.stringify(fallback));
 }
 
 async function loadFromCode(code: string): Promise<Plugin> {
@@ -54,156 +61,157 @@ async function loadFromCode(code: string): Promise<Plugin> {
   }
 }
 
-type LoadResult = { plugin: Plugin; code: string };
-
-let loaded: LoadResult[] = [];
-let errors: Error[] = [];
-
-function submitLoad(code: string) {
+function importCode(
+  code: string,
+  inject: Inject,
+  onLoaded: (plugin: Plugin) => Pipe,
+  id?: PluginId
+) {
   loadFromCode(code).then(
-    plugin => loaded.push({ plugin, code }),
-    error => errors.push(error)
+    plugin => inject(onLoaded(plugin)),
+    error => inject(PluginInstaller.fail(String(error), id))
   );
 }
+
+function restoreFromStorage(inject: Inject) {
+  const installed = readJson<PluginId[]>(storageKey.installed, []);
+  const disabled = readJson<PluginId[]>(storageKey.disabled, []);
+  const meta = readJson<MetaMap>(storageKey.meta, {});
+  inject(PluginInstaller.restored({ installed, disabled, meta }));
+
+  for (const id of installed) {
+    if (disabled.includes(id)) continue;
+    const rawCode = localStorage.getItem(storageKey.code(id));
+    if (!rawCode) {
+      inject(PluginInstaller.fail('no stored code', id));
+      continue;
+    }
+    importCode(
+      JSON.parse(rawCode) as string,
+      inject,
+      PluginInstaller.loaded,
+      id
+    );
+  }
+}
+
+function reviveFromStorage(id: PluginId, inject: Inject) {
+  const rawCode = localStorage.getItem(storageKey.code(id));
+  if (!rawCode) {
+    inject(PluginInstaller.fail('no stored code', id));
+    return;
+  }
+  importCode(JSON.parse(rawCode) as string, inject, PluginInstaller.loaded, id);
+}
+
+const persistNow: Pipe = Composer.bind(ins, state =>
+  persist.emit({
+    installed: state.installed,
+    disabled: state.disabled,
+    meta: state.meta,
+  })
+);
 
 const PluginInstaller = definePlugin({
   id: PLUGIN_ID,
   name: 'PluginInstaller',
 
-  activate: Composer.do(({ set, over }) => {
-    const installed = getInstalledIds();
-    const disabled = getDisabledIds();
+  activate: Composer.pipe(
+    Composer.set(ins, { installed: [], disabled: [], meta: {}, failed: [] }),
+    restore.emit()
+  ),
 
-    const meta: MetaMap = JSON.parse(
-      localStorage.getItem(storageKey.meta) ?? '{}'
-    );
-
-    set(ins, { installed, disabled, failed: [], meta });
-
-    for (const id of installed) {
-      if (disabled.includes(id)) continue;
-
-      const rawCode = localStorage.getItem(storageKey.code(id));
-      if (!rawCode) {
-        console.error(
-          `[PluginInstaller] plugin "${id}" has no code in storage`
-        );
-        over(ins.failed, (ids = []) => [...ids, id]);
-        continue;
-      }
-
-      submitLoad(JSON.parse(rawCode) as string);
-    }
-  }),
-
-  update: Composer.do(({ set, over, pipe }) => {
-    if (loaded.length === 0 && errors.length === 0) return;
-
-    if (loaded.length > 0) {
-      const batch = loaded;
-      loaded = [];
-
-      const installedIds = getInstalledIds();
-      const meta: MetaMap = JSON.parse(
-        localStorage.getItem(storageKey.meta) ?? '{}'
-      );
-      const newInstalledIds = [...installedIds];
-
-      for (const { plugin, code } of batch) {
-        const id = plugin.id;
-        if (!newInstalledIds.includes(id)) newInstalledIds.push(id);
-        localStorage.setItem(storageKey.code(id), JSON.stringify(code));
-        if (plugin.meta) meta[id] = plugin.meta;
-      }
-
-      localStorage.setItem(
-        storageKey.installed,
-        JSON.stringify(newInstalledIds)
-      );
-      localStorage.setItem(storageKey.meta, JSON.stringify(meta));
-      set(ins.meta, meta);
-      pipe(...batch.map(({ plugin }) => ModuleManager.load(plugin)));
-      over(ins.installed, (ids = []) => {
-        const newIds = batch
-          .map(({ plugin }) => plugin.id)
-          .filter(id => !ids.includes(id));
-        return [...ids, ...newIds];
-      });
-    }
-
-    if (errors.length > 0) {
-      const batch = errors;
-      errors = [];
-
-      for (const error of batch) {
-        console.error(`[PluginInstaller] failed to load plugin:`, error);
-      }
-      over(ins.failed, (ids = []) => [...ids, ...batch.map(e => e.message)]);
-    }
-  }),
-
-  deactivate: Composer.do(() => {
-    loaded = [];
-    errors = [];
-  }),
+  deactivate: Composer.set(ins, undefined),
 
   install(code: string): Pipe {
-    submitLoad(code);
-    return Composer.pipe();
+    return compile.emit({ code });
   },
 
   remove(id: PluginId): Pipe {
     return Composer.pipe(
-      Composer.do(({ over }) => {
-        localStorage.setItem(
-          storageKey.installed,
-          JSON.stringify(getInstalledIds().filter(i => i !== id))
-        );
-        localStorage.removeItem(storageKey.code(id));
-        setDisabledIds(getDisabledIds().filter(i => i !== id));
-
-        const meta: MetaMap = JSON.parse(
-          localStorage.getItem(storageKey.meta) ?? '{}'
-        );
-        delete meta[id];
-        localStorage.setItem(storageKey.meta, JSON.stringify(meta));
-        over(ins.meta, (m = {}) => {
-          const next = { ...m };
-          delete next[id];
-          return next;
-        });
-
-        over(ins.installed, (ids = []) => ids.filter(i => i !== id));
-        over(ins.disabled, (ids = []) => ids.filter(i => i !== id));
-        over(ins.failed, (ids = []) => ids.filter(i => i !== id));
-      }),
+      Composer.over(ins, state => ({
+        ...state,
+        installed: state.installed.filter(i => i !== id),
+        disabled: state.disabled.filter(i => i !== id),
+        failed: state.failed.filter(f => f.id !== id),
+        meta: Object.fromEntries(
+          Object.entries(state.meta).filter(([key]) => key !== id)
+        ),
+      })),
+      persistNow,
+      dropCode.emit({ id }),
       ModuleManager.unload(id)
     );
   },
 
   enable(id: PluginId): Pipe {
-    return Composer.do(({ over }) => {
-      setDisabledIds(getDisabledIds().filter(i => i !== id));
-      over(ins.disabled, (ids = []) => ids.filter(i => i !== id));
-
-      const rawCode = localStorage.getItem(storageKey.code(id));
-      if (!rawCode) return;
-
-      submitLoad(JSON.parse(rawCode) as string);
-    });
+    return Composer.pipe(
+      Composer.over(ins.disabled, ids => ids.filter(i => i !== id)),
+      persistNow,
+      revive.emit({ id })
+    );
   },
 
   disable(id: PluginId): Pipe {
-    return Composer.do(({ over, pipe }) => {
-      const disabled = getDisabledIds();
-      if (!disabled.includes(id)) {
-        setDisabledIds([...disabled, id]);
-        over(ins.disabled, (ids = []) => [...ids, id]);
-      }
-
-      pipe(ModuleManager.unload(id));
-    });
+    return Composer.pipe(
+      Composer.over(ins.disabled, ids =>
+        ids.includes(id) ? ids : [...ids, id]
+      ),
+      persistNow,
+      ModuleManager.unload(id)
+    );
   },
+
+  restored(snapshot: Snapshot): Pipe {
+    return Composer.over(ins, state => ({ ...state, ...snapshot }));
+  },
+
+  installed(plugin: Plugin, code: string): Pipe {
+    return Composer.pipe(
+      Composer.over(ins, state => ({
+        ...state,
+        installed: state.installed.includes(plugin.id)
+          ? state.installed
+          : [...state.installed, plugin.id],
+        meta: plugin.meta
+          ? { ...state.meta, [plugin.id]: plugin.meta }
+          : state.meta,
+      })),
+      persistNow,
+      storeCode.emit({ id: plugin.id, code }),
+      ModuleManager.load(plugin)
+    );
+  },
+
+  loaded(plugin: Plugin): Pipe {
+    return ModuleManager.load(plugin);
+  },
+
+  fail(message: string, id?: PluginId): Pipe {
+    return Composer.over(ins.failed, failed => [
+      ...failed,
+      { ...(id !== undefined && { id }), message },
+    ]);
+  },
+
+  effects: [
+    restore.perform((_, inject) => restoreFromStorage(inject)),
+    persist.perform(({ installed, disabled, meta }) => {
+      localStorage.setItem(storageKey.installed, JSON.stringify(installed));
+      localStorage.setItem(storageKey.disabled, JSON.stringify(disabled));
+      localStorage.setItem(storageKey.meta, JSON.stringify(meta));
+    }),
+    storeCode.perform(({ id, code }) =>
+      localStorage.setItem(storageKey.code(id), JSON.stringify(code))
+    ),
+    dropCode.perform(({ id }) => localStorage.removeItem(storageKey.code(id))),
+    compile.perform(({ code }, inject) =>
+      importCode(code, inject, plugin =>
+        PluginInstaller.installed(plugin, code)
+      )
+    ),
+    revive.perform(({ id }, inject) => reviveFromStorage(id, inject)),
+  ],
 });
 
 export default PluginInstaller;
