@@ -186,6 +186,25 @@ describe('Effects', () => {
       expect(seen).toEqual([7]);
     });
 
+    it('should perform what a module emits while it unloads', () => {
+      const bye = Effects.define('test.plugin', 'bye');
+      const seen: string[] = [];
+
+      const frame = load({
+        id: 'test.plugin',
+        deactivate: bye.emit(),
+        effects: [bye.perform(() => seen.push('bye'))],
+      });
+      const unloaded = basePipe(
+        tick(ModuleManager.unload('test.plugin')(frame))
+      );
+
+      Effects.flush(unloaded, noInject);
+
+      expect(seen).toEqual(['bye']);
+      expect(getQueue(basePipe(tick(unloaded)))).toEqual([]);
+    });
+
     it('should refuse two modules performing the same effect', () => {
       const ping = Effects.define('test.plugin', 'ping');
 

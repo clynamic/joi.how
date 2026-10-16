@@ -28,6 +28,7 @@ export type EffectState = {
 type ModuleState = {
   registry: Record<ModuleId, Module>;
   order: ModuleId[];
+  retired: Module[];
 };
 
 const PLUGIN_NAMESPACE = 'core.effects';
@@ -53,7 +54,11 @@ export class Effects {
   static pipe: Pipe = Composer.set(effects.queue, []);
 
   static performers(frame: GameFrame): Map<string, Performer<unknown>> {
-    const { registry = {}, order = [] } = Composer.get(modules)(frame) ?? {};
+    const {
+      registry = {},
+      order = [],
+      retired = [],
+    } = Composer.get(modules)(frame) ?? {};
     const found = new Map<string, Performer<unknown>>();
     for (const id of order) {
       for (const performer of registry[id]?.effects ?? []) {
@@ -63,6 +68,11 @@ export class Effects {
           );
         }
         found.set(performer.type, performer);
+      }
+    }
+    for (const module of retired) {
+      for (const performer of module.effects ?? []) {
+        if (!found.has(performer.type)) found.set(performer.type, performer);
       }
     }
     return found;

@@ -21,6 +21,7 @@ type ModuleManagerState = {
   order: ModuleId[];
   toLoad: ModuleId[];
   toUnload: ModuleId[];
+  retired: Module[];
 };
 
 const mm = typedPath<ModuleManagerState>([MODULE_NAMESPACE]);
@@ -110,8 +111,10 @@ function topologicalSort(
 
 const initPipe: Pipe = Composer.do(({ get, set }) => {
   if (get(mm)) return;
-  set(mm, { registry: {}, order: [], toLoad: [], toUnload: [] });
+  set(mm, { registry: {}, order: [], toLoad: [], toUnload: [], retired: [] });
 });
+
+const retirePipe: Pipe = Composer.set(mm.retired, []);
 
 const reconcilePipe: Pipe = Composer.pipe(
   Events.handle<Module>(eventType.load, event =>
@@ -170,6 +173,10 @@ const transitionPipe: Pipe = Composer.do(({ get, pipe, set }) => {
     .filter((p): p is Pipe => Boolean(p));
 
   set(mm.order, newOrder);
+  set(
+    mm.retired,
+    unloadOrder.map(id => registry[id])
+  );
 
   const pipes = [...deactivates, ...activates];
   if (pipes.length === 0) return;
@@ -229,6 +236,7 @@ sdk.ModuleManager = ModuleManager;
 
 export const moduleManagerPipe: Pipe = Composer.pipe(
   initPipe,
+  retirePipe,
   reconcilePipe,
   transitionPipe,
   updatePipe,
