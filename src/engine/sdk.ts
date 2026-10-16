@@ -15,6 +15,7 @@ export type PluginIndexEntry = {
   description?: string;
   hooks: string[];
   commands: string[];
+  values: string[];
 };
 
 export type SdkIndex = {
@@ -41,6 +42,15 @@ const LIFECYCLE = new Set([
   'deactivate',
 ]);
 
+const SHAPE = new Set([
+  'id',
+  'sdk',
+  'meta',
+  'ordering',
+  'constraints',
+  'effects',
+]);
+
 const isHook = (name: string) => /^(on|when)[A-Z]/.test(name);
 
 function index(): SdkIndex {
@@ -53,9 +63,11 @@ function index(): SdkIndex {
       engine.push(key);
       continue;
     }
-    const methods = Object.keys(mod).filter(
-      name => typeof mod[name] === 'function' && !LIFECYCLE.has(name)
+    const own = Object.keys(mod).filter(
+      name => !LIFECYCLE.has(name) && !SHAPE.has(name)
     );
+    const methods = own.filter(name => typeof mod[name] === 'function');
+    const values = own.filter(name => typeof mod[name] !== 'function');
     const meta = (mod.meta ?? {}) as { name?: string; description?: string };
     plugins.push({
       sdk: key,
@@ -64,6 +76,7 @@ function index(): SdkIndex {
       ...(meta.description !== undefined && { description: meta.description }),
       hooks: methods.filter(isHook),
       commands: methods.filter(name => !isHook(name)),
+      values,
     });
   }
   engine.sort();

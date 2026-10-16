@@ -23,6 +23,11 @@ describe('sdk.index', () => {
       poke: () => (f: unknown) => f,
       onPoke: () => (f: unknown) => f,
       whenPoked: () => (f: unknown) => f,
+      timeline: 'indexed',
+      effects: [],
+      get paths() {
+        return ['test.indexed'];
+      },
     });
 
     const entry = sdk.index().plugins.find(p => p.sdk === 'Indexed');
@@ -34,6 +39,7 @@ describe('sdk.index', () => {
       description: 'for the index test',
       hooks: ['onPoke', 'whenPoked'],
       commands: ['poke'],
+      values: ['timeline', 'paths'],
     });
   });
 
