@@ -46,6 +46,8 @@ const eventType = Events.getKeys(
   'rate_changed'
 );
 
+const warned = new Set<string>();
+
 const rateOf = (
   timeline: string | undefined,
   rates: Record<string, number>
@@ -156,11 +158,70 @@ export class Scheduler {
       Composer.pipe(...events.map(Events.dispatch))
     ),
 
+    Events.handle<{ timeline: string; rate: number }>(
+      eventType.setRate,
+      event =>
+        Composer.do(({ get, set, pipe }) => {
+          const { timeline, rate } = event.payload;
+          if (timeline === ENGINE_TIMELINE) return;
+          if (!Number.isFinite(rate) || rate < 0) {
+            pipe(
+              Log.warn(PLUGIN_NAMESPACE, 'ignored rate {rate} for {timeline}', {
+                rate: String(rate),
+                timeline,
+              })
+            );
+            return;
+          }
+          const rates = get(scheduler.rates) ?? {};
+          const from = rates[timeline] ?? 1;
+          set(scheduler.rates, { ...rates, [timeline]: rate });
+          if (from === rate) return;
+          pipe(
+            Events.dispatch({
+              type: eventType.rateChanged,
+              payload: { timeline, from, to: rate },
+            })
+          );
+        })
+    ),
+
+    Events.handle<string>(eventType.removeTimeline, event =>
+      Composer.do(({ get, set }) => {
+        const timeline = event.payload;
+        if (timeline === ENGINE_TIMELINE) return;
+        const rates = { ...(get(scheduler.rates) ?? {}) };
+        delete rates[timeline];
+        set(scheduler.rates, rates);
+        set(
+          scheduler.scheduled,
+          (get(scheduler.scheduled) ?? []).filter(s => s.timeline !== timeline)
+        );
+      })
+    ),
+
     Events.handle<ScheduledEvent>(eventType.schedule, event =>
-      Composer.over(scheduler.scheduled, list => [
-        ...list.filter(e => e.id !== event.payload.id),
-        event.payload,
-      ])
+      Composer.do(({ get, over, pipe }) => {
+        const { timeline } = event.payload;
+        if (
+          import.meta.env.DEV &&
+          timeline &&
+          timeline !== ENGINE_TIMELINE &&
+          !(timeline in (get(scheduler.rates) ?? {})) &&
+          !warned.has(timeline)
+        ) {
+          warned.add(timeline);
+          pipe(
+            Log.warn(PLUGIN_NAMESPACE, 'timeline {timeline} has no rate set', {
+              timeline,
+            })
+          );
+        }
+        over(scheduler.scheduled, list => [
+          ...list.filter(e => e.id !== event.payload.id),
+          event.payload,
+        ]);
+      })
     ),
 
     Events.handle<string>(eventType.cancel, event =>
@@ -201,48 +262,6 @@ export class Scheduler {
       Composer.over(scheduler.scheduled, list =>
         list.filter(s => !s.id?.startsWith(event.payload))
       )
-    ),
-
-    Events.handle<{ timeline: string; rate: number }>(
-      eventType.setRate,
-      event =>
-        Composer.do(({ get, set, pipe }) => {
-          const { timeline, rate } = event.payload;
-          if (timeline === ENGINE_TIMELINE) return;
-          if (!Number.isFinite(rate) || rate < 0) {
-            pipe(
-              Log.warn(PLUGIN_NAMESPACE, 'ignored rate {rate} for {timeline}', {
-                rate: String(rate),
-                timeline,
-              })
-            );
-            return;
-          }
-          const rates = get(scheduler.rates) ?? {};
-          const from = rates[timeline] ?? 1;
-          if (from === rate) return;
-          set(scheduler.rates, { ...rates, [timeline]: rate });
-          pipe(
-            Events.dispatch({
-              type: eventType.rateChanged,
-              payload: { timeline, from, to: rate },
-            })
-          );
-        })
-    ),
-
-    Events.handle<string>(eventType.removeTimeline, event =>
-      Composer.do(({ get, set }) => {
-        const timeline = event.payload;
-        if (timeline === ENGINE_TIMELINE) return;
-        const rates = { ...(get(scheduler.rates) ?? {}) };
-        delete rates[timeline];
-        set(scheduler.rates, rates);
-        set(
-          scheduler.scheduled,
-          (get(scheduler.scheduled) ?? []).filter(s => s.timeline !== timeline)
-        );
-      })
     )
   );
 }

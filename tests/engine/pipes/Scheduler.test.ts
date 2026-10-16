@@ -125,7 +125,9 @@ describe('Scheduler', () => {
       expect(rates(frame)).toEqual({});
       expect(scheduled(frame)[0].duration).toBe(100 - 16 * 4);
       const warnings = (frame?.core?.effects?.queue ?? []).filter(
-        (e: { type: string }) => e.type === 'core.log/line'
+        (e: { type: string; payload: { message: string } }) =>
+          e.type === 'core.log/line' &&
+          e.payload.message === 'ignored rate {rate} for {timeline}'
       );
       expect(warnings).toHaveLength(3);
       expect(warnings[0].payload).toMatchObject({
@@ -133,6 +135,35 @@ describe('Scheduler', () => {
         source: 'core.scheduler',
         data: { rate: 'NaN', timeline: 'x' },
       });
+    });
+
+    it('should warn once when an entry names a timeline with no rate', () => {
+      const lines = (f: GameFrame) =>
+        (f?.core?.effects?.queue ?? []).filter(
+          (e: { type: string; payload: { message: string } }) =>
+            e.type === 'core.log/line' &&
+            e.payload.message === 'timeline {timeline} has no rate set'
+        );
+      let frame = step(basePipe(makeFrame()), entry('a', 100, 'typo.once'));
+      frame = step(frame, entry('b', 100, 'typo.once'));
+
+      expect(lines(frame)).toHaveLength(1);
+      expect(lines(frame)[0].payload.data).toEqual({ timeline: 'typo.once' });
+    });
+
+    it('should not warn when the rate is set in the same tick', () => {
+      const frame = step(
+        basePipe(makeFrame()),
+        Composer.pipe(
+          Scheduler.setRate('same.tick', 1),
+          entry('a', 100, 'same.tick')
+        )
+      );
+
+      const lines = (frame?.core?.effects?.queue ?? []).filter(
+        (e: { type: string }) => e.type === 'core.log/line'
+      );
+      expect(lines).toEqual([]);
     });
 
     it('should refuse to change the engine timeline', () => {
