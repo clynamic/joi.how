@@ -124,7 +124,7 @@ const Dealer = definePlugin({
           'classic',
           Phase.whenPhase(
             GamePhase.active,
-            Composer.do(({ get, pipe }) => {
+            Composer.do(({ get, pipe, take }) => {
               const state = get(dice);
               if (state.busy) return;
 
@@ -145,18 +145,15 @@ const Dealer = definePlugin({
                 return;
               }
 
-              pipe(
-                Rand.next(value => {
-                  let cumulative = 0;
-                  for (const outcome of eligible) {
-                    cumulative += 1 / chanceOf(outcome);
-                    if (value < cumulative) {
-                      return roll.dispatch('trigger', outcome.event);
-                    }
-                  }
-                  return Composer.pipe();
-                })
-              );
+              const value = take(Rand.next);
+              let cumulative = 0;
+              for (const outcome of eligible) {
+                cumulative += 1 / chanceOf(outcome);
+                if (value < cumulative) {
+                  pipe(roll.dispatch('trigger', outcome.event));
+                  return;
+                }
+              }
             })
           )
         ),

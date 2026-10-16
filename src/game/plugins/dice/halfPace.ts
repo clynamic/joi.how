@@ -16,20 +16,16 @@ export const halfPaceModule: Module = {
   ordering: { loadAfter: [PLUGIN_ID] },
   update: Composer.pipe(
     seq.on(() =>
-      Composer.do(({ get, pipe }) => {
+      Composer.do(({ get, pipe, take }) => {
         const pace = get(paceState);
         const s = get(settings);
         const newPace = Math.max(round(pace.pace / 2), s.minPace);
+        const duration = Math.ceil(take(Rand.next) * 20000) + 12000;
+        const portion = duration / 3;
         pipe(
-          Rand.next(v => {
-            const duration = Math.ceil(v * 20000) + 12000;
-            const portion = duration / 3;
-            return Composer.pipe(
-              Pace.setPace(newPace),
-              seq.message({ title: 'Half pace!', description: '3...' }),
-              seq.after(portion, 'step2', { portion })
-            );
-          })
+          Pace.setPace(newPace),
+          seq.message({ title: 'Half pace!', description: '3...' }),
+          seq.after(portion, 'step2', { portion })
         );
       })
     ),

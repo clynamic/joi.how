@@ -26,12 +26,13 @@ const allPaws = Object.values(Paws);
 const seq = Sequence.for(PLUGIN_ID, 'randomGrip');
 
 const regrip = (then: (paws: Paws) => Pipe): Pipe =>
-  Composer.bind(pawsPath, currentPaws =>
-    Rand.pick(
-      allPaws.filter(p => p !== currentPaws),
-      newPaws => Composer.pipe(Composer.set(pawsPath, newPaws), then(newPaws))
-    )
-  );
+  Composer.do(({ get, set, pipe, take }) => {
+    const current = get(pawsPath);
+    const others = allPaws.filter(p => p !== current);
+    const next = take<Paws>(fn => Rand.pick(others, fn));
+    set(pawsPath, next);
+    pipe(then(next));
+  });
 
 export const randomGripModule: Module = {
   id: `${PLUGIN_ID}.random_grip`,
