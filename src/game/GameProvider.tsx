@@ -48,8 +48,8 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
     engineRef.current = new GameEngine(
       {},
       Piper([
-        impulsePipe,
         Effects.pipe,
+        impulsePipe,
         Events.pipe,
         Scheduler.pipe,
         Perf.pipe,
