@@ -98,13 +98,13 @@ describe('Toy', () => {
   });
 
   it('should schedule a climax ramp step on entering climax', () => {
-    const frame = enterPhase(bootstrap(), GamePhase.climax);
+    const frame = enterPhase(unpauseAndWait(bootstrap()), GamePhase.climax);
 
     expect(getToyScheduled(frame).length).toBeGreaterThan(0);
   });
 
   it('should keep stepping the ramp as it fires', () => {
-    let frame = enterPhase(bootstrap(), GamePhase.climax);
+    let frame = enterPhase(unpauseAndWait(bootstrap()), GamePhase.climax);
 
     expect(getToyScheduled(frame)[0]?.id).toBeDefined();
 
@@ -116,7 +116,7 @@ describe('Toy', () => {
   });
 
   it('should stop scheduling once the ramp is exhausted', () => {
-    let frame = enterPhase(bootstrap(), GamePhase.climax);
+    let frame = enterPhase(unpauseAndWait(bootstrap()), GamePhase.climax);
 
     for (let i = 0; i < CLIMAX_TICKS; i++) {
       frame = gamePipe(tick(frame, CLIMAX_INTERVAL));
@@ -126,7 +126,7 @@ describe('Toy', () => {
   });
 
   it('should cancel the ramp when entering a break', () => {
-    let frame = enterPhase(bootstrap(), GamePhase.climax);
+    let frame = enterPhase(unpauseAndWait(bootstrap()), GamePhase.climax);
     expect(getToyScheduled(frame).length).toBeGreaterThan(0);
 
     frame = enterPhase(frame, GamePhase.break);
@@ -136,7 +136,7 @@ describe('Toy', () => {
 
   it('should emit the ramp as falling vibration strengths ending in a stop', () => {
     const start = withImpulse(Phase.setPhase(GamePhase.climax))(
-      tick(bootstrap())
+      tick(unpauseAndWait(bootstrap()))
     );
     const { effects } = collect(start, CLIMAX_TICKS, CLIMAX_INTERVAL);
 
@@ -235,10 +235,7 @@ describe('Toy', () => {
     frame = withImpulse(Pause.setPaused(true))(tick(frame));
     frame = settle(frame);
 
-    const held = getToyScheduled(frame)[0];
-    expect(held?.held).toBe(true);
-
-    const duration = held?.duration;
+    const duration = getToyScheduled(frame)[0]?.duration;
     for (let i = 0; i < 10; i++) {
       frame = gamePipe(tick(frame));
     }

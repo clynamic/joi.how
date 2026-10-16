@@ -2,7 +2,9 @@ import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
 import { Events } from '../../engine/pipes/Events';
+import { ENGINE_TIMELINE, Scheduler } from '../../engine/pipes/Scheduler';
 import { Sequence } from '../Sequence';
+import { PLAY_TIMELINE } from '../timelines';
 import Scene from './scene';
 
 const PLUGIN_ID = 'core.pause';
@@ -21,7 +23,7 @@ const eventType = Events.getKeys(PLUGIN_ID, 'on', 'off');
 type SetPayload = { paused: boolean };
 type CountdownPayload = { remaining: number; gen: number };
 
-const seq = Sequence.for(PLUGIN_ID, 'set');
+const seq = Sequence.for(PLUGIN_ID, 'set', { timeline: ENGINE_TIMELINE });
 
 const Pause = definePlugin({
   sdk: 'Pause',
@@ -54,12 +56,15 @@ const Pause = definePlugin({
     return Events.handle(eventType.off, fn);
   },
 
-  activate: Composer.set(paths, {
-    paused: true,
-    prev: true,
-    countdown: null,
-    gen: 0,
-  }),
+  activate: Composer.pipe(
+    Composer.set(paths, {
+      paused: true,
+      prev: true,
+      countdown: null,
+      gen: 0,
+    }),
+    Scheduler.setRate(PLAY_TIMELINE, 0)
+  ),
 
   update: Composer.pipe(
     Scene.onEnter('game', () => seq.start({ paused: false })),
@@ -70,6 +75,7 @@ const Pause = definePlugin({
       if (paused === prev) return;
       set(paths.prev, paused);
       pipe(Events.dispatch({ type: paused ? eventType.on : eventType.off }));
+      pipe(Scheduler.setRate(PLAY_TIMELINE, paused ? 0 : 1));
     }),
 
     seq.on<SetPayload>(event =>
@@ -114,7 +120,10 @@ const Pause = definePlugin({
     )
   ),
 
-  deactivate: Composer.set(paths, undefined),
+  deactivate: Composer.pipe(
+    Scheduler.removeTimeline(PLAY_TIMELINE),
+    Composer.set(paths, undefined)
+  ),
 
   get paths() {
     return paths;

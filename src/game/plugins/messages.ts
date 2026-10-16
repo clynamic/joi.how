@@ -3,6 +3,7 @@ import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
 import { Events, GameEvent } from '../../engine/pipes/Events';
 import { Scheduler } from '../../engine/pipes/Scheduler';
+import { PLAY_TIMELINE } from '../timelines';
 
 export interface GameMessagePrompt {
   title: string;
@@ -78,6 +79,7 @@ const Messages = definePlugin({
               Scheduler.schedule({
                 id: scheduleId,
                 duration: updated.duration,
+                timeline: PLAY_TIMELINE,
                 event: {
                   type: eventType.expireMessage,
                   payload: updated.id,

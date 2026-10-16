@@ -7,6 +7,7 @@ import { typedPath } from '../../engine/Lens';
 import { Settings } from '../../settings/Settings';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
+import { PLAY_TIMELINE } from '../timelines';
 
 const PLUGIN_ID = 'core.warmup';
 
@@ -61,6 +62,7 @@ const Warmup = definePlugin({
             Scheduler.schedule({
               id: AUTOSTART_KEY,
               duration: s.warmupDuration * 1000,
+              timeline: PLAY_TIMELINE,
               event: { type: eventType.startGame },
             })
           );
@@ -80,10 +82,7 @@ const Warmup = definePlugin({
         }),
         Phase.setPhase(GamePhase.active)
       )
-    ),
-
-    Pause.onPause(() => Scheduler.hold(AUTOSTART_KEY)),
-    Pause.onResume(() => Scheduler.release(AUTOSTART_KEY))
+    )
   ),
 
   deactivate: Composer.set(warmup, undefined),

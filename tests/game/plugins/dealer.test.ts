@@ -62,8 +62,9 @@ function startGame(intensityOverride = 0.5): GameFrame {
     frame = gamePipe(tick(frame, 100));
   }
 
-  frame = withImpulse(Phase.setPhase(GamePhase.active))(tick(frame));
-  frame = gamePipe(tick(frame));
+  frame = gamePipe(tick(frame, 1));
+  frame = withImpulse(Phase.setPhase(GamePhase.active))(tick(frame, 1));
+  frame = gamePipe(tick(frame, 1));
 
   return frame;
 }

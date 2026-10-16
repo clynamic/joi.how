@@ -12,6 +12,7 @@ import { Pipe } from '../../engine/State';
 import { Settings } from '../../settings/Settings';
 import { ToyClient } from '../../toy';
 import { Sequence } from '../Sequence';
+import { PLAY_TIMELINE } from '../timelines';
 import Phase, { GamePhase, PhaseState } from './phase';
 import Pause from './pause';
 import { StrokeDirection, StrokeState } from './stroke';
@@ -232,10 +233,7 @@ const Toy = definePlugin({
     Phase.onEnter(GamePhase.break, hush),
     seq.on(() => ramp(0)),
     seq.on<{ step: number }>('step', event => ramp(event.payload.step)),
-    Pause.onPause(() =>
-      Composer.pipe(Scheduler.holdByPrefix(PLUGIN_ID), stop.emit())
-    ),
-    Pause.onResume(() => Scheduler.releaseByPrefix(PLUGIN_ID))
+    Scheduler.onStop(PLAY_TIMELINE, () => stop.emit())
   ),
 
   deactivate: Composer.pipe(

@@ -2,13 +2,11 @@ import { definePlugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
 import { Pipe, GameFrame } from '../../engine/State';
 import { Events } from '../../engine/pipes/Events';
-import { Scheduler } from '../../engine/pipes/Scheduler';
 import { ModuleManager } from '../../engine/modules/ModuleManager';
 import { Module } from '../../engine/modules/Module';
 import { Sequence } from '../Sequence';
 import Mode from './mode';
 import Phase, { GamePhase } from './phase';
-import Pause from './pause';
 import Rand from './rand';
 import Clock from './clock';
 import RandomImages from './randomImages';
@@ -173,10 +171,7 @@ const Dealer = definePlugin({
 
     Events.handle(OUTCOME_DONE, () => Composer.set(dice.busy, false)),
 
-    Phase.onLeave(GamePhase.active, () => Composer.set(dice.busy, false)),
-
-    Pause.onPause(() => Scheduler.holdByPrefix(PLUGIN_ID)),
-    Pause.onResume(() => Scheduler.releaseByPrefix(PLUGIN_ID))
+    Phase.onLeave(GamePhase.active, () => Composer.set(dice.busy, false))
   ),
 
   deactivate: Composer.pipe(

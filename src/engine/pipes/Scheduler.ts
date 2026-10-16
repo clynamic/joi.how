@@ -3,19 +3,30 @@ import { typedPath } from '../Lens';
 import { pluginPaths } from '../plugins/Plugins';
 import { GameTiming, Pipe } from '../State';
 import { Events, GameEvent } from './Events';
+import { Log } from './Log';
 
 const PLUGIN_NAMESPACE = 'core.scheduler';
+
+export const ENGINE_TIMELINE = 'engine';
 
 export type ScheduledEvent = {
   id?: string;
   duration: number;
   event: GameEvent;
   held?: boolean;
+  timeline?: string;
+};
+
+export type RateChange = {
+  timeline: string;
+  from: number;
+  to: number;
 };
 
 type SchedulerState = {
   scheduled: ScheduledEvent[];
   current: GameEvent[];
+  rates: Record<string, number>;
 };
 
 const scheduler = pluginPaths<SchedulerState>(PLUGIN_NAMESPACE);
@@ -29,8 +40,19 @@ const eventType = Events.getKeys(
   'release',
   'hold_by_prefix',
   'release_by_prefix',
-  'cancel_by_prefix'
+  'cancel_by_prefix',
+  'set_rate',
+  'remove_timeline',
+  'rate_changed'
 );
+
+const rateOf = (
+  timeline: string | undefined,
+  rates: Record<string, number>
+): number => {
+  if (!timeline || timeline === ENGINE_TIMELINE) return 1;
+  return rates[timeline] ?? 1;
+};
 
 export class Scheduler {
   static getKey(namespace: string, key: string): string {
@@ -71,9 +93,45 @@ export class Scheduler {
     return Events.dispatch({ type: eventType.cancelByPrefix, payload: prefix });
   }
 
+  static setRate(timeline: string, rate: number): Pipe {
+    return Events.dispatch({
+      type: eventType.setRate,
+      payload: { timeline, rate },
+    });
+  }
+
+  static removeTimeline(timeline: string): Pipe {
+    return Events.dispatch({
+      type: eventType.removeTimeline,
+      payload: timeline,
+    });
+  }
+
+  static onRate(timeline: string, fn: (change: RateChange) => Pipe): Pipe {
+    return Events.handle<RateChange>(eventType.rateChanged, event =>
+      event.payload.timeline === timeline ? fn(event.payload) : frame => frame
+    );
+  }
+
+  static onStop(timeline: string, fn: () => Pipe): Pipe {
+    return Scheduler.onRate(timeline, ({ to }) =>
+      to === 0 ? fn() : frame => frame
+    );
+  }
+
+  static onStart(timeline: string, fn: () => Pipe): Pipe {
+    return Scheduler.onRate(timeline, ({ from }) =>
+      from === 0 ? fn() : frame => frame
+    );
+  }
+
+  static get paths() {
+    return scheduler;
+  }
+
   static pipe: Pipe = Composer.pipe(
     Composer.bind(timing.step, delta =>
-      Composer.over(scheduler, ({ scheduled = [] }) => {
+      Composer.over(scheduler, ({ scheduled = [], rates = {}, ...rest }) => {
         const remaining: ScheduledEvent[] = [];
         const current: GameEvent[] = [];
 
@@ -82,7 +140,7 @@ export class Scheduler {
             remaining.push(entry);
             continue;
           }
-          const time = entry.duration - delta;
+          const time = entry.duration - delta * rateOf(entry.timeline, rates);
           if (time <= 0) {
             current.push(entry.event);
           } else {
@@ -90,7 +148,7 @@ export class Scheduler {
           }
         }
 
-        return { scheduled: remaining, current };
+        return { ...rest, scheduled: remaining, current, rates };
       })
     ),
 
@@ -143,6 +201,48 @@ export class Scheduler {
       Composer.over(scheduler.scheduled, list =>
         list.filter(s => !s.id?.startsWith(event.payload))
       )
+    ),
+
+    Events.handle<{ timeline: string; rate: number }>(
+      eventType.setRate,
+      event =>
+        Composer.do(({ get, set, pipe }) => {
+          const { timeline, rate } = event.payload;
+          if (timeline === ENGINE_TIMELINE) return;
+          if (!Number.isFinite(rate) || rate < 0) {
+            pipe(
+              Log.warn(PLUGIN_NAMESPACE, 'ignored rate {rate} for {timeline}', {
+                rate: String(rate),
+                timeline,
+              })
+            );
+            return;
+          }
+          const rates = get(scheduler.rates) ?? {};
+          const from = rates[timeline] ?? 1;
+          if (from === rate) return;
+          set(scheduler.rates, { ...rates, [timeline]: rate });
+          pipe(
+            Events.dispatch({
+              type: eventType.rateChanged,
+              payload: { timeline, from, to: rate },
+            })
+          );
+        })
+    ),
+
+    Events.handle<string>(eventType.removeTimeline, event =>
+      Composer.do(({ get, set }) => {
+        const timeline = event.payload;
+        if (timeline === ENGINE_TIMELINE) return;
+        const rates = { ...(get(scheduler.rates) ?? {}) };
+        delete rates[timeline];
+        set(scheduler.rates, rates);
+        set(
+          scheduler.scheduled,
+          (get(scheduler.scheduled) ?? []).filter(s => s.timeline !== timeline)
+        );
+      })
     )
   );
 }

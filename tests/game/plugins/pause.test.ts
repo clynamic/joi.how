@@ -8,6 +8,7 @@ import {
 } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Pause, { PauseState } from '../../../src/game/plugins/pause';
+import { PLAY_TIMELINE } from '../../../src/game/timelines';
 import { makeFrame, tick } from '../../utils';
 
 const gamePipe: Pipe = Composer.pipe(
@@ -21,17 +22,8 @@ const withImpulse = (impulse: Pipe): Pipe => Composer.pipe(impulse, gamePipe);
 const DEALER_ID = 'test.dealer';
 
 function bootstrap(): GameFrame {
-  const dealerPlugin = {
-    id: DEALER_ID,
-    update: Composer.pipe(
-      Pause.onPause(() => Scheduler.holdByPrefix(DEALER_ID)),
-      Pause.onResume(() => Scheduler.releaseByPrefix(DEALER_ID))
-    ),
-  };
-
   let frame = gamePipe(makeFrame());
   frame = ModuleManager.load(Pause)(frame);
-  frame = ModuleManager.load(dealerPlugin)(frame);
   frame = gamePipe(tick(frame));
   frame = gamePipe(tick(frame));
   return frame;
@@ -39,6 +31,10 @@ function bootstrap(): GameFrame {
 
 function getScheduled(frame: GameFrame): ScheduledEvent[] {
   return frame?.core?.scheduler?.scheduled ?? [];
+}
+
+function getRates(frame: GameFrame): Record<string, number> {
+  return frame?.core?.scheduler?.rates ?? {};
 }
 
 function getPauseState(frame: GameFrame): PauseState | undefined {
@@ -49,6 +45,14 @@ function getDealerScheduled(frame: GameFrame): ScheduledEvent[] {
   return getScheduled(frame).filter(s => s.id?.startsWith(DEALER_ID));
 }
 
+const playEntry = (duration: number): Pipe =>
+  Scheduler.schedule({
+    id: `${DEALER_ID}/schedule/check`,
+    duration,
+    timeline: PLAY_TIMELINE,
+    event: { type: `${DEALER_ID}/roll.check` },
+  });
+
 function unpauseAndWait(frame: GameFrame): GameFrame {
   frame = withImpulse(Pause.setPaused(false))(tick(frame));
   for (let i = 0; i < 300; i++) {
@@ -58,77 +62,78 @@ function unpauseAndWait(frame: GameFrame): GameFrame {
 }
 
 describe('Pause + Scheduler resume', () => {
-  it('should schedule an event and have it tick down', () => {
-    let frame = bootstrap();
+  it('should start with the play timeline stopped', () => {
+    const frame = bootstrap();
 
-    frame = withImpulse(
+    expect(getPauseState(frame)?.paused).toBe(true);
+    expect(getRates(frame)[PLAY_TIMELINE]).toBe(0);
+  });
+
+  it('should keep play entries frozen while paused from the start', () => {
+    let frame = withImpulse(playEntry(1000))(tick(bootstrap()));
+    frame = gamePipe(tick(frame));
+    frame = gamePipe(tick(frame));
+
+    expect(getDealerScheduled(frame)[0]?.duration).toBe(1000);
+  });
+
+  it('should keep engine entries moving while paused', () => {
+    let frame = withImpulse(
       Scheduler.schedule({
-        id: `${DEALER_ID}/schedule/check`,
+        id: `${DEALER_ID}/schedule/engine`,
         duration: 1000,
-        event: { type: `${DEALER_ID}/roll.check` },
+        event: { type: `${DEALER_ID}/engine` },
       })
-    )(tick(frame));
+    )(tick(bootstrap()));
+    frame = gamePipe(tick(frame));
 
-    const before = getScheduled(frame).find(s =>
-      s.id?.includes('check')
-    )?.duration;
+    expect(getDealerScheduled(frame)[0]?.duration).toBeLessThan(1000);
+  });
+
+  it('should let play entries tick down once unpaused', () => {
+    let frame = unpauseAndWait(bootstrap());
+
+    frame = withImpulse(playEntry(1000))(tick(frame));
+    const before = getDealerScheduled(frame)[0]?.duration;
     expect(before).toBeDefined();
 
     frame = gamePipe(tick(frame));
-    const after = getScheduled(frame).find(s =>
-      s.id?.includes('check')
-    )?.duration;
 
-    expect(after).toBeLessThan(before!);
+    expect(getRates(frame)[PLAY_TIMELINE]).toBe(1);
+    expect(getDealerScheduled(frame)[0]?.duration).toBeLessThan(before!);
   });
 
-  it('should hold dealer events when paused', () => {
+  it('should freeze play entries when paused', () => {
     let frame = unpauseAndWait(bootstrap());
 
-    frame = withImpulse(
-      Scheduler.schedule({
-        id: `${DEALER_ID}/schedule/check`,
-        duration: 1000,
-        event: { type: `${DEALER_ID}/roll.check` },
-      })
-    )(tick(frame));
+    frame = withImpulse(playEntry(1000))(tick(frame));
     frame = gamePipe(tick(frame));
 
     frame = withImpulse(Pause.setPaused(true))(tick(frame));
-
     for (let i = 0; i < 5; i++) {
       frame = gamePipe(tick(frame));
     }
 
-    const dealerEvent = getDealerScheduled(frame)[0];
-    expect(dealerEvent?.held).toBe(true);
-
-    const durationAfterHold = dealerEvent?.duration;
+    expect(getRates(frame)[PLAY_TIMELINE]).toBe(0);
+    const durationAfterPause = getDealerScheduled(frame)[0]?.duration;
 
     for (let i = 0; i < 10; i++) {
       frame = gamePipe(tick(frame));
     }
 
-    expect(getDealerScheduled(frame)[0]?.duration).toBe(durationAfterHold);
+    expect(getDealerScheduled(frame)[0]?.duration).toBe(durationAfterPause);
   });
 
-  it('should release dealer events after resume countdown', () => {
+  it('should resume play entries after the countdown', () => {
     let frame = unpauseAndWait(bootstrap());
 
-    frame = withImpulse(
-      Scheduler.schedule({
-        id: `${DEALER_ID}/schedule/check`,
-        duration: 50000,
-        event: { type: `${DEALER_ID}/roll.check` },
-      })
-    )(tick(frame));
+    frame = withImpulse(playEntry(50000))(tick(frame));
     frame = gamePipe(tick(frame));
 
     frame = withImpulse(Pause.setPaused(true))(tick(frame));
     for (let i = 0; i < 5; i++) {
       frame = gamePipe(tick(frame));
     }
-    expect(getDealerScheduled(frame)[0]?.held).toBe(true);
 
     const durationBeforeResume = getDealerScheduled(frame)[0]?.duration;
 
@@ -142,7 +147,7 @@ describe('Pause + Scheduler resume', () => {
     const pauseState = getPauseState(frame);
 
     expect(pauseState?.paused).toBe(false);
-    expect(dealerEvent?.held).toBe(false);
+    expect(getRates(frame)[PLAY_TIMELINE]).toBe(1);
     expect(dealerEvent?.duration).toBeLessThan(durationBeforeResume!);
   });
 
@@ -199,5 +204,16 @@ describe('Pause + Scheduler resume', () => {
     }
 
     expect(getPauseState(frame)?.paused).toBe(true);
+    expect(getRates(frame)[PLAY_TIMELINE]).toBe(0);
+  });
+
+  it('should remove the play timeline on unload', () => {
+    let frame = bootstrap();
+    frame = withImpulse(playEntry(1000))(tick(frame));
+    frame = gamePipe(tick(ModuleManager.unload(Pause.id)(frame)));
+    frame = gamePipe(tick(frame));
+
+    expect(getRates(frame)[PLAY_TIMELINE]).toBeUndefined();
+    expect(getDealerScheduled(frame)).toEqual([]);
   });
 });

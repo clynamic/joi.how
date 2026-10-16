@@ -2,6 +2,7 @@ import { Pipe } from '../engine/State';
 import { Events, GameEvent, Scheduler } from '../engine/pipes';
 import { sdk } from '../engine/sdk';
 import Messages from './plugins/messages';
+import { PLAY_TIMELINE } from './timelines';
 
 type MessageInput = Omit<Parameters<typeof Messages.send>[0], 'id'>;
 type MessagePrompt = NonNullable<MessageInput['prompts']>[number];
@@ -20,8 +21,17 @@ export type SequenceScope = {
   scheduleKey(target: string): string;
 };
 
+export type SequenceOptions = {
+  timeline?: string;
+};
+
 export class Sequence {
-  static for(namespace: string, name: string): SequenceScope {
+  static for(
+    namespace: string,
+    name: string,
+    options: SequenceOptions = {}
+  ): SequenceScope {
+    const timeline = options.timeline ?? PLAY_TIMELINE;
     const rootKey = Events.getKey(namespace, name);
     const nodeKey = (n: string) => Events.getKey(namespace, `${name}.${n}`);
     const schedKey = (n: string) => Scheduler.getKey(namespace, `${name}.${n}`);
@@ -38,6 +48,7 @@ export class Sequence {
         Scheduler.schedule({
           id: schedKey(target),
           duration,
+          timeline,
           event: {
             type: nodeKey(target),
             ...(payload !== undefined && { payload }),

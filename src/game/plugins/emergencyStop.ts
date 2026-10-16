@@ -1,10 +1,8 @@
 import { definePlugin } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
-import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { Sequence } from '../Sequence';
 import Phase, { GamePhase } from './phase';
-import Pause from './pause';
 import Pace from './pace';
 import { IntensityState } from './intensity';
 import { Settings } from '../../settings/Settings';
@@ -61,10 +59,7 @@ const EmergencyStop = definePlugin({
       );
     }),
 
-    seq.on('resume', () => Phase.setPhase(GamePhase.active)),
-
-    Pause.onPause(() => Scheduler.holdByPrefix(PLUGIN_ID)),
-    Pause.onResume(() => Scheduler.releaseByPrefix(PLUGIN_ID))
+    seq.on('resume', () => Phase.setPhase(GamePhase.active))
   ),
 });
 
