@@ -8,6 +8,9 @@ import { doRandomPace } from './randomPace';
 
 const seq = Sequence.for(PLUGIN_ID, 'doublePace');
 
+export const doublePaceChance = (intensity: number): number =>
+  50 - Math.max(0, intensity - 20) * 0.25;
+
 export const doublePaceModule: Module = {
   id: `${PLUGIN_ID}.double_pace`,
   ordering: { loadAfter: [PLUGIN_ID] },

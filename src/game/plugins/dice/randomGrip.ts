@@ -1,7 +1,9 @@
 import { Composer } from '../../../engine/Composer';
 import { typedPath } from '../../../engine/Lens';
 import { Module } from '../../../engine/modules/Module';
+import { Pipe } from '../../../engine/State';
 import { Sequence } from '../../Sequence';
+import Phase, { GamePhase } from '../phase';
 import Rand from '../rand';
 import { PLUGIN_ID, outcomeDone } from './types';
 
@@ -23,25 +25,29 @@ const allPaws = Object.values(Paws);
 
 const seq = Sequence.for(PLUGIN_ID, 'randomGrip');
 
+const regrip = (then: (paws: Paws) => Pipe): Pipe =>
+  Composer.bind(pawsPath, currentPaws =>
+    Rand.pick(
+      allPaws.filter(p => p !== currentPaws),
+      newPaws => Composer.pipe(Composer.set(pawsPath, newPaws), then(newPaws))
+    )
+  );
+
 export const randomGripModule: Module = {
   id: `${PLUGIN_ID}.random_grip`,
   ordering: { loadAfter: [PLUGIN_ID] },
   activate: Rand.pick(allPaws, paw => Composer.set(pawsPath, paw)),
   deactivate: Composer.set(pawsPath, undefined),
   update: Composer.pipe(
+    Phase.onEnter(GamePhase.active, () => regrip(() => Composer.pipe())),
     seq.on(() =>
-      Composer.bind(pawsPath, currentPaws =>
-        Rand.pick(
-          allPaws.filter(p => p !== currentPaws),
-          newPaws =>
-            Composer.pipe(
-              Composer.set(pawsPath, newPaws),
-              seq.message({
-                title: `Grip changed to ${PawLabels[newPaws]}!`,
-                duration: 5000,
-              }),
-              seq.after(10000, 'done')
-            )
+      regrip(newPaws =>
+        Composer.pipe(
+          seq.message({
+            title: `Grip changed to ${PawLabels[newPaws]}!`,
+            duration: 5000,
+          }),
+          seq.after(10000, 'done')
         )
       )
     ),

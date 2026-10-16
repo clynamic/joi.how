@@ -13,6 +13,8 @@ import Phase, { GamePhase } from '../../../src/game/plugins/phase';
 import Pause from '../../../src/game/plugins/pause';
 import Rand from '../../../src/game/plugins/rand';
 import Dealer from '../../../src/game/plugins/dealer';
+import Messages from '../../../src/game/plugins/messages';
+import { doublePaceChance } from '../../../src/game/plugins/dice/doublePace';
 import { DiceEvent } from '../../../src/types';
 import { OUTCOME_DONE } from '../../../src/game/plugins/dice/types';
 import { defaultSettings } from '../../../src/settings/Settings';
@@ -178,6 +180,86 @@ describe('Dealer integration', () => {
     const state = getDiceState(frame)!;
     expect(state.log.length).toBeGreaterThan(0);
     expect(frame.seen).toEqual(state.log.map(entry => entry.event));
+  });
+
+  it('should regrip silently whenever the phase returns to active', () => {
+    let frame = startGame();
+    const before = (frame as any).core.dice.paws;
+    const logBefore = getDiceState(frame)!.log.length;
+
+    frame = withImpulse(Phase.setPhase(GamePhase.break))(tick(frame, 1));
+    frame = gamePipe(tick(frame, 1));
+    frame = withImpulse(Phase.setPhase(GamePhase.active))(tick(frame, 1));
+    frame = gamePipe(tick(frame, 1));
+    frame = gamePipe(tick(frame, 1));
+
+    expect((frame as any).core.dice.paws).not.toBe(before);
+    expect(getDiceState(frame)!.log).toHaveLength(logBefore);
+  });
+
+  it('should scale double pace odds with intensity', () => {
+    expect(doublePaceChance(0)).toBe(50);
+    expect(doublePaceChance(20)).toBe(50);
+    expect(doublePaceChance(60)).toBe(40);
+    expect(doublePaceChance(100)).toBe(30);
+  });
+
+  it('should roll against a chance that depends on the frame', () => {
+    let frame = startGame(0.99);
+    frame = Composer.pipe(
+      Composer.set(typedPath(['settings', 'events']), [DiceEvent.doublePace]),
+      Composer.set(typedPath(['core.rand']), { seed: 'fixed', cursor: 4242 })
+    )(frame);
+
+    for (let i = 0; i < 3000 && !getDiceState(frame)?.busy; i++) {
+      frame = gamePipe(tick(frame, 100));
+    }
+
+    expect(getDiceState(frame)!.log.map(e => e.event)).toEqual([
+      DiceEvent.doublePace,
+    ]);
+  });
+
+  it('should end a ruined climax on good job after clenching', () => {
+    let frame = startGame(1);
+    frame = Composer.pipe(
+      Composer.set(typedPath(['settings', 'events']), [DiceEvent.climax]),
+      Composer.set(typedPath(['settings', 'climaxChance']), 100),
+      Composer.set(typedPath(['settings', 'ruinChance']), 100),
+      ModuleManager.load(Messages)
+    )(frame);
+    frame = gamePipe(tick(frame, 1));
+    frame = runUntilBusy(frame);
+    expect(getDiceState(frame)!.log[0]?.event).toBe(DiceEvent.climax);
+
+    const titles: string[] = [];
+    const seen = (f: GameFrame) => {
+      for (const m of (f as any).core.messages?.messages ?? []) {
+        if (titles.at(-1) !== m.title) titles.push(m.title);
+      }
+    };
+    let edged = false;
+    for (let t = 0; t < 120000; t += 100) {
+      frame = gamePipe(tick(frame, 100));
+      seen(frame);
+      if (!edged && titles.includes('Are you edging?')) {
+        edged = true;
+        frame = withImpulse(
+          Events.dispatch({ type: 'core.dice/climax.edging' })
+        )(tick(frame, 1));
+      }
+      if (titles.includes('Good job, $player')) break;
+    }
+
+    const clench = titles.indexOf('Clench in desperation');
+    const good = titles.indexOf('Good job, $player');
+    expect(titles).toContain('$HANDS OFF! Ruin your orgasm!');
+    expect(clench).toBeGreaterThan(-1);
+    expect(good).toBeGreaterThan(clench);
+    const last = (frame as any).core.messages.messages.at(-1);
+    expect(last.prompts?.map((p: { title: string }) => p.title)).toEqual([
+      'Leave',
+    ]);
   });
 
   it('should stop triggering outcomes when mode leaves classic', () => {

@@ -1,6 +1,7 @@
 import { Composer } from '../../../engine/Composer';
 import { typedPath } from '../../../engine/Lens';
 import { Module } from '../../../engine/modules/Module';
+import { Pipe } from '../../../engine/State';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
 import Scene from '../scene';
@@ -145,12 +146,17 @@ export const climaxModule: Module = {
         return Composer.pipe(
           decay,
           seq.message({
-            title: ruin ? 'Clench in desperation' : 'Good job, $player',
+            title: 'Good job, $player',
             prompts: [seq.prompt('Leave', 'leave')],
           })
         );
       }
+      const clench: Pipe =
+        ruin && countdown === 10
+          ? seq.message({ title: 'Clench in desperation' })
+          : Composer.pipe();
       return Composer.pipe(
+        clench,
         decay,
         seq.after(1000, 'end', { countdown: countdown - 1, denied, ruin })
       );

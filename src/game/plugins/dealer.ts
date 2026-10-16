@@ -21,18 +21,20 @@ import {
 } from './dice/types';
 import { pauseModule } from './dice/pause';
 import { randomPaceModule } from './dice/randomPace';
-import { doublePaceModule } from './dice/doublePace';
+import { doublePaceChance, doublePaceModule } from './dice/doublePace';
 import { halfPaceModule } from './dice/halfPace';
 import { risingPaceModule } from './dice/risingPace';
 import { randomGripModule } from './dice/randomGrip';
 import { cleanUpModule } from './dice/cleanUp';
 import { climaxModule } from './dice/climax';
 
+type Getter = Composer<GameFrame>['get'];
+
 type OutcomeEntry = {
   module: Module;
   event: DiceEvent;
-  chance: number;
-  check?: (get: Composer<GameFrame>['get']) => boolean;
+  chance: number | ((get: Getter) => number);
+  check?: (get: Getter) => boolean;
 };
 
 const intensity = (get: Composer<GameFrame>['get']) =>
@@ -56,7 +58,7 @@ const outcomes: OutcomeEntry[] = [
   {
     module: doublePaceModule,
     event: DiceEvent.doublePace,
-    chance: 50,
+    chance: get => doublePaceChance(intensity(get)),
     check: get => intensity(get) >= 20,
   },
   {
@@ -134,7 +136,10 @@ const Dealer = definePlugin({
                 return true;
               });
 
-              const guaranteed = eligible.find(o => o.chance === 1);
+              const chanceOf = (o: OutcomeEntry) =>
+                typeof o.chance === 'function' ? o.chance(get) : o.chance;
+
+              const guaranteed = eligible.find(o => chanceOf(o) === 1);
               if (guaranteed) {
                 pipe(roll.dispatch('trigger', guaranteed.event));
                 return;
@@ -144,7 +149,7 @@ const Dealer = definePlugin({
                 Rand.next(value => {
                   let cumulative = 0;
                   for (const outcome of eligible) {
-                    cumulative += 1 / outcome.chance;
+                    cumulative += 1 / chanceOf(outcome);
                     if (value < cumulative) {
                       return roll.dispatch('trigger', outcome.event);
                     }
