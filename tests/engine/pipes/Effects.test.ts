@@ -144,6 +144,12 @@ describe('Effects', () => {
 
       expect(seen).toEqual(['known']);
       expect(injected).toHaveLength(1);
+      const reported = Composer.pipe(Effects.pipe, ...injected)(frame);
+      expect(reported.core.effects.queue[0].payload).toMatchObject({
+        level: 'warn',
+        source: 'core.effects',
+        data: { type: 'test.plugin/unknown' },
+      });
     });
 
     it('should survive a performer that throws and log it next tick', () => {
@@ -180,7 +186,8 @@ describe('Effects', () => {
       expect(Log.entries().at(-1)).toMatchObject({
         level: 'error',
         source: 'test.plugin',
-        message: 'test.plugin/boom failed',
+        message: 'effect {type} failed: {error}',
+        data: { type: 'test.plugin/boom', error: 'Error: nope' },
       });
       expect(error).toHaveBeenCalledTimes(1);
       error.mockRestore();

@@ -18,6 +18,21 @@ describe('Events.define', () => {
     expect(pending(frame)).toEqual([{ type: 'test.plugin/ping', payload: 7 }]);
   });
 
+  it('should keep falsy payloads', () => {
+    const ping = Events.define<number | boolean | null>('test.plugin', 'ping');
+    const frame = Composer.pipe(
+      ping.dispatch(0),
+      ping.dispatch(false),
+      ping.dispatch(null)
+    )(makeFrame());
+
+    expect(pending(frame).map((e: { payload: unknown }) => e.payload)).toEqual([
+      0,
+      false,
+      null,
+    ]);
+  });
+
   it('should dispatch without a payload field when there is none', () => {
     const ping = Events.define('test.plugin', 'ping');
     const frame = ping.dispatch()(makeFrame());

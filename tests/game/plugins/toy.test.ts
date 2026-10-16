@@ -189,6 +189,33 @@ describe('Toy', () => {
     });
   });
 
+  it('should not actuate while paused, outside active, or without toys', () => {
+    const withToys = Composer.set(
+      ['core.toy', 'toys'],
+      [{ name: 't', index: 0, actuators: [] }]
+    );
+    const flip = (dir: string) => Composer.set(['core.stroke', 'stroke'], dir);
+    const actuates = (frame: GameFrame) =>
+      [...getEffects(frame), ...collect(frame, 2).effects].filter(
+        e => e.type === `${TOY_ID}/actuate`
+      );
+
+    const paused = withImpulse(Composer.pipe(withToys, flip('up')))(
+      tick(enterPhase(bootstrap(), GamePhase.active))
+    );
+    expect(actuates(paused)).toEqual([]);
+
+    const warmup = withImpulse(Composer.pipe(withToys, flip('down')))(
+      tick(enterPhase(unpauseAndWait(bootstrap()), GamePhase.warmup))
+    );
+    expect(actuates(warmup)).toEqual([]);
+
+    const noToys = withImpulse(flip('up'))(
+      tick(enterPhase(unpauseAndWait(bootstrap()), GamePhase.active))
+    );
+    expect(actuates(noToys)).toEqual([]);
+  });
+
   it('should not actuate on the same stroke twice', () => {
     let frame = unpauseAndWait(bootstrap());
     frame = enterPhase(frame, GamePhase.active);

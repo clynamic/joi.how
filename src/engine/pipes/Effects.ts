@@ -103,14 +103,19 @@ export class Effects {
     for (const effect of queue) {
       const owned = performers.get(effect.type);
       if (!owned) {
-        inject(Log.warn(PLUGIN_NAMESPACE, `nothing performs "${effect.type}"`));
+        inject(
+          Log.warn(PLUGIN_NAMESPACE, 'nothing performs {type}', {
+            type: effect.type,
+          })
+        );
         continue;
       }
       try {
         owned.performer.perform(effect.payload, inject);
       } catch (error) {
         inject(
-          Log.error(owned.owner, `${effect.type} failed`, {
+          Log.error(owned.owner, 'effect {type} failed: {error}', {
+            type: effect.type,
             error: String(error),
           })
         );

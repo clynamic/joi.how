@@ -77,6 +77,61 @@ describe('Fps', () => {
   });
 });
 
+describe('Fps performers', () => {
+  const ID = 'core.fps';
+  const element = () =>
+    document.querySelector(`[data-plugin-id="${ID}"]`) as HTMLElement | null;
+  const flush = (frame: GameFrame) => Effects.flush(frame, () => undefined);
+
+  it('should mount and fill the overlay on show', () => {
+    const frame = step(load(Fps), setVisible(true));
+    flush(frame);
+
+    expect(element()?.textContent).toMatch(/^\d+ FPS \/ \d+ TPS$/);
+    expect(element()?.style.display).toBe('');
+  });
+
+  it('should hide the overlay on hide and remove it on unmount', () => {
+    let frame = step(load(Fps), setVisible(true));
+    flush(frame);
+    frame = step(frame, setVisible(false));
+    flush(frame);
+    expect(element()?.style.display).toBe('none');
+
+    frame = step(frame, ModuleManager.unload(ID));
+    flush(frame);
+    expect(element()).toBeNull();
+  });
+});
+
+describe('PerfOverlay performers', () => {
+  const ID = 'core.perf_overlay';
+  const element = () =>
+    document.querySelector(`[data-plugin-id="${ID}"]`) as HTMLElement | null;
+  const flush = (frame: GameFrame) => Effects.flush(frame, () => undefined);
+
+  it('should render one line per timed phase and a frame total', () => {
+    const frame = step(
+      load(PerfOverlay),
+      Composer.pipe(
+        setVisible(true),
+        Composer.set(['core.perf'], {
+          config: { pluginBudget: 2 },
+          plugins: { core: { pace: { update: { avg: 0.5, lastTick: 1 } } } },
+        })
+      )
+    );
+    flush(frame);
+
+    expect(element()?.textContent).toContain('core.pace');
+    expect(element()?.textContent).toContain('0.50ms');
+    expect(element()?.textContent).toContain('frame');
+
+    flush(step(frame, ModuleManager.unload(ID)));
+    expect(element()).toBeNull();
+  });
+});
+
 describe('PerfOverlay', () => {
   const ID = 'core.perf_overlay';
 
