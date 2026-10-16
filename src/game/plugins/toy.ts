@@ -5,6 +5,7 @@ import {
 } from 'buttplug';
 import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
+import { Effects, type Inject } from '../../engine/pipes/Effects';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { Pipe } from '../../engine/State';
@@ -42,6 +43,13 @@ export type ToyState = {
   stroke?: StrokeDirection;
 };
 
+export type ActuatePayload = {
+  stroke: StrokeDirection;
+  intensity: number;
+  pace: number;
+  maxPace: number;
+};
+
 const toy = pluginPaths<ToyState>(PLUGIN_ID);
 const settings = typedPath<Settings>(['settings']);
 const phaseState = typedPath<PhaseState>(['core.phase']);
@@ -51,12 +59,17 @@ const intensityState = typedPath<IntensityState>(['core.intensity']);
 
 const seq = Sequence.for(PLUGIN_ID, 'climax');
 
+const connect = Effects.define<{ url: string }>(PLUGIN_ID, 'connect');
+const disconnect = Effects.define(PLUGIN_ID, 'disconnect');
+const sync = Effects.define(PLUGIN_ID, 'sync');
+const actuate = Effects.define<ActuatePayload>(PLUGIN_ID, 'actuate');
+const vibration = Effects.define<{ strength: number }>(PLUGIN_ID, 'vibration');
+const stop = Effects.define(PLUGIN_ID, 'stop');
+
 let client: ButtplugClient | null = null;
 let toys: ToyClient[] = [];
 let connection: string | null = null;
-let failure: string | null = null;
 let connecting = false;
-let dirty = false;
 
 const describe = (list: ToyClient[]): ToyInfo[] =>
   list.map(t => ({
@@ -68,10 +81,27 @@ const describe = (list: ToyClient[]): ToyInfo[] =>
     })),
   }));
 
-const report = (error: unknown) => {
-  failure = String(error);
-  dirty = true;
-};
+const snapshot = (inject: Inject) =>
+  inject(
+    Composer.do(({ get, set }) => {
+      const state = get(toy);
+      if (!state) return;
+      set(toy, {
+        ...state,
+        connection: connection ?? undefined,
+        connecting,
+        toys: describe(toys),
+      });
+    })
+  );
+
+const report = (inject: Inject) => (error: unknown) =>
+  inject(
+    Composer.do(({ get, set }) => {
+      if (!get(toy)) return;
+      set(toy.error, String(error));
+    })
+  );
 
 const detach = (target: ButtplugClient) => {
   target.removeListener('deviceadded');
@@ -79,28 +109,30 @@ const detach = (target: ButtplugClient) => {
   target.removeListener('disconnect');
 };
 
-const attach = (target: ButtplugClient) => {
+const attach = (target: ButtplugClient, inject: Inject) => {
   target.addListener('deviceadded', (device: ButtplugClientDevice) => {
     toys = [...toys, new ToyClient(device)];
-    dirty = true;
+    snapshot(inject);
   });
   target.addListener('deviceremoved', (device: ButtplugClientDevice) => {
     toys = toys.filter(t => t.deviceIndex !== device.index);
-    dirty = true;
+    snapshot(inject);
   });
   target.addListener('disconnect', () => {
     detach(target);
     client = null;
     connection = null;
     toys = [];
-    dirty = true;
+    snapshot(inject);
   });
 };
 
-const open = (url: string) => {
-  if (connecting || client) return;
+const open = (url: string, inject: Inject) => {
+  if (connecting || client) {
+    snapshot(inject);
+    return;
+  }
   connecting = true;
-  dirty = true;
   const next = new ButtplugClient('JOI.how');
   next
     .connect(new ButtplugBrowserWebsocketClientConnector(url))
@@ -109,85 +141,60 @@ const open = (url: string) => {
       client = next;
       connection = url;
       toys = next.devices.map(device => new ToyClient(device));
-      attach(next);
+      attach(next, inject);
     })
     .catch(error => {
       next.disconnect().catch(() => undefined);
-      report(error);
+      report(inject)(error);
     })
     .finally(() => {
       connecting = false;
-      dirty = true;
+      snapshot(inject);
     });
 };
 
-const close = () => {
+const close = (inject: Inject) => {
   const current = client;
   if (!current) return;
   detach(current);
   client = null;
   connection = null;
   toys = [];
-  dirty = true;
-  current.disconnect().catch(report);
+  snapshot(inject);
+  current.disconnect().catch(report(inject));
 };
 
-const silence = () => {
-  toys.forEach(t => t.stop().catch(report));
-};
-
-const drain: Pipe = Composer.do(({ get, set }) => {
-  if (!dirty) return;
-  dirty = false;
-  set(toy, {
-    connection: connection ?? undefined,
-    error: failure ?? undefined,
-    connecting,
-    toys: describe(toys),
-    stroke: get(toy)?.stroke,
-  });
-  failure = null;
-});
-
-const actuate: Pipe = Composer.do(({ get, set }) => {
-  if (toys.length === 0) return;
+const actuatePipe: Pipe = Composer.do(({ get, set, pipe }) => {
+  const state = get(toy);
+  if (!state || state.toys.length === 0) return;
 
   const stroke = get(strokeState)?.stroke;
-  if (!stroke) return;
-
-  const state = get(toy);
-  if (!state || state.stroke === stroke) return;
+  if (!stroke || state.stroke === stroke) return;
 
   set(toy.stroke, stroke);
 
   const phase = get(phaseState)?.current;
   if (phase !== GamePhase.active && phase !== GamePhase.finale) return;
 
-  const intensity = (get(intensityState)?.intensity ?? 0) * 100;
-  const pace = get(paceState)?.pace ?? 1;
-  const maxPace = get(settings)?.maxPace ?? 1;
-
-  toys.forEach(t => t.actuate(stroke, intensity, pace, maxPace).catch(report));
+  pipe(
+    actuate.emit({
+      stroke,
+      intensity: (get(intensityState)?.intensity ?? 0) * 100,
+      pace: get(paceState)?.pace ?? 1,
+      maxPace: get(settings)?.maxPace ?? 1,
+    })
+  );
 });
 
-const ramp = (step: number): Pipe =>
-  Composer.do(({ pipe }) => {
-    if (step >= CLIMAX_STEPS) {
-      silence();
-      return;
-    }
-    const strength = Math.max(0, 1 - step * CLIMAX_FALLOFF);
-    toys.forEach(t => t.setVibration(strength).catch(report));
-    pipe(seq.after(CLIMAX_INTERVAL, 'step', { step: step + 1 }));
-  });
+const ramp = (step: number): Pipe => {
+  if (step >= CLIMAX_STEPS) return stop.emit();
+  return Composer.pipe(
+    vibration.emit({ strength: Math.max(0, 1 - step * CLIMAX_FALLOFF) }),
+    seq.after(CLIMAX_INTERVAL, 'step', { step: step + 1 })
+  );
+};
 
-const quiet = (): Pipe => Composer.do(() => silence());
-
-const hush = (): Pipe =>
-  Composer.do(({ pipe }) => {
-    silence();
-    pipe(seq.cancel());
-  });
+const hush = (): Pipe => Composer.pipe(stop.emit(), seq.cancel());
 
 const Toy = definePlugin({
   name: 'Toy',
@@ -205,39 +212,55 @@ const Toy = definePlugin({
   connect(url: string): Pipe {
     return Composer.pipe(
       Composer.set(toy.error, undefined),
-      Composer.do(() => open(url))
+      Composer.set(toy.connecting, true),
+      connect.emit({ url })
     );
   },
 
   disconnect(): Pipe {
-    return Composer.do(() => close());
+    return disconnect.emit();
   },
 
-  activate: Composer.do(({ set }) => {
-    set(toy, { toys: describe(toys), connection: connection ?? undefined });
-  }),
+  activate: Composer.pipe(
+    Composer.set(toy, { toys: [], connecting: false }),
+    sync.emit()
+  ),
 
   update: Composer.pipe(
-    drain,
-    Pause.whenPlaying(actuate),
+    Pause.whenPlaying(actuatePipe),
     Phase.onEnter(GamePhase.climax, () => seq.start()),
     Phase.onEnter(GamePhase.break, hush),
     seq.on(() => ramp(0)),
     seq.on<{ step: number }>('step', event => ramp(event.payload.step)),
     Pause.onPause(() =>
-      Composer.pipe(Scheduler.holdByPrefix(PLUGIN_ID), quiet())
+      Composer.pipe(Scheduler.holdByPrefix(PLUGIN_ID), stop.emit())
     ),
     Pause.onResume(() => Scheduler.releaseByPrefix(PLUGIN_ID))
   ),
 
   deactivate: Composer.pipe(
-    Composer.do(({ pipe }) => {
-      silence();
-      close();
-      pipe(seq.cancel());
-    }),
+    stop.emit(),
+    disconnect.emit(),
+    seq.cancel(),
     Composer.set(toy, undefined)
   ),
+
+  effects: [
+    connect.perform(({ url }, inject) => open(url, inject)),
+    disconnect.perform((_, inject) => close(inject)),
+    sync.perform((_, inject) => snapshot(inject)),
+    actuate.perform(({ stroke, intensity, pace, maxPace }, inject) =>
+      toys.forEach(t =>
+        t.actuate(stroke, intensity, pace, maxPace).catch(report(inject))
+      )
+    ),
+    vibration.perform(({ strength }, inject) =>
+      toys.forEach(t => t.setVibration(strength).catch(report(inject)))
+    ),
+    stop.perform((_, inject) =>
+      toys.forEach(t => t.stop().catch(report(inject)))
+    ),
+  ],
 });
 
 declare module '../../engine/sdk' {
