@@ -59,6 +59,13 @@ describe('Composer', () => {
 
         expect(result.a.b).toBe(42);
       });
+
+      it('should set a path to undefined without replacing the object', () => {
+        const obj = { a: { b: 1 }, c: 2 };
+        const result = new Composer<any>(obj).set('a', undefined).get();
+
+        expect(result).toEqual({ a: undefined, c: 2 });
+      });
     });
 
     describe('zoom', () => {

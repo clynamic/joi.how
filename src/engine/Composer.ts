@@ -115,11 +115,11 @@ export class Composer<T extends object> {
    */
   set<A>(path: Path<A>, value: A): this;
 
-  set(pathOrValue: Path | T, maybeValue?: unknown): this {
-    if (maybeValue === undefined) {
-      this.obj = pathOrValue as T;
+  set(...args: [T] | [Path, unknown]): this {
+    if (args.length === 1) {
+      this.obj = args[0];
     } else {
-      this.obj = _set(this.obj, pathOrValue as Path, maybeValue);
+      this.obj = _set(this.obj, args[0], args[1]);
     }
     return this;
   }
