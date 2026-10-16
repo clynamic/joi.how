@@ -84,14 +84,21 @@ describe('Sound', () => {
     ]);
   });
 
-  it('should survive a failing audio backend', () => {
+  it('should survive a failing audio backend and report each failure', () => {
     audio.broken = true;
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const injected: Pipe[] = [];
     const frame = Sound.chime([200, 300])(loaded());
 
-    expect(() => Effects.flush(frame, () => undefined)).not.toThrow();
-    expect(error).toHaveBeenCalledTimes(2);
+    expect(() =>
+      Effects.flush(frame, pipe => injected.push(pipe))
+    ).not.toThrow();
+    expect(injected).toHaveLength(2);
 
-    error.mockRestore();
+    const next = Composer.pipe(...injected)(frame);
+    expect(
+      next.core.effects.queue.filter(
+        (e: { type: string }) => e.type === 'core.log/line'
+      )
+    ).toHaveLength(2);
   });
 });

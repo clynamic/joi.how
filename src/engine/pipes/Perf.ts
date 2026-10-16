@@ -4,6 +4,7 @@ import { Events, type GameEvent } from './Events';
 import { pluginPaths, PluginId } from '../plugins/Plugins';
 import { typedPath } from '../Lens';
 import { sdk } from '../sdk';
+import { Log } from './Log';
 
 declare module '../sdk' {
   interface SDK {
@@ -113,8 +114,12 @@ export class Perf {
         get(perf.config.pluginBudget) ?? DEFAULT_CONFIG.pluginBudget;
 
       if (duration > budget) {
-        console.warn(
-          `[perf] ${id} ${phase} took ${duration.toFixed(2)}ms (budget: ${budget}ms)`
+        pipe(
+          Log.warn(id, '{phase} took {duration}ms (budget {budget}ms)', {
+            phase,
+            duration: Number(duration.toFixed(2)),
+            budget,
+          })
         );
         pipe(
           Events.dispatch({

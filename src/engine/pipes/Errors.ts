@@ -2,6 +2,7 @@ import { Composer } from '../Composer';
 import { Pipe } from '../State';
 import { pluginPaths, PluginId } from '../plugins/Plugins';
 import { sdk } from '../sdk';
+import { Log } from './Log';
 
 declare module '../sdk' {
   interface SDK {
@@ -38,13 +39,9 @@ export class Errors {
         const entryPath = errors.plugins[id][phase];
         const existing = get(entryPath);
         const count = existing ? existing.count + 1 : 1;
-        const isNew = !existing || existing.message !== message;
 
         set(entryPath, { phase, message, stack, timestamp, count });
-
-        if (sdk.debug && isNew) {
-          console.error(`[errors] ${id} ${phase}:`, err);
-        }
+        pipe(Log.error(id, `${phase}: ${message}`, { stack, count }));
       }
     });
   }

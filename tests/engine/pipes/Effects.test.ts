@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
 import { Effects, type Inject } from '../../../src/engine/pipes/Effects';
+import { Log } from '../../../src/engine/pipes/Log';
 import { Events } from '../../../src/engine/pipes/Events';
 import {
   ModuleManager,
@@ -29,6 +30,10 @@ function load(...modules: Module[]): GameFrame {
 const noInject: Inject = () => undefined;
 
 describe('Effects', () => {
+  beforeEach(() => {
+    Log.clear();
+  });
+
   describe('define', () => {
     it('should namespace the effect type', () => {
       const ping = Effects.define('test.plugin', 'ping');
@@ -125,28 +130,28 @@ describe('Effects', () => {
     it('should skip effects nothing performs and keep going', () => {
       const known = Effects.define('test.plugin', 'known');
       const unknown = Effects.define('test.plugin', 'unknown');
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const seen: string[] = [];
+      const injected: Pipe[] = [];
 
       const frame = load({
         id: 'test.plugin',
         effects: [known.perform(() => seen.push('known'))],
       });
 
-      Effects.flush(
-        Composer.pipe(unknown.emit(), known.emit())(frame),
-        noInject
+      Effects.flush(Composer.pipe(unknown.emit(), known.emit())(frame), pipe =>
+        injected.push(pipe)
       );
 
       expect(seen).toEqual(['known']);
-      warn.mockRestore();
+      expect(injected).toHaveLength(1);
     });
 
-    it('should survive a performer that throws', () => {
+    it('should survive a performer that throws and log it next tick', () => {
       const boom = Effects.define('test.plugin', 'boom');
       const after = Effects.define('test.plugin', 'after');
       const error = vi.spyOn(console, 'error').mockImplementation(() => {});
       const seen: string[] = [];
+      const injected: Pipe[] = [];
 
       const frame = load({
         id: 'test.plugin',
@@ -159,9 +164,24 @@ describe('Effects', () => {
       });
 
       expect(() =>
-        Effects.flush(Composer.pipe(boom.emit(), after.emit())(frame), noInject)
+        Effects.flush(Composer.pipe(boom.emit(), after.emit())(frame), pipe =>
+          injected.push(pipe)
+        )
       ).not.toThrow();
       expect(seen).toEqual(['after']);
+
+      const next = Composer.pipe(
+        Effects.pipe,
+        ...injected,
+        Events.pipe
+      )(tick(frame));
+      Effects.flush(next, noInject);
+
+      expect(Log.entries().at(-1)).toMatchObject({
+        level: 'error',
+        source: 'test.plugin',
+        message: 'test.plugin/boom failed',
+      });
       expect(error).toHaveBeenCalledTimes(1);
       error.mockRestore();
     });

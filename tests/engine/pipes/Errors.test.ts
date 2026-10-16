@@ -3,11 +3,15 @@ import { Composer } from '../../../src/engine/Composer';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import { Events } from '../../../src/engine/pipes/Events';
 import { Errors, type ErrorEntry } from '../../../src/engine/pipes/Errors';
+import { Effects } from '../../../src/engine/pipes/Effects';
+import { Log } from '../../../src/engine/pipes/Log';
 import { lensFromPath } from '../../../src/engine/Lens';
 import { sdk } from '../../../src/engine/sdk';
 import { makeFrame, tick } from '../../utils';
 
 const basePipe: Pipe = Events.pipe;
+
+const flush = (frame: GameFrame) => Effects.flush(frame, () => undefined);
 
 const getEntry = (
   frame: GameFrame,
@@ -19,6 +23,7 @@ const getEntry = (
 describe('Errors', () => {
   beforeEach(() => {
     sdk.debug = true;
+    Log.clear();
   });
   afterEach(() => {
     sdk.debug = false;
@@ -147,12 +152,33 @@ describe('Errors', () => {
       expect(entry!.stack).toBeUndefined();
     });
 
-    it('should deduplicate console.error for repeated identical errors', () => {
+    it('should print the first occurrence even without debug', () => {
+      sdk.debug = false;
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const failing: Pipe = () => {
+        throw new Error('boom');
+      };
+
+      flush(
+        Composer.pipe(
+          basePipe,
+          Errors.withCatch('test.plugin', 'update', failing)
+        )(makeFrame())
+      );
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy.mock.calls[0][0]).toBe('[test.plugin] update: boom');
+      spy.mockRestore();
+    });
+
+    it('should print repeated identical errors once without debug', () => {
+      sdk.debug = false;
       const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const failing: Pipe = () => {
         throw new Error('boom');
       };
       const pipe = Composer.pipe(
+        Effects.pipe,
         basePipe,
         Errors.withCatch('test.plugin', 'update', failing)
       );
@@ -160,45 +186,54 @@ describe('Errors', () => {
       let frame = makeFrame();
       for (let i = 0; i < 5; i++) {
         frame = pipe(tick(frame));
+        flush(frame);
       }
 
       expect(spy).toHaveBeenCalledTimes(1);
+      expect(Log.entries().filter(e => e.level === 'error')).toHaveLength(5);
       spy.mockRestore();
     });
 
-    it('should log again when error message changes', () => {
+    it('should print every repeat with debug on', () => {
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const failing: Pipe = () => {
+        throw new Error('boom');
+      };
+      const pipe = Composer.pipe(
+        Effects.pipe,
+        basePipe,
+        Errors.withCatch('test.plugin', 'update', failing)
+      );
+
+      let frame = makeFrame();
+      for (let i = 0; i < 3; i++) {
+        frame = pipe(tick(frame));
+        flush(frame);
+      }
+
+      expect(spy).toHaveBeenCalledTimes(3);
+      spy.mockRestore();
+    });
+
+    it('should print again when the error message changes', () => {
+      sdk.debug = false;
       const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
       let msg = 'first';
       const failing: Pipe = () => {
         throw new Error(msg);
       };
       const pipe = Composer.pipe(
+        Effects.pipe,
         basePipe,
         Errors.withCatch('test.plugin', 'update', failing)
       );
 
       const frame = pipe(makeFrame());
+      flush(frame);
       msg = 'second';
-      pipe(tick(frame));
+      flush(pipe(tick(frame)));
 
       expect(spy).toHaveBeenCalledTimes(2);
-      spy.mockRestore();
-    });
-
-    it('should not log when sdk.debug is false', () => {
-      sdk.debug = false;
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      const failing: Pipe = () => {
-        throw new Error('boom');
-      };
-      const pipe = Composer.pipe(
-        basePipe,
-        Errors.withCatch('test.plugin', 'update', failing)
-      );
-
-      pipe(makeFrame());
-
-      expect(spy).not.toHaveBeenCalled();
       spy.mockRestore();
     });
 

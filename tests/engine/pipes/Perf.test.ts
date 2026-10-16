@@ -188,6 +188,32 @@ describe('Perf', () => {
       expect(overBudgetEvents[0].payload.duration).toBeGreaterThan(4);
     });
 
+    it('should log a warning naming the plugin when over budget', () => {
+      const slow: Pipe = frame => {
+        const end = performance.now() + 6;
+        while (performance.now() < end /* busy wait */);
+        return frame;
+      };
+
+      const frame1 = Composer.pipe(
+        basePipe,
+        Perf.withTiming('test.plugin', 'update', slow)
+      )(makeFrame());
+
+      const lines = (frame1?.core?.effects?.queue ?? []).filter(
+        (e: any) => e.type === 'core.log/line'
+      );
+
+      expect(lines).toHaveLength(1);
+      expect(lines[0].payload).toMatchObject({
+        level: 'warn',
+        source: 'test.plugin',
+        message: '{phase} took {duration}ms (budget {budget}ms)',
+        data: { phase: 'update', budget: 1 },
+      });
+      expect(lines[0].payload.data.duration).toBeGreaterThan(4);
+    });
+
     it('should not dispatch event when within budget', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(

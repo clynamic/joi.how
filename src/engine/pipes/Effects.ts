@@ -3,6 +3,7 @@ import { typedPath } from '../Lens';
 import type { Module, ModuleId } from '../modules/Module';
 import { pluginPaths } from '../plugins/Plugins';
 import { GameFrame, Pipe } from '../State';
+import { Log, LOG_LINE, type LogEntry } from './Log';
 
 export type EffectKey<T> = string & { readonly __payload?: T };
 
@@ -31,10 +32,22 @@ type ModuleState = {
   retired: Module[];
 };
 
+type Owned = { performer: Performer<unknown>; owner: string };
+
 const PLUGIN_NAMESPACE = 'core.effects';
 
 const effects = pluginPaths<EffectState>(PLUGIN_NAMESPACE);
 const modules = typedPath<ModuleState>(['core.modules']);
+
+const engine: Owned[] = [
+  {
+    owner: 'core.log',
+    performer: {
+      type: LOG_LINE as EffectKey<unknown>,
+      perform: payload => Log.perform(payload as LogEntry),
+    },
+  },
+];
 
 export class Effects {
   static define<T = void>(namespace: string, key: string): EffectDefinition<T> {
@@ -53,13 +66,16 @@ export class Effects {
 
   static pipe: Pipe = Composer.set(effects.queue, []);
 
-  static performers(frame: GameFrame): Map<string, Performer<unknown>> {
+  static performers(frame: GameFrame): Map<string, Owned> {
     const {
       registry = {},
       order = [],
       retired = [],
     } = Composer.get(modules)(frame) ?? {};
-    const found = new Map<string, Performer<unknown>>();
+    const found = new Map<string, Owned>();
+    for (const { performer, owner } of engine) {
+      found.set(performer.type, { performer, owner });
+    }
     for (const id of order) {
       for (const performer of registry[id]?.effects ?? []) {
         if (import.meta.env.DEV && found.has(performer.type)) {
@@ -67,12 +83,13 @@ export class Effects {
             `Effect "${performer.type}" is performed by more than one module`
           );
         }
-        found.set(performer.type, performer);
+        found.set(performer.type, { performer, owner: id });
       }
     }
     for (const module of retired) {
       for (const performer of module.effects ?? []) {
-        if (!found.has(performer.type)) found.set(performer.type, performer);
+        if (!found.has(performer.type))
+          found.set(performer.type, { performer, owner: module.id });
       }
     }
     return found;
@@ -84,17 +101,19 @@ export class Effects {
 
     const performers = Effects.performers(frame);
     for (const effect of queue) {
-      const performer = performers.get(effect.type);
-      if (!performer) {
-        if (import.meta.env.DEV) {
-          console.warn(`[effects] nothing performs "${effect.type}"`);
-        }
+      const owned = performers.get(effect.type);
+      if (!owned) {
+        inject(Log.warn(PLUGIN_NAMESPACE, `nothing performs "${effect.type}"`));
         continue;
       }
       try {
-        performer.perform(effect.payload, inject);
+        owned.performer.perform(effect.payload, inject);
       } catch (error) {
-        console.error(`[effects] ${effect.type} failed:`, error);
+        inject(
+          Log.error(owned.owner, `${effect.type} failed`, {
+            error: String(error),
+          })
+        );
       }
     }
   }
