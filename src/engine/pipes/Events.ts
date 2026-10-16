@@ -13,6 +13,12 @@ export type EventState = {
   current: GameEvent[];
 };
 
+export type EventDefinition<T> = {
+  type: string;
+  dispatch(payload: T): Pipe;
+  handle(fn: (event: GameEvent<T>) => Pipe): Pipe;
+};
+
 const PLUGIN_NAMESPACE = 'core.events';
 
 const events = pluginPaths<EventState>(PLUGIN_NAMESPACE);
@@ -41,6 +47,19 @@ export class Events {
     return {
       namespace: key.slice(0, index),
       key: key.slice(index + 1),
+    };
+  }
+
+  static define<T = void>(namespace: string, key: string): EventDefinition<T> {
+    const type = Events.getKey(namespace, key);
+    return {
+      type,
+      dispatch: payload =>
+        Events.dispatch({
+          type,
+          ...(payload !== undefined && { payload }),
+        } as GameEvent<T>),
+      handle: fn => Events.handle<T>(type, fn),
     };
   }
 
