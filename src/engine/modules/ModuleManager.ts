@@ -3,6 +3,8 @@ import { Pipe } from '../State';
 import { Events } from '../pipes/Events';
 import { Perf } from '../pipes/Perf';
 import { Errors } from '../pipes/Errors';
+import { Effects } from '../pipes/Effects';
+import { Log } from '../pipes/Log';
 import { sdk } from '../sdk';
 import { type Module, type ModuleId, type ModuleRegistry } from './Module';
 import { typedPath } from '../Lens';
@@ -17,6 +19,7 @@ type ModuleManagerState = {
   toLoad: ModuleId[];
   toUnload: ModuleId[];
   retired: Module[];
+  replacing: Record<ModuleId, Module>;
 };
 
 const mm = typedPath<ModuleManagerState>([MODULE_NAMESPACE]);
@@ -106,7 +109,14 @@ function topologicalSort(
 
 const initPipe: Pipe = Composer.do(({ get, set }) => {
   if (get(mm)) return;
-  set(mm, { registry: {}, order: [], toLoad: [], toUnload: [], retired: [] });
+  set(mm, {
+    registry: {},
+    order: [],
+    toLoad: [],
+    toUnload: [],
+    retired: [],
+    replacing: {},
+  });
 });
 
 const retirePipe: Pipe = Composer.set(mm.retired, []);
@@ -116,13 +126,18 @@ const reconcilePipe: Pipe = Composer.pipe(
     Composer.do(({ get, over }) => {
       const { registry } = get(mm);
       const id = event.payload.id;
-      if (registry[id]) return;
+      const existing = registry[id];
+      if (existing === event.payload) return;
 
+      if (existing) {
+        over(mm.replacing, map => ({ ...map, [id]: existing }), {});
+        over(mm.toUnload, ids => (ids.includes(id) ? ids : [...ids, id]), []);
+      }
       over(mm.registry, reg => ({
         ...reg,
         [id]: event.payload,
       }));
-      over(mm.toLoad, ids => [...ids, id], []);
+      over(mm.toLoad, ids => (ids.includes(id) ? ids : [...ids, id]), []);
     })
   ),
   Events.handle<ModuleId>(eventType.unload, event =>
@@ -136,14 +151,16 @@ const reconcilePipe: Pipe = Composer.pipe(
 );
 
 const transitionPipe: Pipe = Composer.do(({ get, pipe, set }) => {
-  const { toUnload, toLoad, registry, order } = get(mm);
+  const { toUnload, toLoad, registry, order, replacing = {} } = get(mm);
 
   if (toLoad.length === 0 && toUnload.length === 0) return;
 
   const unloadOrder = toUnload.filter(id => order.includes(id));
+  const outgoing = (id: ModuleId): Module | undefined =>
+    replacing[id] ?? registry[id];
 
   const deactivates = unloadOrder
-    .map(id => wrapPhase(id, 'deactivate', registry[id]?.deactivate))
+    .map(id => wrapPhase(id, 'deactivate', outgoing(id)?.deactivate))
     .filter((p): p is Pipe => Boolean(p));
 
   const newOrder = topologicalSort(
@@ -155,7 +172,39 @@ const transitionPipe: Pipe = Composer.do(({ get, pipe, set }) => {
 
   for (const id of loadOrder) {
     const mod = registry[id];
-    if (mod?.sdk && !(mod.sdk in sdk)) (sdk as any)[mod.sdk] = mod;
+    if (!mod?.sdk) continue;
+    const taken = Object.hasOwn(sdk, mod.sdk)
+      ? (sdk as any)[mod.sdk]
+      : undefined;
+    if (taken === undefined || taken?.id === mod.id) {
+      (sdk as any)[mod.sdk] = mod;
+    } else {
+      pipe(
+        Log.error(id, 'sdk name {name} is taken by {owner}', {
+          name: mod.sdk,
+          owner: taken?.id ?? 'the engine',
+        })
+      );
+    }
+  }
+
+  const owners = new Map<string, ModuleId>(
+    Effects.engineTypes().map(type => [type, 'the engine'])
+  );
+  for (const id of newOrder) {
+    for (const performer of registry[id]?.effects ?? []) {
+      const owner = owners.get(performer.type);
+      if (owner === undefined) {
+        owners.set(performer.type, id);
+      } else if (owner !== id && loadOrder.includes(id)) {
+        pipe(
+          Log.error(id, 'effect {type} is already performed by {owner}', {
+            type: performer.type,
+            owner,
+          })
+        );
+      }
+    }
   }
 
   const activates = loadOrder
@@ -165,7 +214,7 @@ const transitionPipe: Pipe = Composer.do(({ get, pipe, set }) => {
   set(mm.order, newOrder);
   set(
     mm.retired,
-    unloadOrder.map(id => registry[id])
+    unloadOrder.map(id => outgoing(id)!)
   );
 
   const pipes = [...deactivates, ...activates];
@@ -203,11 +252,14 @@ const finalizePipe: Pipe = Composer.do(({ get, set }) => {
   if (toLoad.length === 0 && toUnload.length === 0) return;
 
   const newRegistry = { ...registry };
-  for (const id of toUnload) delete newRegistry[id];
+  for (const id of toUnload) {
+    if (!toLoad.includes(id)) delete newRegistry[id];
+  }
 
   set(mm.registry, newRegistry);
   set(mm.toLoad, []);
   set(mm.toUnload, []);
+  set(mm.replacing, {});
 });
 
 declare module '../sdk' {

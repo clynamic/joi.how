@@ -225,17 +225,37 @@ describe('Effects', () => {
       expect(getQueue(basePipe(tick(unloaded)))).toEqual([]);
     });
 
-    it('should refuse two modules performing the same effect', () => {
+    it('should keep the first owner of a duplicated effect type', () => {
       const ping = Effects.define('test.plugin', 'ping');
+      const seen: string[] = [];
 
       const frame = load(
-        { id: 'test.a', effects: [ping.perform(() => undefined)] },
-        { id: 'test.b', effects: [ping.perform(() => undefined)] }
+        { id: 'test.a', effects: [ping.perform(() => seen.push('a'))] },
+        { id: 'test.b', effects: [ping.perform(() => seen.push('b'))] }
       );
 
-      expect(() => Effects.flush(ping.emit()(frame), noInject)).toThrow(
-        /performed by more than one module/
+      expect(() => Effects.flush(ping.emit()(frame), noInject)).not.toThrow();
+      expect(seen).toEqual(['a']);
+    });
+
+    it('should forget a retired performer after the next tick', () => {
+      const bye = Effects.define('test.plugin', 'bye');
+      const seen: string[] = [];
+      const injected: Pipe[] = [];
+
+      const frame = load({
+        id: 'test.plugin',
+        effects: [bye.perform(() => seen.push('bye'))],
+      });
+      const unloaded = basePipe(
+        tick(ModuleManager.unload('test.plugin')(frame))
       );
+      const later = basePipe(tick(unloaded));
+
+      Effects.flush(bye.emit()(later), pipe => injected.push(pipe));
+
+      expect(seen).toEqual([]);
+      expect(injected).toHaveLength(1);
     });
   });
 });

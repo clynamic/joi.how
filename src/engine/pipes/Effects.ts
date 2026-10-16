@@ -50,6 +50,10 @@ const engine: Owned[] = [
 ];
 
 export class Effects {
+  static engineTypes(): string[] {
+    return engine.map(({ performer }) => performer.type);
+  }
+
   static define<T = void>(namespace: string, key: string): EffectDefinition<T> {
     const type = `${namespace}/${key}` as EffectKey<T>;
     return {
@@ -78,12 +82,8 @@ export class Effects {
     }
     for (const id of order) {
       for (const performer of registry[id]?.effects ?? []) {
-        if (import.meta.env.DEV && found.has(performer.type)) {
-          throw new Error(
-            `Effect "${performer.type}" is performed by more than one module`
-          );
-        }
-        found.set(performer.type, { performer, owner: id });
+        if (!found.has(performer.type))
+          found.set(performer.type, { performer, owner: id });
       }
     }
     for (const module of retired) {

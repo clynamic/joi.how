@@ -4,13 +4,18 @@ import {
   moduleManagerPipe,
 } from '../../../src/engine/modules/ModuleManager';
 import { Module } from '../../../src/engine/modules/Module';
+import { Effects } from '../../../src/engine/pipes/Effects';
 import { Events } from '../../../src/engine/pipes/Events';
 import { Composer } from '../../../src/engine/Composer';
 import { Pipe, GameFrame } from '../../../src/engine/State';
 import { sdk } from '../../../src/engine/sdk';
 import { makeFrame, tick } from '../../utils';
 
-const gamePipe: Pipe = Composer.pipe(Events.pipe, moduleManagerPipe);
+const gamePipe: Pipe = Composer.pipe(
+  Effects.pipe,
+  Events.pipe,
+  moduleManagerPipe
+);
 
 const getOrder = (frame: GameFrame): string[] =>
   (frame as any)?.core?.modules?.order ?? [];
@@ -25,6 +30,105 @@ function load(module: Module): GameFrame {
 }
 
 describe('ModuleManager', () => {
+  describe('reloading', () => {
+    const mark = (label: string): Pipe =>
+      Composer.over(['marks'], (list: string[]) => [...list, label], []);
+
+    it('should swap a module loaded again under the same id', () => {
+      const v1: Module = {
+        id: 'mod.re',
+        activate: mark('v1 up'),
+        deactivate: mark('v1 down'),
+      };
+      const v2: Module = {
+        id: 'mod.re',
+        activate: mark('v2 up'),
+        deactivate: mark('v2 down'),
+      };
+
+      const frame1 = load(v1);
+      const frame2 = gamePipe(tick(ModuleManager.load(v2)(frame1)));
+      const frame3 = gamePipe(tick(frame2));
+
+      expect(frame3.marks).toEqual(['v1 up', 'v1 down', 'v2 up']);
+      expect(getOrder(frame3).filter(id => id === 'mod.re')).toHaveLength(1);
+      expect(getRegistry(frame3)['mod.re']).toBe(v2);
+    });
+
+    it('should leave a module alone when the same object is loaded again', () => {
+      const once: Module = {
+        id: 'mod.same',
+        activate: mark('up'),
+        deactivate: mark('down'),
+      };
+
+      const frame1 = load(once);
+      const frame2 = gamePipe(tick(ModuleManager.load(once)(frame1)));
+
+      expect(frame2.marks).toEqual(['up']);
+    });
+
+    it('should republish a reloaded module on the sdk', () => {
+      const v1: Module = { id: 'mod.pub', sdk: 'Republished' };
+      const v2: Module = { id: 'mod.pub', sdk: 'Republished' };
+
+      load(v1);
+      expect((sdk as any).Republished).toBe(v1);
+
+      const frame = gamePipe(tick(ModuleManager.load(v2)(load(v1))));
+
+      expect(getRegistry(frame)['mod.pub']).toBe(v2);
+      expect((sdk as any).Republished).toBe(v2);
+    });
+  });
+
+  describe('load-time checks', () => {
+    const lines = (frame: GameFrame) =>
+      (frame?.core?.effects?.queue ?? [])
+        .filter((e: { type: string }) => e.type === 'core.log/line')
+        .map(
+          (e: {
+            payload: { level: string; source: string; message: string };
+          }) => e.payload
+        );
+
+    it('should log and keep the engine entry when an sdk name is taken', () => {
+      const frame = load({ id: 'mod.clash', sdk: 'Composer' });
+
+      expect((sdk as any).Composer).toBe(Composer);
+      expect(lines(frame)).toContainEqual(
+        expect.objectContaining({
+          level: 'error',
+          source: 'mod.clash',
+          message: 'sdk name {name} is taken by {owner}',
+        })
+      );
+    });
+
+    it('should log a duplicated effect type when the second module loads', () => {
+      const first: Module = {
+        id: 'mod.first',
+        effects: [{ type: 'x/ping', perform: () => undefined }],
+      };
+      const second: Module = {
+        id: 'mod.second',
+        effects: [{ type: 'x/ping', perform: () => undefined }],
+      };
+
+      const frame1 = load(first);
+      const frame2 = gamePipe(tick(ModuleManager.load(second)(frame1)));
+
+      expect(lines(frame1)).toEqual([]);
+      expect(lines(frame2)).toContainEqual(
+        expect.objectContaining({
+          level: 'error',
+          source: 'mod.second',
+          message: 'effect {type} is already performed by {owner}',
+        })
+      );
+    });
+  });
+
   describe('sdk publishing', () => {
     it('should publish a plain module with an sdk name when it loads', () => {
       const plain: Module = { id: 'mod.plain', sdk: 'PlainMod' };
