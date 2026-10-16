@@ -32,6 +32,8 @@ const Pause = definePlugin({
     name: 'Pause',
   },
 
+  timeline: PLAY_TIMELINE,
+
   setPaused(val: boolean): Pipe {
     return seq.start({ paused: val });
   },

@@ -57,6 +57,8 @@ const rateOf = (
 };
 
 export class Scheduler {
+  static readonly ENGINE_TIMELINE = ENGINE_TIMELINE;
+
   static getKey(namespace: string, key: string): string {
     return `${namespace}/schedule/${key}`;
   }

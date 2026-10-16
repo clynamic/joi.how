@@ -96,6 +96,8 @@ const Dealer = definePlugin({
     loadAfter: ['core.mode'],
   },
 
+  events: DiceEvent,
+
   triggerOutcome(id: DiceEvent): Pipe {
     return roll.dispatch('trigger', id);
   },
