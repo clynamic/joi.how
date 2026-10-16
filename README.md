@@ -49,5 +49,4 @@ yarn preview
 ### Social
 
 - We have an [e6 forum thread](https://e621.net/forum_topics/23796). We'd love to hear your feedback.
-- Want to let other people set your wallpaper? Try [Walltaker](https://walltaker.joi.how/).
 - Need support? visit our [discord server](https://discord.clynamic.net/).
