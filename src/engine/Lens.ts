@@ -15,9 +15,10 @@ export type TypedPath<T> = (string | number | symbol)[] & {
 export type Path<T = unknown> = StringPath | TypedPath<T>;
 
 export function typedPath<T>(
-  segments: (string | number | symbol)[]
+  segments: (string | number | symbol)[] | string
 ): TypedPath<T> {
-  return new Proxy(segments, {
+  const list = typeof segments === 'string' ? [segments] : segments;
+  return new Proxy(list, {
     get(target, prop, receiver) {
       if (prop in target || typeof prop === 'symbol') {
         return Reflect.get(target, prop, receiver);

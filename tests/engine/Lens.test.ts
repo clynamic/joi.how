@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { lensFromPath, normalizePath } from '../../src/engine/Lens';
+import { lensFromPath, normalizePath, typedPath } from '../../src/engine/Lens';
 
 describe('Lens', () => {
   describe('normalizePath', () => {
@@ -224,5 +224,15 @@ describe('Lens', () => {
         expect(obj.a.b.c.d.e).toBe(42);
       });
     });
+  });
+});
+
+describe('typedPath', () => {
+  it('should accept a dotted string as the root', () => {
+    const path = typedPath<{ cursor: number }>('core.rand');
+    const frame = { core: { rand: { cursor: 7 } } };
+
+    expect(lensFromPath(path.cursor).get(frame)).toBe(7);
+    expect(normalizePath(path)).toEqual(['core', 'rand']);
   });
 });

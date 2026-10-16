@@ -4,7 +4,7 @@ import { registry } from '../registry';
 
 // TODO: make typedPath accept string and kill this thing.
 export function pluginPaths<T>(namespace: string): TypedPath<T> {
-  return typedPath<T>([namespace]);
+  return typedPath<T>(namespace);
 }
 
 export type PluginId = string;
