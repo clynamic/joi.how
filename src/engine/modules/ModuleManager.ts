@@ -1,10 +1,5 @@
 import { Composer } from '../Composer';
 import { Pipe } from '../State';
-import {
-  startDOMBatching,
-  stopDOMBatching,
-  flushDOMOperations,
-} from '../DOMBatcher';
 import { Events } from '../pipes/Events';
 import { Perf } from '../pipes/Perf';
 import { Errors } from '../pipes/Errors';
@@ -181,10 +176,7 @@ const transitionPipe: Pipe = Composer.do(({ get, pipe, set }) => {
   const pipes = [...deactivates, ...activates];
   if (pipes.length === 0) return;
 
-  startDOMBatching();
   pipe(...pipes);
-  stopDOMBatching();
-  flushDOMOperations();
 });
 
 const updatePipe: Pipe = Composer.do(({ get, pipe }) => {
@@ -207,10 +199,7 @@ const updatePipe: Pipe = Composer.do(({ get, pipe }) => {
   const pipes = [...beforeUpdates, ...updates, ...afterUpdates];
   if (pipes.length === 0) return;
 
-  startDOMBatching();
   pipe(...pipes);
-  stopDOMBatching();
-  flushDOMOperations();
 });
 
 const finalizePipe: Pipe = Composer.do(({ get, set }) => {
