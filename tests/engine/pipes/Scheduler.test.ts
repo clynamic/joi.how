@@ -219,17 +219,56 @@ describe('Scheduler', () => {
     });
   });
 
+  describe('ordering within a tick', () => {
+    it('should apply commands in the order they were dispatched', () => {
+      let frame = step(basePipe(makeFrame()), entry('me/a', 100));
+      frame = step(frame);
+
+      frame = step(
+        frame,
+        Composer.pipe(Scheduler.cancelByPrefix('me/'), entry('me/b', 100))
+      );
+      frame = step(frame);
+
+      expect(scheduled(frame).map(e => [e.id, e.duration])).toEqual([
+        ['me/b', 84],
+      ]);
+
+      frame = step(
+        frame,
+        Composer.pipe(entry('me/c', 100), Scheduler.cancelByPrefix('me/'))
+      );
+      frame = step(frame);
+
+      expect(scheduled(frame)).toEqual([]);
+    });
+  });
+
   describe('snapshot and restore', () => {
     it('should snapshot the entries under a prefix with their remaining time', () => {
       let frame = step(
         basePipe(makeFrame()),
-        Composer.pipe(entry('me/a', 100), entry('me/b', 200), entry('you/c', 300))
+        Composer.pipe(
+          entry('me/a', 100),
+          entry('me/b', 200),
+          entry('you/c', 300)
+        )
       );
       frame = step(frame);
 
       expect(Scheduler.snapshot(frame, 'me/')).toEqual([
-        { id: 'me/a', duration: 84, timeline: undefined, event: { type: 'test/me/a' } },
-        { id: 'me/b', duration: 184, timeline: undefined, event: { type: 'test/me/b' } },
+        {
+          id: 'me/a',
+          duration: 84,
+          timeline: undefined,
+          event: { type: 'test/me/a' },
+        },
+        {
+          id: 'me/b',
+          duration: 184,
+          timeline: undefined,
+          event: { type: 'test/me/b' },
+        },
       ]);
     });
 
@@ -246,6 +285,60 @@ describe('Scheduler', () => {
       expect(scheduled(frame).map(e => [e.id, e.duration])).toEqual([
         ['you/c', 252],
         ['me/a', 84],
+      ]);
+    });
+    it('should include an entry that fired until its handler has run', () => {
+      let frame = step(basePipe(makeFrame()), entry('me/a', 16));
+      frame = step(frame);
+      expect(fired(frame)).toEqual([]);
+      expect(Scheduler.snapshot(frame, 'me/')).toMatchObject([
+        { id: 'me/a', duration: 0 },
+      ]);
+
+      frame = step(frame);
+      expect(fired(frame)).toEqual(['test/me/a']);
+      expect(Scheduler.snapshot(frame, 'me/')).toMatchObject([
+        { id: 'me/a', duration: 0 },
+      ]);
+
+      frame = step(frame);
+      expect(Scheduler.snapshot(frame, 'me/')).toEqual([]);
+    });
+
+    it('should let a pending reschedule replace the entry that fired', () => {
+      let frame = step(basePipe(makeFrame()), entry('me/a', 16));
+      frame = step(frame);
+      frame = step(frame, f => f, entry('me/a', 500));
+
+      expect(Scheduler.snapshot(frame, 'me/')).toMatchObject([
+        { id: 'me/a', duration: 500 },
+      ]);
+    });
+
+    it('should drop a pending cancel from the snapshot', () => {
+      let frame = step(basePipe(makeFrame()), entry('me/a', 100));
+      frame = step(frame, f => f, Scheduler.cancel('me/a'));
+
+      expect(Scheduler.snapshot(frame, 'me/')).toEqual([]);
+    });
+
+    it('should restore only well formed entries under the prefix, one per id', () => {
+      let frame = step(basePipe(makeFrame()));
+      frame = step(
+        frame,
+        Scheduler.restore('me/', [
+          { id: 'me/a', duration: 100, event: { type: 'test/me/a' } },
+          { id: 'me/a', duration: 300, event: { type: 'test/me/a' } },
+          { id: 'you/b', duration: 100, event: { type: 'test/you/b' } },
+          { id: 'me/c', duration: NaN, event: { type: 'test/me/c' } },
+          { id: 'me/d', duration: -5, event: { type: 'test/me/d' } },
+          { duration: 100, event: { type: 'test/me/e' } },
+        ])
+      );
+      frame = step(frame);
+
+      expect(scheduled(frame).map(e => [e.id, e.duration])).toEqual([
+        ['me/a', 284],
       ]);
     });
   });

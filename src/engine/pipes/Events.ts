@@ -67,6 +67,10 @@ export class Events {
     return pendingLens.over(pending => [...pending, event], []);
   }
 
+  static pending(frame: GameFrame): GameEvent[] {
+    return pendingLens.get(frame) ?? [];
+  }
+
   static handle<T = any>(
     type: string,
     fn: (event: GameEvent<T>) => Pipe
