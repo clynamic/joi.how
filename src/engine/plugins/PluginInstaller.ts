@@ -9,6 +9,7 @@ import { Composer } from '../Composer';
 import { Effects, type Inject } from '../pipes/Effects';
 import { Pipe } from '../State';
 import { ModuleManager } from '../modules/ModuleManager';
+import Storage from './Storage';
 
 const PLUGIN_ID = 'core.plugin_installer';
 
@@ -21,32 +22,28 @@ type InstallerState = {
   disabled: PluginId[];
   meta: MetaMap;
   failed: InstallFailure[];
+  ready: boolean;
 };
 
 type Snapshot = Pick<InstallerState, 'installed' | 'disabled' | 'meta'>;
 
 const ins = pluginPaths<InstallerState>(PLUGIN_ID);
 
-const storageKey = {
-  installed: `${PLUGIN_ID}.installed`,
-  code: (id: PluginId) => `${PLUGIN_ID}.code/${id}`,
-  disabled: `${PLUGIN_ID}.disabled`,
-  meta: `${PLUGIN_ID}.meta`,
-};
+const INDEX_KEY = `${PLUGIN_ID}.index`;
+const CODE_PREFIX = `${PLUGIN_ID}.code/`;
+const codeKey = (id: PluginId) => `${CODE_PREFIX}${id}`;
+const idOf = (key: string) => key.slice(CODE_PREFIX.length);
 
-const restore = Effects.define(PLUGIN_ID, 'restore');
-const persist = Effects.define<Snapshot>(PLUGIN_ID, 'persist');
-const storeCode = Effects.define<{ id: PluginId; code: string }>(
+const compile = Effects.define<{ code: string; id?: PluginId }>(
   PLUGIN_ID,
-  'store_code'
+  'compile'
 );
-const dropCode = Effects.define<{ id: PluginId }>(PLUGIN_ID, 'drop_code');
-const compile = Effects.define<{ code: string }>(PLUGIN_ID, 'compile');
-const revive = Effects.define<{ id: PluginId }>(PLUGIN_ID, 'revive');
 
-function readJson<T>(key: string, fallback: T): T {
-  return JSON.parse(localStorage.getItem(key) ?? JSON.stringify(fallback));
-}
+const isSnapshot = (value: unknown): value is Snapshot =>
+  typeof value === 'object' &&
+  value !== null &&
+  Array.isArray((value as Snapshot).installed) &&
+  Array.isArray((value as Snapshot).disabled);
 
 async function loadFromCode(code: string): Promise<Plugin> {
   const blob = new Blob([code], { type: 'text/javascript' });
@@ -69,66 +66,119 @@ function importCode(
 ) {
   loadFromCode(code).then(
     plugin => inject(onLoaded(plugin)),
-    error => inject(PluginInstaller.fail(String(error), id))
+    error => inject(fail(String(error), id))
   );
 }
 
-function restoreFromStorage(inject: Inject) {
-  const installed = readJson<PluginId[]>(storageKey.installed, []);
-  const disabled = readJson<PluginId[]>(storageKey.disabled, []);
-  const meta = readJson<MetaMap>(storageKey.meta, {});
-  inject(PluginInstaller.restored({ installed, disabled, meta }));
-
-  for (const id of installed) {
-    if (disabled.includes(id)) continue;
-    const rawCode = localStorage.getItem(storageKey.code(id));
-    if (!rawCode) {
-      inject(PluginInstaller.fail('no stored code', id));
-      continue;
-    }
-    importCode(
-      JSON.parse(rawCode) as string,
-      inject,
-      PluginInstaller.loaded,
-      id
-    );
-  }
-}
-
-function reviveFromStorage(id: PluginId, inject: Inject) {
-  const rawCode = localStorage.getItem(storageKey.code(id));
-  if (!rawCode) {
-    inject(PluginInstaller.fail('no stored code', id));
-    return;
-  }
-  importCode(JSON.parse(rawCode) as string, inject, PluginInstaller.loaded, id);
-}
-
 const persistNow: Pipe = Composer.bind(ins, state =>
-  persist.emit({
-    installed: state.installed,
-    disabled: state.disabled,
-    meta: state.meta,
-  })
+  state.ready
+    ? Storage.write(INDEX_KEY, {
+        installed: state.installed,
+        disabled: state.disabled,
+        meta: state.meta,
+      })
+    : frame => frame
 );
+
+const union = (a: PluginId[], b: PluginId[]) => [
+  ...a,
+  ...b.filter(id => !a.includes(id)),
+];
+
+const restored = (snapshot: Snapshot): Pipe =>
+  Composer.over(ins, state => ({
+    ...state,
+    installed: union(snapshot.installed, state.installed),
+    disabled: union(snapshot.disabled, state.disabled),
+    meta: { ...snapshot.meta, ...state.meta },
+  }));
+
+const wanted = (state: InstallerState | undefined, id: PluginId) =>
+  !!state?.installed.includes(id) && !state.disabled.includes(id);
+
+const settled = (id: PluginId): Pipe =>
+  Composer.over(ins.failed, failed => failed.filter(f => f.id !== id));
+
+const loaded = (plugin: Plugin): Pipe =>
+  Composer.bind(ins, state =>
+    Composer.when(
+      wanted(state, plugin.id),
+      Composer.pipe(settled(plugin.id), ModuleManager.load(plugin))
+    )
+  );
+
+const fail = (message: string, id?: PluginId): Pipe =>
+  Composer.over(ins.failed, failed =>
+    failed.some(f => f.id === id && f.message === message)
+      ? failed
+      : [...failed, { ...(id !== undefined && { id }), message }]
+  );
+
+const installed = (plugin: Plugin, code: string): Pipe =>
+  Composer.pipe(
+    Composer.over(ins, state => ({
+      ...state,
+      installed: state.installed.includes(plugin.id)
+        ? state.installed
+        : [...state.installed, plugin.id],
+      meta: plugin.meta
+        ? { ...state.meta, [plugin.id]: plugin.meta }
+        : state.meta,
+    })),
+    settled(plugin.id),
+    persistNow,
+    Storage.write(codeKey(plugin.id), code),
+    ModuleManager.load(plugin)
+  );
 
 const PluginInstaller = definePlugin({
   id: PLUGIN_ID,
   sdk: 'PluginInstaller',
 
   activate: Composer.pipe(
-    Composer.set(ins, { installed: [], disabled: [], meta: {}, failed: [] }),
-    restore.emit()
+    Composer.set(ins, {
+      installed: [],
+      disabled: [],
+      meta: {},
+      failed: [],
+      ready: false,
+    }),
+    Storage.read(INDEX_KEY)
+  ),
+
+  update: Composer.pipe(
+    Storage.onRead(INDEX_KEY, value =>
+      Composer.do(({ get, set, pipe }) => {
+        if (value !== null && !isSnapshot(value)) {
+          pipe(fail('stored plugin index is not readable'));
+        }
+        if (isSnapshot(value)) pipe(restored(value));
+        set(ins.ready, true);
+        pipe(persistNow);
+        const state = get(ins);
+        for (const id of state.installed) {
+          if (!wanted(state, id)) continue;
+          pipe(Storage.read(codeKey(id)));
+        }
+      })
+    ),
+    Storage.onReadPrefix(CODE_PREFIX, (code, key) =>
+      Composer.bind(ins, state => {
+        const id = idOf(key);
+        if (!wanted(state, id)) return frame => frame;
+        return typeof code === 'string'
+          ? compile.emit({ code, id })
+          : fail('no stored code', id);
+      })
+    )
   ),
 
   deactivate: Composer.set(ins, undefined),
 
-  install(code: string): Pipe {
-    return compile.emit({ code });
-  },
+  install: (code: string): Pipe => compile.emit({ code }),
 
-  remove(id: PluginId): Pipe {
-    return Composer.pipe(
+  remove: (id: PluginId): Pipe =>
+    Composer.pipe(
       Composer.over(ins, state => ({
         ...state,
         installed: state.installed.filter(i => i !== id),
@@ -139,78 +189,43 @@ const PluginInstaller = definePlugin({
         ),
       })),
       persistNow,
-      dropCode.emit({ id }),
+      Storage.remove(codeKey(id)),
       ModuleManager.unload(id)
-    );
-  },
+    ),
 
-  enable(id: PluginId): Pipe {
-    return Composer.pipe(
+  enable: (id: PluginId): Pipe =>
+    Composer.pipe(
       Composer.over(ins.disabled, ids => ids.filter(i => i !== id)),
       persistNow,
-      revive.emit({ id })
-    );
-  },
+      Storage.read(codeKey(id))
+    ),
 
-  disable(id: PluginId): Pipe {
-    return Composer.pipe(
+  disable: (id: PluginId): Pipe =>
+    Composer.pipe(
       Composer.over(ins.disabled, ids =>
         ids.includes(id) ? ids : [...ids, id]
       ),
       persistNow,
       ModuleManager.unload(id)
-    );
-  },
+    ),
 
-  restored(snapshot: Snapshot): Pipe {
-    return Composer.over(ins, state => ({ ...state, ...snapshot }));
-  },
+  restored,
 
-  installed(plugin: Plugin, code: string): Pipe {
-    return Composer.pipe(
-      Composer.over(ins, state => ({
-        ...state,
-        installed: state.installed.includes(plugin.id)
-          ? state.installed
-          : [...state.installed, plugin.id],
-        meta: plugin.meta
-          ? { ...state.meta, [plugin.id]: plugin.meta }
-          : state.meta,
-      })),
-      persistNow,
-      storeCode.emit({ id: plugin.id, code }),
-      ModuleManager.load(plugin)
-    );
-  },
+  installed,
 
-  loaded(plugin: Plugin): Pipe {
-    return ModuleManager.load(plugin);
-  },
+  loaded,
 
-  fail(message: string, id?: PluginId): Pipe {
-    return Composer.over(ins.failed, failed => [
-      ...failed,
-      { ...(id !== undefined && { id }), message },
-    ]);
-  },
+  fail,
 
   effects: [
-    restore.perform((_, inject) => restoreFromStorage(inject)),
-    persist.perform(({ installed, disabled, meta }) => {
-      localStorage.setItem(storageKey.installed, JSON.stringify(installed));
-      localStorage.setItem(storageKey.disabled, JSON.stringify(disabled));
-      localStorage.setItem(storageKey.meta, JSON.stringify(meta));
-    }),
-    storeCode.perform(({ id, code }) =>
-      localStorage.setItem(storageKey.code(id), JSON.stringify(code))
-    ),
-    dropCode.perform(({ id }) => localStorage.removeItem(storageKey.code(id))),
-    compile.perform(({ code }, inject) =>
-      importCode(code, inject, plugin =>
-        PluginInstaller.installed(plugin, code)
+    compile.perform(({ code, id }, inject) =>
+      importCode(
+        code,
+        inject,
+        id === undefined ? plugin => installed(plugin, code) : loaded,
+        id
       )
     ),
-    revive.perform(({ id }, inject) => reviveFromStorage(id, inject)),
   ],
 });
 

@@ -15,7 +15,8 @@ const record = (label: unknown): Pipe =>
 const watcher = {
   id: 'test.watch',
   update: Composer.pipe(
-    Storage.onRead('t.', (value, key) => record({ key, value })),
+    Storage.onReadPrefix('t.', (value, key) => record({ key, value })),
+    Storage.onRead('t.exact', value => record({ exact: value })),
     Storage.onList('t.', (entries: StoredEntry[]) => record(entries))
   ),
 };
@@ -80,11 +81,40 @@ describe('Storage', () => {
     ]);
   });
 
-  it('should hand a read only to handlers of its key', () => {
+  it('should hand a read to handlers of its exact key and of its prefix', () => {
     localStorage.setItem('u.other', '3');
-    let frame = withImpulse(Storage.read('u.other'))(tick(bootstrap()));
+    localStorage.setItem('t.exact', '1');
+    localStorage.setItem('t.exactly', '2');
+    let frame = withImpulse(
+      Composer.pipe(
+        Storage.read('u.other'),
+        Storage.read('t.exact'),
+        Storage.read('t.exactly')
+      )
+    )(tick(bootstrap()));
     frame = flush(frame);
 
-    expect(seen(frame)).toEqual([]);
+    expect(seen(frame)).toEqual([
+      { key: 't.exact', value: 1 },
+      { key: 't.exactly', value: 2 },
+      { exact: 1 },
+    ]);
+  });
+
+  it('should say so when a stored value is not valid JSON', () => {
+    localStorage.setItem('t.broken', '{');
+    let frame = withImpulse(Storage.read('t.broken'))(tick(bootstrap()));
+    frame = flush(frame);
+
+    expect(seen(frame)).toEqual([{ key: 't.broken', value: null }]);
+    expect(frame.core.effects.queue).toContainEqual(
+      expect.objectContaining({
+        type: 'core.log/line',
+        payload: expect.objectContaining({
+          level: 'warn',
+          data: { key: 't.broken' },
+        }),
+      })
+    );
   });
 });

@@ -131,7 +131,7 @@ const Saves = definePlugin({
   ),
 
   update: Composer.pipe(
-    Storage.onRead(KEY_PREFIX, (value, key) =>
+    Storage.onReadPrefix(KEY_PREFIX, (value, key) =>
       Composer.do(({ pipe }) => {
         if (value === null) return;
         const slot = slotOf(key);

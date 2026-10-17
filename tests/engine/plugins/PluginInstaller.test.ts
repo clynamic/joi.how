@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import PluginInstaller from '../../../src/engine/plugins/PluginInstaller';
+import Storage from '../../../src/engine/plugins/Storage';
 import {
   ModuleManager,
   moduleManagerPipe,
@@ -35,7 +36,7 @@ const getEffects = (frame: GameFrame): { type: string; payload?: unknown }[] =>
 const stored = (key: string) =>
   JSON.parse(localStorage.getItem(`${PLUGIN_NAMESPACE}.${key}`) ?? 'null');
 
-function settle(frame: GameFrame, rounds = 2): GameFrame {
+function settle(frame: GameFrame, rounds = 4): GameFrame {
   for (let i = 0; i < rounds; i++) {
     const injected: Pipe[] = [];
     Effects.flush(frame, pipe => injected.push(pipe));
@@ -46,7 +47,10 @@ function settle(frame: GameFrame, rounds = 2): GameFrame {
 
 function bootstrap(): GameFrame {
   const frame0 = fullPipe(makeFrame());
-  const frame1 = ModuleManager.load(PluginInstaller)(frame0);
+  const frame1 = Composer.pipe(
+    ModuleManager.load(Storage),
+    ModuleManager.load(PluginInstaller)
+  )(frame0);
   return settle(fullPipe(tick(frame1)));
 }
 
@@ -56,14 +60,9 @@ function seed(
   meta: Record<string, unknown> = {}
 ) {
   localStorage.setItem(
-    `${PLUGIN_NAMESPACE}.installed`,
-    JSON.stringify(installed)
+    `${PLUGIN_NAMESPACE}.index`,
+    JSON.stringify({ installed, disabled, meta })
   );
-  localStorage.setItem(
-    `${PLUGIN_NAMESPACE}.disabled`,
-    JSON.stringify(disabled)
-  );
-  localStorage.setItem(`${PLUGIN_NAMESPACE}.meta`, JSON.stringify(meta));
   for (const id of installed) {
     localStorage.setItem(
       `${PLUGIN_NAMESPACE}.code/${id}`,
@@ -86,12 +85,15 @@ describe('Plugin Installer', () => {
     expect(getMeta(frame)).toEqual({});
   });
 
-  it('should ask to restore from storage on activate', () => {
+  it('should ask storage for its index on activate', () => {
     const frame0 = fullPipe(makeFrame());
     const frame = fullPipe(tick(ModuleManager.load(PluginInstaller)(frame0)));
 
-    expect(getEffects(frame).map(e => e.type)).toEqual([
-      `${PLUGIN_NAMESPACE}/restore`,
+    expect(frame.core.effects.queue).toEqual([
+      {
+        type: 'core.storage/read',
+        payload: { key: `${PLUGIN_NAMESPACE}.index` },
+      },
     ]);
   });
 
@@ -118,10 +120,8 @@ describe('Plugin Installer', () => {
   });
 
   it('should mark plugins with no code as failed', () => {
-    localStorage.setItem(
-      `${PLUGIN_NAMESPACE}.installed`,
-      JSON.stringify(['user.nocode'])
-    );
+    seed(['user.nocode']);
+    localStorage.removeItem(`${PLUGIN_NAMESPACE}.code/user.nocode`);
 
     const frame = bootstrap();
     expect(getFailed(frame)).toEqual([
@@ -153,17 +153,22 @@ describe('Plugin Installer', () => {
   it('should register a compiled plugin, persist it and load it', () => {
     const plugin = { id: 'user.new', meta: { name: 'New' } };
     let frame = PluginInstaller.installed(plugin, 'code!')(bootstrap());
-    const effects = getEffects(frame).map(e => e.type);
+    const effects = frame.core.effects.queue.map(
+      (e: { type: string; payload?: { key?: string } }) => [
+        e.type,
+        e.payload?.key,
+      ]
+    );
     frame = settle(frame);
 
     expect(effects).toEqual([
-      `${PLUGIN_NAMESPACE}/persist`,
-      `${PLUGIN_NAMESPACE}/store_code`,
+      ['core.storage/write', `${PLUGIN_NAMESPACE}.index`],
+      ['core.storage/write', `${PLUGIN_NAMESPACE}.code/user.new`],
     ]);
     expect(getInstalledIds(frame)).toEqual(['user.new']);
     expect(getMeta(frame)).toEqual({ 'user.new': { name: 'New' } });
-    expect(stored('installed')).toEqual(['user.new']);
-    expect(stored('meta')).toEqual({ 'user.new': { name: 'New' } });
+    expect(stored('index').installed).toEqual(['user.new']);
+    expect(stored('index').meta).toEqual({ 'user.new': { name: 'New' } });
     expect(stored('code/user.new')).toBe('code!');
     expect(frame.core.modules.order).toContain('user.new');
   });
@@ -189,7 +194,7 @@ describe('Plugin Installer', () => {
     expect(getInstalledIds(frame)).not.toContain('user.remove');
     expect(getMeta(frame)).not.toHaveProperty('user.remove');
     expect(stored('code/user.remove')).toBeNull();
-    expect(stored('installed')).not.toContain('user.remove');
+    expect(stored('index').installed).not.toContain('user.remove');
   });
 
   it('should add to disabled array on disable', () => {
@@ -201,7 +206,7 @@ describe('Plugin Installer', () => {
     frame = settle(PluginInstaller.disable('user.dis')(frame));
 
     expect(getDisabledIds(frame)).toContain('user.dis');
-    expect(stored('disabled')).toContain('user.dis');
+    expect(stored('index').disabled).toContain('user.dis');
   });
 
   it('should remove from disabled array and revive on enable', () => {
@@ -211,15 +216,20 @@ describe('Plugin Installer', () => {
     expect(getDisabledIds(frame)).toContain('user.en');
 
     frame = PluginInstaller.enable('user.en')(frame);
-    const effects = getEffects(frame).map(e => e.type);
+    const effects = frame.core.effects.queue.map(
+      (e: { type: string; payload?: { key?: string } }) => [
+        e.type,
+        e.payload?.key,
+      ]
+    );
     frame = settle(frame);
 
     expect(effects).toEqual([
-      `${PLUGIN_NAMESPACE}/persist`,
-      `${PLUGIN_NAMESPACE}/revive`,
+      ['core.storage/write', `${PLUGIN_NAMESPACE}.index`],
+      ['core.storage/read', `${PLUGIN_NAMESPACE}.code/user.en`],
     ]);
     expect(getDisabledIds(frame)).not.toContain('user.en');
-    expect(stored('disabled')).not.toContain('user.en');
+    expect(stored('index').disabled).not.toContain('user.en');
   });
 
   it('should not duplicate disabled entries', () => {
@@ -232,7 +242,7 @@ describe('Plugin Installer', () => {
     expect(getDisabledIds(frame).filter(id => id === 'user.dup')).toHaveLength(
       1
     );
-    expect(stored('disabled')).toEqual(['user.dup']);
+    expect(stored('index').disabled).toEqual(['user.dup']);
   });
 
   it('should clean up disabled on remove', () => {
@@ -243,7 +253,7 @@ describe('Plugin Installer', () => {
 
     expect(getDisabledIds(frame)).not.toContain('user.cr');
     expect(getInstalledIds(frame)).not.toContain('user.cr');
-    expect(stored('disabled')).toEqual([]);
+    expect(stored('index').disabled).toEqual([]);
   });
 
   it('should persist a plugin registered through inject', () => {
@@ -257,7 +267,7 @@ describe('Plugin Installer', () => {
     )(tick(frame));
     Effects.flush(next, () => undefined);
 
-    expect(stored('installed')).toEqual(['user.late']);
+    expect(stored('index').installed).toEqual(['user.late']);
     expect(stored('code/user.late')).toBe('late');
   });
 
@@ -272,7 +282,8 @@ describe('Plugin Installer', () => {
   });
 
   it('should fail an enable for an id with no stored code', () => {
-    seed([], ['user.ghost']);
+    seed(['user.ghost'], ['user.ghost']);
+    localStorage.removeItem(`${PLUGIN_NAMESPACE}.code/user.ghost`);
 
     let frame = bootstrap();
     frame = settle(PluginInstaller.enable('user.ghost')(frame));
@@ -286,5 +297,78 @@ describe('Plugin Installer', () => {
     const frame = PluginInstaller.fail('boom')(bootstrap());
 
     expect(getFailed(frame)).toEqual([{ message: 'boom' }]);
+  });
+
+  it('should keep one failure per plugin and message and clear it once the plugin loads', () => {
+    let frame = bootstrap();
+    frame = PluginInstaller.fail('boom', 'user.a')(frame);
+    frame = PluginInstaller.fail('boom', 'user.a')(frame);
+    frame = PluginInstaller.fail('bang', 'user.a')(frame);
+    const before = getFailed(frame);
+
+    frame = settle(PluginInstaller.installed({ id: 'user.a' }, 'code')(frame));
+
+    expect(before).toEqual([
+      { id: 'user.a', message: 'boom' },
+      { id: 'user.a', message: 'bang' },
+    ]);
+    expect(getFailed(frame)).toEqual([]);
+  });
+
+  it('should not load a plugin that was removed while its code compiled', () => {
+    seed(['user.late']);
+    let frame = settle(PluginInstaller.remove('user.late')(bootstrap()));
+
+    frame = settle(PluginInstaller.loaded({ id: 'user.late' })(frame));
+
+    expect(frame.core.modules.order).not.toContain('user.late');
+  });
+
+  it('should not compile code that arrives for a plugin disabled meanwhile', () => {
+    seed(['user.slow']);
+    let frame = settle(PluginInstaller.disable('user.slow')(bootstrap()));
+
+    frame = Composer.pipe(
+      Events.dispatch({
+        type: 'core.storage/read',
+        payload: { key: `${PLUGIN_NAMESPACE}.code/user.slow`, value: 'code' },
+      }),
+      fullPipe
+    )(tick(frame));
+
+    expect(getEffects(frame)).toEqual([]);
+  });
+
+  it('should keep an index that arrives after an install', () => {
+    const frame0 = fullPipe(makeFrame());
+    let frame = Composer.pipe(
+      ModuleManager.load(Storage),
+      ModuleManager.load(PluginInstaller)
+    )(frame0);
+    frame = fullPipe(tick(frame));
+    frame = PluginInstaller.installed({ id: 'user.early' }, 'code')(frame);
+    seed(['user.stored']);
+
+    frame = settle(frame);
+
+    expect([...getInstalledIds(frame)].sort()).toEqual([
+      'user.early',
+      'user.stored',
+    ]);
+    expect([...stored('index').installed].sort()).toEqual([
+      'user.early',
+      'user.stored',
+    ]);
+  });
+
+  it('should report an index that is not readable and carry on', () => {
+    localStorage.setItem(`${PLUGIN_NAMESPACE}.index`, '"nope"');
+
+    const frame = bootstrap();
+
+    expect(getFailed(frame)).toEqual([
+      { message: 'stored plugin index is not readable' },
+    ]);
+    expect(getInstalledIds(frame)).toEqual([]);
   });
 });

@@ -1,7 +1,8 @@
 import { definePlugin } from './Plugins';
 import { Pipe } from '../State';
 import { Events } from '../pipes/Events';
-import { Effects } from '../pipes/Effects';
+import { Effects, type Inject } from '../pipes/Effects';
+import { Log } from '../pipes/Log';
 
 const PLUGIN_ID = 'core.storage';
 
@@ -17,21 +18,29 @@ const remove = Effects.define<{ key: string }>(PLUGIN_ID, 'remove');
 const read = Effects.define<{ key: string }>(PLUGIN_ID, 'read');
 const list = Effects.define<{ prefix: string }>(PLUGIN_ID, 'list');
 
-function parse(raw: string | null): unknown | null {
+const unreadable = (key: string): Pipe =>
+  Log.warn(PLUGIN_ID, 'ignored {key}, not valid JSON', { key });
+
+function parse(
+  raw: string | null,
+  key: string,
+  inject: Inject
+): unknown | null {
   if (raw === null) return null;
   try {
     return JSON.parse(raw);
   } catch {
+    inject(unreadable(key));
     return null;
   }
 }
 
-function readAll(prefix: string): StoredEntry[] {
+function readAll(prefix: string, inject: Inject): StoredEntry[] {
   const entries: StoredEntry[] = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (!key?.startsWith(prefix)) continue;
-    const value = parse(localStorage.getItem(key));
+    const value = parse(localStorage.getItem(key), key, inject);
     if (value === null) continue;
     entries.push({ key, value });
   }
@@ -53,12 +62,17 @@ const Storage = definePlugin({
 
   list: (prefix: string): Pipe => list.emit({ prefix }),
 
-  onRead: (
-    keyOrPrefix: string,
+  onRead: (key: string, fn: (value: unknown | null) => Pipe): Pipe =>
+    Events.handle<ReadPayload>(eventType.read, event =>
+      event.payload.key === key ? fn(event.payload.value) : frame => frame
+    ),
+
+  onReadPrefix: (
+    prefix: string,
     fn: (value: unknown | null, key: string) => Pipe
   ): Pipe =>
     Events.handle<ReadPayload>(eventType.read, event =>
-      event.payload.key.startsWith(keyOrPrefix)
+      event.payload.key.startsWith(prefix)
         ? fn(event.payload.value, event.payload.key)
         : frame => frame
     ),
@@ -79,7 +93,10 @@ const Storage = definePlugin({
       inject(
         Events.dispatch({
           type: eventType.read,
-          payload: { key, value: parse(localStorage.getItem(key)) },
+          payload: {
+            key,
+            value: parse(localStorage.getItem(key), key, inject),
+          },
         })
       )
     ),
@@ -87,7 +104,7 @@ const Storage = definePlugin({
       inject(
         Events.dispatch({
           type: eventType.listed,
-          payload: { prefix, entries: readAll(prefix) },
+          payload: { prefix, entries: readAll(prefix, inject) },
         })
       )
     ),
