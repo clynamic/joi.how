@@ -1,14 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
+import { Scheduler } from '../../../src/engine/pipes/Scheduler';
 import { Events } from '../../../src/engine/pipes/Events';
 import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame } from '../../../src/engine/State';
 import { typedPath } from '../../../src/engine/Lens';
-import Mode from '../../../src/game/plugins/mode';
 import Phase, { GamePhase } from '../../../src/game/plugins/phase';
 import Pause from '../../../src/game/plugins/pause';
 import Rand from '../../../src/game/plugins/rand';
 import Dealer from '../../../src/game/plugins/dealer';
+import Saves from '../../../src/game/plugins/saves';
+
+const DEALER_ID = 'core.dice';
 import Messages from '../../../src/game/plugins/messages';
 import { doublePaceChance } from '../../../src/game/plugins/dice/doublePace';
 import { DiceEvent } from '../../../src/types';
@@ -42,7 +45,6 @@ function startGame(intensityOverride = 0.5): GameFrame {
 
   frame = ModuleManager.load(Pause)(frame);
   frame = ModuleManager.load(Phase)(frame);
-  frame = ModuleManager.load(Mode)(frame);
   frame = ModuleManager.load(Rand)(frame);
   frame = ModuleManager.load(Dealer)(frame);
 
@@ -127,7 +129,6 @@ describe('Dealer integration', () => {
 
     frame = ModuleManager.load(Pause)(frame);
     frame = ModuleManager.load(Phase)(frame);
-    frame = ModuleManager.load(Mode)(frame);
     frame = ModuleManager.load(Rand)(frame);
     frame = ModuleManager.load(Dealer)(frame);
 
@@ -252,17 +253,35 @@ describe('Dealer integration', () => {
     ]);
   });
 
-  it('should stop triggering outcomes when mode leaves classic', () => {
-    let frame = startGame();
+  it('should keep rolling after a blank load', () => {
+    let frame = Composer.set(Rand.paths.cursor, 7)(startGame());
+    frame = runUntilBusy(frame);
+    expect(getDiceState(frame)?.busy).toBe(true);
 
-    frame = withImpulse(Mode.setMode('freeplay'))(tick(frame));
+    frame = withImpulse(Saves.reset())(tick(frame));
+    frame = gamePipe(tick(frame));
+    expect(getDiceState(frame)).toMatchObject({ busy: false, log: [] });
+    expect(frame.core.phase.current).toBe(GamePhase.warmup);
+
+    frame = withImpulse(Phase.setPhase(GamePhase.active))(tick(frame));
+    frame = runUntilBusy(frame);
+    expect(getDiceState(frame)?.busy).toBe(true);
+    expect(getDiceState(frame)?.log).toHaveLength(1);
+  });
+
+  it('should drop its state, its timers and its outcomes when unloaded', () => {
+    let frame = startGame();
+    const armed = Scheduler.snapshot(frame, DEALER_ID).length;
+
+    frame = gamePipe(tick(ModuleManager.unload(DEALER_ID)(frame)));
+    frame = gamePipe(tick(frame));
     frame = gamePipe(tick(frame));
 
-    for (let i = 0; i < 500; i++) {
-      frame = gamePipe(tick(frame, 100));
-    }
-
-    expect(getDiceState(frame)?.busy).toBe(false);
-    expect(getDiceState(frame)?.log.length ?? 0).toBe(0);
+    expect(armed).toBeGreaterThan(0);
+    expect(getDiceState(frame)?.log).toBeUndefined();
+    expect(Scheduler.snapshot(frame, DEALER_ID)).toEqual([]);
+    expect(
+      frame.core.modules.order.filter((id: string) => id.startsWith(DEALER_ID))
+    ).toEqual([]);
   });
 });

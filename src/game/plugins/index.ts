@@ -6,24 +6,15 @@ import Scene from './scene';
 import Mode from './mode';
 import Debug from './debug';
 import Fps from './fps';
-import Intensity from './intensity';
 import Pause from './pause';
 import Saves from './saves';
+import Classic from './classic';
 import Phase from './phase';
-import Pace from './pace';
 import PerfOverlay from './perf';
 import Image from './image';
-import RandomImages from './randomImages';
-import Warmup from './warmup';
-import Stroke from './stroke';
 import Rand from './rand';
 import Sound from './sound';
-import Cues from './cues';
-import Dealer from './dealer';
-import EmergencyStop from './emergencyStop';
-import Hypno from './hypno';
 import Messages from './messages';
-import Clock from './clock';
 import Toy from './toy';
 
 const plugins = [
@@ -37,17 +28,8 @@ const plugins = [
   Debug,
   Pause,
   Saves,
-  Clock,
-  Intensity,
-  Pace,
-  Stroke,
-  Dealer,
-  Warmup,
+  Classic,
   Toy,
-  Hypno,
-  RandomImages,
-  EmergencyStop,
-  Cues,
   Fps,
   PerfOverlay,
 ];

@@ -7,7 +7,6 @@ import { ScheduledEvent, Scheduler } from '../../engine/pipes/Scheduler';
 import Saves from './saves';
 import { Module } from '../../engine/modules/Module';
 import { Sequence } from '../Sequence';
-import Mode from './mode';
 import Phase, { GamePhase } from './phase';
 import Rand from './rand';
 import Clock from './clock';
@@ -92,7 +91,8 @@ const roll = Sequence.for(PLUGIN_ID, 'roll');
 const fresh = Composer.pipe(
   Composer.set(dice, { busy: false, log: [] }),
   Scheduler.cancelByPrefix(PLUGIN_ID),
-  ...outcomes.map(o => ModuleManager.reload(o.module.id))
+  ...outcomes.map(o => ModuleManager.reload(o.module.id)),
+  roll.after(1000, 'check')
 );
 
 const Dealer = definePlugin({
@@ -117,7 +117,9 @@ const Dealer = definePlugin({
 
   activate: Composer.pipe(
     Composer.set(dice, { busy: false, log: [] }),
-    ...outcomes.map(o => ModuleManager.load(o.module))
+    ...outcomes.map(o => ModuleManager.load(o.module)),
+    RandomImages.start(),
+    roll.after(1000, 'check')
   ),
 
   update: Composer.pipe(
@@ -135,52 +137,41 @@ const Dealer = definePlugin({
             )
           : fresh
     ),
-    Mode.onEnter('classic', () =>
-      Composer.pipe(RandomImages.start(), roll.after(1000, 'check'))
-    ),
-
-    Mode.onLeave('classic', () =>
-      Composer.pipe(RandomImages.stop(), Composer.set(dice.busy, false))
-    ),
-
     roll.on('check', () =>
       Composer.pipe(
-        Mode.whenMode(
-          'classic',
-          Phase.whenPhase(
-            GamePhase.active,
-            Composer.do(({ get, pipe, take }) => {
-              const state = get(dice);
-              if (state.busy) return;
+        Phase.whenPhase(
+          GamePhase.active,
+          Composer.do(({ get, pipe, take }) => {
+            const state = get(dice);
+            if (state.busy) return;
 
-              const s = get(settings);
+            const s = get(settings);
 
-              const eligible = outcomes.filter(o => {
-                if (!s.events.includes(o.event)) return false;
-                if (o.check && !o.check(get)) return false;
-                return true;
-              });
+            const eligible = outcomes.filter(o => {
+              if (!s.events.includes(o.event)) return false;
+              if (o.check && !o.check(get)) return false;
+              return true;
+            });
 
-              const chanceOf = (o: OutcomeEntry) =>
-                typeof o.chance === 'function' ? o.chance(get) : o.chance;
+            const chanceOf = (o: OutcomeEntry) =>
+              typeof o.chance === 'function' ? o.chance(get) : o.chance;
 
-              const guaranteed = eligible.find(o => chanceOf(o) === 1);
-              if (guaranteed) {
-                pipe(roll.dispatch('trigger', guaranteed.event));
+            const guaranteed = eligible.find(o => chanceOf(o) === 1);
+            if (guaranteed) {
+              pipe(roll.dispatch('trigger', guaranteed.event));
+              return;
+            }
+
+            const value = take(Rand.next);
+            let cumulative = 0;
+            for (const outcome of eligible) {
+              cumulative += 1 / chanceOf(outcome);
+              if (value < cumulative) {
+                pipe(roll.dispatch('trigger', outcome.event));
                 return;
               }
-
-              const value = take(Rand.next);
-              let cumulative = 0;
-              for (const outcome of eligible) {
-                cumulative += 1 / chanceOf(outcome);
-                if (value < cumulative) {
-                  pipe(roll.dispatch('trigger', outcome.event));
-                  return;
-                }
-              }
-            })
-          )
+            }
+          })
         ),
         roll.after(1000, 'check')
       )
@@ -207,6 +198,8 @@ const Dealer = definePlugin({
 
   deactivate: Composer.pipe(
     ...outcomes.map(o => ModuleManager.unload(o.module.id)),
+    RandomImages.stop(),
+    roll.cancel(),
     Composer.set(dice, undefined)
   ),
 
