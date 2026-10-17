@@ -7,6 +7,11 @@ import { GameInstructions } from './components/GameInstructions';
 import { GameEmergencyStop } from './components/GameEmergencyStop';
 import { GamePauseMenu } from './components/GamePauseMenu';
 import { GameResume } from './components/GameResume';
+import { WhenLoaded } from './components/WhenLoaded';
+import Pace from './plugins/pace';
+import Stroke from './plugins/stroke';
+import Hypno from './plugins/hypno';
+import EmergencyStop from './plugins/emergencyStop';
 
 const StyledGamePage = styled.div`
   position: relative;
@@ -73,16 +78,24 @@ export const GamePage = () => {
     <StyledGamePage className='game-page'>
       <GameImages />
       <StyledTopBar>
-        <GameInstructions />
+        <WhenLoaded plugin={Pace}>
+          <GameInstructions />
+        </WhenLoaded>
         <GameMessages />
       </StyledTopBar>
       <StyledCenter>
-        <GameMeter />
-        <GameHypno />
+        <WhenLoaded plugin={Stroke}>
+          <GameMeter />
+        </WhenLoaded>
+        <WhenLoaded plugin={Hypno}>
+          <GameHypno />
+        </WhenLoaded>
       </StyledCenter>
       <StyledBottomBar>
         <GamePauseMenu />
-        <GameEmergencyStop />
+        <WhenLoaded plugin={EmergencyStop}>
+          <GameEmergencyStop />
+        </WhenLoaded>
       </StyledBottomBar>
       <GameResume />
     </StyledGamePage>
