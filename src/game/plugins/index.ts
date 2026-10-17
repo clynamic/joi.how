@@ -5,6 +5,7 @@ import PluginInstaller from '../../engine/plugins/PluginInstaller';
 import Storage from '../../engine/plugins/Storage';
 import Scene from './scene';
 import Mode from './mode';
+import Keys from './keys';
 import Debug from './debug';
 import Fps from './fps';
 import Pause from './pause';
@@ -26,6 +27,7 @@ const plugins = [
   Sound,
   Messages,
   Image,
+  Keys,
   Debug,
   Pause,
   Saves,

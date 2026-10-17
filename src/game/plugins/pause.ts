@@ -6,6 +6,7 @@ import { ENGINE_TIMELINE, Scheduler } from '../../engine/pipes/Scheduler';
 import { Sequence } from '../Sequence';
 import { PLAY_TIMELINE } from '../timelines';
 import Scene from './scene';
+import Keys from './keys';
 
 const PLUGIN_ID = 'core.pause';
 
@@ -25,6 +26,11 @@ type CountdownPayload = { remaining: number; gen: number };
 
 const seq = Sequence.for(PLUGIN_ID, 'set', { timeline: ENGINE_TIMELINE });
 
+const setPaused = (val: boolean): Pipe => seq.start({ paused: val });
+
+const whenPlaying = (pipe: Pipe): Pipe =>
+  Composer.bind(paths, state => Composer.when(!state?.paused, pipe));
+
 const Pause = definePlugin({
   sdk: 'Pause',
   id: PLUGIN_ID,
@@ -34,9 +40,7 @@ const Pause = definePlugin({
 
   timeline: PLAY_TIMELINE,
 
-  setPaused(val: boolean): Pipe {
-    return seq.start({ paused: val });
-  },
+  setPaused,
 
   get togglePause(): Pipe {
     return Composer.bind(paths, state => seq.start({ paused: !state?.paused }));
@@ -46,9 +50,7 @@ const Pause = definePlugin({
     return Composer.bind(paths, state => Composer.when(!!state?.paused, pipe));
   },
 
-  whenPlaying(pipe: Pipe): Pipe {
-    return Composer.bind(paths, state => Composer.when(!state?.paused, pipe));
-  },
+  whenPlaying,
 
   onPause(fn: () => Pipe): Pipe {
     return Events.handle(eventType.on, fn);
@@ -69,6 +71,17 @@ const Pause = definePlugin({
   ),
 
   update: Composer.pipe(
+    Keys.onKey('Escape', () =>
+      Scene.whenScene(
+        'game',
+        Composer.bind(paths, state =>
+          Composer.when(
+            !state?.paused || state?.countdown != null,
+            setPaused(true)
+          )
+        )
+      )
+    ),
     Scene.onEnter('game', () => seq.start({ paused: false })),
     Scene.onLeave('game', () => seq.start({ paused: true })),
 

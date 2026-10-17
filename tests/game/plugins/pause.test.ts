@@ -3,6 +3,10 @@ import { Scheduler, ScheduledEvent } from '../../../src/engine/pipes/Scheduler';
 import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Pause, { PauseState } from '../../../src/game/plugins/pause';
+import Scene from '../../../src/game/plugins/scene';
+import Keys from '../../../src/game/plugins/keys';
+import { Effects } from '../../../src/engine/pipes/Effects';
+import { Composer } from '../../../src/engine/Composer';
 import { PLAY_TIMELINE } from '../../../src/game/timelines';
 import { makeFrame, makeGame, tick } from '../../utils';
 
@@ -207,5 +211,76 @@ describe('Pause + Scheduler resume', () => {
     expect(getRates(frame)[PLAY_TIMELINE]).toBeUndefined();
     expect(held).toBeLessThan(1000);
     expect(getDealerScheduled(frame)[0]?.duration).toBe(held);
+  });
+
+  describe('Escape key', () => {
+    const press = () =>
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+    function playingIn(scene: string): { frame: GameFrame; injected: Pipe[] } {
+      let frame = gamePipe(makeFrame());
+      frame = Composer.pipe(
+        ModuleManager.load(Keys),
+        ModuleManager.load(Scene),
+        ModuleManager.load(Pause)
+      )(frame);
+      frame = gamePipe(tick(frame));
+      const injected: Pipe[] = [];
+      Effects.flush(frame, pipe => injected.push(pipe));
+      frame = Composer.pipe(
+        Composer.set(Scene.paths.current, scene),
+        Composer.set(Scene.paths.prev, scene),
+        Composer.set(Pause.paths.paused, false),
+        Composer.set(Pause.paths.prev, false)
+      )(frame);
+      return { frame: gamePipe(tick(frame)), injected };
+    }
+
+    const teardown = (frame: GameFrame) => {
+      const unloaded = gamePipe(tick(ModuleManager.unload(Keys.id)(frame)));
+      Effects.flush(unloaded, () => undefined);
+    };
+
+    it('should pause on Escape while playing in the game scene', () => {
+      const { frame, injected } = playingIn('game');
+
+      press();
+      const next = gamePipe(
+        tick(withImpulse(Composer.pipe(...injected))(tick(frame)))
+      );
+      teardown(next);
+
+      expect(next.core.pause.paused).toBe(true);
+    });
+
+    it('should pause on Escape during the resume countdown', () => {
+      const { frame: playing, injected } = playingIn('game');
+      const counting = Composer.pipe(
+        Composer.set(Pause.paths.paused, true),
+        Composer.set(Pause.paths.prev, true),
+        Composer.set(Pause.paths.countdown, 2)
+      )(playing);
+
+      press();
+      const next = gamePipe(
+        tick(withImpulse(Composer.pipe(...injected))(tick(counting)))
+      );
+      teardown(next);
+
+      expect(next.core.pause.paused).toBe(true);
+      expect(next.core.pause.countdown).toBeNull();
+    });
+
+    it('should ignore Escape outside the game scene', () => {
+      const { frame, injected } = playingIn('home');
+
+      press();
+      const next = gamePipe(
+        tick(withImpulse(Composer.pipe(...injected))(tick(frame)))
+      );
+      teardown(next);
+
+      expect(next.core.pause.paused).toBe(false);
+    });
   });
 });
