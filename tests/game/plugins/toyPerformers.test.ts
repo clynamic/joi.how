@@ -117,9 +117,12 @@ describe('Toy performers', () => {
 
   it('should stop every device on a stop effect and clear on disconnect', async () => {
     let frame = await flushAndApply(Toy.connect('ws://x')(bootstrap()));
+    frame = Composer.set(Pause.paths.paused, false)(frame);
+    for (let i = 0; i < 4; i++) frame = await flushAndApply(frame);
+    expect(fake.device.stop).not.toHaveBeenCalled();
 
-    frame = await flushAndApply(Pause.setPaused(true)(frame));
-    frame = await flushAndApply(frame);
+    frame = Pause.setPaused(true)(frame);
+    for (let i = 0; i < 6; i++) frame = await flushAndApply(frame);
     expect(fake.device.stop).toHaveBeenCalled();
 
     frame = await flushAndApply(Toy.disconnect()(frame));

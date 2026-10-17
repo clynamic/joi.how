@@ -87,11 +87,11 @@ describe('Scheduler', () => {
       expect(scheduled(frame)[0].duration).toBe(100 - 16 * 2);
     });
 
-    it('should run an unset timeline at rate 1', () => {
+    it('should hold an entry on a timeline with no rate', () => {
       let frame = step(basePipe(makeFrame()), entry('a', 100, 'unknown'));
       frame = step(frame);
 
-      expect(scheduled(frame)[0].duration).toBe(84);
+      expect(scheduled(frame)[0].duration).toBe(100);
     });
 
     it('should scale a timeline by its rate', () => {
@@ -116,7 +116,10 @@ describe('Scheduler', () => {
     });
 
     it('should leave other timelines alone when one is stopped', () => {
-      let frame = step(basePipe(makeFrame()), Scheduler.setRate('x', 0));
+      let frame = step(
+        basePipe(makeFrame()),
+        Composer.pipe(Scheduler.setRate('x', 0), Scheduler.setRate('y', 1))
+      );
       frame = step(
         frame,
         Composer.pipe(
@@ -131,13 +134,16 @@ describe('Scheduler', () => {
     });
 
     it('should ignore a rate that is not a finite non-negative number', () => {
-      let frame = step(basePipe(makeFrame()), entry('a', 100, 'x'));
+      let frame = step(
+        basePipe(makeFrame()),
+        Composer.pipe(Scheduler.setRate('x', 1), entry('a', 100, 'x'))
+      );
       for (const bad of [NaN, -1, Infinity]) {
         frame = step(frame, Scheduler.setRate('x', bad));
       }
       frame = step(frame);
 
-      expect(rates(frame)).toEqual({});
+      expect(rates(frame)).toEqual({ x: 1 });
       expect(scheduled(frame)[0].duration).toBe(100 - 16 * 4);
       const warnings = (frame?.core?.effects?.queue ?? []).filter(
         (e: { type: string; payload: { message: string } }) =>
@@ -193,16 +199,23 @@ describe('Scheduler', () => {
       expect(scheduled(frame)[0].duration).toBe(84);
     });
 
-    it('should cancel entries when a timeline is removed', () => {
+    it('should keep entries and stop their timeline when it is removed', () => {
       let frame = step(
         basePipe(makeFrame()),
+        Composer.pipe(Scheduler.setRate('x', 1), Scheduler.setRate('y', 1))
+      );
+      frame = step(
+        frame,
         Composer.pipe(entry('a', 100, 'x'), entry('b', 100, 'y'))
       );
-      frame = step(frame, Scheduler.setRate('x', 0.5));
       frame = step(frame, Scheduler.removeTimeline('x'));
+      frame = step(frame);
 
-      expect(scheduled(frame).map(e => e.id)).toEqual(['b']);
-      expect(rates(frame)).toEqual({});
+      expect(scheduled(frame).map(e => [e.id, e.duration])).toEqual([
+        ['a', 84],
+        ['b', 68],
+      ]);
+      expect(rates(frame)).toEqual({ y: 1 });
     });
   });
 
@@ -215,18 +228,37 @@ describe('Scheduler', () => {
       const watch = Scheduler.onRate('x', change =>
         Composer.over(['seen'], (list: unknown[]) => [...list, change], [])
       );
-      let frame = step(basePipe(makeFrame()), Scheduler.setRate('x', 0), watch);
+      let frame = step(
+        basePipe(makeFrame()),
+        Scheduler.setRate('x', 0.5),
+        watch
+      );
       frame = step(frame, f => f, watch);
 
-      expect(seen(frame)).toEqual([{ timeline: 'x', from: 1, to: 0 }]);
+      expect(seen(frame)).toEqual([{ timeline: 'x', from: 0, to: 0.5 }]);
     });
 
     it('should not report a change to the same rate', () => {
       const watch = Scheduler.onRate('x', () => record('changed'));
-      let frame = step(basePipe(makeFrame()), Scheduler.setRate('x', 1), watch);
+      let frame = step(basePipe(makeFrame()), Scheduler.setRate('x', 0), watch);
       frame = step(frame, f => f, watch);
 
       expect(seen(frame)).toEqual([]);
+    });
+
+    it('should report a removed timeline as a stop', () => {
+      const watch = Scheduler.onRate('x', change =>
+        Composer.over(['seen'], (list: unknown[]) => [...list, change], [])
+      );
+      let frame = step(basePipe(makeFrame()), Scheduler.setRate('x', 2), watch);
+      frame = step(frame, Scheduler.removeTimeline('x'), watch);
+      frame = step(frame, Scheduler.removeTimeline('x'), watch);
+      frame = step(frame, f => f, watch);
+
+      expect(seen(frame)).toEqual([
+        { timeline: 'x', from: 0, to: 2 },
+        { timeline: 'x', from: 2, to: 0 },
+      ]);
     });
 
     it('should fire onStop and onStart only on the zero crossing', () => {
@@ -240,12 +272,12 @@ describe('Scheduler', () => {
         frame = step(frame, f => f, watch);
       }
 
-      expect(seen(frame)).toEqual(['stop', 'start']);
+      expect(seen(frame)).toEqual(['start', 'stop', 'start']);
     });
 
     it('should only report its own timeline', () => {
       const watch = Scheduler.onStop('x', () => record('x stopped'));
-      let frame = step(basePipe(makeFrame()), Scheduler.setRate('y', 0), watch);
+      let frame = step(basePipe(makeFrame()), Scheduler.setRate('y', 1), watch);
       frame = step(frame, f => f, watch);
 
       expect(seen(frame)).toEqual([]);

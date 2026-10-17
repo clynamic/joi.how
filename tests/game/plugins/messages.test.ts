@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { Composer } from '../../../src/engine/Composer';
 import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
+import { Scheduler } from '../../../src/engine/pipes/Scheduler';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Messages from '../../../src/game/plugins/messages';
+import { PLAY_TIMELINE } from '../../../src/game/timelines';
 import { makeFrame, makeGame, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
@@ -11,7 +14,11 @@ const titles = (frame: GameFrame): string[] =>
 
 function bootstrap(): GameFrame {
   const frame = gamePipe(makeFrame());
-  return gamePipe(tick(ModuleManager.load(Messages)(frame)));
+  const booted = Composer.pipe(
+    Scheduler.setRate(PLAY_TIMELINE, 1),
+    ModuleManager.load(Messages)
+  );
+  return gamePipe(tick(booted(frame)));
 }
 
 function step(frame: GameFrame, impulse: Pipe = f => f, ms = 16): GameFrame {

@@ -196,13 +196,16 @@ describe('Pause + Scheduler resume', () => {
     expect(getRates(frame)[PLAY_TIMELINE]).toBe(0);
   });
 
-  it('should remove the play timeline on unload', () => {
-    let frame = bootstrap();
+  it('should stop play entries where they are on unload', () => {
+    let frame = unpauseAndWait(bootstrap());
     frame = withImpulse(playEntry(1000))(tick(frame));
     frame = gamePipe(tick(ModuleManager.unload(Pause.id)(frame)));
+    for (let i = 0; i < 5; i++) frame = gamePipe(tick(frame));
+    const held = getDealerScheduled(frame)[0]?.duration;
     frame = gamePipe(tick(frame));
 
     expect(getRates(frame)[PLAY_TIMELINE]).toBeUndefined();
-    expect(getDealerScheduled(frame)).toEqual([]);
+    expect(held).toBeLessThan(1000);
+    expect(getDealerScheduled(frame)[0]?.duration).toBe(held);
   });
 });

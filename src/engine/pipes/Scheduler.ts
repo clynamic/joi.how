@@ -53,7 +53,7 @@ const rateOf = (
   rates: Record<string, number>
 ): number => {
   if (!timeline || timeline === ENGINE_TIMELINE) return 1;
-  return rates[timeline] ?? 1;
+  return rates[timeline] ?? 0;
 };
 
 export class Scheduler {
@@ -181,7 +181,7 @@ export class Scheduler {
             return;
           }
           const rates = get(scheduler.rates) ?? {};
-          const from = rates[timeline] ?? 1;
+          const from = rates[timeline] ?? 0;
           set(scheduler.rates, { ...rates, [timeline]: rate });
           if (from === rate) return;
           pipe(
@@ -194,15 +194,19 @@ export class Scheduler {
     ),
 
     Events.handle<string>(eventType.removeTimeline, event =>
-      Composer.do(({ get, set }) => {
+      Composer.do(({ get, set, pipe }) => {
         const timeline = event.payload;
         if (timeline === ENGINE_TIMELINE) return;
         const rates = { ...(get(scheduler.rates) ?? {}) };
+        const from = rates[timeline] ?? 0;
         delete rates[timeline];
         set(scheduler.rates, rates);
-        set(
-          scheduler.scheduled,
-          (get(scheduler.scheduled) ?? []).filter(s => s.timeline !== timeline)
+        if (from === 0) return;
+        pipe(
+          Events.dispatch({
+            type: eventType.rateChanged,
+            payload: { timeline, from, to: 0 },
+          })
         );
       })
     ),
