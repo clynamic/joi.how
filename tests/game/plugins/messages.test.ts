@@ -79,6 +79,17 @@ describe('Messages', () => {
     expect(titles(frame)).toEqual([]);
   });
 
+  it('should give each send its own expiry instead of inheriting the last one', () => {
+    let frame = step(
+      bootstrap(),
+      Messages.send({ id: 'a', title: 'Timed', duration: 1000 })
+    );
+    frame = step(frame, Messages.send({ id: 'a', title: 'Prompt' }));
+    frame = run(frame, 3000);
+
+    expect(titles(frame)).toEqual(['Prompt']);
+  });
+
   it('should cancel the expiry when an update drops the duration', () => {
     let frame = step(
       bootstrap(),

@@ -63,6 +63,7 @@ const Messages = definePlugin({
           updated[index < 0 ? updated.length : index] = {
             ...existing,
             ...patch,
+            duration: patch.duration,
           };
 
           return {
