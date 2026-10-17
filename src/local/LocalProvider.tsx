@@ -4,9 +4,12 @@ import {
   PropsWithChildren,
   useCallback,
   useContext,
+  useEffect,
+  useState,
 } from 'react';
 import { localImageService, LocalImageRequest } from './LocalImageService';
-import { LocalImage } from './files';
+import { LocalImage, withoutMissingLocals } from './files';
+import { useImages } from '../settings/ImageProvider';
 
 const LocalImagesContext = createContext<
   | {
@@ -23,6 +26,27 @@ const LocalImagesContext = createContext<
 export const LocalImageProvider: React.FC<PropsWithChildren> = ({
   children,
 }) => {
+  const [, setImages] = useImages();
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    localImageService
+      .listIds()
+      .then(ids => {
+        const present = new Set(ids);
+        setImages(prev => {
+          const kept = withoutMissingLocals(prev, present);
+          if (kept.length === prev.length) return prev;
+          console.warn(
+            `Dropped ${prev.length - kept.length} local images whose files are gone`
+          );
+          return kept;
+        });
+      })
+      .catch(error => console.error('Failed to read local images:', error))
+      .finally(() => setChecked(true));
+  }, [setImages]);
+
   const resolveUrl = useCallback(async (url: string): Promise<string> => {
     return localImageService.resolveUrl(url);
   }, []);
@@ -51,7 +75,7 @@ export const LocalImageProvider: React.FC<PropsWithChildren> = ({
     <LocalImagesContext.Provider
       value={{ storeImage, getImage, resolveUrl, removeImage }}
     >
-      {children}
+      {checked ? children : null}
     </LocalImagesContext.Provider>
   );
 };

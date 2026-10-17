@@ -20,6 +20,7 @@ export interface LocalImageRequest {
 class LocalImageService {
   private dbPromise: Promise<IDBPDatabase<LocalImagesDB>>;
   private resolveRequests = new Map<string, Promise<string>>();
+  private persistRequested = false;
 
   constructor() {
     this.dbPromise = this.initDB();
@@ -59,32 +60,10 @@ class LocalImageService {
 
       switch (size as ImageSize) {
         case ImageSize.thumbnail:
-          if (!image.thumbnail) {
-            const thumbnail = await this.createThumbnailOrPreview(
-              image,
-              ImageSize.thumbnail
-            );
-            image.thumbnail = thumbnail;
-            const updateTx = db.transaction('images', 'readwrite');
-            const updateStore = updateTx.objectStore('images');
-            await updateStore.put(image);
-            await updateTx.done;
-          }
-          blob = image.thumbnail;
+          blob = await this.lowRes(db, image, ImageSize.thumbnail);
           break;
         case ImageSize.preview:
-          if (!image.preview) {
-            const preview = await this.createThumbnailOrPreview(
-              image,
-              ImageSize.preview
-            );
-            image.preview = preview;
-            const updateTx = db.transaction('images', 'readwrite');
-            const updateStore = updateTx.objectStore('images');
-            await updateStore.put(image);
-            await updateTx.done;
-          }
-          blob = image.preview;
+          blob = await this.lowRes(db, image, ImageSize.preview);
           break;
         case ImageSize.full:
           blob = image.full;
@@ -103,6 +82,12 @@ class LocalImageService {
     } finally {
       this.resolveRequests.delete(key);
     }
+  }
+
+  async listIds(): Promise<string[]> {
+    const db = await this.dbPromise;
+    const keys = await db.getAllKeys('images');
+    return keys.map(String);
   }
 
   async getImage(id: string): Promise<LocalImage | undefined> {
@@ -137,6 +122,8 @@ class LocalImageService {
       preparedImages.push(newImage);
     }
 
+    this.persist();
+
     const tx = db.transaction('images', 'readwrite');
     const store = tx.objectStore('images');
 
@@ -146,9 +133,9 @@ class LocalImageService {
 
     await tx.done;
 
-    return preparedImages as T extends LocalImageRequest
-      ? LocalImage
-      : LocalImage[];
+    return (
+      Array.isArray(request) ? preparedImages : preparedImages[0]
+    ) as T extends LocalImageRequest ? LocalImage : LocalImage[];
   }
 
   async removeImage(id: string | string[]) {
@@ -164,6 +151,34 @@ class LocalImageService {
       await store.delete(id);
     }
     await tx.done;
+  }
+
+  private persist() {
+    const storage = navigator.storage;
+    if (this.persistRequested || !storage?.persist) return;
+    this.persistRequested = true;
+    storage.persist().catch(() => undefined);
+  }
+
+  private async lowRes(
+    db: IDBPDatabase<LocalImagesDB>,
+    image: LocalImage,
+    size: ImageSize.thumbnail | ImageSize.preview
+  ): Promise<Blob> {
+    const cached = image[size];
+    if (cached) return cached;
+    try {
+      const blob = await this.createThumbnailOrPreview(image, size);
+      image[size] = blob;
+      await db.put('images', image);
+      return blob;
+    } catch (error) {
+      console.warn(
+        `Failed to resize ${image.name}, using the full file:`,
+        error
+      );
+      return image.full;
+    }
   }
 
   private generateImageId(name: string, hash: string): string {

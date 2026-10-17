@@ -70,3 +70,11 @@ export const localImageToImage = (localImage: LocalImage): ImageItem => {
     id: localImage.id,
   };
 };
+
+export const withoutMissingLocals = (
+  images: ImageItem[],
+  present: Set<string>
+): ImageItem[] =>
+  images.filter(
+    image => image.service !== ImageServiceType.local || present.has(image.id)
+  );
