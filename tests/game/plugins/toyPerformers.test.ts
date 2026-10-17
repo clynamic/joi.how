@@ -57,6 +57,7 @@ import { GameFrame, Pipe } from '../../../src/engine/State';
 import Pause from '../../../src/game/plugins/pause';
 import Phase from '../../../src/game/plugins/phase';
 import Toy from '../../../src/game/plugins/toy';
+import Storage from '../../../src/engine/plugins/Storage';
 import { makeFrame, makeGame, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
@@ -72,7 +73,7 @@ async function flushAndApply(frame: GameFrame): Promise<GameFrame> {
 
 function bootstrap(): GameFrame {
   let frame = gamePipe(makeFrame());
-  for (const plugin of [Pause, Phase, Toy]) {
+  for (const plugin of [Storage, Pause, Phase, Toy]) {
     frame = ModuleManager.load(plugin)(frame);
   }
   frame = gamePipe(tick(frame));
@@ -81,6 +82,7 @@ function bootstrap(): GameFrame {
 
 describe('Toy performers', () => {
   beforeEach(() => {
+    localStorage.clear();
     fake.state.connectShouldFail = false;
     fake.state.instances = [];
     fake.device.stop.mockClear();
@@ -119,6 +121,61 @@ describe('Toy performers', () => {
       connection: 'ws://127.0.0.1:12345',
       toys: [{ name: 'Fake Wand' }],
     });
+  });
+
+  it('should remember the address once connected and forget it on disconnect', async () => {
+    let frame = await flushAndApply(
+      Toy.connect('ws://127.0.0.1:12345')(bootstrap())
+    );
+    frame = await flushAndApply(frame);
+    const remembered = localStorage.getItem('core.toy.connection');
+
+    frame = await flushAndApply(Toy.disconnect()(frame));
+    await flushAndApply(frame);
+
+    expect(remembered).toBe('"ws://127.0.0.1:12345"');
+    expect(localStorage.getItem('core.toy.connection')).toBeNull();
+  });
+
+  it('should connect at boot to a remembered address', async () => {
+    localStorage.setItem('core.toy.connection', '"ws://127.0.0.1:12345"');
+
+    let frame = gamePipe(makeFrame());
+    for (const plugin of [Storage, Pause, Phase, Toy]) {
+      frame = ModuleManager.load(plugin)(frame);
+    }
+    frame = gamePipe(tick(frame));
+    for (let i = 0; i < 4; i++) frame = await flushAndApply(frame);
+
+    expect(fake.state.instances).toHaveLength(1);
+    expect(frame.core.toy.connection).toBe('ws://127.0.0.1:12345');
+  });
+
+  it('should forget a remembered address that refuses the connection', async () => {
+    localStorage.setItem('core.toy.connection', '"ws://127.0.0.1:12345"');
+    fake.state.connectShouldFail = true;
+
+    let frame = gamePipe(makeFrame());
+    for (const plugin of [Storage, Pause, Phase, Toy]) {
+      frame = ModuleManager.load(plugin)(frame);
+    }
+    frame = gamePipe(tick(frame));
+    for (let i = 0; i < 5; i++) frame = await flushAndApply(frame);
+
+    expect(frame.core.toy.error).toContain('refused');
+    expect(localStorage.getItem('core.toy.connection')).toBeNull();
+  });
+
+  it('should forget the address on disconnect without a live client', async () => {
+    let frame = bootstrap();
+    for (let i = 0; i < 3; i++) frame = await flushAndApply(frame);
+    localStorage.setItem('core.toy.connection', '"ws://127.0.0.1:12345"');
+
+    frame = await flushAndApply(Toy.disconnect()(frame));
+    await flushAndApply(frame);
+
+    expect(fake.state.instances).toHaveLength(0);
+    expect(localStorage.getItem('core.toy.connection')).toBeNull();
   });
 
   it('should report a refused connection as an error', async () => {

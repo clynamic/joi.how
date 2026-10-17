@@ -12,6 +12,7 @@ import { Pipe } from '../../engine/State';
 import { Settings } from '../../settings/Settings';
 import { ToyClient } from '../../toy';
 import { Sequence } from '../Sequence';
+import Storage from '../../engine/plugins/Storage';
 import { PLAY_TIMELINE } from '../timelines';
 import Phase, { GamePhase, PhaseState } from './phase';
 import Pause from './pause';
@@ -82,6 +83,8 @@ const describe = (list: ToyClient[]): ToyInfo[] =>
     })),
   }));
 
+const CONNECTION_KEY = `${PLUGIN_ID}.connection`;
+
 const snapshot = (inject: Inject) =>
   inject(
     Composer.do(({ get, set }) => {
@@ -143,9 +146,11 @@ const open = (url: string, inject: Inject) => {
       connection = url;
       toys = next.devices.map(device => new ToyClient(device));
       attach(next, inject);
+      inject(Storage.write(CONNECTION_KEY, url));
     })
     .catch(error => {
       next.disconnect().catch(() => undefined);
+      inject(Storage.remove(CONNECTION_KEY));
       report(inject)(error);
     })
     .finally(() => {
@@ -155,6 +160,7 @@ const open = (url: string, inject: Inject) => {
 };
 
 const close = (inject: Inject) => {
+  inject(Storage.remove(CONNECTION_KEY));
   const current = client;
   if (!current) return;
   detach(current);
@@ -224,10 +230,14 @@ const Toy = definePlugin({
 
   activate: Composer.pipe(
     Composer.set(toy, { toys: [], connecting: false }),
-    sync.emit()
+    sync.emit(),
+    Storage.read(CONNECTION_KEY)
   ),
 
   update: Composer.pipe(
+    Storage.onRead(CONNECTION_KEY, url =>
+      typeof url === 'string' ? connect.emit({ url }) : frame => frame
+    ),
     Pause.whenPlaying(actuatePipe),
     Phase.onEnter(GamePhase.climax, () => seq.start()),
     Phase.onEnter(GamePhase.break, hush),
