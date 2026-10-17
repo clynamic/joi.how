@@ -38,7 +38,8 @@ export const getImageSwitchDuration = (
   const seconds = Number.isFinite(imageDuration)
     ? imageDuration
     : defaultSettings.imageDuration;
-  const scale = intenseImages ? Math.max(1 - intensity, 0.1) : 1;
+  const level = Number.isFinite(intensity) ? intensity : 0;
+  const scale = intenseImages ? Math.max(1 - level, 0.1) : 1;
   return Math.max(seconds * scale * 1000, 1000);
 };
 

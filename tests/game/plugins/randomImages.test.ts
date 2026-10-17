@@ -79,6 +79,12 @@ describe('getImageSwitchDuration', () => {
     expect(getImageSwitchDuration(settings, 2)).toBe(2000);
   });
 
+  it('should treat a missing intensity as zero', () => {
+    const settings = { imageDuration: 20, intenseImages: true };
+    expect(getImageSwitchDuration(settings, undefined as never)).toBe(20000);
+    expect(getImageSwitchDuration(settings, NaN)).toBe(20000);
+  });
+
   it('should floor the raw setting at a second when intense images are off', () => {
     const settings = { imageDuration: 0, intenseImages: false };
     expect(getImageSwitchDuration(settings, 0)).toBe(1000);

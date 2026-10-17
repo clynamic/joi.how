@@ -47,7 +47,7 @@ const StyledBackgroundImage = motion.create(styled.div`
 
 export const GameImages = () => {
   const { currentImage, nextImages = [] } = useGameFrame(Image.paths);
-  const { intensity } = useGameFrame(Intensity.paths);
+  const { intensity = 0 } = useGameFrame(Intensity.paths);
   const [videoSound] = useSetting('videoSound');
   const [highRes] = useSetting('highRes');
   const [imageDuration] = useSetting('imageDuration');
