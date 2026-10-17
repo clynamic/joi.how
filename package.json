@@ -69,7 +69,6 @@
     "vitest": "^4.0.6"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "npm": "please-use-yarn"
+    "node": ">=20.0.0"
   }
 }

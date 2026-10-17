@@ -33,18 +33,17 @@ The app is made with react and nodejs and fully open source.
 To locally run it:
 
 1. install [node 20](https://nodejs.org/en/blog/release/v20.12.0/)
-2. install [yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
-3. run
+2. run
 
 ```sh
 git clone https://github.com/clynamic/joi.how.git
 cd joi.how
-yarn
-yarn build
-yarn preview
+npm ci
+npm run build
+npm run preview
 ```
 
-4. open one of the URLs listed in your browser
+3. open one of the URLs listed in your browser
 
 ### Social
 
