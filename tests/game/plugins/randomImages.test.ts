@@ -1,12 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
 import { Events } from '../../../src/engine/pipes/Events';
-import { Scheduler } from '../../../src/engine/pipes/Scheduler';
-import {
-  ModuleManager,
-  moduleManagerPipe,
-} from '../../../src/engine/modules/ModuleManager';
-import { GameFrame, Pipe } from '../../../src/engine/State';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
+import { GameFrame } from '../../../src/engine/State';
 import { typedPath } from '../../../src/engine/Lens';
 import Image from '../../../src/game/plugins/image';
 import Rand from '../../../src/game/plugins/rand';
@@ -15,15 +11,9 @@ import RandomImages, {
 } from '../../../src/game/plugins/randomImages';
 import { ImageItem, ImageServiceType, ImageType } from '../../../src/types';
 import { defaultSettings } from '../../../src/settings/Settings';
-import { makeFrame, tick } from '../../utils';
+import { makeFrame, makeGame, tick } from '../../utils';
 
-const gamePipe: Pipe = Composer.pipe(
-  Events.pipe,
-  Scheduler.pipe,
-  moduleManagerPipe
-);
-
-const withImpulse = (impulse: Pipe): Pipe => Composer.pipe(impulse, gamePipe);
+const { pipe: gamePipe, withImpulse } = makeGame();
 
 const makeImage = (id: string): ImageItem => ({
   id,

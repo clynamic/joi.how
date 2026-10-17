@@ -1,12 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
-import { Effects } from '../../../src/engine/pipes/Effects';
-import { Events } from '../../../src/engine/pipes/Events';
-import { Scheduler } from '../../../src/engine/pipes/Scheduler';
-import {
-  ModuleManager,
-  moduleManagerPipe,
-} from '../../../src/engine/modules/ModuleManager';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Cues from '../../../src/game/plugins/cues';
 import Messages from '../../../src/game/plugins/messages';
@@ -14,14 +8,9 @@ import Pause from '../../../src/game/plugins/pause';
 import Phase, { GamePhase } from '../../../src/game/plugins/phase';
 import Stroke from '../../../src/game/plugins/stroke';
 import Sound from '../../../src/game/plugins/sound';
-import { makeFrame, tick } from '../../utils';
+import { makeFrame, makeGame, tick } from '../../utils';
 
-const gamePipe: Pipe = Composer.pipe(
-  Effects.pipe,
-  Events.pipe,
-  Scheduler.pipe,
-  moduleManagerPipe
-);
+const { pipe: gamePipe, withImpulse } = makeGame();
 
 type Tone = { frequency: number; delay: number };
 
@@ -64,7 +53,7 @@ function collect(frame: GameFrame, ticks: number, ms: number): number[] {
 }
 
 function step(frame: GameFrame, impulse: Pipe = f => f): GameFrame {
-  return Composer.pipe(impulse, gamePipe)(tick(frame));
+  return withImpulse(impulse)(tick(frame));
 }
 
 describe('Cues', () => {

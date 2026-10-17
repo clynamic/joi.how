@@ -15,21 +15,13 @@ vi.mock('../../../src/utils/sound', () => ({
 
 import { Composer } from '../../../src/engine/Composer';
 import { Effects } from '../../../src/engine/pipes/Effects';
-import { Events } from '../../../src/engine/pipes/Events';
-import {
-  ModuleManager,
-  moduleManagerPipe,
-} from '../../../src/engine/modules/ModuleManager';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import { lensFromPath } from '../../../src/engine/Lens';
 import Sound from '../../../src/game/plugins/sound';
-import { makeFrame, tick } from '../../utils';
+import { makeFrame, makeGame, tick } from '../../utils';
 
-const basePipe: Pipe = Composer.pipe(
-  Effects.pipe,
-  Events.pipe,
-  moduleManagerPipe
-);
+const { pipe: basePipe } = makeGame();
 
 const getQueue = (frame: GameFrame): unknown[] =>
   lensFromPath(['core.effects', 'queue']).get(frame) ?? [];

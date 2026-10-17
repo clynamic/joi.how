@@ -1,22 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { Composer } from '../../../src/engine/Composer';
-import { Effects } from '../../../src/engine/pipes/Effects';
-import { Events } from '../../../src/engine/pipes/Events';
-import { Scheduler } from '../../../src/engine/pipes/Scheduler';
-import {
-  ModuleManager,
-  moduleManagerPipe,
-} from '../../../src/engine/modules/ModuleManager';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Messages from '../../../src/game/plugins/messages';
-import { makeFrame, tick } from '../../utils';
+import { makeFrame, makeGame, tick } from '../../utils';
 
-const gamePipe: Pipe = Composer.pipe(
-  Effects.pipe,
-  Events.pipe,
-  Scheduler.pipe,
-  moduleManagerPipe
-);
+const { pipe: gamePipe, withImpulse } = makeGame();
 
 const titles = (frame: GameFrame): string[] =>
   (frame.core.messages?.messages ?? []).map((m: { title: string }) => m.title);
@@ -27,7 +15,7 @@ function bootstrap(): GameFrame {
 }
 
 function step(frame: GameFrame, impulse: Pipe = f => f, ms = 16): GameFrame {
-  return Composer.pipe(impulse, gamePipe)(tick(frame, ms));
+  return withImpulse(impulse)(tick(frame, ms));
 }
 
 function run(frame: GameFrame, ms: number, stepMs = 100): GameFrame {

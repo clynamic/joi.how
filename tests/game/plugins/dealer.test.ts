@@ -1,12 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
 import { Events } from '../../../src/engine/pipes/Events';
-import { Scheduler } from '../../../src/engine/pipes/Scheduler';
-import {
-  ModuleManager,
-  moduleManagerPipe,
-} from '../../../src/engine/modules/ModuleManager';
-import { GameFrame, Pipe } from '../../../src/engine/State';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
+import { GameFrame } from '../../../src/engine/State';
 import { typedPath } from '../../../src/engine/Lens';
 import Mode from '../../../src/game/plugins/mode';
 import Phase, { GamePhase } from '../../../src/game/plugins/phase';
@@ -18,15 +14,9 @@ import { doublePaceChance } from '../../../src/game/plugins/dice/doublePace';
 import { DiceEvent } from '../../../src/types';
 import { OUTCOME_DONE } from '../../../src/game/plugins/dice/types';
 import { defaultSettings } from '../../../src/settings/Settings';
-import { makeFrame, tick } from '../../utils';
+import { makeFrame, makeGame, tick } from '../../utils';
 
-const gamePipe: Pipe = Composer.pipe(
-  Events.pipe,
-  Scheduler.pipe,
-  moduleManagerPipe
-);
-
-const withImpulse = (impulse: Pipe): Pipe => Composer.pipe(impulse, gamePipe);
+const { pipe: gamePipe, withImpulse } = makeGame();
 
 function startGame(intensityOverride = 0.5): GameFrame {
   let frame = gamePipe(makeFrame());

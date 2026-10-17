@@ -1,23 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { Composer } from '../../../src/engine/Composer';
 import { Effects } from '../../../src/engine/pipes/Effects';
-import { Events } from '../../../src/engine/pipes/Events';
-import {
-  ModuleManager,
-  moduleManagerPipe,
-} from '../../../src/engine/modules/ModuleManager';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import { sdk } from '../../../src/engine/sdk';
 import Debug from '../../../src/game/plugins/debug';
-import { makeFrame, tick } from '../../utils';
+import { makeFrame, makeGame, tick } from '../../utils';
 
 const ID = 'core.debug';
 
-const gamePipe: Pipe = Composer.pipe(
-  Effects.pipe,
-  Events.pipe,
-  moduleManagerPipe
-);
+const { pipe: gamePipe } = makeGame();
 
 const types = (frame: GameFrame): string[] =>
   (frame?.core?.effects?.queue ?? [])

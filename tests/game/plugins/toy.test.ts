@@ -1,24 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
-import { Effects } from '../../../src/engine/pipes/Effects';
-import { Events } from '../../../src/engine/pipes/Events';
-import { Scheduler, ScheduledEvent } from '../../../src/engine/pipes/Scheduler';
-import {
-  ModuleManager,
-  moduleManagerPipe,
-} from '../../../src/engine/modules/ModuleManager';
-import { GameFrame, Pipe } from '../../../src/engine/State';
+import { ScheduledEvent } from '../../../src/engine/pipes/Scheduler';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
+import { GameFrame } from '../../../src/engine/State';
 import Pause from '../../../src/game/plugins/pause';
 import Phase, { GamePhase } from '../../../src/game/plugins/phase';
 import Toy from '../../../src/game/plugins/toy';
-import { makeFrame, tick } from '../../utils';
+import { makeFrame, makeGame, tick } from '../../utils';
 
-const gamePipe: Pipe = Composer.pipe(
-  Effects.pipe,
-  Events.pipe,
-  Scheduler.pipe,
-  moduleManagerPipe
-);
+const { pipe: gamePipe, withImpulse } = makeGame();
 
 type Emitted = { type: string; payload?: unknown };
 
@@ -39,8 +29,6 @@ function collect(
   }
   return { frame, effects };
 }
-
-const withImpulse = (impulse: Pipe): Pipe => Composer.pipe(impulse, gamePipe);
 
 const TOY_ID = 'core.toy';
 const CLIMAX_INTERVAL = 400;

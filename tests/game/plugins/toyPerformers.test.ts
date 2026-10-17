@@ -52,24 +52,14 @@ vi.mock('buttplug', async importOriginal => ({
 
 import { Composer } from '../../../src/engine/Composer';
 import { Effects } from '../../../src/engine/pipes/Effects';
-import { Events } from '../../../src/engine/pipes/Events';
-import { Scheduler } from '../../../src/engine/pipes/Scheduler';
-import {
-  ModuleManager,
-  moduleManagerPipe,
-} from '../../../src/engine/modules/ModuleManager';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Pause from '../../../src/game/plugins/pause';
 import Phase from '../../../src/game/plugins/phase';
 import Toy from '../../../src/game/plugins/toy';
-import { makeFrame, tick } from '../../utils';
+import { makeFrame, makeGame, tick } from '../../utils';
 
-const gamePipe: Pipe = Composer.pipe(
-  Effects.pipe,
-  Events.pipe,
-  Scheduler.pipe,
-  moduleManagerPipe
-);
+const { pipe: gamePipe, withImpulse } = makeGame();
 
 const settle = () => new Promise(resolve => setTimeout(resolve, 0));
 
@@ -77,13 +67,7 @@ async function flushAndApply(frame: GameFrame): Promise<GameFrame> {
   const injected: Pipe[] = [];
   Effects.flush(frame, pipe => injected.push(pipe));
   await settle();
-  return Composer.pipe(
-    Effects.pipe,
-    ...injected,
-    Events.pipe,
-    Scheduler.pipe,
-    moduleManagerPipe
-  )(tick(frame));
+  return withImpulse(Composer.pipe(...injected))(tick(frame));
 }
 
 function bootstrap(): GameFrame {

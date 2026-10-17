@@ -2,13 +2,11 @@ import { useEffect, useRef, useState, ReactNode, useCallback } from 'react';
 import { createContext } from 'use-context-selector';
 import { GameEngine, Pipe, GameFrame } from '../engine';
 import { Effects } from '../engine/pipes/Effects';
-import { Events } from '../engine/pipes/Events';
-import { Scheduler } from '../engine/pipes/Scheduler';
 import { Perf } from '../engine/pipes/Perf';
-import { Errors } from '../engine/pipes/Errors';
 import { Piper } from '../engine/Piper';
 import { Impulses } from '../engine/Impulses';
 import { sdk } from '../engine/sdk';
+import { gamePipes } from './pipes/Game';
 
 type GameEngineContextValue = {
   /**
@@ -43,15 +41,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
 
     engineRef.current = new GameEngine(
       {},
-      Piper([
-        Effects.pipe,
-        impulses.pipe,
-        Events.pipe,
-        Scheduler.pipe,
-        Perf.pipe,
-        Errors.pipe,
-        ...pipes,
-      ])
+      Piper(gamePipes(impulses, pipes))
     );
 
     const inject = (pipe: Pipe) => impulses.push(pipe);

@@ -1,23 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { Composer } from '../../../src/engine/Composer';
-import { Events } from '../../../src/engine/pipes/Events';
 import { Scheduler, ScheduledEvent } from '../../../src/engine/pipes/Scheduler';
-import {
-  ModuleManager,
-  moduleManagerPipe,
-} from '../../../src/engine/modules/ModuleManager';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Pause, { PauseState } from '../../../src/game/plugins/pause';
 import { PLAY_TIMELINE } from '../../../src/game/timelines';
-import { makeFrame, tick } from '../../utils';
+import { makeFrame, makeGame, tick } from '../../utils';
 
-const gamePipe: Pipe = Composer.pipe(
-  Events.pipe,
-  Scheduler.pipe,
-  moduleManagerPipe
-);
-
-const withImpulse = (impulse: Pipe): Pipe => Composer.pipe(impulse, gamePipe);
+const { pipe: gamePipe, withImpulse } = makeGame();
 
 const DEALER_ID = 'test.dealer';
 

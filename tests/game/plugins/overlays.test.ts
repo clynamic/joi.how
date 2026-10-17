@@ -1,22 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
 import { Effects } from '../../../src/engine/pipes/Effects';
-import { Events } from '../../../src/engine/pipes/Events';
-import {
-  ModuleManager,
-  moduleManagerPipe,
-} from '../../../src/engine/modules/ModuleManager';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { Module } from '../../../src/engine/modules/Module';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Fps from '../../../src/game/plugins/fps';
 import PerfOverlay from '../../../src/game/plugins/perf';
-import { makeFrame, tick } from '../../utils';
+import { makeFrame, makeGame, tick } from '../../utils';
 
-const gamePipe: Pipe = Composer.pipe(
-  Effects.pipe,
-  Events.pipe,
-  moduleManagerPipe
-);
+const { pipe: gamePipe, withImpulse } = makeGame();
 
 type Emitted = { type: string; payload?: unknown };
 
@@ -35,7 +27,7 @@ function load(module: Module): GameFrame {
 }
 
 function step(frame: GameFrame, impulse: Pipe = f => f): GameFrame {
-  return Composer.pipe(impulse, gamePipe)(tick(frame));
+  return withImpulse(impulse)(tick(frame));
 }
 
 describe('Fps', () => {
