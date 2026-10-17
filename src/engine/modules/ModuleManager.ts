@@ -11,7 +11,7 @@ import { typedPath } from '../Lens';
 
 const MODULE_NAMESPACE = 'core.modules';
 
-const eventType = Events.getKeys(MODULE_NAMESPACE, 'load', 'unload');
+const eventType = Events.getKeys(MODULE_NAMESPACE, 'load', 'unload', 'reload');
 
 type ModuleManagerState = {
   registry: ModuleRegistry;
@@ -37,6 +37,13 @@ export class ModuleManager {
   static unload(id: ModuleId): Pipe {
     return Events.dispatch({
       type: eventType.unload,
+      payload: id,
+    });
+  }
+
+  static reload(id: ModuleId): Pipe {
+    return Events.dispatch({
+      type: eventType.reload,
       payload: id,
     });
   }
@@ -121,33 +128,57 @@ const initPipe: Pipe = Composer.do(({ get, set }) => {
 
 const retirePipe: Pipe = Composer.set(mm.retired, []);
 
-const reconcilePipe: Pipe = Composer.pipe(
-  Events.handle<Module>(eventType.load, event =>
-    Composer.do(({ get, over }) => {
-      const { registry } = get(mm);
-      const id = event.payload.id;
-      const existing = registry[id];
-      if (existing === event.payload) return;
+const add = (ids: ModuleId[] = [], id: ModuleId) =>
+  ids.includes(id) ? ids : [...ids, id];
 
-      if (existing) {
-        over(mm.replacing, map => ({ ...map, [id]: existing }), {});
-        over(mm.toUnload, ids => (ids.includes(id) ? ids : [...ids, id]), []);
+const reconcilePipe: Pipe = Events.handle(
+  Events.getKey(MODULE_NAMESPACE, '*'),
+  event =>
+    Composer.do(({ get, over }) => {
+      const { registry, toUnload, order } = get(mm);
+      switch (event.type) {
+        case eventType.load: {
+          const module = event.payload as Module;
+          const id = module.id;
+          const existing = registry[id];
+          if (existing === module) {
+            if (toUnload.includes(id)) over(mm.toLoad, ids => add(ids, id));
+            return;
+          }
+          if (existing) {
+            over(mm.replacing, map => ({ [id]: existing, ...map }), {});
+            over(mm.toUnload, ids => add(ids, id));
+          }
+          over(mm.registry, reg => ({ ...reg, [id]: module }));
+          over(mm.toLoad, ids => add(ids, id));
+          return;
+        }
+        case eventType.unload: {
+          const id = event.payload as ModuleId;
+          if (!registry[id]) return;
+          over(mm.toLoad, ids => ids.filter(i => i !== id), []);
+          if (order.includes(id)) {
+            over(mm.toUnload, ids => add(ids, id));
+          } else if (!toUnload.includes(id)) {
+            over(mm.registry, reg =>
+              Object.fromEntries(
+                Object.entries(reg).filter(([key]) => key !== id)
+              )
+            );
+          }
+          return;
+        }
+        case eventType.reload: {
+          const id = event.payload as ModuleId;
+          if (!registry[id]) return;
+          over(mm.toUnload, ids => add(ids, id));
+          over(mm.toLoad, ids => add(ids, id));
+          return;
+        }
+        default:
+          return;
       }
-      over(mm.registry, reg => ({
-        ...reg,
-        [id]: event.payload,
-      }));
-      over(mm.toLoad, ids => (ids.includes(id) ? ids : [...ids, id]), []);
     })
-  ),
-  Events.handle<ModuleId>(eventType.unload, event =>
-    Composer.do(({ get, over }) => {
-      const { registry } = get(mm);
-      if (!registry[event.payload]) return;
-
-      over(mm.toUnload, ids => [...ids, event.payload], []);
-    })
-  )
 );
 
 const transitionPipe: Pipe = Composer.do(({ get, pipe, set }) => {

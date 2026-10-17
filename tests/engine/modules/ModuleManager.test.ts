@@ -68,6 +68,90 @@ describe('ModuleManager', () => {
       expect(frame2.marks).toEqual(['up']);
     });
 
+    it('should reload a module by id, deactivating before activating again', () => {
+      const mod: Module = {
+        id: 'test.mod',
+        activate: Composer.pipe(mark('activate'), Composer.set(['n'], 1)),
+        update: Composer.over(['n'], (n: number) => n + 1),
+        deactivate: mark('deactivate'),
+      };
+      let frame = load(mod);
+      frame = gamePipe(tick(frame));
+      const before = frame.n;
+
+      frame = gamePipe(tick(ModuleManager.reload('test.mod')(frame)));
+
+      expect(before).toBe(3);
+      expect(frame.marks).toEqual(['activate', 'deactivate', 'activate']);
+      expect(frame.n).toBe(2);
+      expect(getOrder(frame)).toEqual(['test.mod']);
+      expect(getRegistry(frame)['test.mod']).toBe(mod);
+    });
+
+    it('should reload a module loaded again in the tick it is unloaded', () => {
+      const mod: Module = {
+        id: 'test.mod',
+        activate: mark('activate'),
+        deactivate: mark('deactivate'),
+      };
+      let frame = load(mod);
+
+      frame = gamePipe(
+        tick(
+          Composer.pipe(
+            ModuleManager.unload('test.mod'),
+            ModuleManager.load(mod)
+          )(frame)
+        )
+      );
+
+      expect(frame.marks).toEqual(['activate', 'deactivate', 'activate']);
+      expect(getOrder(frame)).toEqual(['test.mod']);
+    });
+
+    it('should apply loads and unloads in the order they were dispatched', () => {
+      const mod: Module = {
+        id: 'test.mod',
+        activate: mark('activate'),
+        deactivate: mark('deactivate'),
+      };
+      let frame = gamePipe(makeFrame());
+
+      frame = gamePipe(
+        tick(
+          Composer.pipe(
+            ModuleManager.load(mod),
+            ModuleManager.unload('test.mod')
+          )(frame)
+        )
+      );
+      frame = gamePipe(tick(frame));
+
+      expect(frame.marks).toBeUndefined();
+      expect(getOrder(frame)).toEqual([]);
+      expect(getRegistry(frame)).toEqual({});
+    });
+
+    it('should deactivate a module once when it is unloaded twice in one tick', () => {
+      const mod: Module = {
+        id: 'test.mod',
+        activate: mark('activate'),
+        deactivate: mark('deactivate'),
+      };
+      let frame = load(mod);
+
+      frame = gamePipe(
+        tick(
+          Composer.pipe(
+            ModuleManager.unload('test.mod'),
+            ModuleManager.unload('test.mod')
+          )(frame)
+        )
+      );
+
+      expect(frame.marks).toEqual(['activate', 'deactivate']);
+    });
+
     it('should republish a reloaded module on the sdk', () => {
       const v1: Module = { id: 'mod.pub', sdk: 'Republished' };
       const v2: Module = { id: 'mod.pub', sdk: 'Republished' };
