@@ -7,9 +7,11 @@ import { PLUGIN_ID, intensityState, settings, outcomeDone } from './types';
 import { doRandomPace } from './randomPace';
 
 type RisingPacePayload = {
-  current: number;
+  start: number;
+  max: number;
   portion: number;
-  remaining: number;
+  step: number;
+  total: number;
 };
 
 const seq = Sequence.for(PLUGIN_ID, 'risingPace');
@@ -22,7 +24,7 @@ export const risingPaceModule: Module = {
       Composer.bind(intensityState, ist =>
         Composer.bind(settings, s => {
           const i = ist.intensity * 100;
-          const acceleration = Math.round(100 / Math.min(i, 35));
+          const acceleration = Math.round(100 / Math.max(1, Math.min(i, 35)));
           const { max } = intensityToPaceRange(i, s.steepness, s.timeshift, {
             min: s.minPace,
             max: s.maxPace,
@@ -32,27 +34,25 @@ export const risingPaceModule: Module = {
             seq.message({ title: 'Rising pace strokes!' }),
             Pace.setPace(s.minPace),
             seq.after(10000, 'step', {
-              current: s.minPace,
+              start: s.minPace,
+              max,
               portion,
-              remaining: acceleration,
+              step: 1,
+              total: acceleration,
             })
           );
         })
       )
     ),
     seq.on<RisingPacePayload>('step', event => {
-      const { current, portion, remaining } = event.payload;
-      const newPace = round(current + portion);
+      const { start, max, portion, step, total } = event.payload;
+      const newPace = round(Math.min(max, start + portion * step));
       return Composer.pipe(
         Pace.setPace(newPace),
         seq.message({ title: `Pace rising to ${newPace}!`, duration: 5000 }),
-        remaining <= 1
+        step >= total
           ? seq.after(10000, 'hold')
-          : seq.after(10000, 'step', {
-              current: newPace,
-              portion,
-              remaining: remaining - 1,
-            })
+          : seq.after(10000, 'step', { ...event.payload, step: step + 1 })
       );
     }),
     seq.on('hold', () =>
