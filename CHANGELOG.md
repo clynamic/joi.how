@@ -1,3 +1,13 @@
+## 3.0.0 - 2026-10-17
+
+### Added
+
+- Game engine
+
+### Removed
+
+- Walltaker banner
+
 ## 2.7.0 - 2026-05-31
 
 ### Added
