@@ -7,6 +7,8 @@ import { Piper } from '../engine/Piper';
 import { Impulses } from '../engine/Impulses';
 import { sdk } from '../engine/sdk';
 import { gamePipes } from './pipes/Game';
+import { ModuleManager } from '../engine/modules/ModuleManager';
+import Debug from './plugins/debug';
 
 type GameEngineContextValue = {
   /**
@@ -50,6 +52,17 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
 
     const STEP = 16;
     const MAX_TICKS_PER_FRAME = 4;
+    let speed = 1;
+    impulses.push(
+      ModuleManager.load({
+        id: 'app.loop',
+        effects: [
+          Debug.speed.perform(({ factor }) => {
+            speed = factor;
+          }),
+        ],
+      })
+    );
     let accumulator = 0;
     let lastWallTime: number | null = null;
     let frameId: number;
@@ -65,13 +78,14 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
         return;
       }
 
-      accumulator += now - lastWallTime;
+      accumulator += (now - lastWallTime) * speed;
       lastWallTime = now;
 
       let ticked = false;
       let ticks = 0;
+      const maxTicks = MAX_TICKS_PER_FRAME * speed;
 
-      while (accumulator >= STEP && ticks < MAX_TICKS_PER_FRAME) {
+      while (accumulator >= STEP && ticks < maxTicks) {
         ticked = true;
         Effects.flush(
           engineRef.current.tick(),
@@ -82,7 +96,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
         ticks++;
       }
 
-      if (ticks >= MAX_TICKS_PER_FRAME) {
+      if (ticks >= maxTicks) {
         accumulator = 0;
       }
 

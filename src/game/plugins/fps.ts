@@ -14,7 +14,7 @@ type FpsState = {
 
 const fps = pluginPaths<FpsState>(PLUGIN_ID);
 
-const show = Effects.define(PLUGIN_ID, 'show');
+const show = Effects.define<{ speed: number }>(PLUGIN_ID, 'show');
 const hide = Effects.define(PLUGIN_ID, 'hide');
 const unmount = Effects.define(PLUGIN_ID, 'unmount');
 
@@ -72,7 +72,7 @@ function mount(): HTMLElement {
   return el;
 }
 
-function paint() {
+function paint(speed: number) {
   const target = mount();
   target.style.display = '';
 
@@ -84,7 +84,8 @@ function paint() {
       ? fpsHistory.reduce((sum, v) => sum + v, 0) / fpsHistory.length
       : 0;
 
-  target.textContent = `${Math.round(avgFps)} FPS / ${tickTimestamps.length} TPS`;
+  const factor = speed > 1 ? ` ×${speed}` : '';
+  target.textContent = `${Math.round(avgFps)} FPS / ${tickTimestamps.length} TPS${factor}`;
 }
 
 function conceal() {
@@ -115,7 +116,7 @@ const Fps = definePlugin({
 
     const visible = !!get(Debug.paths.visible);
     if (visible) {
-      pipe(show.emit());
+      pipe(show.emit({ speed: get(Debug.paths.speed) ?? 1 }));
     } else if (state.visible) {
       pipe(hide.emit());
     }
@@ -125,7 +126,7 @@ const Fps = definePlugin({
   deactivate: Composer.pipe(unmount.emit(), Composer.set(fps, undefined)),
 
   effects: [
-    show.perform(() => paint()),
+    show.perform(({ speed }) => paint(speed)),
     hide.perform(() => conceal()),
     unmount.perform(() => teardown()),
   ],
