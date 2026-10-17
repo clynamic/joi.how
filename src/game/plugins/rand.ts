@@ -20,14 +20,19 @@ function stringToSeed(str: string): number {
   return hash >>> 0;
 }
 
-function advance(cursor: number): [number, number] {
-  const next = Math.imul(48271, cursor) % 0x7fffffff;
-  return [next, (next & 0x7fffffff) / 0x7fffffff];
+const MODULUS = 0x7fffffff;
+
+const live = (cursor: number | undefined): number =>
+  Number.isInteger(cursor) && cursor !== 0 ? cursor! : 1;
+
+function advance(cursor: number | undefined): [number, number] {
+  const next = live(Math.imul(48271, live(cursor)) % MODULUS);
+  return [next, (next & MODULUS) / MODULUS];
 }
 
 const fresh: Pipe = Composer.do(({ set }) => {
   const seed = Date.now().toString();
-  set(paths, { seed, cursor: stringToSeed(seed) });
+  set(paths, { seed, cursor: live(stringToSeed(seed)) });
 });
 
 const Rand = definePlugin({
@@ -47,6 +52,13 @@ const Rand = definePlugin({
   ),
 
   deactivate: Composer.set(paths, undefined),
+
+  seed(value: string): Pipe {
+    return Composer.set(paths, {
+      seed: value,
+      cursor: live(stringToSeed(value)),
+    });
+  },
 
   next(fn: (value: number) => Pipe): Pipe {
     return Composer.do(({ get, set, pipe }) => {
