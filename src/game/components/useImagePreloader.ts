@@ -12,6 +12,7 @@ const usePreloadItems = () => {
 
   return async (items: PreloadItem[]) => {
     for (const item of items) {
+      if (!item.src) continue;
       switch (item.type) {
         case 'image': {
           const img = new Image();

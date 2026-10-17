@@ -10,10 +10,10 @@ import { Blacklist } from './E621Blacklist';
 export interface E621Post {
   id: number;
   preview: {
-    url: string;
+    url: string | null;
   };
   sample: {
-    url: string;
+    url: string | null;
   };
   file: {
     url?: string;
@@ -80,6 +80,8 @@ export class E621Service {
 
     const blacklistEntries = Blacklist.entriesParse(props.blacklist || []);
 
+    const isVideo = (ext: string) => ext === 'webm' || ext === 'mp4';
+
     return response.data.posts
       .filter(post => post.file.url) // deleted posts should not be included
       .filter(post => post.file.ext !== 'swf') // Flash is not supported
@@ -87,8 +89,11 @@ export class E621Service {
         blacklistEntries.every(entry => !Blacklist.postMatch(post, entry))
       ) // Blacklisted posts should not be included
       .map(post => ({
-        thumbnail: post.preview.url,
-        preview: post.sample.url,
+        thumbnail: post.preview.url ?? post.sample.url ?? post.file.url!,
+        preview:
+          post.sample.url ??
+          (isVideo(post.file.ext) ? post.preview.url : null) ??
+          post.file.url!,
         full: post.file.url!,
         type: (() => {
           switch (post.file.ext) {
