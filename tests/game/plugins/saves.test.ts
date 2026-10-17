@@ -210,6 +210,31 @@ describe('Saves', () => {
     );
   });
 
+  it('should autosave every ten seconds of play and not while paused', () => {
+    let frame = bootstrap(Pause, Saves, a);
+    const persisted = (f: GameFrame) =>
+      queue(f).some(e => e.type === `${SAVES_ID}/persist`);
+    frame = Composer.set(['test.a'], { n: 3 })(frame);
+    for (let i = 0; i < 15; i++) {
+      frame = gamePipe(tick(frame, 1000));
+      flush(frame);
+    }
+    const whilePaused = stored('auto');
+
+    frame = Composer.set(Pause.paths.paused, false)(frame);
+    frame = until(frame, f => f.core.scheduler.rates.play === 1);
+    frame = until(frame, persisted, { step: 1000, maxTicks: 12 });
+    flush(frame);
+    const first = stored('auto');
+    frame = Composer.set(['test.a'], { n: 4 })(frame);
+    frame = until(frame, persisted, { step: 1000, maxTicks: 12 });
+    flush(frame);
+
+    expect(whilePaused).toBeNull();
+    expect(first?.blobs).toEqual({ 'test.a': { n: 3 } });
+    expect(stored('auto')?.blobs).toEqual({ 'test.a': { n: 4 } });
+  });
+
   it('should drop a slot', () => {
     store('one', { 'test.a': { n: 9 } });
     const frame = withImpulse(Saves.drop('one'))(tick(bootstrap(Saves)));

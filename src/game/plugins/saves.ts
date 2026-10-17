@@ -6,6 +6,7 @@ import { Effects } from '../../engine/pipes/Effects';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { Log } from '../../engine/pipes/Log';
 import { PLAY_TIMELINE } from '../timelines';
+import { Sequence } from '../Sequence';
 import pkg from '../../../package.json';
 
 const PLUGIN_ID = 'core.saves';
@@ -38,6 +39,10 @@ const storageKey = (slot: string) => `${PLUGIN_ID}.${slot}`;
 
 const save = (slot: string): Pipe =>
   Events.dispatch({ type: eventType.save, payload: slot });
+
+const AUTOSAVE_INTERVAL = 10000;
+
+const autosave = Sequence.for(PLUGIN_ID, 'autosave');
 
 function readFile(slot: string): SaveFile | null {
   const raw = localStorage.getItem(storageKey(slot));
@@ -88,7 +93,8 @@ const Saves = definePlugin({
 
   activate: Composer.pipe(
     Composer.set(paths, {}),
-    restore.emit({ slot: AUTO_SLOT })
+    restore.emit({ slot: AUTO_SLOT }),
+    autosave.after(AUTOSAVE_INTERVAL, 'tick')
   ),
 
   update: Composer.pipe(
@@ -101,7 +107,10 @@ const Saves = definePlugin({
         });
       })
     ),
-    Scheduler.onStop(PLAY_TIMELINE, () => save(AUTO_SLOT))
+    Scheduler.onStop(PLAY_TIMELINE, () => save(AUTO_SLOT)),
+    autosave.on('tick', () =>
+      Composer.pipe(save(AUTO_SLOT), autosave.after(AUTOSAVE_INTERVAL, 'tick'))
+    )
   ),
 
   afterUpdate: Composer.do(({ get, set, pipe }) => {
@@ -111,7 +120,7 @@ const Saves = definePlugin({
     pipe(persist.emit(collecting));
   }),
 
-  deactivate: Composer.set(paths, undefined),
+  deactivate: Composer.pipe(autosave.cancel(), Composer.set(paths, undefined)),
 
   effects: [
     persist.perform(({ slot, blobs }) => {
