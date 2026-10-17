@@ -9,7 +9,9 @@ import {
 import styled from 'styled-components';
 import { useDispatchEvent } from '../../game/hooks/UseDispatchEvent';
 import { useGameFrame } from '../../game/hooks/UseGameFrame';
-import PluginInstaller from '../../engine/plugins/PluginInstaller';
+import PluginInstaller, {
+  InstallFailure,
+} from '../../engine/plugins/PluginInstaller';
 import type { PluginMeta } from '../../engine/plugins/Plugins';
 
 const StyledPluginDetails = styled(WaDetails)<{ $enabled: boolean }>`
@@ -43,6 +45,15 @@ const StyledPluginActions = styled.div`
   gap: var(--wa-space-xs);
 `;
 
+const StyledPluginFailure = styled.p`
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-xs);
+  margin: 0 0 var(--wa-space-xs);
+  color: var(--wa-color-danger-60);
+  font-size: 0.9rem;
+`;
+
 export const PluginSettings = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const { inject } = useDispatchEvent();
@@ -52,6 +63,8 @@ export const PluginSettings = () => {
   const disabled: string[] = Array.isArray(rawDisabled) ? rawDisabled : [];
   const meta: Record<string, PluginMeta> =
     useGameFrame(['core', 'plugin_installer', 'meta']) ?? {};
+  const rawFailed = useGameFrame(['core', 'plugin_installer', 'failed']);
+  const failed: InstallFailure[] = Array.isArray(rawFailed) ? rawFailed : [];
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -76,6 +89,15 @@ export const PluginSettings = () => {
         <span>Load plugin</span>
       </WaButton>
       <Space size='small' />
+      {failed.map((failure, index) => (
+        <StyledPluginFailure key={`${failure.id ?? ''}-${index}`}>
+          <WaIcon name='triangle-exclamation' />
+          <span>
+            {failure.id ? `${failure.id}: ` : ''}
+            {failure.message}
+          </span>
+        </StyledPluginFailure>
+      ))}
       {installed.map(id => {
         const m = meta[id];
         const isEnabled = !disabled.includes(id);
