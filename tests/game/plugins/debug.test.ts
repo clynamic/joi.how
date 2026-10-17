@@ -102,13 +102,15 @@ describe('Debug', () => {
   });
 
   it('should emit the new factor for the loop and halve on minus down to one', () => {
-    let frame = gamePipe(tick(Debug.toggle()(load().frame)));
+    const { frame: loaded, injected } = load();
+    let frame = gamePipe(tick(Debug.toggle()(loaded)));
     frame = withImpulse(Debug.setSpeed(4))(tick(frame));
     const raised = getEffects(frame);
 
-    frame = withImpulse(Debug.slower())(tick(frame));
-    frame = withImpulse(Debug.slower())(tick(frame));
-    frame = withImpulse(Debug.slower())(tick(frame));
+    for (let i = 0; i < 3; i++) {
+      press('-');
+      frame = apply(frame, injected);
+    }
     const floored = getEffects(frame);
 
     expect(raised).toContainEqual({
@@ -126,6 +128,19 @@ describe('Debug', () => {
     const next = apply(frame, injected);
 
     expect(next.core.debug.speed).toBe(1);
+  });
+
+  it('should put the loop back to normal speed when the overlay hides', () => {
+    let frame = gamePipe(tick(Debug.toggle()(load().frame)));
+    frame = withImpulse(Debug.setSpeed(8))(tick(frame));
+
+    frame = withImpulse(Debug.toggle())(tick(frame));
+
+    expect(frame.core.debug).toEqual({ visible: false, speed: 1 });
+    expect(getEffects(frame)).toContainEqual({
+      type: `${ID}/speed`,
+      payload: { factor: 1 },
+    });
   });
 
   it('should release F3 and put the loop back to normal speed on unload', () => {

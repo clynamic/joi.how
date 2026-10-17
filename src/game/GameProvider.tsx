@@ -60,7 +60,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
         id: 'app.loop',
         effects: [
           Debug.speed.perform(({ factor }) => {
-            speed = factor;
+            speed = Number.isFinite(factor) && factor > 0 ? factor : 1;
           }),
         ],
       })

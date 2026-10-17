@@ -23,14 +23,6 @@ const speed = Effects.define<{ factor: number }>(PLUGIN_ID, 'speed');
 const clampSpeed = (factor: number) =>
   Math.min(MAX_SPEED, Math.max(1, Math.round(factor)));
 
-const toggle = (): Pipe =>
-  Composer.do(({ get, set }) => {
-    const state = get(debug);
-    if (!state) return;
-    sdk.debug = !state.visible;
-    set(debug.visible, !state.visible);
-  });
-
 const setSpeed = (factor: number): Pipe =>
   Composer.do(({ get, set, pipe }) => {
     const state = get(debug);
@@ -39,6 +31,15 @@ const setSpeed = (factor: number): Pipe =>
     if (next === state.speed) return;
     set(debug.speed, next);
     pipe(speed.emit({ factor: next }));
+  });
+
+const toggle = (): Pipe =>
+  Composer.do(({ get, set, pipe }) => {
+    const state = get(debug);
+    if (!state) return;
+    sdk.debug = !state.visible;
+    set(debug.visible, !state.visible);
+    if (state.visible) pipe(setSpeed(1));
   });
 
 const faster = (): Pipe =>
@@ -51,6 +52,7 @@ const whenVisible = (pipe: Pipe): Pipe =>
   Composer.bind(debug, state => Composer.when(!!state?.visible, pipe));
 
 const Debug = definePlugin({
+  sdk: 'Debug',
   id: PLUGIN_ID,
   meta: {
     name: 'Debug',
@@ -98,5 +100,11 @@ const Debug = definePlugin({
     })
   ),
 });
+
+declare module '../../engine/sdk' {
+  interface PluginSDK {
+    Debug: typeof Debug;
+  }
+}
 
 export default Debug;
