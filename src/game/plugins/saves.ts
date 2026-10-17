@@ -21,8 +21,19 @@ export type SaveFile = {
 
 type Collecting = { slot: string; blobs: Record<string, unknown> };
 
+export type Restored = {
+  slot: string;
+  savedAt: number;
+};
+
+type LoadPayload = {
+  restored: Restored | null;
+  blobs: Record<string, unknown>;
+};
+
 type SavesState = {
   collecting?: Collecting;
+  restored: Restored | null;
 };
 
 type Getter = Composer<GameFrame>['get'];
@@ -86,22 +97,32 @@ const Saves = definePlugin({
   },
 
   onLoad<T>(id: string, fn: (data: T | undefined) => Pipe): Pipe {
-    return Events.handle<Record<string, unknown>>(eventType.load, event =>
-      fn(event.payload[id] as T | undefined)
+    return Events.handle<LoadPayload>(eventType.load, event =>
+      fn(event.payload.blobs[id] as T | undefined)
     );
   },
 
   reset(): Pipe {
-    return Events.dispatch({ type: eventType.load, payload: {} });
+    return Events.dispatch({
+      type: eventType.load,
+      payload: { restored: null, blobs: {} },
+    });
+  },
+
+  fresh(): Pipe {
+    return Composer.pipe(drop.emit({ slot: AUTO_SLOT }), Saves.reset());
   },
 
   activate: Composer.pipe(
-    Composer.set(paths, {}),
+    Composer.set(paths, { restored: null }),
     restore.emit({ slot: AUTO_SLOT }),
     autosave.after(AUTOSAVE_INTERVAL, 'tick')
   ),
 
   update: Composer.pipe(
+    Events.handle<LoadPayload>(eventType.load, event =>
+      Composer.set(paths.restored, event.payload.restored)
+    ),
     Events.handle<string>(eventType.save, event =>
       Composer.do(({ get, set }) => {
         const collecting = get(paths)?.collecting;
@@ -126,6 +147,10 @@ const Saves = definePlugin({
 
   deactivate: Composer.pipe(autosave.cancel(), Composer.set(paths, undefined)),
 
+  get paths() {
+    return paths;
+  },
+
   effects: [
     persist.perform(({ slot, blobs }) => {
       const file: SaveFile = {
@@ -147,7 +172,15 @@ const Saves = definePlugin({
         );
         return;
       }
-      inject(Events.dispatch({ type: eventType.load, payload: file.blobs }));
+      inject(
+        Events.dispatch({
+          type: eventType.load,
+          payload: {
+            restored: { slot, savedAt: file.savedAt },
+            blobs: file.blobs,
+          },
+        })
+      );
     }),
     drop.perform(({ slot }) => localStorage.removeItem(storageKey(slot))),
   ],

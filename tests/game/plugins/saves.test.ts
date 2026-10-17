@@ -249,6 +249,20 @@ describe('Saves', () => {
     expect(stored('auto')?.blobs).toEqual({ 'test.a': { n: 4 } });
   });
 
+  it('should record what it restored and forget it when starting fresh', () => {
+    store('auto', { 'test.a': { n: 5 } });
+    let frame = bootstrap(Saves, a);
+    const afterBoot = frame.core.saves.restored;
+
+    frame = withImpulse(Saves.fresh())(tick(frame));
+    flush(frame);
+
+    expect(afterBoot).toEqual({ slot: 'auto', savedAt: 1 });
+    expect(frame.core.saves.restored).toBeNull();
+    expect(frame.test.a).toEqual({ n: 1 });
+    expect(stored('auto')).toBeNull();
+  });
+
   it('should drop a slot', () => {
     store('one', { 'test.a': { n: 9 } });
     const frame = withImpulse(Saves.drop('one'))(tick(bootstrap(Saves)));

@@ -4,7 +4,7 @@ import { ModuleManager } from '../../engine/modules/ModuleManager';
 import { Module } from '../../engine/modules/Module';
 import Mode from './mode';
 import Scene from './scene';
-import Saves, { AUTO_SLOT } from './saves';
+import Saves from './saves';
 import Clock from './clock';
 import Intensity from './intensity';
 import Pace from './pace';
@@ -55,9 +55,7 @@ const Classic = definePlugin({
   update: Composer.pipe(
     Mode.onEnter(MODE, () => load),
     Mode.onLeave(MODE, () => unload),
-    Scene.onLeave('end', () =>
-      Composer.pipe(Saves.drop(AUTO_SLOT), Saves.reset())
-    )
+    Scene.onLeave('end', () => Saves.fresh())
   ),
 
   deactivate: Composer.pipe(Mode.unregister(MODE), unload),
