@@ -11,6 +11,7 @@ import { getImageSwitchDuration } from '../plugins/randomImages';
 
 const StyledGameImages = styled.div`
   position: absolute;
+  isolation: isolate;
   overflow: hidden;
 
   height: 100%;
