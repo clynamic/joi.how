@@ -45,6 +45,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
 
     const inject = (pipe: Pipe) => impulses.push(pipe);
     sdk.inject = inject;
+    sdk.frame = () => engineRef.current?.getFrame() ?? null;
     const engineTypes = new Set(Effects.engineTypes());
     const observe = (owner: string, type: string, duration: number) => {
       if (engineTypes.has(type)) return;
@@ -113,6 +114,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
     return () => {
       cancelAnimationFrame(frameId);
       sdk.inject = () => undefined;
+      sdk.frame = () => null;
       engineRef.current = null;
       impulses.clear();
     };

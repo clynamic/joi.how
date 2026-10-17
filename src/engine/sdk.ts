@@ -4,7 +4,7 @@ import { Events } from './pipes/Events';
 import { Scheduler } from './pipes/Scheduler';
 import { definePlugin, pluginPaths } from './plugins/Plugins';
 import { registry } from './registry';
-import { Pipe } from './State';
+import { GameFrame, Pipe } from './State';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PluginSDK {}
@@ -34,6 +34,7 @@ export interface SDK extends PluginSDK {
   definePlugin: typeof definePlugin;
   index: () => SdkIndex;
   inject: (pipe: Pipe) => void;
+  frame: () => GameFrame | null;
 }
 
 const LIFECYCLE = new Set([
@@ -96,6 +97,7 @@ export const sdk: SDK = Object.assign(registry, {
   definePlugin,
   index,
   inject: () => undefined,
+  frame: () => null,
 }) as unknown as SDK;
 
 (globalThis as any).sdk = sdk;
