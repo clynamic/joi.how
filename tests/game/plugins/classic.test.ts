@@ -94,6 +94,50 @@ describe('Classic', () => {
     expect(loaded(frame).sort()).toEqual([...RUN].sort());
   });
 
+  it('should autosave with its mode when play stops', () => {
+    let frame = bootstrap();
+    frame = Composer.set(Pause.paths.paused, false)(frame);
+    frame = until(frame, f => f.core.scheduler.rates.play === 1);
+    frame = Composer.set(Intensity.paths.intensity, 0.3)(frame);
+
+    frame = withImpulse(Pause.setPaused(true))(tick(frame));
+    frame = until(frame, f =>
+      (f.core.effects?.queue ?? []).some(
+        (e: { type: string }) => e.type === 'core.saves/persist'
+      )
+    );
+    flush(frame);
+
+    expect(JSON.parse(autoSlot()!)).toMatchObject({
+      meta: { mode: 'classic' },
+      blobs: { 'core.intensity': { intensity: 0.3 } },
+    });
+  });
+
+  it('should autosave every ten seconds of play and not while paused', () => {
+    const persisted = (f: GameFrame) =>
+      (f.core.effects?.queue ?? []).some(
+        (e: { type: string }) => e.type === 'core.saves/persist'
+      );
+    let frame = bootstrap();
+    for (let i = 0; i < 15; i++) {
+      frame = gamePipe(tick(frame, 1000));
+      flush(frame);
+    }
+    const whilePaused = autoSlot();
+
+    frame = Composer.set(Pause.paths.paused, false)(frame);
+    frame = until(frame, f => f.core.scheduler.rates.play === 1);
+    frame = until(frame, persisted, { step: 1000, maxTicks: 12 });
+    const first = frame.tick;
+    flush(frame);
+    frame = until(frame, persisted, { step: 1000, maxTicks: 12 });
+
+    expect(whilePaused).toBeNull();
+    expect(frame.tick - first).toBeGreaterThanOrEqual(10);
+    expect(JSON.parse(autoSlot()!).meta).toEqual({ mode: 'classic' });
+  });
+
   it('should keep a run alone when the end screen is not involved', () => {
     let frame = enter(bootstrap(), 'game');
     frame = Composer.set(Intensity.paths.intensity, 0.7)(frame);

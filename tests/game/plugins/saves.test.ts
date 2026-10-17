@@ -32,11 +32,12 @@ const stored = (slot: string): SaveFile | null =>
 const store = (
   slot: string,
   blobs: Record<string, unknown>,
-  version = pkg.version
+  version = pkg.version,
+  extra: Record<string, unknown> = {}
 ) =>
   localStorage.setItem(
     `${SAVES_ID}.${slot}`,
-    JSON.stringify({ version, savedAt: 1, blobs })
+    JSON.stringify({ version, savedAt: 1, ...extra, blobs })
   );
 
 const counter = (id: string, n: number): Module => ({
@@ -72,16 +73,18 @@ describe('Saves', () => {
   it('should collect each plugin blob under its id and persist them with the version', () => {
     let frame = bootstrap(Saves, a, b);
 
-    frame = withImpulse(Saves.save('one'))(tick(frame));
+    frame = withImpulse(Saves.save('one', { mode: 'test' }))(tick(frame));
     const persist = queue(frame).find(e => e.type === `${SAVES_ID}/persist`);
     flush(frame);
 
     expect(persist?.payload).toEqual({
       slot: 'one',
+      meta: { mode: 'test' },
       blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
     });
     expect(stored('one')).toMatchObject({
       version: pkg.version,
+      meta: { mode: 'test' },
       blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
     });
   });
@@ -138,21 +141,6 @@ describe('Saves', () => {
     const frame = bootstrap(Saves, a);
 
     expect(frame.test.a).toEqual({ n: 5 });
-  });
-
-  it('should autosave to the auto slot when play stops', () => {
-    let frame = bootstrap(Pause, Saves, a);
-    frame = Composer.set(Pause.paths.paused, false)(frame);
-    frame = until(frame, f => f.core.scheduler.rates.play === 1);
-    frame = Composer.set(['test.a'], { n: 7 })(frame);
-
-    frame = withImpulse(Pause.setPaused(true))(tick(frame));
-    frame = until(frame, f =>
-      queue(f).some(e => e.type === `${SAVES_ID}/persist`)
-    );
-    flush(frame);
-
-    expect(stored('auto')?.blobs).toEqual({ 'test.a': { n: 7 } });
   });
 
   it('should resume the game plugins and their timers from a slot', () => {
@@ -224,31 +212,6 @@ describe('Saves', () => {
     );
   });
 
-  it('should autosave every ten seconds of play and not while paused', () => {
-    let frame = bootstrap(Pause, Saves, a);
-    const persisted = (f: GameFrame) =>
-      queue(f).some(e => e.type === `${SAVES_ID}/persist`);
-    frame = Composer.set(['test.a'], { n: 3 })(frame);
-    for (let i = 0; i < 15; i++) {
-      frame = gamePipe(tick(frame, 1000));
-      flush(frame);
-    }
-    const whilePaused = stored('auto');
-
-    frame = Composer.set(Pause.paths.paused, false)(frame);
-    frame = until(frame, f => f.core.scheduler.rates.play === 1);
-    frame = until(frame, persisted, { step: 1000, maxTicks: 12 });
-    flush(frame);
-    const first = stored('auto');
-    frame = Composer.set(['test.a'], { n: 4 })(frame);
-    frame = until(frame, persisted, { step: 1000, maxTicks: 12 });
-    flush(frame);
-
-    expect(whilePaused).toBeNull();
-    expect(first?.blobs).toEqual({ 'test.a': { n: 3 } });
-    expect(stored('auto')?.blobs).toEqual({ 'test.a': { n: 4 } });
-  });
-
   it('should record what it restored and forget it when starting fresh', () => {
     store('auto', { 'test.a': { n: 5 } });
     let frame = bootstrap(Saves, a);
@@ -261,6 +224,24 @@ describe('Saves', () => {
     expect(frame.core.saves.restored).toBeNull();
     expect(frame.test.a).toEqual({ n: 1 });
     expect(stored('auto')).toBeNull();
+  });
+
+  it('should list the slots newest first with their metadata and keep the list current', () => {
+    store('old', { 'test.a': { n: 1 } }, pkg.version, { meta: { mode: 'x' } });
+    store('auto', { 'test.a': { n: 2 } }, pkg.version, { savedAt: 2 });
+    let frame = bootstrap(Saves, a);
+    const atBoot = frame.core.saves.slots;
+
+    frame = withImpulse(Saves.drop('old'))(tick(frame));
+    frame = flush(frame);
+
+    expect(atBoot).toEqual([
+      { slot: 'auto', version: pkg.version, savedAt: 2 },
+      { slot: 'old', version: pkg.version, savedAt: 1, meta: { mode: 'x' } },
+    ]);
+    expect(frame.core.saves.slots).toEqual([
+      { slot: 'auto', version: pkg.version, savedAt: 2 },
+    ]);
   });
 
   it('should drop a slot', () => {
