@@ -12,11 +12,18 @@ declare module '../sdk' {
   }
 }
 
+export type PerfSample = {
+  duration: number;
+  tick: number;
+};
+
 export type PluginPerfEntry = {
   last: number;
   avg: number;
   max: number;
-  samples: number[];
+  perFrame: number;
+  over: boolean;
+  samples: PerfSample[];
   lastTick: number;
 };
 
@@ -32,7 +39,8 @@ export type PerfContext = {
 };
 
 const PLUGIN_NAMESPACE = 'core.perf';
-const SAMPLE_SIZE = 60;
+const WINDOW_TICKS = 60;
+const MAX_SAMPLES = 600;
 const EXPIRY_TICKS = 900;
 
 const DEFAULT_CONFIG: PerfConfig = {
@@ -42,7 +50,7 @@ const DEFAULT_CONFIG: PerfConfig = {
 type OverBudgetPayload = {
   id: string;
   phase: string;
-  duration: number;
+  perFrame: number;
   budget: number;
 };
 
@@ -55,6 +63,21 @@ function isEntry(value: unknown): value is PluginPerfEntry {
   return value != null && typeof value === 'object' && 'lastTick' in value;
 }
 
+function aged(entry: PluginPerfEntry, tick: number): PluginPerfEntry {
+  if (!entry.samples) return entry;
+  const samples = entry.samples.filter(s => tick - s.tick < WINDOW_TICKS);
+  if (samples.length === entry.samples.length) return entry;
+  const sum = samples.reduce((total, s) => total + s.duration, 0);
+  const perFrame = sum / WINDOW_TICKS;
+  return {
+    ...entry,
+    samples,
+    avg: samples.length ? sum / samples.length : 0,
+    perFrame,
+    over: entry.over && perFrame > 0,
+  };
+}
+
 function pruneExpired(
   node: Record<string, unknown>,
   tick: number
@@ -65,7 +88,9 @@ function pruneExpired(
   for (const [key, value] of Object.entries(node)) {
     if (isEntry(value)) {
       if (tick - value.lastTick <= EXPIRY_TICKS) {
-        result[key] = value;
+        const entry = aged(value, tick);
+        result[key] = entry;
+        if (entry !== value) dirty = true;
       } else {
         dirty = true;
       }
@@ -105,30 +130,45 @@ export class Perf {
       const entryPath = perf.plugins[id][phase];
       const entry = get(entryPath);
 
-      const samples = entry
-        ? [...entry.samples, duration].slice(-SAMPLE_SIZE)
-        : [duration];
+      const samples = [...(entry?.samples ?? []), { duration, tick }]
+        .filter(s => tick - s.tick < WINDOW_TICKS)
+        .slice(-MAX_SAMPLES);
 
-      const avg = samples.reduce((sum, v) => sum + v, 0) / samples.length;
+      const sum = samples.reduce((total, s) => total + s.duration, 0);
+      const avg = sum / samples.length;
+      const perFrame = sum / WINDOW_TICKS;
       const max = entry ? Math.max(entry.max, duration) : duration;
-
-      set(entryPath, { last: duration, avg, max, samples, lastTick: tick });
 
       const budget =
         get(perf.config.pluginBudget) ?? DEFAULT_CONFIG.pluginBudget;
+      const over = perFrame > budget;
 
-      if (duration > budget) {
+      set(entryPath, {
+        last: duration,
+        avg,
+        max,
+        perFrame,
+        over,
+        samples,
+        lastTick: tick,
+      });
+
+      if (over && !entry?.over) {
         pipe(
-          Log.warn(id, '{phase} took {duration}ms (budget {budget}ms)', {
-            phase,
-            duration: Number(duration.toFixed(2)),
-            budget,
-          })
+          Log.warn(
+            id,
+            '{phase} is over budget at {perFrame}ms per frame (budget {budget}ms)',
+            {
+              phase,
+              perFrame: Number(perFrame.toFixed(2)),
+              budget,
+            }
+          )
         );
         pipe(
           Events.dispatch({
             type: eventType.overBudget,
-            payload: { id, phase, duration, budget },
+            payload: { id, phase, perFrame, budget },
           })
         );
       }

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import { Events } from '../../../src/engine/pipes/Events';
+import { Effects } from '../../../src/engine/pipes/Effects';
 import {
   Perf,
   type PerfConfig,
@@ -11,7 +12,7 @@ import { lensFromPath } from '../../../src/engine/Lens';
 import { sdk } from '../../../src/engine/sdk';
 import { makeFrame, tick } from '../../utils';
 
-const basePipe: Pipe = Composer.pipe(Events.pipe, Perf.pipe);
+const basePipe: Pipe = Composer.pipe(Effects.pipe, Events.pipe, Perf.pipe);
 
 const getEntry = (
   frame: GameFrame,
@@ -23,6 +24,35 @@ const getEntry = (
 const getConfig = (frame: GameFrame): PerfConfig | undefined =>
   lensFromPath(['core.perf', 'config']).get(frame);
 
+const overBudgetEvents = (frame: GameFrame) =>
+  (frame?.core?.events?.pending ?? []).filter(
+    (e: any) => e.type === 'core.perf/over_budget'
+  );
+
+const warnings = (frame: GameFrame) =>
+  (frame?.core?.effects?.queue ?? []).filter(
+    (e: any) => e.type === 'core.log/line'
+  );
+
+function recordFor(
+  frame: GameFrame,
+  ticks: number,
+  duration: number,
+  phase = 'update'
+): { frame: GameFrame; events: number; lines: number } {
+  let events = 0;
+  let lines = 0;
+  for (let i = 0; i < ticks; i++) {
+    frame = Composer.pipe(
+      basePipe,
+      Perf.record('test.plugin', phase, duration)
+    )(tick(frame));
+    events += overBudgetEvents(frame).length;
+    lines += warnings(frame).length;
+  }
+  return { frame, events, lines };
+}
+
 describe('Perf', () => {
   beforeEach(() => {
     sdk.debug = true;
@@ -30,6 +60,7 @@ describe('Perf', () => {
   afterEach(() => {
     sdk.debug = false;
   });
+
   describe('Perf.pipe', () => {
     it('should preserve existing metrics across frames', () => {
       const frame0 = basePipe(makeFrame());
@@ -46,7 +77,7 @@ describe('Perf', () => {
   });
 
   describe('withTiming', () => {
-    it('should record duration into perf context', () => {
+    it('should record a duration into the perf context', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
         basePipe,
@@ -58,44 +89,12 @@ describe('Perf', () => {
 
       expect(entry).toBeDefined();
       expect(entry!.last).toBeGreaterThanOrEqual(0);
-      expect(entry!.avg).toBeGreaterThanOrEqual(0);
+      expect(entry!.perFrame).toBeGreaterThanOrEqual(0);
       expect(entry!.max).toBeGreaterThanOrEqual(0);
       expect(entry!.samples).toHaveLength(1);
     });
 
-    it('should accumulate samples across invocations', () => {
-      const noop: Pipe = frame => frame;
-      const pipe = Composer.pipe(
-        basePipe,
-        Perf.withTiming('test.plugin', 'update', noop)
-      );
-
-      let frame = makeFrame();
-      for (let i = 0; i < 5; i++) {
-        frame = pipe(tick(frame));
-      }
-
-      const entry = getEntry(frame, 'test.plugin', 'update');
-      expect(entry!.samples).toHaveLength(5);
-    });
-
-    it('should cap rolling window at 60 samples', () => {
-      const noop: Pipe = frame => frame;
-      const pipe = Composer.pipe(
-        basePipe,
-        Perf.withTiming('test.plugin', 'update', noop)
-      );
-
-      let frame = makeFrame();
-      for (let i = 0; i < 80; i++) {
-        frame = pipe(tick(frame));
-      }
-
-      const entry = getEntry(frame, 'test.plugin', 'update');
-      expect(entry!.samples).toHaveLength(60);
-    });
-
-    it('should track max as all-time high', () => {
+    it('should track max as the all time high', () => {
       let slowOnce = true;
       const sometimesSlow: Pipe = frame => {
         if (slowOnce) {
@@ -120,35 +119,23 @@ describe('Perf', () => {
       expect(maxAfterFast).toBeGreaterThanOrEqual(maxAfterSlow);
     });
 
-    it('should track separate phases independently', () => {
+    it('should track separate phases and plugins independently', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
         basePipe,
         Perf.withTiming('test.plugin', 'activate', noop),
-        Perf.withTiming('test.plugin', 'update', noop)
+        Perf.withTiming('test.plugin', 'update', noop),
+        Perf.withTiming('plugin.b', 'update', noop)
       );
 
       const result = pipe(makeFrame());
 
       expect(getEntry(result, 'test.plugin', 'activate')).toBeDefined();
       expect(getEntry(result, 'test.plugin', 'update')).toBeDefined();
-    });
-
-    it('should track separate plugins independently', () => {
-      const noop: Pipe = frame => frame;
-      const pipe = Composer.pipe(
-        basePipe,
-        Perf.withTiming('plugin.a', 'update', noop),
-        Perf.withTiming('plugin.b', 'update', noop)
-      );
-
-      const result = pipe(makeFrame());
-
-      expect(getEntry(result, 'plugin.a', 'update')).toBeDefined();
       expect(getEntry(result, 'plugin.b', 'update')).toBeDefined();
     });
 
-    it('should work without Perf.pipe (graceful fallback)', () => {
+    it('should work without Perf.pipe', () => {
       const noop: Pipe = frame => frame;
       const pipe = Composer.pipe(
         Events.pipe,
@@ -164,7 +151,7 @@ describe('Perf', () => {
   });
 
   describe('Perf.record', () => {
-    it('should accumulate samples, average and max for a phase', () => {
+    it('should keep samples with their tick and derive average, per frame and max', () => {
       const frame0 = basePipe(makeFrame());
       const frame1 = Perf.record('test.plugin', 'perform tone', 3)(frame0);
       const frame2 = Perf.record(
@@ -178,77 +165,115 @@ describe('Perf', () => {
         last: 5,
         avg: 4,
         max: 5,
-        samples: [3, 5],
+        perFrame: 8 / 60,
+        samples: [
+          { duration: 3, tick: 0 },
+          { duration: 5, tick: 1 },
+        ],
         lastTick: 1,
       });
     });
-  });
 
-  describe('over budget events', () => {
-    it('should dispatch over_budget event when plugin exceeds budget', () => {
-      const slow: Pipe = frame => {
-        const end = performance.now() + 6;
-        while (performance.now() < end /* busy wait */);
-        return frame;
-      };
-
-      const pipe = Composer.pipe(
+    it('should keep several samples from one tick', () => {
+      const frame = Composer.pipe(
         basePipe,
-        Perf.withTiming('test.plugin', 'update', slow)
-      );
-      const frame1 = pipe(makeFrame());
-
-      const pending = frame1?.core?.events?.pending ?? [];
-      const overBudgetEvents = pending.filter(
-        (e: any) => e.type === 'core.perf/over_budget'
-      );
-
-      expect(overBudgetEvents).toHaveLength(1);
-      expect(overBudgetEvents[0].payload.id).toBe('test.plugin');
-      expect(overBudgetEvents[0].payload.phase).toBe('update');
-      expect(overBudgetEvents[0].payload.duration).toBeGreaterThan(4);
-    });
-
-    it('should log a warning naming the plugin when over budget', () => {
-      const slow: Pipe = frame => {
-        const end = performance.now() + 6;
-        while (performance.now() < end /* busy wait */);
-        return frame;
-      };
-
-      const frame1 = Composer.pipe(
-        basePipe,
-        Perf.withTiming('test.plugin', 'update', slow)
+        Perf.record('test.plugin', 'perform tone', 1),
+        Perf.record('test.plugin', 'perform tone', 2)
       )(makeFrame());
 
-      const lines = (frame1?.core?.effects?.queue ?? []).filter(
-        (e: any) => e.type === 'core.log/line'
-      );
-
-      expect(lines).toHaveLength(1);
-      expect(lines[0].payload).toMatchObject({
-        level: 'warn',
-        source: 'test.plugin',
-        message: '{phase} took {duration}ms (budget {budget}ms)',
-        data: { phase: 'update', budget: 1 },
-      });
-      expect(lines[0].payload.data.duration).toBeGreaterThan(4);
+      expect(getEntry(frame, 'test.plugin', 'perform tone')!.samples).toEqual([
+        { duration: 1, tick: 0 },
+        { duration: 2, tick: 0 },
+      ]);
     });
 
-    it('should not dispatch event when within budget', () => {
-      const noop: Pipe = frame => frame;
-      const pipe = Composer.pipe(
-        basePipe,
-        Perf.withTiming('test.plugin', 'update', noop)
-      );
-      const frame1 = pipe(makeFrame());
+    it('should drop samples older than sixty ticks from the window', () => {
+      const { frame } = recordFor(basePipe(makeFrame()), 80, 1);
 
-      const pending = frame1?.core?.events?.pending ?? [];
-      const overBudgetEvents = pending.filter(
-        (e: any) => e.type === 'core.perf/over_budget'
-      );
+      const entry = getEntry(frame, 'test.plugin', 'update')!;
+      expect(entry.samples).toHaveLength(60);
+      expect(entry.samples[0].tick).toBe(80 - 60 + 1);
+      expect(entry.perFrame).toBe(1);
+    });
 
-      expect(overBudgetEvents).toHaveLength(0);
+    it('should let the cost per frame fall once a plugin goes quiet', () => {
+      let { frame } = recordFor(basePipe(makeFrame()), 60, 1);
+      const busy = getEntry(frame, 'test.plugin', 'update')!.perFrame;
+
+      for (let i = 0; i < 30; i++) frame = basePipe(tick(frame));
+      const fading = getEntry(frame, 'test.plugin', 'update')!;
+      for (let i = 0; i < 30; i++) frame = basePipe(tick(frame));
+      const quiet = getEntry(frame, 'test.plugin', 'update')!;
+
+      expect(busy).toBe(1);
+      expect(fading.perFrame).toBe(0.5);
+      expect(fading.max).toBe(1);
+      expect(quiet.perFrame).toBe(0);
+      expect(quiet.samples).toEqual([]);
+    });
+
+    it('should read a rare call as a small cost per frame', () => {
+      const frame = Perf.record(
+        'test.plugin',
+        'perform persist',
+        6
+      )(basePipe(makeFrame()));
+
+      expect(getEntry(frame, 'test.plugin', 'perform persist')!.perFrame).toBe(
+        0.1
+      );
+    });
+  });
+
+  describe('over budget', () => {
+    it('should report once when the per frame cost crosses the budget', () => {
+      const { frame, events, lines } = recordFor(basePipe(makeFrame()), 90, 2);
+
+      expect(events).toBe(1);
+      expect(lines).toBe(1);
+      expect(getEntry(frame, 'test.plugin', 'update')!.over).toBe(true);
+    });
+
+    it('should name the plugin, the phase and the cost in the warning', () => {
+      let frame = basePipe(makeFrame());
+      let line: any;
+      for (let i = 0; i < 90 && !line; i++) {
+        frame = Composer.pipe(
+          basePipe,
+          Perf.record('test.plugin', 'update', 2)
+        )(tick(frame));
+        line = warnings(frame)[0];
+      }
+
+      expect(line.payload).toMatchObject({
+        level: 'warn',
+        source: 'test.plugin',
+        message:
+          '{phase} is over budget at {perFrame}ms per frame (budget {budget}ms)',
+        data: { phase: 'update', budget: 1 },
+      });
+      expect(line.payload.data.perFrame).toBeGreaterThan(1);
+    });
+
+    it('should stay silent for a single slow call', () => {
+      const frame = Perf.record(
+        'test.plugin',
+        'update',
+        6
+      )(basePipe(makeFrame()));
+
+      expect(overBudgetEvents(frame)).toHaveLength(0);
+      expect(warnings(frame)).toHaveLength(0);
+    });
+
+    it('should report again after the cost drops back under budget and rises', () => {
+      const first = recordFor(basePipe(makeFrame()), 90, 2);
+      const calm = recordFor(first.frame, 90, 0);
+      const second = recordFor(calm.frame, 90, 2);
+
+      expect(first.events).toBe(1);
+      expect(calm.events).toBe(0);
+      expect(second.events).toBe(1);
     });
   });
 

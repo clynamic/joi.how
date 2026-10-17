@@ -109,14 +109,19 @@ describe('PerfOverlay performers', () => {
         setVisible(true),
         Composer.set(['core.perf'], {
           config: { pluginBudget: 2 },
-          plugins: { core: { pace: { update: { avg: 0.5, lastTick: 1 } } } },
+          plugins: {
+            core: {
+              pace: { update: { perFrame: 0.5, max: 1.25, lastTick: 1 } },
+            },
+          },
         })
       )
     );
     flush(frame);
 
     expect(element()?.textContent).toContain('core.pace');
-    expect(element()?.textContent).toContain('0.50ms');
+    expect(element()?.textContent).toContain('0.50');
+    expect(element()?.textContent).toContain('1.25');
     expect(element()?.textContent).toContain('frame');
 
     flush(step(frame, ModuleManager.unload(ID)));
@@ -131,14 +136,14 @@ describe('PerfOverlay', () => {
     config: { pluginBudget: 2 },
     plugins: {
       core: {
-        pace: { update: { avg: 0.5, lastTick: 1 } },
-        perf_overlay: { update: { avg: 9, lastTick: 1 } },
+        pace: { update: { perFrame: 0.5, max: 2, lastTick: 1 } },
+        perf_overlay: { update: { perFrame: 9, max: 9, lastTick: 1 } },
       },
-      'net.mod': { update: { avg: 1.25, lastTick: 1 } },
+      'net.mod': { update: { perFrame: 1.25, max: 3, lastTick: 1 } },
     },
   });
 
-  it('should emit a view of every timed phase except its own', () => {
+  it('should emit a view of every timed phase except its own, costliest first', () => {
     const frame = step(
       load(PerfOverlay),
       Composer.pipe(setVisible(true), perfData)
@@ -150,10 +155,27 @@ describe('PerfOverlay', () => {
     expect(effect.payload).toEqual({
       budget: 2,
       rows: [
-        { id: 'core.pace', phase: 'update', avg: 0.5 },
-        { id: 'net.mod', phase: 'update', avg: 1.25 },
+        { id: 'net.mod', phase: 'update', perFrame: 1.25, max: 3 },
+        { id: 'core.pace', phase: 'update', perFrame: 0.5, max: 2 },
       ],
     });
+  });
+
+  it('should repaint every fifteen ticks while visible', () => {
+    let frame = step(
+      load(PerfOverlay),
+      Composer.pipe(setVisible(true), perfData)
+    );
+    const views: number[] = [];
+    for (let i = 0; i < 45; i++) {
+      frame = step(frame);
+      if (getEffects(frame, ID).some(e => e.type === `${ID}/view`)) {
+        views.push(frame.tick);
+      }
+    }
+
+    expect(views).toHaveLength(3);
+    expect(views.every(t => t % 15 === 0)).toBe(true);
   });
 
   it('should emit hide once when debug turns off', () => {

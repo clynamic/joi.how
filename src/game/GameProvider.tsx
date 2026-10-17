@@ -39,14 +39,14 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
   useEffect(() => {
     const impulses = impulsesRef.current;
 
-    engineRef.current = new GameEngine(
-      {},
-      Piper(gamePipes(impulses, pipes))
-    );
+    engineRef.current = new GameEngine({}, Piper(gamePipes(impulses, pipes)));
 
     const inject = (pipe: Pipe) => impulses.push(pipe);
-    const observe = (owner: string, type: string, duration: number) =>
+    const engineTypes = new Set(Effects.engineTypes());
+    const observe = (owner: string, type: string, duration: number) => {
+      if (engineTypes.has(type)) return;
       inject(Perf.record(owner, `perform ${type.split('/').pop()}`, duration));
+    };
 
     const STEP = 16;
     const MAX_TICKS_PER_FRAME = 4;
