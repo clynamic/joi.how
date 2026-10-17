@@ -8,6 +8,7 @@ import Debug from './debug';
 import Fps from './fps';
 import Intensity from './intensity';
 import Pause from './pause';
+import Saves from './saves';
 import Phase from './phase';
 import Pace from './pace';
 import PerfOverlay from './perf';
@@ -35,6 +36,7 @@ const plugins = [
   Image,
   Debug,
   Pause,
+  Saves,
   Clock,
   Intensity,
   Pace,
