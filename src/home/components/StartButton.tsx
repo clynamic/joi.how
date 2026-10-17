@@ -90,6 +90,7 @@ export const StartButton = () => {
             <WaButton
               size='small'
               appearance='plain'
+              disabled={images.length === 0}
               onClick={() => {
                 inject(Saves.fresh(restored.slot));
                 navigate('/play');

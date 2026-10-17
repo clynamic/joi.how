@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
 import { Effects } from '../../../src/engine/pipes/Effects';
 import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
@@ -69,9 +69,13 @@ function bootstrap(...modules: Module[]): GameFrame {
 }
 
 describe('Saves', () => {
+  afterEach(() => vi.useRealTimers());
+
   beforeEach(() => localStorage.clear());
 
   it('should collect each plugin blob under its id and persist them with the version', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1234);
     let frame = bootstrap(Storage, Saves, a, b);
 
     frame = withImpulse(Saves.save('one', { mode: 'test' }))(tick(frame));
@@ -82,15 +86,52 @@ describe('Saves', () => {
       key: `${SAVES_ID}.one`,
       value: {
         version: pkg.version,
+        savedAt: 1234,
         meta: { mode: 'test' },
         blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
       },
     });
-    expect(stored('one')).toMatchObject({
+    expect(stored('one')).toEqual({
       version: pkg.version,
+      savedAt: 1234,
       meta: { mode: 'test' },
       blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
     });
+    expect(frame.core.saves.restored).toEqual({
+      slot: 'one',
+      savedAt: 1234,
+      meta: { mode: 'test' },
+    });
+  });
+
+  it('should write two slots asked for in the same tick', () => {
+    let frame = bootstrap(Storage, Saves, a, b);
+
+    frame = withImpulse(
+      Composer.pipe(Saves.save('one', { mode: 'x' }), Saves.save('two'))
+    )(tick(frame));
+    flush(frame);
+
+    expect(stored('one')).toMatchObject({
+      meta: { mode: 'x' },
+      blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+    });
+    expect(stored('two')).toMatchObject({
+      blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+    });
+    expect(stored('two')).not.toHaveProperty('meta');
+  });
+
+  it('should accept a save from another minor version of the same major', () => {
+    const [major] = pkg.version.split('.');
+    store('one', { 'test.a': { n: 9 } }, `${major}.99.99`);
+    let frame = bootstrap(Storage, Saves, a);
+
+    frame = withImpulse(Saves.load('one'))(tick(frame));
+    frame = flush(frame);
+    frame = gamePipe(tick(frame));
+
+    expect(frame.test.a).toEqual({ n: 9 });
   });
 
   it('should hand each plugin its own blob on load and start plugins without one fresh', () => {
@@ -119,7 +160,7 @@ describe('Saves', () => {
     expect(stored('auto')?.blobs).toEqual({ 'test.a': { n: 9 } });
   });
 
-  it('should ignore a save written by another version and say so', () => {
+  it('should ignore a save written by another major version and say so', () => {
     store('one', { 'test.a': { n: 9 } }, '0.0.1');
     let frame = bootstrap(Storage, Saves, a);
 
@@ -255,6 +296,24 @@ describe('Saves', () => {
     expect(frame.core.saves.slots).toEqual([
       { slot: 'auto', version: pkg.version, savedAt: 2 },
     ]);
+  });
+
+  it('should find the slots under a prefix without the caller knowing their keys', () => {
+    store('vn/1', { 'test.a': { n: 1 } }, pkg.version, {
+      meta: { name: 'Cafe' },
+    });
+    store('vn/2', { 'test.a': { n: 2 } }, pkg.version, {
+      savedAt: 5,
+      meta: { name: 'Roof' },
+    });
+    store('classic', { 'test.a': { n: 3 } });
+    const frame = bootstrap(Storage, Saves, a);
+
+    expect(Saves.find(frame, 'vn/').map(s => [s.slot, s.meta])).toEqual([
+      ['vn/2', { name: 'Roof' }],
+      ['vn/1', { name: 'Cafe' }],
+    ]);
+    expect(Saves.find(frame, 'dice').length).toBe(0);
   });
 
   it('should drop a slot', () => {

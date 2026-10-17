@@ -2,8 +2,9 @@ import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
 import { Events, GameEvent } from '../../engine/pipes/Events';
-import { Scheduler } from '../../engine/pipes/Scheduler';
+import { ScheduledEvent, Scheduler } from '../../engine/pipes/Scheduler';
 import { PLAY_TIMELINE } from '../timelines';
+import Saves from './saves';
 
 export interface GameMessagePrompt {
   title: string;
@@ -50,6 +51,18 @@ const Messages = definePlugin({
   activate: Composer.set(paths, { messages: [], versions: {} }),
 
   update: Composer.pipe(
+    Saves.onSave(PLUGIN_ID, get => ({
+      state: get(paths),
+      timers: Scheduler.snapshot(get(), PLUGIN_ID),
+    })),
+    Saves.onLoad<{ state: MessageState; timers: ScheduledEvent[] }>(
+      PLUGIN_ID,
+      data =>
+        Composer.pipe(
+          Composer.set(paths, data?.state ?? { messages: [], versions: {} }),
+          Scheduler.restore(PLUGIN_ID, data?.timers ?? [])
+        )
+    ),
     Events.handle<PartialGameMessage>(eventType.sendMessage, event =>
       Composer.pipe(
         Composer.over(paths, ({ messages, versions = {} }) => {

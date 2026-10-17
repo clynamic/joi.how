@@ -43,6 +43,8 @@ const run: Module[] = [
 
 const autosave = Sequence.for(PLUGIN_ID, 'autosave');
 
+const save = Mode.whenMode(MODE, Saves.save(SLOT, META));
+
 const start = Composer.pipe(
   ...run.map(ModuleManager.load),
   Saves.load(SLOT),
@@ -73,12 +75,15 @@ const Classic = definePlugin({
   update: Composer.pipe(
     Mode.onEnter(MODE, () => start),
     Mode.onLeave(MODE, () => stop),
-    Scheduler.onStop(PLAY_TIMELINE, () =>
-      Mode.whenMode(MODE, Saves.save(SLOT, META))
+    Scheduler.onStop(PLAY_TIMELINE, () => Scene.whenScene('game', save)),
+    Scene.onLeave('game', () =>
+      Composer.bind(Scene.paths, scene =>
+        Composer.when(scene.current !== 'end', save)
+      )
     ),
     autosave.on('tick', () =>
       Composer.pipe(
-        Saves.save(SLOT, META),
+        Scene.whenScene('game', save),
         autosave.after(AUTOSAVE_INTERVAL, 'tick')
       )
     ),

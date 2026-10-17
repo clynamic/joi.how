@@ -42,7 +42,7 @@ type LoadPayload = {
 };
 
 type SavesState = {
-  collecting?: Collecting;
+  collecting?: Collecting[];
   restored: Restored | null;
   slots: SaveInfo[];
 };
@@ -63,6 +63,21 @@ const isFile = (value: unknown): value is SaveFile =>
   value !== null &&
   'version' in value &&
   'blobs' in value;
+
+const majorOf = (version: string) => version.split('.')[0];
+
+const compatible = (version: string) =>
+  majorOf(version) === majorOf(pkg.version);
+
+const collect = (
+  list: Collecting[] | undefined,
+  { slot, meta }: SavePayload,
+  blobs: Record<string, unknown>
+): Collecting[] => {
+  const rest = (list ?? []).filter(c => c.slot !== slot);
+  const existing = (list ?? []).find(c => c.slot === slot);
+  return [...rest, { slot, meta, blobs: { ...existing?.blobs, ...blobs } }];
+};
 
 function toInfo(entries: StoredEntry[]): SaveInfo[] {
   return entries
@@ -97,15 +112,18 @@ const Saves = definePlugin({
 
   list: (): Pipe => refresh(),
 
+  find: (frame: GameFrame, prefix: string): SaveInfo[] =>
+    (Composer.get(paths.slots)(frame) ?? []).filter(info =>
+      info.slot.startsWith(prefix)
+    ),
+
   onSave: (id: string, fn: (get: Getter) => unknown): Pipe =>
     Events.handle<SavePayload>(eventType.save, event =>
       Composer.do(({ get, set }) => {
-        const collecting = get(paths)?.collecting;
-        set(paths.collecting, {
-          slot: event.payload.slot,
-          meta: event.payload.meta,
-          blobs: { ...collecting?.blobs, [id]: fn(get) },
-        });
+        set(
+          paths.collecting,
+          collect(get(paths)?.collecting, event.payload, { [id]: fn(get) })
+        );
       })
     ),
 
@@ -140,7 +158,7 @@ const Saves = definePlugin({
           );
           return;
         }
-        if (value.version !== pkg.version) {
+        if (!compatible(value.version)) {
           pipe(
             Log.warn(PLUGIN_ID, 'ignored save {slot} from version {version}', {
               slot,
@@ -172,28 +190,34 @@ const Saves = definePlugin({
     ),
     Events.handle<SavePayload>(eventType.save, event =>
       Composer.do(({ get, set }) => {
-        const collecting = get(paths)?.collecting;
-        set(paths.collecting, {
-          slot: event.payload.slot,
-          meta: event.payload.meta,
-          blobs: collecting?.blobs ?? {},
-        });
+        set(
+          paths.collecting,
+          collect(get(paths)?.collecting, event.payload, {})
+        );
       })
     )
   ),
 
   afterUpdate: Composer.do(({ get, set, pipe }) => {
     const collecting = get(paths)?.collecting;
-    if (!collecting) return;
+    if (!collecting?.length) return;
     set(paths.collecting, undefined);
-    const { slot, meta, blobs } = collecting;
-    const file: SaveFile = {
-      version: pkg.version,
-      savedAt: Date.now(),
-      ...(meta !== undefined && { meta }),
-      blobs,
-    };
-    pipe(Storage.write(storageKey(slot), file), refresh());
+    const savedAt = Date.now();
+    for (const { slot, meta, blobs } of collecting) {
+      const file: SaveFile = {
+        version: pkg.version,
+        savedAt,
+        ...(meta !== undefined && { meta }),
+        blobs,
+      };
+      set(paths.restored, {
+        slot,
+        savedAt,
+        ...(meta !== undefined && { meta }),
+      });
+      pipe(Storage.write(storageKey(slot), file));
+    }
+    pipe(refresh());
   }),
 
   deactivate: Composer.set(paths, undefined),

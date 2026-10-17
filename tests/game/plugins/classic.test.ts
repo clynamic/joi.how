@@ -112,7 +112,7 @@ describe('Classic', () => {
   });
 
   it('should autosave with its mode when play stops', () => {
-    let frame = bootstrap();
+    let frame = enter(bootstrap(), 'game');
     frame = Composer.set(Pause.paths.paused, false)(frame);
     frame = until(frame, f => f.core.scheduler.rates.play === 1);
     frame = Composer.set(Intensity.paths.intensity, 0.3)(frame);
@@ -136,7 +136,7 @@ describe('Classic', () => {
       (f.core.effects?.queue ?? []).some(
         (e: { type: string }) => e.type === 'core.storage/write'
       );
-    let frame = bootstrap();
+    let frame = enter(bootstrap(), 'game');
     for (let i = 0; i < 15; i++) {
       frame = gamePipe(tick(frame, 1000));
       flush(frame);
@@ -153,6 +153,70 @@ describe('Classic', () => {
     expect(whilePaused).toBeNull();
     expect(frame.tick - first).toBeGreaterThanOrEqual(10);
     expect(JSON.parse(autoSlot()!).meta).toEqual({ mode: 'classic' });
+  });
+
+  it('should not save a run that has reached the end screen', () => {
+    let frame = enter(bootstrap(), 'game');
+    frame = Composer.set(Pause.paths.paused, false)(frame);
+    frame = until(frame, f => f.core.scheduler.rates.play === 1);
+    frame = Composer.set(Intensity.paths.intensity, 0.3)(frame);
+
+    frame = enter(frame, 'end');
+    frame = withImpulse(Pause.setPaused(true))(tick(frame));
+    frame = until(frame, f => f.core.scheduler.rates.play === 0);
+    for (let i = 0; i < 4; i++) frame = flush(frame);
+
+    expect(autoSlot()).toBeNull();
+    expect(frame.core.saves.restored).toBeNull();
+  });
+
+  it('should save a run that leaves the game scene for home', () => {
+    let frame = enter(bootstrap(), 'game');
+    frame = Composer.set(Intensity.paths.intensity, 0.6)(frame);
+
+    frame = enter(frame, 'home');
+    for (let i = 0; i < 4; i++) frame = flush(frame);
+
+    expect(JSON.parse(autoSlot()!)).toMatchObject({
+      blobs: { 'core.intensity': { intensity: 0.6 } },
+    });
+    expect(frame.core.saves.restored).toMatchObject({ slot: 'classic' });
+  });
+
+  it('should read its slot once at boot', () => {
+    let frame = gamePipe(makeFrame());
+    frame = Composer.set(['settings'], defaultSettings)(frame);
+    frame = Composer.set(['images'], [])(frame);
+    for (const p of [
+      Scene,
+      Mode,
+      Phase,
+      Pause,
+      Rand,
+      Messages,
+      Storage,
+      Saves,
+      Classic,
+    ]) {
+      frame = ModuleManager.load(p)(frame);
+    }
+    const slotReads = (f: GameFrame) =>
+      (f.core.effects?.queue ?? []).filter(
+        (e: { type: string; payload?: { key?: string } }) =>
+          e.type === 'core.storage/read' &&
+          e.payload?.key === 'core.saves.classic'
+      ).length;
+    let reads = 0;
+    for (let i = 0; i < 12; i++) {
+      frame = gamePipe(tick(frame));
+      reads += slotReads(frame);
+      const injected: Pipe[] = [];
+      Effects.flush(frame, pipe => injected.push(pipe));
+      frame = withImpulse(Composer.pipe(...injected))(tick(frame));
+      reads += slotReads(frame);
+    }
+
+    expect(reads).toBe(1);
   });
 
   it("should resume its own slot on enter and leave another mode's slot alone", () => {

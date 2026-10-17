@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { Composer } from '../../../src/engine/Composer';
 import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { Scheduler } from '../../../src/engine/pipes/Scheduler';
+import { Events } from '../../../src/engine/pipes/Events';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Messages from '../../../src/game/plugins/messages';
+import Saves from '../../../src/game/plugins/saves';
 import { PLAY_TIMELINE } from '../../../src/game/timelines';
 import { makeFrame, makeGame, tick } from '../../utils';
 
@@ -103,5 +105,31 @@ describe('Messages', () => {
     );
     expect(pending).toEqual([]);
     expect(titles(run(frame, 2000))).toEqual(['Timed']);
+  });
+
+  it('should resume its messages and their expiry from a save', () => {
+    let frame = step(
+      bootstrap(),
+      Messages.send({ id: 'a', title: 'Hello', duration: 5000 })
+    );
+    frame = run(frame, 2000);
+    frame = step(frame, Saves.save('slot'));
+    const blob = frame.core.saves.collecting[0].blobs['core.messages'];
+
+    let other = step(bootstrap(), Messages.send({ id: 'b', title: 'Other' }));
+    other = step(
+      other,
+      Events.dispatch({
+        type: 'core.saves/load',
+        payload: { restored: null, blobs: { 'core.messages': blob } },
+      })
+    );
+    other = step(other);
+
+    expect(titles(other)).toEqual(['Hello']);
+    other = run(other, 2500);
+    expect(titles(other)).toEqual(['Hello']);
+    other = run(other, 1000);
+    expect(titles(other)).toEqual([]);
   });
 });
