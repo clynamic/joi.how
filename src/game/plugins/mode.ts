@@ -2,12 +2,20 @@ import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Events } from '../../engine/pipes/Events';
 import { Composer } from '../../engine';
+import { Log } from '../../engine/pipes/Log';
 
 const PLUGIN_ID = 'core.mode';
+
+export type ModeInfo = {
+  id: string;
+  name: string;
+  description?: string;
+};
 
 export type ModeState = {
   current: string;
   prev: string;
+  modes: Record<string, ModeInfo>;
 };
 
 const mode = pluginPaths<ModeState>(PLUGIN_ID);
@@ -24,8 +32,31 @@ const Mode = definePlugin({
     name: 'Mode',
   },
 
+  register(info: ModeInfo): Pipe {
+    return Composer.over(
+      mode.modes,
+      modes => ({ ...modes, [info.id]: info }),
+      {}
+    );
+  },
+
+  unregister(id: string): Pipe {
+    return Composer.over(
+      mode.modes,
+      modes =>
+        Object.fromEntries(Object.entries(modes).filter(([key]) => key !== id)),
+      {}
+    );
+  },
+
   setMode(m: string): Pipe {
-    return Composer.set(mode.current, m);
+    return Composer.do(({ get, set, pipe }) => {
+      if (!(m in (get(mode)?.modes ?? {}))) {
+        pipe(Log.warn(PLUGIN_ID, 'mode {mode} is not registered', { mode: m }));
+        return;
+      }
+      set(mode.current, m);
+    });
   },
 
   whenMode(m: string, pipe: Pipe): Pipe {
@@ -44,7 +75,8 @@ const Mode = definePlugin({
 
   activate: Composer.set(mode, {
     current: 'classic',
-    prev: '',
+    prev: 'classic',
+    modes: {},
   }),
 
   update: Composer.do(({ get, set, pipe }) => {
