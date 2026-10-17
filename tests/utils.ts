@@ -27,5 +27,16 @@ export const makeGame = (plugins: Pipe[] = [moduleManagerPipe]) => {
       impulses.push(impulse);
       return pipe(frame);
     };
-  return { pipe, withImpulse, impulses };
+  const until = (
+    frame: GameFrame,
+    predicate: (frame: GameFrame) => boolean,
+    { maxTicks = 100, step = 16 } = {}
+  ): GameFrame => {
+    for (let i = 0; i < maxTicks; i++) {
+      frame = pipe(tick(frame, step));
+      if (predicate(frame)) return frame;
+    }
+    throw new Error(`condition not met within ${maxTicks} ticks`);
+  };
+  return { pipe, withImpulse, impulses, until };
 };
