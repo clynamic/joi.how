@@ -17,6 +17,8 @@ const intensity = pluginPaths<IntensityState>(PLUGIN_ID);
 const timing = typedPath<GameTiming>([]);
 const settings = typedPath<Settings>(['settings']);
 
+const fresh = Composer.set(intensity, { intensity: 0 });
+
 const Intensity = definePlugin({
   sdk: 'Intensity',
   id: PLUGIN_ID,
@@ -24,12 +26,12 @@ const Intensity = definePlugin({
     name: 'Intensity',
   },
 
-  activate: Composer.set(intensity, { intensity: 0 }),
+  activate: fresh,
 
   update: Composer.pipe(
     Saves.onSave(PLUGIN_ID, get => get(intensity)),
     Saves.onLoad<IntensityState>(PLUGIN_ID, data =>
-      Composer.set(intensity, data)
+      data ? Composer.set(intensity, data) : fresh
     ),
     Pause.whenPlaying(
       Phase.whenPhase(

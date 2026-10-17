@@ -89,6 +89,12 @@ const outcomes: OutcomeEntry[] = [
 
 const roll = Sequence.for(PLUGIN_ID, 'roll');
 
+const fresh = Composer.pipe(
+  Composer.set(dice, { busy: false, log: [] }),
+  Scheduler.cancelByPrefix(PLUGIN_ID),
+  ...outcomes.map(o => ModuleManager.reload(o.module.id))
+);
+
 const Dealer = definePlugin({
   sdk: 'Dealer',
   id: PLUGIN_ID,
@@ -122,10 +128,12 @@ const Dealer = definePlugin({
     Saves.onLoad<{ state: DiceState; timers: ScheduledEvent[] }>(
       PLUGIN_ID,
       data =>
-        Composer.pipe(
-          Composer.set(dice, data.state),
-          Scheduler.restore(PLUGIN_ID, data.timers)
-        )
+        data
+          ? Composer.pipe(
+              Composer.set(dice, data.state),
+              Scheduler.restore(PLUGIN_ID, data.timers)
+            )
+          : fresh
     ),
     Mode.onEnter('classic', () =>
       Composer.pipe(RandomImages.start(), roll.after(1000, 'check'))

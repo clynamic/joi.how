@@ -44,7 +44,7 @@ const counter = (id: string, n: number): Module => ({
   activate: Composer.set([id], { n }),
   update: Composer.pipe(
     Saves.onSave(id, get => get([id])),
-    Saves.onLoad<{ n: number }>(id, data => Composer.set([id], data))
+    Saves.onLoad<{ n: number }>(id, data => Composer.set([id], data ?? { n }))
   ),
   deactivate: Composer.set([id], undefined),
 });
@@ -86,9 +86,10 @@ describe('Saves', () => {
     });
   });
 
-  it('should hand each plugin its own blob on load and leave plugins without one alone', () => {
+  it('should hand each plugin its own blob on load and start plugins without one fresh', () => {
     store('one', { 'test.a': { n: 9 } });
     let frame = bootstrap(Saves, a, b);
+    frame = Composer.set(['test.b'], { n: 5 })(frame);
 
     frame = withImpulse(Saves.load('one'))(tick(frame));
     frame = flush(frame);
@@ -96,6 +97,19 @@ describe('Saves', () => {
 
     expect(frame.test.a).toEqual({ n: 9 });
     expect(frame.test.b).toEqual({ n: 2 });
+  });
+
+  it('should start every plugin fresh on reset without touching storage', () => {
+    store('auto', { 'test.a': { n: 9 } });
+    let frame = bootstrap(Saves, a, b);
+    frame = Composer.set(['test.b'], { n: 5 })(frame);
+
+    frame = withImpulse(Saves.reset())(tick(frame));
+    flush(frame);
+
+    expect(frame.test.a).toEqual({ n: 1 });
+    expect(frame.test.b).toEqual({ n: 2 });
+    expect(stored('auto')?.blobs).toEqual({ 'test.a': { n: 9 } });
   });
 
   it('should ignore a save written by another version and say so', () => {

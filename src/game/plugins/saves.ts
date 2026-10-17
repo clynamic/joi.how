@@ -85,10 +85,14 @@ const Saves = definePlugin({
     );
   },
 
-  onLoad<T>(id: string, fn: (data: T) => Pipe): Pipe {
+  onLoad<T>(id: string, fn: (data: T | undefined) => Pipe): Pipe {
     return Events.handle<Record<string, unknown>>(eventType.load, event =>
-      id in event.payload ? fn(event.payload[id] as T) : frame => frame
+      fn(event.payload[id] as T | undefined)
     );
+  },
+
+  reset(): Pipe {
+    return Events.dispatch({ type: eventType.load, payload: {} });
   },
 
   activate: Composer.pipe(

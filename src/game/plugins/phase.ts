@@ -26,6 +26,11 @@ const eventType = {
   leave: (p: string) => Events.getKey(PLUGIN_ID, `leave/${p}`),
 };
 
+const fresh = Composer.set(phase, {
+  current: GamePhase.warmup,
+  prev: GamePhase.warmup,
+});
+
 const Phase = definePlugin({
   sdk: 'Phase',
   id: PLUGIN_ID,
@@ -51,14 +56,13 @@ const Phase = definePlugin({
     return Events.handle(eventType.leave(p), fn);
   },
 
-  activate: Composer.set(phase, {
-    current: GamePhase.warmup,
-    prev: GamePhase.warmup,
-  }),
+  activate: fresh,
 
   update: Composer.pipe(
     Saves.onSave(PLUGIN_ID, get => get(phase)),
-    Saves.onLoad<PhaseState>(PLUGIN_ID, data => Composer.set(phase, data)),
+    Saves.onLoad<PhaseState>(PLUGIN_ID, data =>
+      data ? Composer.set(phase, data) : fresh
+    ),
     Composer.do(({ get, set, pipe }) => {
       const { current, prev } = get(phase);
       if (current === prev) return;

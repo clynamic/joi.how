@@ -21,6 +21,16 @@ export type PaceState = {
 const pace = pluginPaths<PaceState>(PLUGIN_ID);
 const settings = typedPath<Settings>(['settings']);
 
+const fresh = Composer.bind(settings, s =>
+  Composer.set(pace, {
+    pace: s.minPace,
+    prevMinPace: s.minPace,
+    prevPace: s.minPace,
+    history: [{ time: 0, pace: s.minPace }],
+    lastRecorded: 0,
+  })
+);
+
 const Pace = definePlugin({
   sdk: 'Pace',
   id: PLUGIN_ID,
@@ -36,19 +46,13 @@ const Pace = definePlugin({
     return Composer.bind(settings, s => Composer.set(pace.pace, s.minPace));
   },
 
-  activate: Composer.bind(settings, s =>
-    Composer.set(pace, {
-      pace: s.minPace,
-      prevMinPace: s.minPace,
-      prevPace: s.minPace,
-      history: [{ time: 0, pace: s.minPace }],
-      lastRecorded: 0,
-    })
-  ),
+  activate: fresh,
 
   update: Composer.pipe(
     Saves.onSave(PLUGIN_ID, get => get(pace)),
-    Saves.onLoad<PaceState>(PLUGIN_ID, data => Composer.set(pace, data)),
+    Saves.onLoad<PaceState>(PLUGIN_ID, data =>
+      data ? Composer.set(pace, data) : fresh
+    ),
     Composer.do(({ get, set, over }) => {
       const state = get(pace);
       const { minPace } = get(settings);

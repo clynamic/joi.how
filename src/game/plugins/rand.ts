@@ -25,6 +25,11 @@ function advance(cursor: number): [number, number] {
   return [next, (next & 0x7fffffff) / 0x7fffffff];
 }
 
+const fresh: Pipe = Composer.do(({ set }) => {
+  const seed = Date.now().toString();
+  set(paths, { seed, cursor: stringToSeed(seed) });
+});
+
 const Rand = definePlugin({
   sdk: 'Rand',
   id: PLUGIN_ID,
@@ -32,14 +37,13 @@ const Rand = definePlugin({
     name: 'Rand',
   },
 
-  activate: Composer.do(({ set }) => {
-    const seed = Date.now().toString();
-    set(paths, { seed, cursor: stringToSeed(seed) });
-  }),
+  activate: fresh,
 
   update: Composer.pipe(
     Saves.onSave(PLUGIN_ID, get => get(paths)),
-    Saves.onLoad<RandState>(PLUGIN_ID, data => Composer.set(paths, data))
+    Saves.onLoad<RandState>(PLUGIN_ID, data =>
+      data ? Composer.set(paths, data) : fresh
+    )
   ),
 
   deactivate: Composer.set(paths, undefined),

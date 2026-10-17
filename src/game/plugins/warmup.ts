@@ -23,13 +23,18 @@ const AUTOSTART_KEY = Scheduler.getKey(PLUGIN_ID, 'autoStart');
 
 const eventType = Events.getKeys(PLUGIN_ID, 'start_game');
 
+const fresh = Composer.pipe(
+  Composer.set(warmup, { initialized: false }),
+  Scheduler.cancelByPrefix(PLUGIN_ID)
+);
+
 const Warmup = definePlugin({
   id: PLUGIN_ID,
   meta: {
     name: 'Warmup',
   },
 
-  activate: Composer.set(warmup, { initialized: false }),
+  activate: fresh,
 
   update: Composer.pipe(
     Saves.onSave(PLUGIN_ID, get => ({
@@ -39,10 +44,12 @@ const Warmup = definePlugin({
     Saves.onLoad<{ state: WarmupState; timers: ScheduledEvent[] }>(
       PLUGIN_ID,
       data =>
-        Composer.pipe(
-          Composer.set(warmup, data.state),
-          Scheduler.restore(PLUGIN_ID, data.timers)
-        )
+        data
+          ? Composer.pipe(
+              Composer.set(warmup, data.state),
+              Scheduler.restore(PLUGIN_ID, data.timers)
+            )
+          : fresh
     ),
     Pause.whenPlaying(
       Phase.whenPhase(

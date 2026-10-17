@@ -27,6 +27,11 @@ const paceState = typedPath<PaceState>(['core.pace']);
 
 const flipped = Events.define<StrokeDirection>(PLUGIN_ID, 'flipped');
 
+const fresh = Composer.set(stroke, {
+  stroke: StrokeDirection.up,
+  timer: 0,
+});
+
 const Stroke = definePlugin({
   sdk: 'Stroke',
   id: PLUGIN_ID,
@@ -38,14 +43,13 @@ const Stroke = definePlugin({
     return flipped.handle(event => fn(event.payload));
   },
 
-  activate: Composer.set(stroke, {
-    stroke: StrokeDirection.up,
-    timer: 0,
-  }),
+  activate: fresh,
 
   update: Composer.pipe(
     Saves.onSave(PLUGIN_ID, get => get(stroke)),
-    Saves.onLoad<StrokeState>(PLUGIN_ID, data => Composer.set(stroke, data)),
+    Saves.onLoad<StrokeState>(PLUGIN_ID, data =>
+      data ? Composer.set(stroke, data) : fresh
+    ),
     Pause.whenPlaying(
       Composer.do(({ get, set, pipe }) => {
         const phase = get(phaseState)?.current;

@@ -12,6 +12,8 @@ export type ClockState = {
 
 const clock = pluginPaths<ClockState>(PLUGIN_ID);
 
+const fresh = Composer.set(clock, { elapsed: 0, lastWall: null });
+
 const Clock = definePlugin({
   sdk: 'Clock',
   id: PLUGIN_ID,
@@ -19,12 +21,14 @@ const Clock = definePlugin({
     name: 'Clock',
   },
 
-  activate: Composer.set(clock, { elapsed: 0, lastWall: null }),
+  activate: fresh,
 
   update: Composer.pipe(
     Saves.onSave(PLUGIN_ID, get => ({ elapsed: get(clock).elapsed })),
     Saves.onLoad<{ elapsed: number }>(PLUGIN_ID, data =>
-      Composer.set(clock, { elapsed: data.elapsed, lastWall: null })
+      data
+        ? Composer.set(clock, { elapsed: data.elapsed, lastWall: null })
+        : fresh
     ),
     Pause.whenPlaying(
       Composer.do(({ get, over, set }) => {
