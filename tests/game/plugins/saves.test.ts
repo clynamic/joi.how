@@ -6,6 +6,7 @@ import { Module } from '../../../src/engine/modules/Module';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import { Scheduler } from '../../../src/engine/pipes/Scheduler';
 import Pause from '../../../src/game/plugins/pause';
+import Storage from '../../../src/engine/plugins/Storage';
 import Saves, { SaveFile } from '../../../src/game/plugins/saves';
 import Rand from '../../../src/game/plugins/rand';
 import Intensity from '../../../src/game/plugins/intensity';
@@ -71,16 +72,19 @@ describe('Saves', () => {
   beforeEach(() => localStorage.clear());
 
   it('should collect each plugin blob under its id and persist them with the version', () => {
-    let frame = bootstrap(Saves, a, b);
+    let frame = bootstrap(Storage, Saves, a, b);
 
     frame = withImpulse(Saves.save('one', { mode: 'test' }))(tick(frame));
-    const persist = queue(frame).find(e => e.type === `${SAVES_ID}/persist`);
+    const write = queue(frame).find(e => e.type === 'core.storage/write');
     flush(frame);
 
-    expect(persist?.payload).toEqual({
-      slot: 'one',
-      meta: { mode: 'test' },
-      blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+    expect(write?.payload).toMatchObject({
+      key: `${SAVES_ID}.one`,
+      value: {
+        version: pkg.version,
+        meta: { mode: 'test' },
+        blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+      },
     });
     expect(stored('one')).toMatchObject({
       version: pkg.version,
@@ -91,7 +95,7 @@ describe('Saves', () => {
 
   it('should hand each plugin its own blob on load and start plugins without one fresh', () => {
     store('one', { 'test.a': { n: 9 } });
-    let frame = bootstrap(Saves, a, b);
+    let frame = bootstrap(Storage, Saves, a, b);
     frame = Composer.set(['test.b'], { n: 5 })(frame);
 
     frame = withImpulse(Saves.load('one'))(tick(frame));
@@ -104,7 +108,7 @@ describe('Saves', () => {
 
   it('should start every plugin fresh on reset without touching storage', () => {
     store('auto', { 'test.a': { n: 9 } });
-    let frame = bootstrap(Saves, a, b);
+    let frame = bootstrap(Storage, Saves, a, b);
     frame = Composer.set(['test.b'], { n: 5 })(frame);
 
     frame = withImpulse(Saves.reset())(tick(frame));
@@ -117,7 +121,7 @@ describe('Saves', () => {
 
   it('should ignore a save written by another version and say so', () => {
     store('one', { 'test.a': { n: 9 } }, '0.0.1');
-    let frame = bootstrap(Saves, a);
+    let frame = bootstrap(Storage, Saves, a);
 
     frame = withImpulse(Saves.load('one'))(tick(frame));
     frame = flush(frame);
@@ -138,7 +142,7 @@ describe('Saves', () => {
   it('should restore the auto slot when it activates', () => {
     store('auto', { 'test.a': { n: 5 } });
 
-    const frame = bootstrap(Saves, a);
+    const frame = bootstrap(Storage, Saves, a);
 
     expect(frame.test.a).toEqual({ n: 5 });
   });
@@ -146,6 +150,7 @@ describe('Saves', () => {
   it('should resume the game plugins and their timers from a slot', () => {
     const plugins = [
       Pause,
+      Storage,
       Saves,
       Rand,
       Intensity,
@@ -192,6 +197,7 @@ describe('Saves', () => {
     fresh = withImpulse(Saves.load('one'))(tick(fresh));
     fresh = flush(fresh);
     fresh = gamePipe(tick(fresh));
+    fresh = gamePipe(tick(fresh));
 
     expect(file['core.warmup'].timers[0].duration).toBeLessThan(30000);
     expect(fresh.core.rand).toEqual({ seed: 'saved', cursor: 42 });
@@ -214,7 +220,7 @@ describe('Saves', () => {
 
   it('should record what it restored and forget it when starting fresh', () => {
     store('auto', { 'test.a': { n: 5 } });
-    let frame = bootstrap(Saves, a);
+    let frame = bootstrap(Storage, Saves, a);
     const afterBoot = frame.core.saves.restored;
 
     frame = withImpulse(Saves.fresh())(tick(frame));
@@ -229,7 +235,7 @@ describe('Saves', () => {
   it('should list the slots newest first with their metadata and keep the list current', () => {
     store('old', { 'test.a': { n: 1 } }, pkg.version, { meta: { mode: 'x' } });
     store('auto', { 'test.a': { n: 2 } }, pkg.version, { savedAt: 2 });
-    let frame = bootstrap(Saves, a);
+    let frame = bootstrap(Storage, Saves, a);
     const atBoot = frame.core.saves.slots;
 
     frame = withImpulse(Saves.drop('old'))(tick(frame));
@@ -246,7 +252,9 @@ describe('Saves', () => {
 
   it('should drop a slot', () => {
     store('one', { 'test.a': { n: 9 } });
-    const frame = withImpulse(Saves.drop('one'))(tick(bootstrap(Saves)));
+    const frame = withImpulse(Saves.drop('one'))(
+      tick(bootstrap(Storage, Saves))
+    );
 
     flush(frame);
 

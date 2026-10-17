@@ -2,8 +2,8 @@ import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
 import { GameFrame, Pipe } from '../../engine/State';
 import { Events } from '../../engine/pipes/Events';
-import { Effects } from '../../engine/pipes/Effects';
 import { Log } from '../../engine/pipes/Log';
+import Storage, { StoredEntry } from '../../engine/plugins/Storage';
 import pkg from '../../../package.json';
 
 const PLUGIN_ID = 'core.saves';
@@ -53,43 +53,34 @@ type Getter = Composer<GameFrame>['get'];
 
 const paths = pluginPaths<SavesState>(PLUGIN_ID);
 
-const eventType = Events.getKeys(PLUGIN_ID, 'save', 'load', 'listed');
-
-const persist = Effects.define<Collecting>(PLUGIN_ID, 'persist');
-const restore = Effects.define<{ slot: string }>(PLUGIN_ID, 'restore');
-const drop = Effects.define<{ slot: string }>(PLUGIN_ID, 'drop');
-const list = Effects.define(PLUGIN_ID, 'list');
+const eventType = Events.getKeys(PLUGIN_ID, 'save', 'load');
 
 const KEY_PREFIX = `${PLUGIN_ID}.`;
 
 const storageKey = (slot: string) => `${KEY_PREFIX}${slot}`;
+const slotOf = (key: string) => key.slice(KEY_PREFIX.length);
 
-function readFile(slot: string): SaveFile | null {
-  const raw = localStorage.getItem(storageKey(slot));
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as SaveFile;
-  } catch {
-    return null;
-  }
+const isFile = (value: unknown): value is SaveFile =>
+  typeof value === 'object' &&
+  value !== null &&
+  'version' in value &&
+  'blobs' in value;
+
+function toInfo(entries: StoredEntry[]): SaveInfo[] {
+  return entries
+    .filter((entry): entry is StoredEntry & { value: SaveFile } =>
+      isFile(entry.value)
+    )
+    .map(({ key, value }) => ({
+      slot: slotOf(key),
+      version: value.version,
+      savedAt: value.savedAt,
+      ...(value.meta !== undefined && { meta: value.meta }),
+    }))
+    .sort((a, b) => b.savedAt - a.savedAt);
 }
 
-function listFiles(): SaveInfo[] {
-  const slots: SaveInfo[] = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (!key?.startsWith(KEY_PREFIX)) continue;
-    const slot = key.slice(KEY_PREFIX.length);
-    const file = readFile(slot);
-    if (!file) continue;
-    const { version, savedAt, meta } = file;
-    slots.push({ slot, version, savedAt, ...(meta !== undefined && { meta }) });
-  }
-  return slots.sort((a, b) => b.savedAt - a.savedAt);
-}
-
-const listed = (): Pipe =>
-  Events.dispatch({ type: eventType.listed, payload: listFiles() });
+const refresh = (): Pipe => Storage.list(KEY_PREFIX);
 
 const Saves = definePlugin({
   sdk: 'Saves',
@@ -98,24 +89,18 @@ const Saves = definePlugin({
     name: 'Saves',
   },
 
-  save(slot = AUTO_SLOT, meta?: unknown): Pipe {
-    return Events.dispatch({ type: eventType.save, payload: { slot, meta } });
-  },
+  save: (slot: string = AUTO_SLOT, meta?: unknown): Pipe =>
+    Events.dispatch({ type: eventType.save, payload: { slot, meta } }),
 
-  load(slot = AUTO_SLOT): Pipe {
-    return restore.emit({ slot });
-  },
+  load: (slot: string = AUTO_SLOT): Pipe => Storage.read(storageKey(slot)),
 
-  drop(slot = AUTO_SLOT): Pipe {
-    return drop.emit({ slot });
-  },
+  drop: (slot: string = AUTO_SLOT): Pipe =>
+    Composer.pipe(Storage.remove(storageKey(slot)), refresh()),
 
-  list(): Pipe {
-    return list.emit();
-  },
+  list: (): Pipe => refresh(),
 
-  onSave(id: string, fn: (get: Getter) => unknown): Pipe {
-    return Events.handle<SavePayload>(eventType.save, event =>
+  onSave: (id: string, fn: (get: Getter) => unknown): Pipe =>
+    Events.handle<SavePayload>(eventType.save, event =>
       Composer.do(({ get, set }) => {
         const collecting = get(paths)?.collecting;
         set(paths.collecting, {
@@ -124,38 +109,69 @@ const Saves = definePlugin({
           blobs: { ...collecting?.blobs, [id]: fn(get) },
         });
       })
-    );
-  },
+    ),
 
-  onLoad<T>(id: string, fn: (data: T | undefined) => Pipe): Pipe {
-    return Events.handle<LoadPayload>(eventType.load, event =>
+  onLoad: <T>(id: string, fn: (data: T | undefined) => Pipe): Pipe =>
+    Events.handle<LoadPayload>(eventType.load, event =>
       fn(event.payload.blobs[id] as T | undefined)
-    );
-  },
+    ),
 
-  reset(): Pipe {
-    return Events.dispatch({
+  reset: (): Pipe =>
+    Events.dispatch({
       type: eventType.load,
       payload: { restored: null, blobs: {} },
-    });
-  },
+    }),
 
-  fresh(): Pipe {
-    return Composer.pipe(drop.emit({ slot: AUTO_SLOT }), Saves.reset());
-  },
+  fresh: (): Pipe => Composer.pipe(Saves.drop(AUTO_SLOT), Saves.reset()),
 
   activate: Composer.pipe(
     Composer.set(paths, { restored: null, slots: [] }),
-    restore.emit({ slot: AUTO_SLOT }),
-    list.emit()
+    Storage.read(storageKey(AUTO_SLOT)),
+    refresh()
   ),
 
   update: Composer.pipe(
+    Storage.onRead(KEY_PREFIX, (value, key) =>
+      Composer.do(({ pipe }) => {
+        if (value === null) return;
+        const slot = slotOf(key);
+        if (!isFile(value)) {
+          pipe(
+            Log.warn(PLUGIN_ID, 'ignored save {slot}, not a save file', {
+              slot,
+            })
+          );
+          return;
+        }
+        if (value.version !== pkg.version) {
+          pipe(
+            Log.warn(PLUGIN_ID, 'ignored save {slot} from version {version}', {
+              slot,
+              version: value.version,
+            })
+          );
+          return;
+        }
+        pipe(
+          Events.dispatch({
+            type: eventType.load,
+            payload: {
+              restored: {
+                slot,
+                savedAt: value.savedAt,
+                ...(value.meta !== undefined && { meta: value.meta }),
+              },
+              blobs: value.blobs,
+            },
+          })
+        );
+      })
+    ),
+    Storage.onList(KEY_PREFIX, entries =>
+      Composer.set(paths.slots, toInfo(entries))
+    ),
     Events.handle<LoadPayload>(eventType.load, event =>
       Composer.set(paths.restored, event.payload.restored)
-    ),
-    Events.handle<SaveInfo[]>(eventType.listed, event =>
-      Composer.set(paths.slots, event.payload)
     ),
     Events.handle<SavePayload>(eventType.save, event =>
       Composer.do(({ get, set }) => {
@@ -173,7 +189,14 @@ const Saves = definePlugin({
     const collecting = get(paths)?.collecting;
     if (!collecting) return;
     set(paths.collecting, undefined);
-    pipe(persist.emit(collecting));
+    const { slot, meta, blobs } = collecting;
+    const file: SaveFile = {
+      version: pkg.version,
+      savedAt: Date.now(),
+      ...(meta !== undefined && { meta }),
+      blobs,
+    };
+    pipe(Storage.write(storageKey(slot), file), refresh());
   }),
 
   deactivate: Composer.set(paths, undefined),
@@ -181,50 +204,6 @@ const Saves = definePlugin({
   get paths() {
     return paths;
   },
-
-  effects: [
-    persist.perform(({ slot, meta, blobs }, inject) => {
-      const file: SaveFile = {
-        version: pkg.version,
-        savedAt: Date.now(),
-        ...(meta !== undefined && { meta }),
-        blobs,
-      };
-      localStorage.setItem(storageKey(slot), JSON.stringify(file));
-      inject(listed());
-    }),
-    restore.perform(({ slot }, inject) => {
-      const file = readFile(slot);
-      if (!file) return;
-      if (file.version !== pkg.version) {
-        inject(
-          Log.warn(PLUGIN_ID, 'ignored save {slot} from version {version}', {
-            slot,
-            version: file.version,
-          })
-        );
-        return;
-      }
-      inject(
-        Events.dispatch({
-          type: eventType.load,
-          payload: {
-            restored: {
-              slot,
-              savedAt: file.savedAt,
-              ...(file.meta !== undefined && { meta: file.meta }),
-            },
-            blobs: file.blobs,
-          },
-        })
-      );
-    }),
-    drop.perform(({ slot }, inject) => {
-      localStorage.removeItem(storageKey(slot));
-      inject(listed());
-    }),
-    list.perform((_, inject) => inject(listed())),
-  ],
 });
 
 declare module '../../engine/sdk' {

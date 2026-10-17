@@ -2,6 +2,7 @@ import { ModuleManager } from '../../engine/modules/ModuleManager';
 import { Composer } from '../../engine/Composer';
 import { Pipe } from '../../engine/State';
 import PluginInstaller from '../../engine/plugins/PluginInstaller';
+import Storage from '../../engine/plugins/Storage';
 import Scene from './scene';
 import Mode from './mode';
 import Debug from './debug';
@@ -35,6 +36,7 @@ const plugins = [
 ];
 
 export const registerPlugins: Pipe = Composer.pipe(
+  ModuleManager.load(Storage),
   ModuleManager.load(PluginInstaller),
   ...plugins.map(ModuleManager.load)
 );

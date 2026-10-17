@@ -9,6 +9,7 @@ import Phase from '../../../src/game/plugins/phase';
 import Pause from '../../../src/game/plugins/pause';
 import Rand from '../../../src/game/plugins/rand';
 import Messages from '../../../src/game/plugins/messages';
+import Storage from '../../../src/engine/plugins/Storage';
 import Saves from '../../../src/game/plugins/saves';
 import Intensity from '../../../src/game/plugins/intensity';
 import Classic from '../../../src/game/plugins/classic';
@@ -34,7 +35,17 @@ function bootstrap(): GameFrame {
   let frame = gamePipe(makeFrame());
   frame = Composer.set(['settings'], defaultSettings)(frame);
   frame = Composer.set(['images'], [])(frame);
-  for (const p of [Scene, Mode, Phase, Pause, Rand, Messages, Saves, Classic]) {
+  for (const p of [
+    Scene,
+    Mode,
+    Phase,
+    Pause,
+    Rand,
+    Messages,
+    Storage,
+    Saves,
+    Classic,
+  ]) {
     frame = ModuleManager.load(p)(frame);
   }
   frame = gamePipe(tick(frame));
@@ -103,7 +114,7 @@ describe('Classic', () => {
     frame = withImpulse(Pause.setPaused(true))(tick(frame));
     frame = until(frame, f =>
       (f.core.effects?.queue ?? []).some(
-        (e: { type: string }) => e.type === 'core.saves/persist'
+        (e: { type: string }) => e.type === 'core.storage/write'
       )
     );
     flush(frame);
@@ -117,7 +128,7 @@ describe('Classic', () => {
   it('should autosave every ten seconds of play and not while paused', () => {
     const persisted = (f: GameFrame) =>
       (f.core.effects?.queue ?? []).some(
-        (e: { type: string }) => e.type === 'core.saves/persist'
+        (e: { type: string }) => e.type === 'core.storage/write'
       );
     let frame = bootstrap();
     for (let i = 0; i < 15; i++) {
