@@ -232,14 +232,11 @@ describe('Toy', () => {
     ]);
   });
 
-  it('should emit stop and disconnect while unloading', () => {
+  it('should stop the devices and keep the connection while unloading', () => {
     const frame = bootstrap();
     const unloaded = gamePipe(tick(ModuleManager.unload(TOY_ID)(frame)));
 
-    expect(getEffects(unloaded).map(e => e.type)).toEqual([
-      `${TOY_ID}/stop`,
-      `${TOY_ID}/disconnect`,
-    ]);
+    expect(getEffects(unloaded).map(e => e.type)).toEqual([`${TOY_ID}/stop`]);
     expect(unloaded.core.toy).toBeUndefined();
   });
 

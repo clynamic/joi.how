@@ -238,7 +238,6 @@ const Toy = definePlugin({
 
   deactivate: Composer.pipe(
     stop.emit(),
-    disconnect.emit(),
     seq.cancel(),
     Composer.set(toy, undefined)
   ),

@@ -104,6 +104,23 @@ describe('Toy performers', () => {
     expect(fake.state.instances).toHaveLength(1);
   });
 
+  it('should keep the connection across an unload and report it on the next activate', async () => {
+    let frame = await flushAndApply(
+      Toy.connect('ws://127.0.0.1:12345')(bootstrap())
+    );
+
+    frame = await flushAndApply(ModuleManager.unload(Toy.id)(frame));
+    frame = await flushAndApply(frame);
+    frame = await flushAndApply(ModuleManager.load(Toy)(frame));
+    frame = await flushAndApply(frame);
+
+    expect(fake.state.instances).toHaveLength(1);
+    expect(frame.core.toy).toMatchObject({
+      connection: 'ws://127.0.0.1:12345',
+      toys: [{ name: 'Fake Wand' }],
+    });
+  });
+
   it('should report a refused connection as an error', async () => {
     fake.state.connectShouldFail = true;
     let frame = Toy.connect('ws://127.0.0.1:12345')(bootstrap());
