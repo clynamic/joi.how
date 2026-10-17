@@ -1,7 +1,7 @@
 import { Fields, JoiStack, SettingsDescription, Space } from '../../common';
 import type { Settings } from '../Settings';
 import { useSettings } from '../SettingsProvider';
-import { ImageItem, ImageServiceType } from '../../types';
+import { ImageItem } from '../../types';
 import { useImages } from '../ImageProvider';
 import { ChangeEvent } from 'react';
 import { WaButton, WaDivider, WaIcon } from '@awesome.me/webawesome/dist/react';
@@ -23,7 +23,7 @@ export const TradeSettings = () => {
       version: '1',
       settings: settings,
       // local images could be base64 encoded, but this would cause significant bloat
-      images: images.filter(image => image.service === ImageServiceType.local),
+      images,
     };
     const data = JSON.stringify(tradeFormat, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
