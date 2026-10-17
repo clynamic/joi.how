@@ -8,8 +8,6 @@ import pkg from '../../../package.json';
 
 const PLUGIN_ID = 'core.saves';
 
-export const AUTO_SLOT = 'auto';
-
 export type SaveFile = {
   version: string;
   savedAt: number;
@@ -89,12 +87,12 @@ const Saves = definePlugin({
     name: 'Saves',
   },
 
-  save: (slot: string = AUTO_SLOT, meta?: unknown): Pipe =>
+  save: (slot: string, meta?: unknown): Pipe =>
     Events.dispatch({ type: eventType.save, payload: { slot, meta } }),
 
-  load: (slot: string = AUTO_SLOT): Pipe => Storage.read(storageKey(slot)),
+  load: (slot: string): Pipe => Storage.read(storageKey(slot)),
 
-  drop: (slot: string = AUTO_SLOT): Pipe =>
+  drop: (slot: string): Pipe =>
     Composer.pipe(Storage.remove(storageKey(slot)), refresh()),
 
   list: (): Pipe => refresh(),
@@ -122,11 +120,10 @@ const Saves = definePlugin({
       payload: { restored: null, blobs: {} },
     }),
 
-  fresh: (): Pipe => Composer.pipe(Saves.drop(AUTO_SLOT), Saves.reset()),
+  fresh: (slot: string): Pipe => Composer.pipe(Saves.drop(slot), Saves.reset()),
 
   activate: Composer.pipe(
     Composer.set(paths, { restored: null, slots: [] }),
-    Storage.read(storageKey(AUTO_SLOT)),
     refresh()
   ),
 

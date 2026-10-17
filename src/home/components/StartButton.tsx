@@ -91,7 +91,7 @@ export const StartButton = () => {
               size='small'
               appearance='plain'
               onClick={() => {
-                inject(Saves.fresh());
+                inject(Saves.fresh(restored.slot));
                 navigate('/play');
               }}
             >

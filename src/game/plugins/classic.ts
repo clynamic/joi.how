@@ -7,7 +7,7 @@ import { Sequence } from '../Sequence';
 import { PLAY_TIMELINE } from '../timelines';
 import Mode from './mode';
 import Scene from './scene';
-import Saves, { AUTO_SLOT } from './saves';
+import Saves from './saves';
 import Clock from './clock';
 import Intensity from './intensity';
 import Pace from './pace';
@@ -25,6 +25,7 @@ const MODE = 'classic';
 
 const AUTOSAVE_INTERVAL = 10000;
 
+const SLOT = MODE;
 const META = { mode: MODE };
 
 const run: Module[] = [
@@ -44,6 +45,7 @@ const autosave = Sequence.for(PLUGIN_ID, 'autosave');
 
 const start = Composer.pipe(
   ...run.map(ModuleManager.load),
+  Saves.load(SLOT),
   autosave.after(AUTOSAVE_INTERVAL, 'tick')
 );
 
@@ -72,15 +74,15 @@ const Classic = definePlugin({
     Mode.onEnter(MODE, () => start),
     Mode.onLeave(MODE, () => stop),
     Scheduler.onStop(PLAY_TIMELINE, () =>
-      Mode.whenMode(MODE, Saves.save(AUTO_SLOT, META))
+      Mode.whenMode(MODE, Saves.save(SLOT, META))
     ),
     autosave.on('tick', () =>
       Composer.pipe(
-        Saves.save(AUTO_SLOT, META),
+        Saves.save(SLOT, META),
         autosave.after(AUTOSAVE_INTERVAL, 'tick')
       )
     ),
-    Scene.onLeave('end', () => Saves.fresh())
+    Scene.onLeave('end', () => Saves.fresh(SLOT))
   ),
 
   deactivate: Composer.pipe(Mode.unregister(MODE), stop),

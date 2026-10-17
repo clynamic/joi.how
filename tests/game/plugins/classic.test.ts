@@ -14,6 +14,7 @@ import Saves from '../../../src/game/plugins/saves';
 import Intensity from '../../../src/game/plugins/intensity';
 import Classic from '../../../src/game/plugins/classic';
 import { defaultSettings } from '../../../src/settings/Settings';
+import pkg from '../../../package.json';
 import { makeFrame, makeGame, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse, until } = makeGame();
@@ -23,7 +24,12 @@ const RUN = ['core.dice', 'core.intensity', 'core.warmup', 'core.cues'];
 const loaded = (frame: GameFrame): string[] =>
   frame.core.modules.order.filter((id: string) => RUN.includes(id));
 
-const autoSlot = () => localStorage.getItem('core.saves.auto');
+const autoSlot = () => localStorage.getItem('core.saves.classic');
+const store = (slot: string, blobs: Record<string, unknown>) =>
+  localStorage.setItem(
+    `core.saves.${slot}`,
+    JSON.stringify({ version: pkg.version, savedAt: 1, blobs })
+  );
 
 function flush(frame: GameFrame): GameFrame {
   const injected: Pipe[] = [];
@@ -91,7 +97,7 @@ describe('Classic', () => {
   it('should start the next run fresh after the end screen', () => {
     let frame = enter(bootstrap(), 'game');
     frame = Composer.set(Intensity.paths.intensity, 0.7)(frame);
-    frame = withImpulse(Saves.save('auto'))(tick(frame));
+    frame = withImpulse(Saves.save('classic'))(tick(frame));
     frame = flush(frame);
     const savedBefore = autoSlot();
 
@@ -147,6 +153,22 @@ describe('Classic', () => {
     expect(whilePaused).toBeNull();
     expect(frame.tick - first).toBeGreaterThanOrEqual(10);
     expect(JSON.parse(autoSlot()!).meta).toEqual({ mode: 'classic' });
+  });
+
+  it("should resume its own slot on enter and leave another mode's slot alone", () => {
+    store('dice', { 'core.intensity': { intensity: 0.9 } });
+    const other = bootstrap();
+    const untouched = other.core.intensity.intensity;
+
+    localStorage.clear();
+    store('classic', { 'core.intensity': { intensity: 0.4 } });
+    let frame = bootstrap();
+    frame = until(frame, f => f.core.intensity.intensity === 0.4, {
+      maxTicks: 10,
+    });
+
+    expect(untouched).toBe(0);
+    expect(frame.core.saves.restored).toMatchObject({ slot: 'classic' });
   });
 
   it('should keep a run alone when the end screen is not involved', () => {

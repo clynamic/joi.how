@@ -139,12 +139,16 @@ describe('Saves', () => {
     );
   });
 
-  it('should restore the auto slot when it activates', () => {
+  it('should list but not restore any slot when it activates', () => {
     store('auto', { 'test.a': { n: 5 } });
 
     const frame = bootstrap(Storage, Saves, a);
 
-    expect(frame.test.a).toEqual({ n: 5 });
+    expect(frame.test.a).toEqual({ n: 1 });
+    expect(frame.core.saves.restored).toBeNull();
+    expect(frame.core.saves.slots.map((s: { slot: string }) => s.slot)).toEqual(
+      ['auto']
+    );
   });
 
   it('should resume the game plugins and their timers from a slot', () => {
@@ -221,12 +225,15 @@ describe('Saves', () => {
   it('should record what it restored and forget it when starting fresh', () => {
     store('auto', { 'test.a': { n: 5 } });
     let frame = bootstrap(Storage, Saves, a);
-    const afterBoot = frame.core.saves.restored;
+    frame = withImpulse(Saves.load('auto'))(tick(frame));
+    frame = flush(frame);
+    frame = gamePipe(tick(frame));
+    const afterLoad = frame.core.saves.restored;
 
-    frame = withImpulse(Saves.fresh())(tick(frame));
+    frame = withImpulse(Saves.fresh('auto'))(tick(frame));
     flush(frame);
 
-    expect(afterBoot).toEqual({ slot: 'auto', savedAt: 1 });
+    expect(afterLoad).toEqual({ slot: 'auto', savedAt: 1 });
     expect(frame.core.saves.restored).toBeNull();
     expect(frame.test.a).toEqual({ n: 1 });
     expect(stored('auto')).toBeNull();
