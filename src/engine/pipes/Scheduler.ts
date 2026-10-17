@@ -41,6 +41,7 @@ const eventType = Events.getKeys(
   'hold_by_prefix',
   'release_by_prefix',
   'cancel_by_prefix',
+  'restore',
   'set_rate',
   'remove_timeline',
   'rate_changed'
@@ -114,6 +115,18 @@ export class Scheduler {
   static remaining(frame: GameFrame, idOrPrefix: string): number | undefined {
     const scheduled = Composer.get(scheduler.scheduled)(frame) ?? [];
     return scheduled.find(entry => entry.id?.startsWith(idOrPrefix))?.duration;
+  }
+
+  static snapshot(frame: GameFrame, prefix: string): ScheduledEvent[] {
+    const scheduled = Composer.get(scheduler.scheduled)(frame) ?? [];
+    return scheduled.filter(entry => entry.id?.startsWith(prefix));
+  }
+
+  static restore(prefix: string, entries: ScheduledEvent[]): Pipe {
+    return Events.dispatch({
+      type: eventType.restore,
+      payload: { prefix, entries },
+    });
   }
 
   static onRate(timeline: string, fn: (change: RateChange) => Pipe): Pipe {
@@ -273,6 +286,15 @@ export class Scheduler {
       Composer.over(scheduler.scheduled, list =>
         list.filter(s => !s.id?.startsWith(event.payload))
       )
+    ),
+
+    Events.handle<{ prefix: string; entries: ScheduledEvent[] }>(
+      eventType.restore,
+      event =>
+        Composer.over(scheduler.scheduled, (list = []) => [
+          ...list.filter(s => !s.id?.startsWith(event.payload.prefix)),
+          ...event.payload.entries,
+        ])
     )
   );
 }

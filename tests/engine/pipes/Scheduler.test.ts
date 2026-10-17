@@ -219,6 +219,37 @@ describe('Scheduler', () => {
     });
   });
 
+  describe('snapshot and restore', () => {
+    it('should snapshot the entries under a prefix with their remaining time', () => {
+      let frame = step(
+        basePipe(makeFrame()),
+        Composer.pipe(entry('me/a', 100), entry('me/b', 200), entry('you/c', 300))
+      );
+      frame = step(frame);
+
+      expect(Scheduler.snapshot(frame, 'me/')).toEqual([
+        { id: 'me/a', duration: 84, timeline: undefined, event: { type: 'test/me/a' } },
+        { id: 'me/b', duration: 184, timeline: undefined, event: { type: 'test/me/b' } },
+      ]);
+    });
+
+    it('should replace the entries under a prefix and leave others alone', () => {
+      let frame = step(
+        basePipe(makeFrame()),
+        Composer.pipe(entry('me/a', 100), entry('you/c', 300))
+      );
+      const saved = Scheduler.snapshot(frame, 'me/');
+      frame = step(frame, entry('me/fresh', 50));
+      frame = step(frame, Scheduler.restore('me/', saved));
+      frame = step(frame);
+
+      expect(scheduled(frame).map(e => [e.id, e.duration])).toEqual([
+        ['you/c', 252],
+        ['me/a', 84],
+      ]);
+    });
+  });
+
   describe('rate events', () => {
     const seen = (frame: GameFrame): unknown[] => frame.seen ?? [];
     const record = (label: string): Pipe =>
