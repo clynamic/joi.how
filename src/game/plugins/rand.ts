@@ -1,6 +1,7 @@
 import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
 import { Pipe } from '../../engine/State';
+import Saves from './saves';
 
 const PLUGIN_ID = 'core.rand';
 
@@ -35,6 +36,11 @@ const Rand = definePlugin({
     const seed = Date.now().toString();
     set(paths, { seed, cursor: stringToSeed(seed) });
   }),
+
+  update: Composer.pipe(
+    Saves.onSave(PLUGIN_ID, get => get(paths)),
+    Saves.onLoad<RandState>(PLUGIN_ID, data => Composer.set(paths, data))
+  ),
 
   deactivate: Composer.set(paths, undefined),
 

@@ -5,6 +5,7 @@ import { Settings } from '../../settings/Settings';
 import { GameTiming } from '../../engine/State';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
+import Saves from './saves';
 
 const PLUGIN_ID = 'core.intensity';
 
@@ -25,16 +26,22 @@ const Intensity = definePlugin({
 
   activate: Composer.set(intensity, { intensity: 0 }),
 
-  update: Pause.whenPlaying(
-    Phase.whenPhase(
-      GamePhase.active,
-      Composer.do(({ get, over }) => {
-        const delta = get(timing.step);
-        const s = get(settings);
-        over(intensity, ({ intensity: i = 0 }) => ({
-          intensity: Math.min(1, i + delta / (s.gameDuration * 1000)),
-        }));
-      })
+  update: Composer.pipe(
+    Saves.onSave(PLUGIN_ID, get => get(intensity)),
+    Saves.onLoad<IntensityState>(PLUGIN_ID, data =>
+      Composer.set(intensity, data)
+    ),
+    Pause.whenPlaying(
+      Phase.whenPhase(
+        GamePhase.active,
+        Composer.do(({ get, over }) => {
+          const delta = get(timing.step);
+          const s = get(settings);
+          over(intensity, ({ intensity: i = 0 }) => ({
+            intensity: Math.min(1, i + delta / (s.gameDuration * 1000)),
+          }));
+        })
+      )
     )
   ),
 

@@ -1,6 +1,7 @@
 import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
 import Pause from './pause';
+import Saves from './saves';
 
 const PLUGIN_ID = 'core.clock';
 
@@ -21,6 +22,10 @@ const Clock = definePlugin({
   activate: Composer.set(clock, { elapsed: 0, lastWall: null }),
 
   update: Composer.pipe(
+    Saves.onSave(PLUGIN_ID, get => ({ elapsed: get(clock).elapsed })),
+    Saves.onLoad<{ elapsed: number }>(PLUGIN_ID, data =>
+      Composer.set(clock, { elapsed: data.elapsed, lastWall: null })
+    ),
     Pause.whenPlaying(
       Composer.do(({ get, over, set }) => {
         const now = performance.now();

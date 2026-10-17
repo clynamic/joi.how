@@ -6,6 +6,7 @@ import { GameTiming, Pipe } from '../../engine/State';
 import { PhaseState, GamePhase } from './phase';
 import Pause from './pause';
 import { PaceState } from './pace';
+import Saves from './saves';
 
 const PLUGIN_ID = 'core.stroke';
 
@@ -42,32 +43,36 @@ const Stroke = definePlugin({
     timer: 0,
   }),
 
-  update: Pause.whenPlaying(
-    Composer.do(({ get, set, pipe }) => {
-      const phase = get(phaseState)?.current;
-      if (phase !== GamePhase.active && phase !== GamePhase.finale) return;
+  update: Composer.pipe(
+    Saves.onSave(PLUGIN_ID, get => get(stroke)),
+    Saves.onLoad<StrokeState>(PLUGIN_ID, data => Composer.set(stroke, data)),
+    Pause.whenPlaying(
+      Composer.do(({ get, set, pipe }) => {
+        const phase = get(phaseState)?.current;
+        if (phase !== GamePhase.active && phase !== GamePhase.finale) return;
 
-      const pace = get(paceState)?.pace;
-      if (!pace || pace <= 0) return;
+        const pace = get(paceState)?.pace;
+        if (!pace || pace <= 0) return;
 
-      const delta = get(timing.step);
-      const state = get(stroke);
-      if (!state) return;
+        const delta = get(timing.step);
+        const state = get(stroke);
+        if (!state) return;
 
-      const interval = (1 / pace) * 1000;
-      const elapsed = state.timer + delta;
+        const interval = (1 / pace) * 1000;
+        const elapsed = state.timer + delta;
 
-      if (elapsed >= interval) {
-        const next =
-          state.stroke === StrokeDirection.up
-            ? StrokeDirection.down
-            : StrokeDirection.up;
-        set(stroke, { stroke: next, timer: elapsed - interval });
-        pipe(flipped.dispatch(next));
-      } else {
-        set(stroke.timer, elapsed);
-      }
-    })
+        if (elapsed >= interval) {
+          const next =
+            state.stroke === StrokeDirection.up
+              ? StrokeDirection.down
+              : StrokeDirection.up;
+          set(stroke, { stroke: next, timer: elapsed - interval });
+          pipe(flipped.dispatch(next));
+        } else {
+          set(stroke.timer, elapsed);
+        }
+      })
+    )
   ),
 
   deactivate: Composer.set(stroke, undefined),

@@ -4,6 +4,7 @@ import { typedPath } from '../../engine/Lens';
 import { Settings } from '../../settings/Settings';
 import { Composer } from '../../engine';
 import Clock from './clock';
+import Saves from './saves';
 
 const PLUGIN_ID = 'core.pace';
 
@@ -45,27 +46,31 @@ const Pace = definePlugin({
     })
   ),
 
-  update: Composer.do(({ get, set, over }) => {
-    const state = get(pace);
-    const { minPace } = get(settings);
+  update: Composer.pipe(
+    Saves.onSave(PLUGIN_ID, get => get(pace)),
+    Saves.onLoad<PaceState>(PLUGIN_ID, data => Composer.set(pace, data)),
+    Composer.do(({ get, set, over }) => {
+      const state = get(pace);
+      const { minPace } = get(settings);
 
-    if (minPace !== state.prevMinPace) {
-      set(pace.prevMinPace, minPace);
-      set(pace.pace, minPace);
-    }
-
-    if (state.pace !== state.prevPace) {
-      set(pace.prevPace, state.pace);
-      const { elapsed } = get(Clock.paths) ?? { elapsed: 0 };
-      if (elapsed - state.lastRecorded >= 1000) {
-        set(pace.lastRecorded, elapsed);
-        over(pace.history, (h: PaceEntry[]) => [
-          ...h,
-          { time: elapsed, pace: state.pace },
-        ]);
+      if (minPace !== state.prevMinPace) {
+        set(pace.prevMinPace, minPace);
+        set(pace.pace, minPace);
       }
-    }
-  }),
+
+      if (state.pace !== state.prevPace) {
+        set(pace.prevPace, state.pace);
+        const { elapsed } = get(Clock.paths) ?? { elapsed: 0 };
+        if (elapsed - state.lastRecorded >= 1000) {
+          set(pace.lastRecorded, elapsed);
+          over(pace.history, (h: PaceEntry[]) => [
+            ...h,
+            { time: elapsed, pace: state.pace },
+          ]);
+        }
+      }
+    })
+  ),
 
   deactivate: Composer.set(pace, undefined),
 

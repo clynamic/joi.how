@@ -2,7 +2,8 @@ import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine';
 import { Events } from '../../engine/pipes/Events';
 import Messages from './messages';
-import { Scheduler } from '../../engine/pipes/Scheduler';
+import { ScheduledEvent, Scheduler } from '../../engine/pipes/Scheduler';
+import Saves from './saves';
 import { typedPath } from '../../engine/Lens';
 import { Settings } from '../../settings/Settings';
 import Phase, { GamePhase } from './phase';
@@ -31,6 +32,18 @@ const Warmup = definePlugin({
   activate: Composer.set(warmup, { initialized: false }),
 
   update: Composer.pipe(
+    Saves.onSave(PLUGIN_ID, get => ({
+      state: get(warmup),
+      timers: Scheduler.snapshot(get(), PLUGIN_ID),
+    })),
+    Saves.onLoad<{ state: WarmupState; timers: ScheduledEvent[] }>(
+      PLUGIN_ID,
+      data =>
+        Composer.pipe(
+          Composer.set(warmup, data.state),
+          Scheduler.restore(PLUGIN_ID, data.timers)
+        )
+    ),
     Pause.whenPlaying(
       Phase.whenPhase(
         GamePhase.warmup,

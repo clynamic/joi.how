@@ -2,6 +2,7 @@ import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Pipe } from '../../engine/State';
 import { Events } from '../../engine/pipes/Events';
 import { Composer } from '../../engine';
+import Saves from './saves';
 
 const PLUGIN_ID = 'core.phase';
 
@@ -55,13 +56,17 @@ const Phase = definePlugin({
     prev: GamePhase.warmup,
   }),
 
-  update: Composer.do(({ get, set, pipe }) => {
-    const { current, prev } = get(phase);
-    if (current === prev) return;
-    set(phase.prev, current);
-    pipe(Events.dispatch({ type: eventType.leave(prev) }));
-    pipe(Events.dispatch({ type: eventType.enter(current) }));
-  }),
+  update: Composer.pipe(
+    Saves.onSave(PLUGIN_ID, get => get(phase)),
+    Saves.onLoad<PhaseState>(PLUGIN_ID, data => Composer.set(phase, data)),
+    Composer.do(({ get, set, pipe }) => {
+      const { current, prev } = get(phase);
+      if (current === prev) return;
+      set(phase.prev, current);
+      pipe(Events.dispatch({ type: eventType.leave(prev) }));
+      pipe(Events.dispatch({ type: eventType.enter(current) }));
+    })
+  ),
 
   deactivate: Composer.set(phase, undefined),
 

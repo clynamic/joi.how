@@ -3,6 +3,8 @@ import { Composer } from '../../engine/Composer';
 import { Pipe, GameFrame } from '../../engine/State';
 import { Events } from '../../engine/pipes/Events';
 import { ModuleManager } from '../../engine/modules/ModuleManager';
+import { ScheduledEvent, Scheduler } from '../../engine/pipes/Scheduler';
+import Saves from './saves';
 import { Module } from '../../engine/modules/Module';
 import { Sequence } from '../Sequence';
 import Mode from './mode';
@@ -18,6 +20,7 @@ import {
   intensityState,
   OUTCOME_DONE,
   DiceLogEntry,
+  DiceState,
 } from './dice/types';
 import { pauseModule } from './dice/pause';
 import { randomPaceModule } from './dice/randomPace';
@@ -112,6 +115,18 @@ const Dealer = definePlugin({
   ),
 
   update: Composer.pipe(
+    Saves.onSave(PLUGIN_ID, get => ({
+      state: get(dice),
+      timers: Scheduler.snapshot(get(), PLUGIN_ID),
+    })),
+    Saves.onLoad<{ state: DiceState; timers: ScheduledEvent[] }>(
+      PLUGIN_ID,
+      data =>
+        Composer.pipe(
+          Composer.set(dice, data.state),
+          Scheduler.restore(PLUGIN_ID, data.timers)
+        )
+    ),
     Mode.onEnter('classic', () =>
       Composer.pipe(RandomImages.start(), roll.after(1000, 'check'))
     ),
