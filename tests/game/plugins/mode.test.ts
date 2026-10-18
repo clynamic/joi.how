@@ -44,6 +44,7 @@ describe('Mode', () => {
     )(tick(frame));
     const both = frame.core.mode.modes;
 
+    frame = withImpulse(Mode.setMode('dj'))(tick(frame));
     frame = withImpulse(Mode.unregister('dj'))(tick(frame));
 
     expect(both).toEqual({
@@ -53,6 +54,7 @@ describe('Mode', () => {
     expect(frame.core.mode.modes).toEqual({
       classic: { id: 'classic', name: 'Classic' },
     });
+    expect(frame.core.mode.current).toBe('classic');
   });
 
   it('should keep the current mode and say so when the target is not registered', () => {

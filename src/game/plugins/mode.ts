@@ -45,11 +45,20 @@ const Mode = definePlugin({
   },
 
   unregister(id: string): Pipe {
-    return Composer.over(
-      mode.modes,
-      modes =>
-        Object.fromEntries(Object.entries(modes).filter(([key]) => key !== id)),
-      {}
+    return Composer.pipe(
+      Composer.over(
+        mode.modes,
+        modes =>
+          Object.fromEntries(
+            Object.entries(modes).filter(([key]) => key !== id)
+          ),
+        {}
+      ),
+      Composer.do(({ get, set }) => {
+        const { current, modes } = get(mode);
+        const [remaining] = Object.keys(modes);
+        if (current === id && remaining) set(mode.current, remaining);
+      })
     );
   },
 
