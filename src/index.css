@@ -75,6 +75,7 @@
   --wa-tooltip-content-color: var(--wa-color-text-normal);
 
   --wa-color-neutral-fill-loud: var(--button-background);
+  --wa-color-neutral-on-loud: var(--button-color);
   --wa-color-fill-loud: var(--wa-color-neutral-fill-loud);
 
   --wa-form-control-border-color: var(--wa-color-brand);
