@@ -34,26 +34,26 @@ const StyledTopBar = styled.div`
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
+`;
 
-  & > *:first-child {
-    margin-bottom: 8px;
-  }
+const StyledTopLeft = styled.div`
+  margin-bottom: 8px;
+`;
 
-  & > *:nth-child(2) {
-    margin-left: auto;
-  }
+const StyledTopRight = styled.div`
+  margin-left: auto;
 `;
 
 const StyledCenter = styled.div`
   position: relative;
+`;
 
-  & > *:nth-child(2) {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    white-space: nowrap;
-  }
+const StyledCenterOverlay = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
 `;
 
 const StyledBottomBar = styled.div`
@@ -67,10 +67,10 @@ const StyledBottomBar = styled.div`
   flex-wrap: wrap;
 
   align-items: flex-end;
+`;
 
-  & > *:nth-child(2) {
-    margin-left: auto;
-  }
+const StyledBottomRight = styled.div`
+  margin-left: auto;
 `;
 
 export const GamePage = () => {
@@ -78,24 +78,32 @@ export const GamePage = () => {
     <StyledGamePage className='game-page'>
       <GameImages />
       <StyledTopBar>
-        <WhenLoaded plugin={Pace}>
-          <GameInstructions />
-        </WhenLoaded>
-        <GameMessages />
+        <StyledTopLeft>
+          <WhenLoaded plugin={Pace}>
+            <GameInstructions />
+          </WhenLoaded>
+        </StyledTopLeft>
+        <StyledTopRight>
+          <GameMessages />
+        </StyledTopRight>
       </StyledTopBar>
       <StyledCenter>
         <WhenLoaded plugin={Stroke}>
           <GameMeter />
         </WhenLoaded>
-        <WhenLoaded plugin={Hypno}>
-          <GameHypno />
-        </WhenLoaded>
+        <StyledCenterOverlay>
+          <WhenLoaded plugin={Hypno}>
+            <GameHypno />
+          </WhenLoaded>
+        </StyledCenterOverlay>
       </StyledCenter>
       <StyledBottomBar>
         <GamePauseMenu />
-        <WhenLoaded plugin={EmergencyStop}>
-          <GameEmergencyStop />
-        </WhenLoaded>
+        <StyledBottomRight>
+          <WhenLoaded plugin={EmergencyStop}>
+            <GameEmergencyStop />
+          </WhenLoaded>
+        </StyledBottomRight>
       </StyledBottomBar>
       <GameResume />
     </StyledGamePage>
