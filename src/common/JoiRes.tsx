@@ -2,7 +2,6 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import React from 'react';
 import { createComponent, type EventName } from '@lit/react';
-import { localImageService } from '../services/localImages';
 
 @customElement('joi-res')
 export class JoiResElement extends LitElement {
@@ -48,24 +47,8 @@ export class JoiResElement extends LitElement {
     }
   }
 
-  private async resolveUrl() {
-    if (!this.src) {
-      this.resolvedSrc = '';
-      return;
-    }
-
-    this.isLoading = true;
-    this.hasError = false;
-
-    try {
-      this.resolvedSrc = await localImageService.resolveUrl(this.src);
-    } catch (error) {
-      console.warn('Failed to resolve image URL:', error);
-      this.resolvedSrc = this.src;
-      this.hasError = true;
-    } finally {
-      this.isLoading = false;
-    }
+  private resolveUrl() {
+    this.resolvedSrc = this.src ?? '';
   }
 
   private onLoad = (e: Event) => {

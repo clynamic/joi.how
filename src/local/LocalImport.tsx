@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { SettingsDescription, Space, SettingsGrid, JoiStack } from '../common';
-import { useImages } from '../settings';
+import { useDispatchEvent } from '../game/hooks';
+import Local from '../game/plugins/local';
+import ClassicImages from '../game/plugins/classicImages';
 import { AnimatePresence } from 'framer-motion';
 import { discoverImageFiles, imageTypeFromExtension } from './files';
-import { useLocalImages } from './LocalProvider';
-import { ImageServiceType } from '../types';
 import { chunk } from 'lodash';
 import {
   WaButton,
@@ -15,8 +15,7 @@ import { LocalImageRequest } from '../services/localImages';
 
 export const LocalImport = () => {
   const [loading, setLoading] = useState(false);
-  const { storeImage } = useLocalImages();
-  const [, setImages] = useImages();
+  const { inject } = useDispatchEvent();
   const [files, setFiles] = useState<File[] | undefined>(undefined);
   const [progress, setProgress] = useState<number | undefined>(undefined);
 
@@ -47,20 +46,12 @@ export const LocalImport = () => {
           })
         );
 
-        const results = await storeImage(requests);
-
-        setImages(prev => [
-          ...(prev ?? []),
-          ...results.map(result => ({
-            thumbnail: `local://thumbnail/${result.id}`,
-            preview: `local://preview/${result.id}`,
-            full: `local://full/${result.id}`,
-            type: result.type,
-            source: `local://full/${result.id}`,
-            service: ImageServiceType.local,
-            id: result.id,
-          })),
-        ]);
+        const items = await Local.import(requests);
+        inject(
+          ClassicImages.add(
+            items.map(item => ({ source: Local.source, ...item }))
+          )
+        );
       }
     } finally {
       setLoading(false);

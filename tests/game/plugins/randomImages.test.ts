@@ -5,6 +5,7 @@ import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame } from '../../../src/engine/State';
 import { typedPath } from '../../../src/engine/Lens';
 import Image from '../../../src/game/plugins/image';
+import Scene from '../../../src/game/plugins/scene';
 import Rand from '../../../src/game/plugins/rand';
 import RandomImages, {
   getImageSwitchDuration,
@@ -118,6 +119,24 @@ describe('RandomImages lookahead', () => {
 
     expect(second.currentImage).toBe(first.nextImages[0]);
     expect(second.nextImages).toHaveLength(3);
+  });
+});
+
+describe('RandomImages on the game scene', () => {
+  it('should queue images when the game scene is entered and stop switching when it is left', () => {
+    let frame = startImages();
+    frame = ModuleManager.load(Scene)(frame);
+    frame = gamePipe(tick(frame));
+    frame = withImpulse(Scene.setScene('game'))(tick(frame));
+    for (let i = 0; i < 3; i++) frame = gamePipe(tick(frame));
+
+    expect(frame.core.images.nextImages.length).toBeGreaterThan(0);
+    expect(switchDuration(frame)).toBeDefined();
+
+    frame = withImpulse(Scene.setScene('home'))(tick(frame));
+    for (let i = 0; i < 3; i++) frame = gamePipe(tick(frame));
+
+    expect(switchDuration(frame)).toBeUndefined();
   });
 });
 

@@ -11,12 +11,17 @@ import {
   JoiStack,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
-import { E621Service } from '../services/e621';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { useImages } from '../settings';
+import { useDispatchEvent, useGameFrame } from '../game/hooks';
+import ClassicImages from '../game/plugins/classicImages';
+import { PendingRequest } from '../engine/pipes/Requests';
 import { useE621Setting } from './E621Provider';
-import { E621SortOrder, e621SortOrderLabels } from '../services/e621';
+import {
+  E621Service,
+  E621SortOrder,
+  e621SortOrderLabels,
+} from '../services/e621';
 import { AnimatePresence, motion } from 'framer-motion';
 import { E621CredentialsInput } from './E621Credentials';
 import { defaultTransition } from '../utils';
@@ -32,8 +37,6 @@ import {
 } from '@awesome.me/webawesome/dist/react';
 
 export const E621Search = () => {
-  const [loading, setLoading] = useState(false);
-
   const [tags, setTags] = useE621Setting('search');
   const [limit, setLimit] = useE621Setting('limit');
   const [order, setOrder] = useE621Setting('order');
@@ -44,35 +47,36 @@ export const E621Search = () => {
     useE621Setting('enableBlacklist');
   const [blacklist, setBlacklist] = useE621Setting('blacklist');
 
-  const setImages = useImages()[1];
+  const { inject } = useDispatchEvent();
   const e621Service = useMemo(() => new E621Service(), []);
+  const pending = useGameFrame<Record<string, PendingRequest> | undefined>([
+    'core.requests',
+    'pending',
+  ]);
+  const loading = Object.values(pending ?? {}).some(
+    request => request.type === 'core.e621/search'
+  );
 
-  const runSearch = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await e621Service.getImages({
-        tags: tags,
+  const runSearch = useCallback(() => {
+    inject(
+      ClassicImages.searchE621({
+        tags,
         limit,
         order,
+        minScore,
         credentials,
         blacklist: enableBlacklist ? blacklist : undefined,
-      });
-      setImages(images => [
-        ...result.filter(image => !images.some(i => i.id === image.id)),
-        ...images,
-      ]);
-    } finally {
-      setLoading(false);
-    }
+      })
+    );
   }, [
-    e621Service,
+    inject,
     tags,
     limit,
     order,
+    minScore,
     credentials,
     enableBlacklist,
     blacklist,
-    setImages,
   ]);
 
   const onToggleCredentials = useCallback(() => {

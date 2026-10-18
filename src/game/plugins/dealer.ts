@@ -10,7 +10,6 @@ import { Sequence } from '../Sequence';
 import Phase, { GamePhase } from './phase';
 import Rand from './rand';
 import Clock from './clock';
-import RandomImages from './randomImages';
 import { DiceEvent } from '../../types';
 import {
   PLUGIN_ID,
@@ -121,7 +120,6 @@ const Dealer = definePlugin({
   activate: Composer.pipe(
     Composer.set(dice, { busy: false, log: [] }),
     ...outcomes.map(o => ModuleManager.load(o.module)),
-    RandomImages.start(),
     roll.after(1000, 'check')
   ),
 
@@ -201,7 +199,6 @@ const Dealer = definePlugin({
 
   deactivate: Composer.pipe(
     ...outcomes.map(o => ModuleManager.unload(o.module.id)),
-    RandomImages.stop(),
     roll.cancel(),
     Composer.set(dice, undefined)
   ),

@@ -1,10 +1,11 @@
 import styled from 'styled-components';
 import { ContentSection } from '../../common';
-import { useImages } from '../../settings';
 import { useNavigate } from 'react-router-dom';
 import { WaButton } from '@awesome.me/webawesome/dist/react';
 import { useGameFrame } from '../../game/hooks/UseGameFrame';
 import { useDispatchEvent } from '../../game/hooks/UseDispatchEvent';
+import { useKeys } from '../../game/hooks';
+import ClassicImages from '../../game/plugins/classicImages';
 import Saves, { Restored } from '../../game/plugins/saves';
 
 const StyledStartSection = styled(ContentSection)`
@@ -64,7 +65,7 @@ function savedAgo(savedAt: number): string {
 }
 
 export const StartButton = () => {
-  const [images] = useImages();
+  const [{ images }] = useKeys(ClassicImages.keys);
   const navigate = useNavigate();
   const { inject } = useDispatchEvent();
   const { restored = null } = useGameFrame(Saves.paths) as {

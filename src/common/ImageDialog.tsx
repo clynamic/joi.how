@@ -1,14 +1,15 @@
 import { JoiToggleTile } from './ToggleTile';
 import { useCallback, useEffect, useState } from 'react';
-import { ImageItem, ImageType } from '../types';
+import { GridImage } from './gridImage';
 import { JoiImage } from './JoiImage';
-import { useLocalImages } from '../local/LocalProvider';
+import { useDispatchEvent } from '../game/hooks';
+import Assets from '../game/plugins/assets';
 import styled from 'styled-components';
 import { WaDialog, WaCard, WaIcon } from '@awesome.me/webawesome/dist/react';
 import { JoiStack } from './JoiStack';
 
 export interface ImageDialogProps {
-  image?: ImageItem;
+  image?: GridImage;
   onClose?: () => void;
   onSelect?: () => void;
   onDelete?: () => void;
@@ -40,13 +41,22 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
   loud = false,
 }) => {
   const [visible, setVisible] = useState(false);
-  const [current, setCurrent] = useState<ImageItem | null>(null);
-  const { resolveUrl } = useLocalImages();
+  const [current, setCurrent] = useState<GridImage | null>(null);
+  const { inject } = useDispatchEvent();
 
   useEffect(() => {
     setVisible(!!image);
-    if (image) setCurrent(image);
-  }, [image]);
+    if (image) {
+      setCurrent(image);
+      inject(
+        Assets.load(
+          image.key,
+          image.record.kind === 'video' ? 'full' : 'preview'
+        )
+      );
+      inject(Assets.load(image.key, 'full'));
+    }
+  }, [image, inject]);
 
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
@@ -68,20 +78,29 @@ export const ImageDialog: React.FC<ImageDialogProps> = ({
       {current && (
         <JoiStack>
           <JoiImage
-            thumb={current.thumbnail}
-            preview={current.preview}
-            full={current.full}
-            kind={current.type === ImageType.video ? 'video' : 'image'}
-            playable={current.type === ImageType.video}
+            thumb={current.urls.thumbnail}
+            preview={current.urls.preview}
+            full={current.urls.full}
+            kind={current.record.kind === 'video' ? 'video' : 'image'}
+            playable={current.record.kind === 'video'}
             loud={loud}
             objectFit='contain'
             style={{ height: 400 }}
-            alt={`file #${current.id}`}
+            alt={`file #${current.key}`}
           />
           <WaCard appearance='filled'>
             <JoiToggleTile
               onChange={async () =>
-                window.open(await resolveUrl(current.source), '_blank')
+                window.open(
+                  (
+                    current.record.meta?.source as string | undefined
+                  )?.startsWith('local://')
+                    ? (current.urls.full ?? '')
+                    : ((current.record.meta?.source as string | undefined) ??
+                        current.urls.full ??
+                        ''),
+                  '_blank'
+                )
               }
             >
               <h6 className='subtitle'>Browse</h6>

@@ -130,7 +130,12 @@ const ClassicImages = definePlugin({
       if (gone.length === 0 && fresh.length === 0) return;
       set(paths.used, selection);
       if (gone.length) pipe(Assets.unuse(gone));
-      if (fresh.length) pipe(Assets.use(fresh));
+      if (fresh.length) {
+        pipe(
+          Assets.use(fresh),
+          ...fresh.map(key => Assets.load(key, 'thumbnail'))
+        );
+      }
     })
   ),
 

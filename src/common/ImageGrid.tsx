@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { ImageItem, ImageType } from '../types';
+import { GridImage } from './gridImage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState } from 'react';
 import { faCheck, faImage } from '@fortawesome/free-solid-svg-icons';
@@ -19,7 +19,7 @@ import { motion } from 'framer-motion';
 import { JoiImage } from './JoiImage';
 
 interface ImageThumbnailTileProps {
-  item: ImageItem;
+  item: GridImage;
   selecting?: boolean;
   selected?: boolean;
   onSelectedChange?: (selected: boolean) => void;
@@ -52,10 +52,10 @@ const ImageThumbnailTile: React.FC<ImageThumbnailTileProps> = ({
           }}
         >
           <JoiImage
-            thumb={item.thumbnail}
-            kind={item.type === ImageType.video ? 'video' : 'image'}
+            thumb={item.urls.thumbnail}
+            kind={item.record.kind === 'video' ? 'video' : 'image'}
             objectFit='cover'
-            alt={`thumbnail #${item.id}`}
+            alt={`thumbnail #${item.key}`}
           />
         </StyledImageThumbnailTileImage>
       </ImageMiniView>
@@ -112,7 +112,7 @@ const SelectionOverlay: React.FC<SelectionOverlayProps> = ({
 };
 
 interface ImageMiniViewProps extends React.HTMLAttributes<HTMLDivElement> {
-  item: ImageItem;
+  item: GridImage;
   children: React.ReactNode;
 }
 
@@ -186,14 +186,14 @@ const ImageMiniView: React.FC<ImageMiniViewProps> = ({ item, children }) => {
           style={{ ...floatingStyles, ...styles }}
         >
           <JoiImage
-            thumb={item.thumbnail}
-            preview={item.preview}
+            thumb={item.urls.thumbnail}
+            preview={item.urls.preview ?? item.urls.thumbnail}
             full=''
-            kind={item.type === ImageType.video ? 'video' : 'image'}
-            playable={item.type === ImageType.video}
+            kind={item.record.kind === 'video' ? 'video' : 'image'}
+            playable={item.record.kind === 'video'}
             objectFit='contain'
             ratio={1}
-            alt={`preview #${item.id}`}
+            alt={`preview #${item.key}`}
           />
         </StyledImageMiniViewImage>
       )}
@@ -202,10 +202,10 @@ const ImageMiniView: React.FC<ImageMiniViewProps> = ({ item, children }) => {
 };
 
 export interface ImageGridProps {
-  images: ImageItem[];
-  selected?: ImageItem[];
-  onSelectedChange?: (selected: ImageItem[]) => void;
-  onClickTile?: (item: ImageItem) => void;
+  images: GridImage[];
+  selected?: GridImage[];
+  onSelectedChange?: (selected: GridImage[]) => void;
+  onClickTile?: (item: GridImage) => void;
 }
 
 const StyledImageGrid = styled.div`
