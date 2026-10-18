@@ -20,6 +20,7 @@ import Messages from './messages';
 import Toy from './toy';
 import Settings from './settings';
 import Presets from './presets';
+import Player from './player';
 
 const plugins = [
   Scene,
@@ -43,6 +44,7 @@ export const registerPlugins: Pipe = Composer.pipe(
   ModuleManager.load(Storage),
   ModuleManager.load(Settings),
   ModuleManager.load(Presets),
+  ModuleManager.load(Player),
   ModuleManager.load(PluginInstaller),
   ...plugins.map(ModuleManager.load)
 );

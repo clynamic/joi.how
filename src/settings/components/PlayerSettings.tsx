@@ -13,7 +13,8 @@ import {
   PlayerGenderDescriptions,
   PlayerGenderLabels,
 } from '../../types';
-import { useSetting } from '../SettingsProvider';
+import { useKeys } from '../../game/hooks';
+import { playerKeys } from '../../game/plugins/player';
 import {
   faMars,
   faMarsAndVenus,
@@ -21,8 +22,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export const PlayerSettings = () => {
-  const [gender, setGender] = useSetting('gender');
-  const [body, setBody] = useSetting('body');
+  const [{ gender, body }, set] = useKeys(playerKeys);
 
   return (
     <Fields label={'Player'}>
@@ -33,7 +33,7 @@ export const PlayerSettings = () => {
           <JoiToggleTile
             key={current}
             value={gender === current}
-            onClick={() => setGender(current)}
+            onClick={() => set('gender', current)}
           >
             <h6 className='subtitle'>{PlayerGenderLabels[current]}</h6>
             <p className='caption'>{PlayerGenderDescriptions[current]}</p>
@@ -63,7 +63,7 @@ export const PlayerSettings = () => {
           <JoiToggleTile
             key={current}
             value={body === current}
-            onClick={() => setBody(current)}
+            onClick={() => set('body', current)}
           >
             <h6 className='subtitle2'>{PlayerBodyLabels[current]}</h6>
             <p className='caption'>{PlayerBodyDescriptions[current]}</p>

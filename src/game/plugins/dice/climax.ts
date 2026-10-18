@@ -8,7 +8,8 @@ import Scene from '../scene';
 import Pace from '../pace';
 import Rand from '../rand';
 import { IntensityState } from '../intensity';
-import { PLUGIN_ID, intensityState, settings, outcomeDone } from './types';
+import Presets from '../presets';
+import { PLUGIN_ID, intensityState, outcomeDone } from './types';
 
 export type ClimaxResultType = 'climax' | 'denied' | 'ruined' | null;
 
@@ -17,6 +18,11 @@ type ClimaxState = {
 };
 
 export const climax = typedPath<ClimaxState>([PLUGIN_ID, 'climax']);
+
+export const climaxKeys = Presets.keys(`${PLUGIN_ID}.climax`, {
+  climaxChance: 100,
+  ruinChance: 0,
+});
 
 type ClimaxEndPayload = { countdown: number; denied?: boolean; ruin?: boolean };
 
@@ -101,33 +107,36 @@ export const climaxModule: Module = {
     ),
 
     seq.on('resolve', () =>
-      Composer.bind(settings, s =>
-        Rand.next(roll => {
-          if (roll * 100 > s.climaxChance) {
-            return Composer.pipe(
-              Composer.set(climax.result, 'denied'),
-              Phase.setPhase(GamePhase.break),
-              seq.message({
-                title: '$HANDS OFF! Do not cum!',
-                description: undefined,
-              }),
-              seq.after(1000, 'end', { countdown: 5, denied: true })
-            );
-          }
-          return Rand.next(ruinRoll => {
-            const ruin = ruinRoll * 100 <= s.ruinChance;
-            return Composer.pipe(
-              Composer.set(climax.result, ruin ? 'ruined' : 'climax'),
-              Phase.setPhase(ruin ? GamePhase.break : GamePhase.climax),
-              seq.message({
-                title: ruin ? '$HANDS OFF! Ruin your orgasm!' : 'Cum!',
-                description: undefined,
-              }),
-              seq.after(3000, 'end', { countdown: 10, ruin })
-            );
-          });
-        })
-      )
+      Composer.do(({ get, pipe }) => {
+        const s = climaxKeys.get(get());
+        pipe(
+          Rand.next(roll => {
+            if (roll * 100 > s.climaxChance) {
+              return Composer.pipe(
+                Composer.set(climax.result, 'denied'),
+                Phase.setPhase(GamePhase.break),
+                seq.message({
+                  title: '$HANDS OFF! Do not cum!',
+                  description: undefined,
+                }),
+                seq.after(1000, 'end', { countdown: 5, denied: true })
+              );
+            }
+            return Rand.next(ruinRoll => {
+              const ruin = ruinRoll * 100 <= s.ruinChance;
+              return Composer.pipe(
+                Composer.set(climax.result, ruin ? 'ruined' : 'climax'),
+                Phase.setPhase(ruin ? GamePhase.break : GamePhase.climax),
+                seq.message({
+                  title: ruin ? '$HANDS OFF! Ruin your orgasm!' : 'Cum!',
+                  description: undefined,
+                }),
+                seq.after(3000, 'end', { countdown: 10, ruin })
+              );
+            });
+          })
+        );
+      })
     ),
 
     seq.on<ClimaxEndPayload>('end', event => {

@@ -8,12 +8,12 @@ import {
   SettingsDescription,
 } from '../../common';
 import { SettingsInfo } from '../../common/SettingsInfo';
-import { useSetting } from '../SettingsProvider';
+import { useKeys } from '../../game/hooks';
+import { climaxKeys } from '../../game/plugins/dice/climax';
 import { WaSlider } from '@awesome.me/webawesome/dist/react';
 
 export const ClimaxSettings = () => {
-  const [climaxChance, setClimaxChance] = useSetting('climaxChance');
-  const [ruinChance, setRuinChance] = useSetting('ruinChance');
+  const [{ climaxChance, ruinChance }, set] = useKeys(climaxKeys);
 
   const climaxText = useMemo(() => {
     if (climaxChance == 100) {
@@ -50,7 +50,7 @@ export const ClimaxSettings = () => {
           value={climaxChance}
           min={0}
           max={100}
-          onInput={e => setClimaxChance(e.currentTarget.value)}
+          onInput={e => set('climaxChance', Number(e.currentTarget.value))}
           style={{ width: '100%' }}
         />
         <Measure value={climaxChance} chars={3} unit='%' />
@@ -65,7 +65,7 @@ export const ClimaxSettings = () => {
           value={ruinChance}
           min={0}
           max={100}
-          onInput={e => setRuinChance(e.currentTarget.value)}
+          onInput={e => set('ruinChance', Number(e.currentTarget.value))}
           style={{ width: '100%' }}
         />
         <Measure value={ruinChance} chars={3} unit='%' />

@@ -6,6 +6,9 @@ import { gamePipes } from '../src/game/pipes/Game';
 import Pace from '../src/game/plugins/pace';
 import { intensityKeys } from '../src/game/plugins/intensity';
 import { warmupKeys } from '../src/game/plugins/warmup';
+import { dealerKeys } from '../src/game/plugins/dealer';
+import { climaxKeys } from '../src/game/plugins/dice/climax';
+import { playerKeys } from '../src/game/plugins/player';
 
 export const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
   tick: 0,
@@ -21,7 +24,14 @@ export const tick = (frame: GameFrame, step = 16): GameFrame => ({
   time: frame.time + step,
 });
 
-const declared = [Pace.keys, intensityKeys, warmupKeys];
+const declared = [
+  Pace.keys,
+  intensityKeys,
+  warmupKeys,
+  dealerKeys,
+  climaxKeys,
+  playerKeys,
+];
 
 const sectioned = (values: Record<string, unknown>) =>
   Object.fromEntries(

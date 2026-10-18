@@ -15,12 +15,12 @@ import { DiceEvent } from '../../types';
 import {
   PLUGIN_ID,
   dice,
-  settings,
   intensityState,
   OUTCOME_DONE,
   DiceLogEntry,
   DiceState,
 } from './dice/types';
+import Presets from './presets';
 import { pauseModule } from './dice/pause';
 import { randomPaceModule } from './dice/randomPace';
 import { doublePaceChance, doublePaceModule } from './dice/doublePace';
@@ -39,6 +39,9 @@ type OutcomeEntry = {
   check?: (get: Getter) => boolean;
 };
 
+export const dealerKeys = Presets.keys(PLUGIN_ID, {
+  events: Object.values(DiceEvent) as DiceEvent[],
+});
 const intensity = (get: Composer<GameFrame>['get']) =>
   get(intensityState).intensity * 100;
 
@@ -145,7 +148,7 @@ const Dealer = definePlugin({
             const state = get(dice);
             if (state.busy) return;
 
-            const s = get(settings);
+            const s = dealerKeys.get(get());
 
             const eligible = outcomes.filter(o => {
               if (!s.events.includes(o.event)) return false;

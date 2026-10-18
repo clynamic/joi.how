@@ -7,7 +7,6 @@ import {
   faPersonRunning,
   faPersonWalking,
 } from '@fortawesome/free-solid-svg-icons';
-import { useSetting } from '../../settings';
 import { useMemo } from 'react';
 import { DiceEvent } from '../../types';
 import { ProgressBar } from '../../common';
@@ -15,7 +14,7 @@ import { WaDivider } from '@awesome.me/webawesome/dist/react';
 import { useGameFrame, useKeys } from '../hooks';
 import Pace from '../plugins/pace';
 import Intensity from '../plugins/intensity';
-import { Paws, PawLabels, pawsPath } from '../plugins/dealer';
+import { Paws, PawLabels, pawsPath, dealerKeys } from '../plugins/dealer';
 
 const StyledGameInstructions = styled.div`
   display: flex;
@@ -125,7 +124,7 @@ const IntensityDisplay = () => {
 };
 
 export const GameInstructions = () => {
-  const [events] = useSetting('events');
+  const [{ events }] = useKeys(dealerKeys);
   const useRandomGrip = useMemo(
     () => events.includes(DiceEvent.randomGrip),
     [events]

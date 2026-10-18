@@ -8,13 +8,14 @@ import { typedPath } from '../../../src/engine/Lens';
 import Phase, { GamePhase } from '../../../src/game/plugins/phase';
 import Pause from '../../../src/game/plugins/pause';
 import Rand from '../../../src/game/plugins/rand';
-import Dealer from '../../../src/game/plugins/dealer';
+import Dealer, { dealerKeys } from '../../../src/game/plugins/dealer';
 import Saves from '../../../src/game/plugins/saves';
 
 const DEALER_ID = 'core.dice';
 import Messages from '../../../src/game/plugins/messages';
 import { doublePaceChance } from '../../../src/game/plugins/dice/doublePace';
 import { DiceEvent } from '../../../src/types';
+import { climaxKeys } from '../../../src/game/plugins/dice/climax';
 import { OUTCOME_DONE } from '../../../src/game/plugins/dice/types';
 import { defaultSettings } from '../../../src/settings/Settings';
 import { makeFrame, makeGame, seed, tick } from '../../utils';
@@ -107,7 +108,7 @@ describe('Dealer integration', () => {
   it('should not trigger outcomes before active phase', () => {
     let frame = gamePipe(makeFrame());
 
-    frame = Composer.set(typedPath(['settings']), {
+    frame = seed({
       ...defaultSettings,
       events: Object.values(DiceEvent),
     })(frame);
@@ -196,7 +197,7 @@ describe('Dealer integration', () => {
   it('should roll against a chance that depends on the frame', () => {
     let frame = startGame(0.99);
     frame = Composer.pipe(
-      Composer.set(typedPath(['settings', 'events']), [DiceEvent.doublePace]),
+      dealerKeys.set('events', [DiceEvent.doublePace]),
       Composer.set(typedPath(['core.rand']), { seed: 'fixed', cursor: 4242 })
     )(frame);
 
@@ -212,9 +213,9 @@ describe('Dealer integration', () => {
   it('should end a ruined climax on good job after clenching', () => {
     let frame = startGame(1);
     frame = Composer.pipe(
-      Composer.set(typedPath(['settings', 'events']), [DiceEvent.climax]),
-      Composer.set(typedPath(['settings', 'climaxChance']), 100),
-      Composer.set(typedPath(['settings', 'ruinChance']), 100),
+      dealerKeys.set('events', [DiceEvent.climax]),
+      climaxKeys.set('climaxChance', 100),
+      climaxKeys.set('ruinChance', 100),
       ModuleManager.load(Messages)
     )(frame);
     frame = gamePipe(tick(frame, 1));

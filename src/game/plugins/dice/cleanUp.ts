@@ -3,7 +3,8 @@ import { Module } from '../../../engine/modules/Module';
 import { Sequence } from '../../Sequence';
 import Phase, { GamePhase } from '../phase';
 import { CleanUpDescriptions } from '../../../types';
-import { PLUGIN_ID, settings, outcomeDone } from './types';
+import { playerKeys } from '../player';
+import { PLUGIN_ID, outcomeDone } from './types';
 
 const seq = Sequence.for(PLUGIN_ID, 'cleanUp');
 
@@ -12,11 +13,11 @@ export const cleanUpModule: Module = {
   ordering: { loadAfter: [PLUGIN_ID] },
   update: Composer.pipe(
     seq.on(() =>
-      Composer.bind(settings, s =>
-        Composer.pipe(
+      Composer.do(({ get, pipe }) =>
+        pipe(
           Phase.setPhase(GamePhase.break),
           seq.message({
-            title: `Lick up any ${CleanUpDescriptions[s.body]}`,
+            title: `Lick up any ${CleanUpDescriptions[playerKeys.get(get()).body]}`,
             duration: undefined,
             prompts: [seq.prompt(`I'm done, $master`, 'done')],
           })

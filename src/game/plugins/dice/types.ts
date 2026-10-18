@@ -4,7 +4,6 @@ import { pluginPaths } from '../../../engine/plugins/Plugins';
 import { typedPath } from '../../../engine/Lens';
 import { IntensityState } from '../intensity';
 import { PaceState } from '../pace';
-import { Settings } from '../../../settings/Settings';
 import { DiceEvent } from '../../../types';
 
 export const PLUGIN_ID = 'core.dice';
@@ -19,7 +18,6 @@ export type DiceState = {
 export const dice = pluginPaths<DiceState>(PLUGIN_ID);
 export const paceState = typedPath<PaceState>(['core.pace']);
 export const intensityState = typedPath<IntensityState>(['core.intensity']);
-export const settings = typedPath<Settings>(['settings']);
 
 export const OUTCOME_DONE = Events.getKey(PLUGIN_ID, 'outcome.done');
 export const outcomeDone = (): Pipe => Events.dispatch({ type: OUTCOME_DONE });

@@ -1,20 +1,24 @@
 import { DiceEvent, DiceEventDescriptions, DiceEventLabels } from '../../types';
 import { useCallback } from 'react';
 import { Fields, JoiToggleTile, SettingsDescription } from '../../common';
-import { useSetting } from '../SettingsProvider';
+import { useKeys } from '../../game/hooks';
+import { dealerKeys } from '../../game/plugins/dealer';
 
 export const EventSettings = () => {
-  const [events, setEvents] = useSetting('events');
+  const [{ events }, set] = useKeys(dealerKeys);
 
   const toggleEvent = useCallback(
     (event: DiceEvent) => {
       if (events.includes(event)) {
-        setEvents(events.filter(e => e !== event));
+        set(
+          'events',
+          events.filter(e => e !== event)
+        );
       } else {
-        setEvents([...events, event]);
+        set('events', [...events, event]);
       }
     },
-    [events, setEvents]
+    [events, set]
   );
 
   return (
