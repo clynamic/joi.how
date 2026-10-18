@@ -6,9 +6,10 @@ import {
 import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
 import { Effects, type Inject } from '../../engine/pipes/Effects';
+import { Requests } from '../../engine/pipes/Requests';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
-import { Pipe } from '../../engine/State';
+import { GameFrame, Pipe } from '../../engine/State';
 import { ToyClient } from '../../toy';
 import { Sequence } from '../Sequence';
 import Storage from '../../engine/plugins/Storage';
@@ -60,7 +61,10 @@ const intensityState = typedPath<IntensityState>(['core.intensity']);
 
 const seq = Sequence.for(PLUGIN_ID, 'climax');
 
-const connect = Effects.define<{ url: string }>(PLUGIN_ID, 'connect');
+const connect = Requests.define<
+  { url: string },
+  { url: string; toys: ToyInfo[] }
+>(PLUGIN_ID, 'connect');
 const disconnect = Effects.define(PLUGIN_ID, 'disconnect');
 const sync = Effects.define(PLUGIN_ID, 'sync');
 const actuate = Effects.define<ActuatePayload>(PLUGIN_ID, 'actuate');
@@ -130,32 +134,28 @@ const attach = (target: ButtplugClient, inject: Inject) => {
   });
 };
 
-const open = (url: string, inject: Inject) => {
-  if (connecting || client) {
-    snapshot(inject);
-    return;
-  }
+const open = async (
+  url: string,
+  inject: Inject
+): Promise<{ url: string; toys: ToyInfo[] }> => {
+  if (client) return { url: connection ?? url, toys: describe(toys) };
+  if (connecting) throw new Error('already connecting');
   connecting = true;
   const next = new ButtplugClient('JOI.how');
-  next
-    .connect(new ButtplugBrowserWebsocketClientConnector(url))
-    .then(() => next.startScanning())
-    .then(() => {
-      client = next;
-      connection = url;
-      toys = next.devices.map(device => new ToyClient(device));
-      attach(next, inject);
-      inject(Storage.write(CONNECTION_KEY, url));
-    })
-    .catch(error => {
-      next.disconnect().catch(() => undefined);
-      inject(Storage.remove(CONNECTION_KEY));
-      report(inject)(error);
-    })
-    .finally(() => {
-      connecting = false;
-      snapshot(inject);
-    });
+  try {
+    await next.connect(new ButtplugBrowserWebsocketClientConnector(url));
+    await next.startScanning();
+    client = next;
+    connection = url;
+    toys = next.devices.map(device => new ToyClient(device));
+    attach(next, inject);
+    return { url, toys: describe(toys) };
+  } catch (error) {
+    next.disconnect().catch(() => undefined);
+    throw error;
+  } finally {
+    connecting = false;
+  }
 };
 
 const close = (inject: Inject) => {
@@ -202,6 +202,14 @@ const ramp = (step: number): Pipe => {
 
 const hush = (): Pipe => Composer.pipe(stop.emit(), seq.cancel());
 
+const startConnect = (url: string): Pipe =>
+  Composer.do<GameFrame>(({ get, set, pipe }) => {
+    if (!get(toy)) return;
+    set(toy.error, undefined);
+    set(toy.connecting, true);
+    pipe(connect.start({ url }));
+  });
+
 const Toy = definePlugin({
   sdk: 'Toy',
   id: PLUGIN_ID,
@@ -216,12 +224,7 @@ const Toy = definePlugin({
   },
 
   connect(url: string): Pipe {
-    return Composer.do(({ get, set, pipe }) => {
-      if (!get(toy)) return;
-      set(toy.error, undefined);
-      set(toy.connecting, true);
-      pipe(connect.emit({ url }));
-    });
+    return startConnect(url);
   },
 
   disconnect(): Pipe {
@@ -240,7 +243,24 @@ const Toy = definePlugin({
 
   update: Composer.pipe(
     Storage.onRead(CONNECTION_KEY, url =>
-      typeof url === 'string' ? connect.emit({ url }) : frame => frame
+      typeof url === 'string' ? startConnect(url) : frame => frame
+    ),
+    connect.onDone(({ url, toys: list }) =>
+      Composer.do(({ get, set, pipe }) => {
+        if (!get(toy)) return;
+        set(toy.connection, url);
+        set(toy.connecting, false);
+        set(toy.toys, list);
+        pipe(Storage.write(CONNECTION_KEY, url));
+      })
+    ),
+    connect.onFailed(reason =>
+      Composer.do(({ get, set, pipe }) => {
+        if (!get(toy)) return;
+        set(toy.connecting, false);
+        set(toy.error, reason);
+        pipe(Storage.remove(CONNECTION_KEY));
+      })
     ),
     Pause.whenPlaying(actuatePipe),
     Phase.onEnter(GamePhase.climax, () => seq.start()),

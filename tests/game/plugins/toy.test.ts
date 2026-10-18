@@ -228,7 +228,13 @@ describe('Toy', () => {
     expect(frame.core.toy.connecting).toBe(true);
     expect(frame.core.toy.error).toBeUndefined();
     expect(getEffects(frame)).toEqual([
-      { type: `${TOY_ID}/connect`, payload: { url: 'ws://127.0.0.1:12345' } },
+      {
+        type: `${TOY_ID}/connect`,
+        payload: {
+          id: expect.any(String),
+          payload: { url: 'ws://127.0.0.1:12345' },
+        },
+      },
     ]);
   });
 

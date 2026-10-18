@@ -33,7 +33,7 @@ export type RequestDefinition<P, R> = {
   type: string;
   start: (payload: P) => Pipe;
   perform: (
-    fn: (payload: P, id: RequestId) => Promise<R>
+    fn: (payload: P, inject: Inject, id: RequestId) => Promise<R>
   ) => Performer<unknown>;
   onDone: (fn: (result: R, id: RequestId) => Pipe) => Pipe;
   onFailed: (fn: (reason: string, id: RequestId) => Pipe) => Pipe;
@@ -66,7 +66,7 @@ export class Requests {
 
       perform: fn =>
         effect.perform(({ id, payload }, inject: Inject) => {
-          fn(payload, id).then(
+          fn(payload, inject, id).then(
             result =>
               inject(
                 Events.dispatch<Done<R>>({
