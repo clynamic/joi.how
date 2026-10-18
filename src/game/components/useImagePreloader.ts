@@ -1,11 +1,7 @@
 import { useCallback, useEffect } from 'react';
-import { ImageItem, ImageSize, ImageType } from '../../types';
+import { ImageItem, ImageSize } from '../../types';
+import { PreloadItem, preloadItemsFor } from './preloadItems';
 import { useLocalImages } from '../../local/LocalProvider';
-
-interface PreloadItem {
-  src: string;
-  type: 'image' | 'video';
-}
 
 const usePreloadItems = () => {
   const { resolveUrl } = useLocalImages();
@@ -36,22 +32,6 @@ export const useImagePreloader = (imageItems: ImageItem[], size: ImageSize) => {
   const preloadItems = usePreloadItems();
 
   useEffect(() => {
-    const items: PreloadItem[] = [];
-
-    imageItems.forEach(item => {
-      if (size === ImageSize.thumbnail) {
-        items.push({ src: item.thumbnail, type: 'image' });
-      } else if (size === ImageSize.preview) {
-        items.push({ src: item.preview, type: 'image' });
-      } else if (size === ImageSize.full) {
-        if (item.type === ImageType.video) {
-          items.push({ src: item.full, type: 'video' });
-        } else {
-          items.push({ src: item.full, type: 'image' });
-        }
-      }
-    });
-
-    preloadItems(items);
+    preloadItems(preloadItemsFor(imageItems, size));
   }, [imageItems, preloadItems, size]);
 };
