@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { useSettings, useImages } from '../../settings';
+import { normalizeSettings } from '../../settings/Settings';
 import { Composer, Pipe } from '../../engine';
 
 export const useSettingsPipe = (): Pipe => {
@@ -14,7 +15,7 @@ export const useSettingsPipe = (): Pipe => {
   return useCallback<Pipe>(
     frame =>
       Composer.pipe(
-        Composer.set(['settings'], settingsRef.current),
+        Composer.set(['settings'], normalizeSettings(settingsRef.current)),
         Composer.set(['images'], imagesRef.current)
       )(frame),
     []

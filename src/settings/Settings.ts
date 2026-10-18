@@ -19,6 +19,11 @@ export interface Settings {
   intenseImages: boolean;
 }
 
+export const normalizeSettings = (s: Settings): Settings => ({
+  ...s,
+  maxPace: Math.max(s.minPace, s.maxPace),
+});
+
 export const defaultSettings: Settings = {
   gameDuration: 900,
   warmupDuration: 0,
