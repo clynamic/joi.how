@@ -11,7 +11,8 @@ import { climaxKeys } from '../src/game/plugins/dice/climax';
 import { hypnoKeys } from '../src/game/plugins/hypno';
 import { imageKeys } from '../src/game/plugins/randomImages';
 import { playerKeys } from '../src/game/plugins/player';
-import { displayKeys } from '../src/game/components/displayKeys';
+import { displayKeys } from '../src/game/plugins/image';
+import ClassicImages from '../src/game/plugins/classicImages';
 import Home from '../src/game/plugins/home';
 
 export const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
@@ -38,6 +39,7 @@ const declared = [
   imageKeys,
   playerKeys,
   displayKeys,
+  ClassicImages.keys,
   Home.keys,
 ];
 

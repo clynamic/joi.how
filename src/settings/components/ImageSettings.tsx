@@ -1,7 +1,7 @@
 import { ImageGrid, ImageDialog, Space, Fields, JoiStack } from '../../common';
 import { useImages } from '../../settings';
 import { useKeys } from '../../game/hooks';
-import { displayKeys } from '../../game/components/displayKeys';
+import { displayKeys } from '../../game/plugins/image';
 import { useState } from 'react';
 import { ImageItem } from '../../types';
 import { useLocalImages } from '../../local/LocalProvider';

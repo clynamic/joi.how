@@ -3,20 +3,11 @@ import { Composer } from '../../../src/engine/Composer';
 import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Image from '../../../src/game/plugins/image';
-import { ImageItem, ImageServiceType, ImageType } from '../../../src/types';
 import { makeFrame, makeGame, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
 
-const img = (id: string): ImageItem => ({
-  id,
-  type: ImageType.image,
-  thumbnail: `${id}-thumb`,
-  preview: `${id}-preview`,
-  full: `${id}-full`,
-  source: `${id}-source`,
-  service: ImageServiceType.local,
-});
+const img = (id: string) => `local:${id}`;
 
 const state = (frame: GameFrame) => frame.core.images;
 
@@ -39,10 +30,7 @@ describe('Image', () => {
     );
 
     expect(state(frame).currentImage).toBeUndefined();
-    expect(state(frame).nextImages.map((i: ImageItem) => i.id)).toEqual([
-      'a',
-      'b',
-    ]);
+    expect(state(frame).nextImages).toEqual(['local:a', 'local:b']);
   });
 
   it('should show the head of the queue on advance', () => {
@@ -55,8 +43,8 @@ describe('Image', () => {
     );
     frame = step(frame, Image.advance());
 
-    expect(state(frame).currentImage?.id).toBe('a');
-    expect(state(frame).nextImages.map((i: ImageItem) => i.id)).toEqual(['b']);
+    expect(state(frame).currentImage).toBe('local:a');
+    expect(state(frame).nextImages).toEqual(['local:b']);
   });
 
   it('should keep the current image when advancing an empty queue', () => {
@@ -64,7 +52,7 @@ describe('Image', () => {
     frame = step(frame, Image.advance());
     frame = step(frame, Image.advance());
 
-    expect(state(frame).currentImage?.id).toBe('a');
+    expect(state(frame).currentImage).toBe('local:a');
     expect(state(frame).nextImages).toEqual([]);
   });
 });

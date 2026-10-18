@@ -11,7 +11,7 @@ import {
 } from '../../common';
 import { useKeys } from '../../game/hooks';
 import { imageKeys } from '../../game/plugins/randomImages';
-import { displayKeys } from '../../game/components/displayKeys';
+import { displayKeys } from '../../game/plugins/image';
 import { faVolumeMute, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
 import { WaSlider } from '@awesome.me/webawesome/dist/react';
 

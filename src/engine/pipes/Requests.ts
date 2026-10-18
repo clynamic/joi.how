@@ -45,8 +45,8 @@ export type RequestDefinition<P, R> = {
   perform: (
     fn: (payload: P, inject: Inject, id: RequestId) => Promise<R>
   ) => Performer<unknown>;
-  onDone: (fn: (result: R, id: RequestId) => Pipe) => Pipe;
-  onFailed: (fn: (reason: string, id: RequestId) => Pipe) => Pipe;
+  onDone: (fn: (result: R, id: RequestId, payload: P) => Pipe) => Pipe;
+  onFailed: (fn: (reason: string, id: RequestId, payload: P) => Pipe) => Pipe;
 };
 
 export class Requests {
@@ -98,16 +98,16 @@ export class Requests {
         }),
 
       onDone: fn =>
-        Events.handle<Done<R>>(eventType.done, event =>
+        Events.handle<Done<R, P>>(eventType.done, event =>
           event.payload.type === type
-            ? fn(event.payload.result, event.payload.id)
+            ? fn(event.payload.result, event.payload.id, event.payload.payload)
             : frame => frame
         ),
 
       onFailed: fn =>
-        Events.handle<Failed>(eventType.failed, event =>
+        Events.handle<Failed<P>>(eventType.failed, event =>
           event.payload.type === type
-            ? fn(event.payload.reason, event.payload.id)
+            ? fn(event.payload.reason, event.payload.id, event.payload.payload)
             : frame => frame
         ),
     };

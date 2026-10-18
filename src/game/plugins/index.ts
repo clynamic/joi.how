@@ -22,6 +22,10 @@ import Settings from './settings';
 import Presets from './presets';
 import Home from './home';
 import Player from './player';
+import Assets from './assets';
+import Local from './local';
+import E621 from './e621';
+import ClassicImages from './classicImages';
 
 const plugins = [
   Scene,
@@ -37,6 +41,7 @@ const plugins = [
   Saves,
   Classic,
   Toy,
+  ClassicImages,
   Fps,
   PerfOverlay,
 ];
@@ -47,6 +52,9 @@ export const registerPlugins: Pipe = Composer.pipe(
   ModuleManager.load(Presets),
   ModuleManager.load(Player),
   ModuleManager.load(Home),
+  ModuleManager.load(Assets),
+  ModuleManager.load(Local),
+  ModuleManager.load(E621),
   ModuleManager.load(PluginInstaller),
   ...plugins.map(ModuleManager.load)
 );

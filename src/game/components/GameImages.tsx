@@ -1,13 +1,11 @@
 import styled from 'styled-components';
 import { useKeys } from '../hooks';
-import { displayKeys } from './displayKeys';
 import { imageKeys } from '../plugins/randomImages';
 import { motion } from 'framer-motion';
 import { JoiImage } from '../../common';
-import { useImagePreloader } from './useImagePreloader';
-import { ImageSize, ImageType } from '../../types';
 import { useGameFrame } from '../hooks';
-import Image from '../plugins/image';
+import Image, { displayKeys } from '../plugins/image';
+import Assets from '../plugins/assets';
 import Intensity from '../plugins/intensity';
 import { getImageSwitchDuration } from '../plugins/randomImages';
 
@@ -48,17 +46,23 @@ const StyledBackgroundImage = motion.create(styled.div`
   filter: blur(30px);
 `);
 export const GameImages = () => {
-  const { currentImage, nextImages = [] } = useGameFrame(Image.paths);
+  const { currentImage } = useGameFrame(Image.paths);
   const { intensity = 0 } = useGameFrame(Intensity.paths);
-  const [{ videoSound, highRes }] = useKeys(displayKeys);
+  const assets = useGameFrame(Assets.paths);
+  const [{ videoSound }] = useKeys(displayKeys);
   const [{ imageDuration, intenseImages }] = useKeys(imageKeys);
-
-  useImagePreloader(nextImages, highRes ? ImageSize.full : ImageSize.preview);
 
   const switchDuration = getImageSwitchDuration(
     { imageDuration, intenseImages },
     intensity
   );
+
+  const entry = currentImage ? assets?.inUse?.[currentImage] : undefined;
+  const record = currentImage
+    ? assets?.library?.[currentImage]?.record
+    : undefined;
+  const urls = entry?.urls ?? {};
+  const isVideo = record?.kind === 'video';
 
   return (
     <StyledGameImages>
@@ -74,23 +78,19 @@ export const GameImages = () => {
             }}
           >
             <JoiImage
-              thumb={currentImage.thumbnail}
-              preview={currentImage.preview}
-              kind={currentImage.type === ImageType.video ? 'video' : 'image'}
+              thumb={urls.thumbnail}
+              preview={urls.preview}
+              kind={isVideo ? 'video' : 'image'}
               objectFit='cover'
             />
           </StyledBackgroundImage>
           <StyledForegroundImage>
             <JoiImage
-              thumb={currentImage.thumbnail}
-              preview={currentImage.preview}
-              full={
-                highRes || currentImage.type === ImageType.video
-                  ? currentImage.full
-                  : undefined
-              }
-              kind={currentImage.type === ImageType.video ? 'video' : 'image'}
-              playable={currentImage.type === ImageType.video}
+              thumb={urls.thumbnail}
+              preview={urls.preview}
+              full={urls.full}
+              kind={isVideo ? 'video' : 'image'}
+              playable={isVideo}
               loud={videoSound}
               randomStart={true}
               objectFit='contain'

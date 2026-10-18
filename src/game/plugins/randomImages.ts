@@ -4,10 +4,10 @@ import { Events } from '../../engine/pipes/Events';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { Pipe } from '../../engine/State';
-import { ImageItem } from '../../types';
 import Presets from './presets';
 import { PLAY_TIMELINE } from '../timelines';
 import Image from './image';
+import ClassicImages from './classicImages';
 import { IntensityState } from './intensity';
 import Rand from './rand';
 
@@ -18,7 +18,6 @@ type RandomImagesState = {
 };
 
 const state = pluginPaths<RandomImagesState>(PLUGIN_ID);
-const images = typedPath<ImageItem[]>(['images']);
 const intensityState = typedPath<IntensityState>(['core.intensity']);
 export const imageKeys = Presets.keys(PLUGIN_ID, {
   imageDuration: 20,
@@ -51,15 +50,15 @@ const RandomImages = definePlugin({
 
   start(): Pipe {
     return Composer.do(({ get, pipe }) => {
-      const imgs = get(images);
-      if (!imgs || imgs.length === 0) return;
+      const imgs = ClassicImages.keys.get(get()).images;
+      if (imgs.length === 0) return;
 
       pipe(
         Rand.shuffle(imgs, shuffled => {
           const initial = shuffled.slice(0, Math.min(3, imgs.length));
           return Composer.pipe(
-            Composer.set(state, { seenImages: initial.map(img => img.id) }),
-            ...initial.map(img => Image.pushNextImage(img)),
+            Composer.set(state, { seenImages: initial }),
+            ...initial.map(key => Image.pushNextImage(key)),
             Events.dispatch({ type: eventType.scheduleNext })
           );
         })
@@ -77,15 +76,15 @@ const RandomImages = definePlugin({
 
   update: Events.handle(eventType.scheduleNext, () =>
     Composer.do(({ get, pipe }) => {
-      const imgs = get(images);
-      if (!imgs || imgs.length === 0) return;
+      const imgs = ClassicImages.keys.get(get()).images;
+      if (imgs.length === 0) return;
 
       const { seenImages = [] } = get(state);
       const { intensity = 0 } = get(intensityState);
       const s = imageKeys.get(get());
 
       const imagesWithDistance = imgs.map(image => {
-        const seenIndex = seenImages.indexOf(image.id);
+        const seenIndex = seenImages.indexOf(image);
         const distance = seenIndex === -1 ? seenImages.length : seenIndex;
         return { image, distance };
       });
@@ -112,11 +111,11 @@ const RandomImages = definePlugin({
           const randomImage = imagesWithDistance[selectedIndex].image;
 
           const seen = [...seenImages];
-          const existingIndex = seen.indexOf(randomImage.id);
+          const existingIndex = seen.indexOf(randomImage);
           if (existingIndex !== -1) {
             seen.splice(existingIndex, 1);
           }
-          seen.unshift(randomImage.id);
+          seen.unshift(randomImage);
           if (seen.length > 500) {
             seen.pop();
           }

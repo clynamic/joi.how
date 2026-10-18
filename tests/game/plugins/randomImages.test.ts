@@ -9,33 +9,18 @@ import Rand from '../../../src/game/plugins/rand';
 import RandomImages, {
   getImageSwitchDuration,
 } from '../../../src/game/plugins/randomImages';
-import { ImageItem, ImageServiceType, ImageType } from '../../../src/types';
 import { defaults, makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
-
-const makeImage = (id: string): ImageItem => ({
-  id,
-  type: ImageType.image,
-  thumbnail: `${id}-thumb`,
-  preview: `${id}-preview`,
-  full: `${id}-full`,
-  source: `${id}-source`,
-  service: ImageServiceType.local,
-});
 
 function startImages(overrides?: Partial<typeof defaults>): GameFrame {
   let frame = gamePipe(makeFrame());
 
   frame = seed({
     ...defaults,
+    images: ['local:a', 'local:b', 'local:c'],
     ...overrides,
   })(frame);
-  frame = Composer.set(typedPath(['images']), [
-    makeImage('a'),
-    makeImage('b'),
-    makeImage('c'),
-  ])(frame);
   frame = Composer.set(typedPath(['core.intensity']), { intensity: 0 })(frame);
 
   frame = ModuleManager.load(Rand)(frame);
@@ -114,11 +99,9 @@ describe('RandomImages lookahead', () => {
     frame = gamePipe(tick(frame));
 
     const { currentImage, nextImages } = imageState(frame);
-    expect(['a', 'b', 'c']).toContain(currentImage?.id);
+    expect(['local:a', 'local:b', 'local:c']).toContain(currentImage);
     expect(nextImages).toHaveLength(3);
-    expect(nextImages.slice(0, 2).map((i: ImageItem) => i.id)).not.toContain(
-      currentImage?.id
-    );
+    expect(nextImages.slice(0, 2)).not.toContain(currentImage);
   });
 
   it('should advance through the queue on each switch', () => {
@@ -133,7 +116,7 @@ describe('RandomImages lookahead', () => {
     frame = gamePipe(tick(frame));
     const second = imageState(frame);
 
-    expect(second.currentImage?.id).toBe(first.nextImages[0].id);
+    expect(second.currentImage).toBe(first.nextImages[0]);
     expect(second.nextImages).toHaveLength(3);
   });
 });
