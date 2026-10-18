@@ -61,6 +61,22 @@ describe('Messages', () => {
 
     frame = run(frame, 600);
     expect(titles(frame)).toEqual([]);
+
+    frame = step(
+      frame,
+      Composer.pipe(
+        Scheduler.setRate(PLAY_TIMELINE, 0),
+        Messages.send({ id: 'b', title: 'Waiting', duration: 1000 }),
+        Messages.send({
+          id: 'c',
+          title: 'Ticking',
+          duration: 1000,
+          timeline: Scheduler.ENGINE_TIMELINE,
+        })
+      )
+    );
+    frame = run(frame, 1300);
+    expect(titles(frame)).toEqual(['Waiting']);
   });
 
   it('should keep a message that was updated just before its old expiry', () => {

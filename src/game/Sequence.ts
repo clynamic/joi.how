@@ -43,7 +43,7 @@ export class Sequence {
           return Events.handle(rootKey, nameOrHandler);
         return Events.handle(nodeKey(nameOrHandler), handler);
       },
-      message: msg => Messages.send({ ...msg, id: name }),
+      message: msg => Messages.send({ timeline, ...msg, id: name }),
       after: (duration, target, payload) =>
         Scheduler.schedule({
           id: schedKey(target),

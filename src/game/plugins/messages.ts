@@ -17,6 +17,7 @@ export interface GameMessage {
   description?: string;
   prompts?: GameMessagePrompt[];
   duration?: number;
+  timeline?: string;
 }
 
 export type PartialGameMessage = Partial<GameMessage> & Pick<GameMessage, 'id'>;
@@ -77,6 +78,7 @@ const Messages = definePlugin({
             ...existing,
             ...patch,
             duration: patch.duration,
+            timeline: patch.timeline,
           };
 
           return {
@@ -103,7 +105,7 @@ const Messages = definePlugin({
               Scheduler.schedule({
                 id: scheduleId,
                 duration: updated.duration,
-                timeline: PLAY_TIMELINE,
+                timeline: updated.timeline ?? PLAY_TIMELINE,
                 event: {
                   type: eventType.expireMessage,
                   payload: { id: updated.id, version },
