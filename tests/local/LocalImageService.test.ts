@@ -2,14 +2,14 @@ import 'fake-indexeddb/auto';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ImageType } from '../../src/types';
 
-vi.mock('../../src/local/resize', () => ({
+vi.mock('../../src/services/resize', () => ({
   LowResImageSize: { thumbnail: 'thumbnail', preview: 'preview' },
   generateLowResImage: vi.fn(async () => {
     throw new Error('no canvas');
   }),
 }));
 
-import { localImageService } from '../../src/local/LocalImageService';
+import { localImageService } from '../../src/services/localImages';
 
 const blobOf = async (text: string) => new Blob([text], { type: 'image/png' });
 

@@ -1,5 +1,5 @@
 export * from './files';
 export * from './LocalImport';
 export * from './LocalProvider';
-export * from './LocalImageService';
-export * from './resize';
+export * from '../services/localImages';
+export * from '../services/resize';

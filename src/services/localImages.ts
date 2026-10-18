@@ -2,7 +2,16 @@ import { openDB, IDBPDatabase } from 'idb';
 import { ImageSize, ImageType } from '../types';
 import { generateLowResImage, LowResImageSize } from './resize';
 import SparkMD5 from 'spark-md5';
-import { LocalImage } from './files';
+
+export interface LocalImage {
+  thumbnail?: Blob;
+  preview?: Blob;
+  full: Blob;
+  type: ImageType;
+  hash: string;
+  name: string;
+  id: string;
+}
 
 interface LocalImagesDB {
   images: {

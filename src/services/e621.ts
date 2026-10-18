@@ -1,11 +1,35 @@
 import axios, { AxiosInstance } from 'axios';
 import { ImageItem, ImageServiceType, ImageType } from '../types';
-import {
-  E621Credentials,
-  E621SortOrder,
-  e621SortOrderTags,
-} from './E621Provider';
-import { Blacklist } from './E621Blacklist';
+import { Blacklist } from './e621Blacklist';
+
+export interface E621Credentials {
+  username: string;
+  apiKey: string;
+}
+
+export enum E621SortOrder {
+  Id = 'id',
+  Random = 'random',
+  Favourites = 'favourites',
+  Comments = 'comments',
+  Score = 'score',
+}
+
+export const e621SortOrderLabels: Record<E621SortOrder, string> = {
+  [E621SortOrder.Id]: 'ID',
+  [E621SortOrder.Random]: 'Random',
+  [E621SortOrder.Favourites]: 'Favourites',
+  [E621SortOrder.Comments]: 'Comments',
+  [E621SortOrder.Score]: 'Score',
+};
+
+export const e621SortOrderTags: Record<E621SortOrder, string> = {
+  [E621SortOrder.Id]: 'order:id_desc',
+  [E621SortOrder.Random]: 'order:random',
+  [E621SortOrder.Favourites]: 'order:favcount',
+  [E621SortOrder.Comments]: 'order:comment_count',
+  [E621SortOrder.Score]: 'order:score',
+};
 
 export interface E621Post {
   id: number;

@@ -1,4 +1,4 @@
-import { E621Service } from './E621Service';
+import { E621Service } from '../services/e621';
 import { useCallback, useMemo, useState } from 'react';
 import {
   JoiStack,
@@ -7,7 +7,7 @@ import {
   SettingsRow,
   Space,
 } from '../common';
-import { E621Credentials } from './E621Provider';
+import { E621Credentials } from '../services/e621';
 import { WaButton, WaIcon, WaInput } from '@awesome.me/webawesome/dist/react';
 
 export interface E621CredentialsInputProps {

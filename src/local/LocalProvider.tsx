@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { localImageService, LocalImageRequest } from './LocalImageService';
+import { localImageService, LocalImageRequest } from '../services/localImages';
 import { LocalImage, withoutMissingLocals } from './files';
 import { useImages } from '../settings/ImageProvider';
 

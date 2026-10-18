@@ -11,15 +11,12 @@ import {
   JoiStack,
 } from '../common';
 import { useCallback, useMemo, useState } from 'react';
-import { E621Service } from './E621Service';
+import { E621Service } from '../services/e621';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { useImages } from '../settings';
-import {
-  E621SortOrder,
-  e621SortOrderLabels,
-  useE621Setting,
-} from './E621Provider';
+import { useE621Setting } from './E621Provider';
+import { E621SortOrder, e621SortOrderLabels } from '../services/e621';
 import { AnimatePresence, motion } from 'framer-motion';
 import { E621CredentialsInput } from './E621Credentials';
 import { defaultTransition } from '../utils';

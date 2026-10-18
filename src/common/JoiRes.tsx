@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import React from 'react';
 import { createComponent, type EventName } from '@lit/react';
-import { localImageService } from '../local/LocalImageService';
+import { localImageService } from '../services/localImages';
 
 @customElement('joi-res')
 export class JoiResElement extends LitElement {

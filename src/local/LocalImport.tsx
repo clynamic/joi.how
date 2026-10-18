@@ -11,7 +11,7 @@ import {
   WaIcon,
   WaProgressBar,
 } from '@awesome.me/webawesome/dist/react';
-import { LocalImageRequest } from './LocalImageService';
+import { LocalImageRequest } from '../services/localImages';
 
 export const LocalImport = () => {
   const [loading, setLoading] = useState(false);

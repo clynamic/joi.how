@@ -1,14 +1,7 @@
 import { ImageItem, ImageServiceType, ImageType } from '../types';
+import { LocalImage } from '../services/localImages';
 
-export interface LocalImage {
-  thumbnail?: Blob;
-  preview?: Blob;
-  full: Blob;
-  type: ImageType;
-  hash: string;
-  name: string;
-  id: string;
-}
+export type { LocalImage };
 
 export const itemExtensions = [
   'gif',

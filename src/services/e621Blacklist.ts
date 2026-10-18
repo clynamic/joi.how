@@ -1,6 +1,6 @@
 // Taken from https://github.com/e621ng/e621ng/blob/59f5fda98f0877190bb5816f766c17bd6b9affb9/app/javascript/src/javascripts/blacklists.js
 
-import { E621Post } from '.';
+import { E621Post } from './e621';
 
 class Utility {
   static is_subset(array: string[], subarray: string[]): boolean {
