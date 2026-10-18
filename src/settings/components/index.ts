@@ -8,7 +8,6 @@ export * from './PaceSettings';
 export * from './PlayerSettings';
 export * from './PluginSettings';
 export * from './ServiceSettings';
-export * from './TradeSettings';
 export * from './ToyClientSettings';
 export * from './WalltakerSettings';
 export * from './ToySettings';
