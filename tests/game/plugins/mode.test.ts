@@ -77,4 +77,29 @@ describe('Mode', () => {
     expect(frame.core.mode.current).toBe('dj');
     expect(seen(frame)).toEqual(['left classic', 'entered dj']);
   });
+
+  it('should clear its state on unload', () => {
+    let frame = bootstrap();
+    frame = withImpulse(Mode.register({ id: 'dj', name: 'DJ' }))(tick(frame));
+    frame = withImpulse(ModuleManager.unload(Mode.id))(tick(frame));
+    frame = gamePipe(tick(frame));
+
+    expect(frame.core.mode).toBeUndefined();
+  });
+
+  it('should keep its registry across a reload', () => {
+    let frame = bootstrap();
+    frame = withImpulse(Mode.register({ id: 'dj', name: 'DJ' }))(tick(frame));
+    frame = withImpulse(Mode.setMode('dj'))(tick(frame));
+    frame = gamePipe(tick(frame));
+    frame = gamePipe(tick(frame));
+
+    frame = withImpulse(ModuleManager.reload(Mode.id))(tick(frame));
+    frame = gamePipe(tick(frame));
+    frame = gamePipe(tick(frame));
+
+    expect(frame.core.mode.modes).toEqual({ dj: { id: 'dj', name: 'DJ' } });
+    expect(frame.core.mode.current).toBe('dj');
+    expect(seen(frame)).toEqual(['left classic', 'entered dj']);
+  });
 });

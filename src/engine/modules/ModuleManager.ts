@@ -1,5 +1,5 @@
 import { Composer } from '../Composer';
-import { Pipe } from '../State';
+import { GameFrame, Pipe } from '../State';
 import { Events } from '../pipes/Events';
 import { Perf } from '../pipes/Perf';
 import { Errors } from '../pipes/Errors';
@@ -46,6 +46,10 @@ export class ModuleManager {
       type: eventType.reload,
       payload: id,
     });
+  }
+
+  static replacing(frame: GameFrame, id: ModuleId): boolean {
+    return Boolean(Composer.get(mm.replacing)(frame)?.[id]);
   }
 }
 
@@ -142,7 +146,10 @@ const reconcilePipe: Pipe = Events.handle(
           const id = module.id;
           const existing = registry[id];
           if (existing === module) {
-            if (toUnload.includes(id)) over(mm.toLoad, ids => add(ids, id));
+            if (toUnload.includes(id)) {
+              over(mm.replacing, map => ({ [id]: existing, ...map }), {});
+              over(mm.toLoad, ids => add(ids, id));
+            }
             return;
           }
           if (existing) {
@@ -171,6 +178,7 @@ const reconcilePipe: Pipe = Events.handle(
         case eventType.reload: {
           const id = event.payload as ModuleId;
           if (!registry[id]) return;
+          over(mm.replacing, map => ({ [id]: registry[id], ...map }), {});
           over(mm.toUnload, ids => add(ids, id));
           over(mm.toLoad, ids => add(ids, id));
           return;

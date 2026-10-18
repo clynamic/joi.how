@@ -3,6 +3,8 @@ import { Pipe } from '../../engine/State';
 import { Events } from '../../engine/pipes/Events';
 import { Composer } from '../../engine';
 import { Log } from '../../engine/pipes/Log';
+import { GameFrame } from '../../engine/State';
+import { ModuleManager } from '../../engine/modules/ModuleManager';
 
 const PLUGIN_ID = 'core.mode';
 
@@ -19,6 +21,8 @@ export type ModeState = {
 };
 
 const mode = pluginPaths<ModeState>(PLUGIN_ID);
+
+const initial: ModeState = { current: 'classic', prev: 'classic', modes: {} };
 
 const eventType = {
   enter: (m: string) => Events.getKey(PLUGIN_ID, `enter/${m}`),
@@ -73,11 +77,9 @@ const Mode = definePlugin({
     return Events.handle(eventType.leave(m), fn);
   },
 
-  activate: Composer.set(mode, {
-    current: 'classic',
-    prev: 'classic',
-    modes: {},
-  }),
+  activate: Composer.bind(mode, state =>
+    Composer.when(!state, Composer.set(mode, initial))
+  ),
 
   update: Composer.do(({ get, set, pipe }) => {
     const { current, prev } = get(mode);
@@ -87,7 +89,10 @@ const Mode = definePlugin({
     pipe(Events.dispatch({ type: eventType.enter(current) }));
   }),
 
-  deactivate: Composer.set(mode, undefined),
+  deactivate: Composer.do<GameFrame>(({ get, set }) => {
+    if (ModuleManager.replacing(get(), PLUGIN_ID)) return;
+    set(mode, undefined);
+  }),
 
   get paths() {
     return mode;
