@@ -15,8 +15,18 @@ type RequestsState = {
   pending: Record<RequestId, PendingRequest>;
 };
 
-export type Done<R> = { type: string; id: RequestId; result: R };
-export type Failed = { type: string; id: RequestId; reason: string };
+export type Done<R, P = unknown> = {
+  type: string;
+  id: RequestId;
+  payload: P;
+  result: R;
+};
+export type Failed<P = unknown> = {
+  type: string;
+  id: RequestId;
+  payload: P;
+  reason: string;
+};
 
 const requests = typedPath<RequestsState>([PLUGIN_NAMESPACE]);
 
@@ -40,6 +50,9 @@ export type RequestDefinition<P, R> = {
 };
 
 export class Requests {
+  static readonly doneType = eventType.done;
+  static readonly failedType = eventType.failed;
+
   static define<P = void, R = void>(
     namespace: string,
     key: string
@@ -69,16 +82,16 @@ export class Requests {
           fn(payload, inject, id).then(
             result =>
               inject(
-                Events.dispatch<Done<R>>({
+                Events.dispatch<Done<R, P>>({
                   type: eventType.done,
-                  payload: { type, id, result },
+                  payload: { type, id, payload, result },
                 })
               ),
             error =>
               inject(
-                Events.dispatch<Failed>({
+                Events.dispatch<Failed<P>>({
                   type: eventType.failed,
-                  payload: { type, id, reason: String(error) },
+                  payload: { type, id, payload, reason: String(error) },
                 })
               )
           );
