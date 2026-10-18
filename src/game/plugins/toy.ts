@@ -9,7 +9,6 @@ import { Effects, type Inject } from '../../engine/pipes/Effects';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { Pipe } from '../../engine/State';
-import { Settings } from '../../settings/Settings';
 import { ToyClient } from '../../toy';
 import { Sequence } from '../Sequence';
 import Storage from '../../engine/plugins/Storage';
@@ -18,7 +17,7 @@ import Phase, { GamePhase, PhaseState } from './phase';
 import Pause from './pause';
 import { StrokeState } from './stroke';
 import { StrokeDirection } from '../../types';
-import { PaceState } from './pace';
+import Pace, { PaceState } from './pace';
 import { IntensityState } from './intensity';
 
 const PLUGIN_ID = 'core.toy';
@@ -54,7 +53,6 @@ export type ActuatePayload = {
 };
 
 const toy = pluginPaths<ToyState>(PLUGIN_ID);
-const settings = typedPath<Settings>(['settings']);
 const phaseState = typedPath<PhaseState>(['core.phase']);
 const strokeState = typedPath<StrokeState>(['core.stroke']);
 const paceState = typedPath<PaceState>(['core.pace']);
@@ -189,7 +187,7 @@ const actuatePipe: Pipe = Composer.do(({ get, set, pipe }) => {
       stroke,
       intensity: (get(intensityState)?.intensity ?? 0) * 100,
       pace: get(paceState)?.pace ?? 1,
-      maxPace: get(settings)?.maxPace ?? 1,
+      maxPace: Pace.bounds(get()).max,
     })
   );
 });

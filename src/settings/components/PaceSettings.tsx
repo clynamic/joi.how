@@ -11,17 +11,15 @@ import {
   Space,
   SettingsDescription,
 } from '../../common';
-import { useSetting } from '../SettingsProvider';
+import { useKeys } from '../../game/hooks';
+import Pace from '../../game/plugins/pace';
 import { WaSlider } from '@awesome.me/webawesome/dist/react';
 
 const settingsMinPace = 0.25;
 const settingsMaxPace = 10;
 
 export const PaceSettings = () => {
-  const [minPace, setMinPace] = useSetting('minPace');
-  const [maxPace, setMaxPace] = useSetting('maxPace');
-  const [steepness, setSteepness] = useSetting('steepness');
-  const [timeshift, setTimeshift] = useSetting('timeshift');
+  const [{ minPace, maxPace, steepness, timeshift }, set] = useKeys(Pace.keys);
 
   const chartData = useMemo(() => {
     return Array.from(new Array(100))
@@ -47,7 +45,7 @@ export const PaceSettings = () => {
           step={0.05}
           value={minPace}
           onInput={e =>
-            setMinPace(parseFloat(e.currentTarget.value.toString()))
+            set('minPace', parseFloat(e.currentTarget.value.toString()))
           }
           style={{ width: '100%' }}
         />
@@ -62,7 +60,7 @@ export const PaceSettings = () => {
           step={0.05}
           value={maxPace}
           onInput={e =>
-            setMaxPace(parseFloat(e.currentTarget.value.toString()))
+            set('maxPace', parseFloat(e.currentTarget.value.toString()))
           }
           style={{ width: '100%' }}
         />
@@ -81,7 +79,7 @@ export const PaceSettings = () => {
           step={0.05}
           value={steepness}
           onInput={e =>
-            setSteepness(parseFloat(e.currentTarget.value.toString()))
+            set('steepness', parseFloat(e.currentTarget.value.toString()))
           }
           style={{ width: '100%' }}
         />
@@ -96,7 +94,7 @@ export const PaceSettings = () => {
           step={0.05}
           value={timeshift}
           onInput={e =>
-            setTimeshift(parseFloat(e.currentTarget.value.toString()))
+            set('timeshift', parseFloat(e.currentTarget.value.toString()))
           }
           style={{ width: '100%' }}
         />

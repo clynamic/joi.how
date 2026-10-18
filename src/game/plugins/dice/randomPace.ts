@@ -5,19 +5,19 @@ import { Module } from '../../../engine/modules/Module';
 import Pace from '../pace';
 import Rand from '../rand';
 import { intensityToPaceRange, round } from '../../../utils';
-import { PLUGIN_ID, intensityState, settings, outcomeDone } from './types';
+import { PLUGIN_ID, intensityState, outcomeDone } from './types';
 
 const seq = Sequence.for(PLUGIN_ID, 'randomPace');
 
 export const doRandomPace = (): Pipe =>
   Composer.do(({ get, pipe }) => {
     const i = get(intensityState).intensity;
-    const s = get(settings);
+    const { steepness, timeshift } = Pace.keys.get(get());
     const { min, max } = intensityToPaceRange(
       i * 100,
-      s.steepness,
-      s.timeshift,
-      { min: s.minPace, max: s.maxPace }
+      steepness,
+      timeshift,
+      Pace.bounds(get())
     );
     pipe(
       Rand.nextFloatRange(min, max, v => {

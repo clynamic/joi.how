@@ -161,7 +161,7 @@ describe('Toy', () => {
         ),
         Composer.set(['core.intensity', 'intensity'], 0.5),
         Composer.set(['core.pace', 'pace'], 2),
-        Composer.set(['settings', 'maxPace'], 5),
+        Composer.set(['core', 'presets', 'document', 'maxPace'], 5),
         Composer.set(['core.stroke', 'stroke'], 'up')
       )
     )(tick(frame));

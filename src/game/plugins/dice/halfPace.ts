@@ -4,7 +4,7 @@ import { Sequence } from '../../Sequence';
 import Pace from '../pace';
 import Rand from '../rand';
 import { round } from '../../../utils';
-import { PLUGIN_ID, paceState, settings, outcomeDone } from './types';
+import { PLUGIN_ID, paceState, outcomeDone } from './types';
 import { doRandomPace } from './randomPace';
 
 type HalfPacePayload = { portion: number };
@@ -18,8 +18,8 @@ export const halfPaceModule: Module = {
     seq.on(() =>
       Composer.do(({ get, pipe, take }) => {
         const pace = get(paceState);
-        const s = get(settings);
-        const newPace = Math.max(round(pace.pace / 2), s.minPace);
+        const { min } = Pace.bounds(get());
+        const newPace = Math.max(round(pace.pace / 2), min);
         const duration = Math.ceil(take(Rand.next) * 20000) + 12000;
         const portion = duration / 3;
         pipe(

@@ -18,7 +18,7 @@ import Messages from '../../../src/game/plugins/messages';
 import Warmup from '../../../src/game/plugins/warmup';
 import { defaultSettings } from '../../../src/settings/Settings';
 import pkg from '../../../package.json';
-import { makeFrame, makeGame, tick } from '../../utils';
+import { makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse, until } = makeGame();
 
@@ -208,7 +208,7 @@ describe('Saves', () => {
     ];
     const playing = (): GameFrame => {
       let frame = gamePipe(makeFrame());
-      frame = Composer.set(['settings'], {
+      frame = seed({
         ...defaultSettings,
         warmupDuration: 30,
       })(frame);

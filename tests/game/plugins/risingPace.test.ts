@@ -10,7 +10,7 @@ import Messages from '../../../src/game/plugins/messages';
 import { risingPaceModule } from '../../../src/game/plugins/dice/risingPace';
 import { defaultSettings } from '../../../src/settings/Settings';
 import { intensityToPaceRange, round } from '../../../src/utils';
-import { makeFrame, makeGame, tick } from '../../utils';
+import { makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse, until } = makeGame();
 
@@ -19,7 +19,7 @@ const titles = (frame: GameFrame): string[] =>
 
 function playing(maxPace: number, intensity = 1): GameFrame {
   let frame = gamePipe(makeFrame());
-  frame = Composer.set(['settings'], {
+  frame = seed({
     ...defaultSettings,
     minPace: 1,
     maxPace,
@@ -38,8 +38,8 @@ describe('rising pace', () => {
     let frame = playing(10, 0.4);
     const { max } = intensityToPaceRange(
       40,
-      defaultSettings.steepness,
-      defaultSettings.timeshift,
+      Pace.keys.defaults.steepness,
+      Pace.keys.defaults.timeshift,
       { min: 1, max: 10 }
     );
     frame = withImpulse(

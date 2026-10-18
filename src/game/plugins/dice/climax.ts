@@ -28,9 +28,9 @@ export const climaxModule: Module = {
   deactivate: Composer.set(climax, undefined),
   update: Composer.pipe(
     seq.on(() =>
-      Composer.bind(settings, s =>
-        Composer.pipe(
-          Pace.setPace(s.minPace),
+      Composer.do(({ get, pipe }) =>
+        pipe(
+          Pace.setPace(Pace.bounds(get()).min),
           seq.message({
             title: `You should be getting close to the edge. Don't cum yet.`,
             duration: 10000,
@@ -41,9 +41,9 @@ export const climaxModule: Module = {
     ),
 
     seq.on('edgePush', () =>
-      Composer.bind(settings, s =>
-        Composer.pipe(
-          Pace.setPace(s.maxPace),
+      Composer.do(({ get, pipe }) =>
+        pipe(
+          Pace.setPace(Pace.bounds(get()).max),
           seq.message({
             title: `Keep going!`,
             duration: 20000,
@@ -67,13 +67,13 @@ export const climaxModule: Module = {
     ),
 
     seq.on('edging', () =>
-      Composer.bind(settings, s =>
-        Composer.pipe(
+      Composer.do(({ get, pipe }) =>
+        pipe(
           seq.message({
             title: 'Stay on the edge, $player',
             prompts: undefined,
           }),
-          Pace.setPace(s.minPace),
+          Pace.setPace(Pace.bounds(get()).min),
           seq.after(3000, 'countdown3')
         )
       )
@@ -182,10 +182,10 @@ export const climaxModule: Module = {
     ),
 
     seq.on('cantResume', () =>
-      Composer.bind(settings, s =>
-        Composer.pipe(
+      Composer.do(({ get, pipe }) =>
+        pipe(
           seq.message({ title: 'Start to $stroke again', duration: 5000 }),
-          Pace.setPace(s.minPace),
+          Pace.setPace(Pace.bounds(get()).min),
           Phase.setPhase(GamePhase.active),
           outcomeDone()
         )

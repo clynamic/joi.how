@@ -6,12 +6,10 @@ import { Sequence } from '../Sequence';
 import Phase, { GamePhase } from './phase';
 import Pace from './pace';
 import { IntensityState } from './intensity';
-import { Settings } from '../../settings/Settings';
 
 const PLUGIN_ID = 'core.emergency_stop';
 
 const intensityState = typedPath<IntensityState>(['core.intensity']);
-const settings = typedPath<Settings>(['settings']);
 
 type CountdownPayload = { remaining: number };
 
@@ -33,16 +31,16 @@ const EmergencyStop = definePlugin({
       Phase.whenPhase(
         GamePhase.active,
         Composer.bind(intensityState, ist =>
-          Composer.bind(settings, s => {
+          Composer.do(({ get, pipe }) => {
             const i = ist.intensity * 100;
             const timeToCalmDown = Math.ceil((i * 500 + 10000) / 1000);
-            return Composer.pipe(
+            pipe(
               Phase.setPhase(GamePhase.break),
               seq.message({ title: 'Calm down with your $hands off.' }),
               Composer.over(intensityState, (st: IntensityState) => ({
                 intensity: Math.max(0, st.intensity - 0.3),
               })),
-              Pace.setPace(s.minPace),
+              Pace.setPace(Pace.bounds(get()).min),
               seq.after(5000, 'countdown', { remaining: timeToCalmDown })
             );
           })

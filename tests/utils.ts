@@ -3,6 +3,7 @@ import { Composer } from '../src/engine/Composer';
 import { Impulses } from '../src/engine/Impulses';
 import { moduleManagerPipe } from '../src/engine/modules/ModuleManager';
 import { gamePipes } from '../src/game/pipes/Game';
+import Pace from '../src/game/plugins/pace';
 
 export const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
   tick: 0,
@@ -17,6 +18,29 @@ export const tick = (frame: GameFrame, step = 16): GameFrame => ({
   step,
   time: frame.time + step,
 });
+
+const declared = [Pace.keys];
+
+const sectioned = (values: Record<string, unknown>) =>
+  Object.fromEntries(
+    declared.map(keys => [
+      keys.plugin,
+      Object.fromEntries(
+        Object.keys(keys.defaults)
+          .filter(key => key in values)
+          .map(key => [key, values[key]])
+      ),
+    ])
+  );
+
+export const seed = (values: object): Pipe => {
+  const document = sectioned(values as Record<string, unknown>);
+  return Composer.pipe(
+    Composer.set(['settings'], values),
+    Composer.set(['core', 'presets'], { document, loaded: true }),
+    Composer.set(['core', 'settings'], { document, loaded: true })
+  );
+};
 
 export const makeGame = (plugins: Pipe[] = [moduleManagerPipe]) => {
   const impulses = new Impulses();

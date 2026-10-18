@@ -3,7 +3,7 @@ import { Module } from '../../../engine/modules/Module';
 import { Sequence } from '../../Sequence';
 import Pace from '../pace';
 import { intensityToPaceRange, round } from '../../../utils';
-import { PLUGIN_ID, intensityState, settings, outcomeDone } from './types';
+import { PLUGIN_ID, intensityState, outcomeDone } from './types';
 import { doRandomPace } from './randomPace';
 
 type RisingPacePayload = {
@@ -22,19 +22,18 @@ export const risingPaceModule: Module = {
   update: Composer.pipe(
     seq.on(() =>
       Composer.bind(intensityState, ist =>
-        Composer.bind(settings, s => {
+        Composer.do(({ get, pipe }) => {
           const i = ist.intensity * 100;
           const acceleration = Math.round(100 / Math.max(1, Math.min(i, 35)));
-          const { max } = intensityToPaceRange(i, s.steepness, s.timeshift, {
-            min: s.minPace,
-            max: s.maxPace,
-          });
-          const portion = (max - s.minPace) / acceleration;
-          return Composer.pipe(
+          const { steepness, timeshift } = Pace.keys.get(get());
+          const bounds = Pace.bounds(get());
+          const { max } = intensityToPaceRange(i, steepness, timeshift, bounds);
+          const portion = (max - bounds.min) / acceleration;
+          pipe(
             seq.message({ title: 'Rising pace strokes!' }),
-            Pace.setPace(s.minPace),
+            Pace.setPace(bounds.min),
             seq.after(10000, 'step', {
-              start: s.minPace,
+              start: bounds.min,
               max,
               portion,
               step: 1,

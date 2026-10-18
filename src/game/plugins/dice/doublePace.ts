@@ -3,7 +3,7 @@ import { Module } from '../../../engine/modules/Module';
 import { Sequence } from '../../Sequence';
 import Pace from '../pace';
 import { round } from '../../../utils';
-import { PLUGIN_ID, paceState, settings, outcomeDone } from './types';
+import { PLUGIN_ID, paceState, outcomeDone } from './types';
 import { doRandomPace } from './randomPace';
 
 const seq = Sequence.for(PLUGIN_ID, 'doublePace');
@@ -17,8 +17,9 @@ export const doublePaceModule: Module = {
   update: Composer.pipe(
     seq.on(() =>
       Composer.bind(paceState, pace =>
-        Composer.bind(settings, s => {
-          const newPace = Math.min(round(pace.pace * 2), s.maxPace);
+        Composer.do(({ get }) => {
+          const { max } = Pace.bounds(get());
+          const newPace = Math.min(round(pace.pace * 2), max);
           return Composer.pipe(
             Pace.setPace(newPace),
             seq.message({ title: 'Double pace!', description: '3...' }),

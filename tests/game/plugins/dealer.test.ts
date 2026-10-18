@@ -17,14 +17,14 @@ import { doublePaceChance } from '../../../src/game/plugins/dice/doublePace';
 import { DiceEvent } from '../../../src/types';
 import { OUTCOME_DONE } from '../../../src/game/plugins/dice/types';
 import { defaultSettings } from '../../../src/settings/Settings';
-import { makeFrame, makeGame, tick } from '../../utils';
+import { makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
 
 function startGame(intensityOverride = 0.5): GameFrame {
   let frame = gamePipe(makeFrame());
 
-  frame = Composer.set(typedPath(['settings']), {
+  frame = seed({
     ...defaultSettings,
     events: Object.values(DiceEvent),
   })(frame);
@@ -34,7 +34,6 @@ function startGame(intensityOverride = 0.5): GameFrame {
   })(frame);
   frame = Composer.set(typedPath(['core.pace']), {
     pace: 2,
-    prevMinPace: 1,
     prevPace: 2,
     history: [],
   })(frame);
@@ -118,7 +117,6 @@ describe('Dealer integration', () => {
     );
     frame = Composer.set(typedPath(['core.pace']), {
       pace: 2,
-      prevMinPace: 1,
       prevPace: 2,
       history: [],
     })(frame);

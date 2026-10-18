@@ -11,7 +11,7 @@ import RandomImages, {
 } from '../../../src/game/plugins/randomImages';
 import { ImageItem, ImageServiceType, ImageType } from '../../../src/types';
 import { defaultSettings } from '../../../src/settings/Settings';
-import { makeFrame, makeGame, tick } from '../../utils';
+import { makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
 
@@ -28,7 +28,7 @@ const makeImage = (id: string): ImageItem => ({
 function startImages(overrides?: Partial<typeof defaultSettings>): GameFrame {
   let frame = gamePipe(makeFrame());
 
-  frame = Composer.set(typedPath(['settings']), {
+  frame = seed({
     ...defaultSettings,
     ...overrides,
   })(frame);

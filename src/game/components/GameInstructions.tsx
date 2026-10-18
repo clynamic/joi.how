@@ -12,7 +12,7 @@ import { useMemo } from 'react';
 import { DiceEvent } from '../../types';
 import { ProgressBar } from '../../common';
 import { WaDivider } from '@awesome.me/webawesome/dist/react';
-import { useGameFrame } from '../hooks';
+import { useGameFrame, useKeys } from '../hooks';
 import Pace from '../plugins/pace';
 import Intensity from '../plugins/intensity';
 import { Paws, PawLabels, pawsPath } from '../plugins/dealer';
@@ -65,7 +65,7 @@ const StyledIntensityMeter = styled.div`
 
 const PaceDisplay = () => {
   const { pace = 0 } = useGameFrame(Pace.paths) ?? {};
-  const [maxPace] = useSetting('maxPace');
+  const [{ maxPace }] = useKeys(Pace.keys);
   const paceSection = useMemo(() => maxPace / 3, [maxPace]);
 
   return (

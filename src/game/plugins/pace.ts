@@ -1,10 +1,9 @@
 import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
-import { Pipe } from '../../engine/State';
-import { typedPath } from '../../engine/Lens';
-import { Settings } from '../../settings/Settings';
+import { GameFrame, Pipe } from '../../engine/State';
 import { Composer } from '../../engine';
 import Clock from './clock';
 import Saves from './saves';
+import Presets from './presets';
 
 const PLUGIN_ID = 'core.pace';
 
@@ -12,24 +11,36 @@ export type PaceEntry = { time: number; pace: number };
 
 export type PaceState = {
   pace: number;
-  prevMinPace: number;
   prevPace: number;
   history: PaceEntry[];
   lastRecorded: number;
 };
 
 const pace = pluginPaths<PaceState>(PLUGIN_ID);
-const settings = typedPath<Settings>(['settings']);
 
-const fresh = Composer.bind(settings, s =>
-  Composer.set(pace, {
-    pace: s.minPace,
-    prevMinPace: s.minPace,
-    prevPace: s.minPace,
-    history: [{ time: 0, pace: s.minPace }],
+export const paceKeys = Presets.keys(PLUGIN_ID, {
+  minPace: 1,
+  maxPace: 5,
+  steepness: 0.5,
+  timeshift: 0.5,
+});
+
+export type PaceBounds = { min: number; max: number };
+
+const boundsOf = (frame: GameFrame): PaceBounds => {
+  const { minPace, maxPace } = paceKeys.get(frame);
+  return { min: minPace, max: Math.max(minPace, maxPace) };
+};
+
+const fresh: Pipe = Composer.do<GameFrame>(({ get, set }) => {
+  const { min } = boundsOf(get());
+  set(pace, {
+    pace: min,
+    prevPace: min,
+    history: [{ time: 0, pace: min }],
     lastRecorded: 0,
-  })
-);
+  });
+});
 
 const Pace = definePlugin({
   sdk: 'Pace',
@@ -43,7 +54,17 @@ const Pace = definePlugin({
   },
 
   resetPace(): Pipe {
-    return Composer.bind(settings, s => Composer.set(pace.pace, s.minPace));
+    return Composer.do<GameFrame>(({ get, set }) => {
+      set(pace.pace, boundsOf(get()).min);
+    });
+  },
+
+  bounds(frame: GameFrame): PaceBounds {
+    return boundsOf(frame);
+  },
+
+  get keys() {
+    return paceKeys;
   },
 
   activate: fresh,
@@ -55,12 +76,9 @@ const Pace = definePlugin({
     ),
     Composer.do(({ get, set, over }) => {
       const state = get(pace);
-      const { minPace } = get(settings);
-
-      if (minPace !== state.prevMinPace) {
-        set(pace.prevMinPace, minPace);
-        set(pace.pace, minPace);
-      }
+      const { min, max } = boundsOf(get());
+      const clamped = Math.min(max, Math.max(min, state.pace));
+      if (clamped !== state.pace) set(pace.pace, clamped);
 
       if (state.pace !== state.prevPace) {
         set(pace.prevPace, state.pace);
