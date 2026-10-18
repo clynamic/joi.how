@@ -43,8 +43,8 @@ const Scene = definePlugin({
   },
 
   activate: Composer.set(scene, {
-    current: 'unknown',
-    prev: 'unknown',
+    current: 'boot',
+    prev: 'boot',
   }),
 
   update: Composer.do(({ get, set, pipe }) => {

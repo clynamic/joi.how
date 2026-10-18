@@ -11,6 +11,7 @@ const routeToScene: Record<string, string> = {
 };
 
 const sceneToRoute: Record<string, string> = {
+  boot: '/',
   home: '/',
   game: '/play',
   end: '/end',
@@ -26,11 +27,14 @@ export const SceneBridge = () => {
 
   const lastRouteSceneRef = useRef<string | null>(null);
 
+  const booting = !sceneState?.current || sceneState.current === 'boot';
+
   useEffect(() => {
+    if (booting) return;
     const scene = routeToScene[location.pathname] ?? 'unknown';
     lastRouteSceneRef.current = scene;
     injectImpulse(Scene.setScene(scene));
-  }, [location.pathname, injectImpulse]);
+  }, [location.pathname, injectImpulse, booting]);
 
   useEffect(() => {
     const current = sceneState?.current;

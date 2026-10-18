@@ -1,7 +1,7 @@
 import { JoiStack, Space } from '../../common';
 import styled from 'styled-components';
 import { useKeys } from '../../game/hooks';
-import Settings from '../../game/plugins/settings';
+import Home from '../../game/plugins/home';
 import { WaButton, WaDialog, WaIcon } from '@awesome.me/webawesome/dist/react';
 
 const StyledAgeWarningDialog = styled(WaDialog)`
@@ -18,9 +18,8 @@ const StyledAgeWarningDialog = styled(WaDialog)`
   }
 `;
 
-const ageKeys = Settings.keys('core.home', { ageCheckConfirm: false });
 export const AgeWarning = () => {
-  const [{ ageCheckConfirm }, set] = useKeys(ageKeys);
+  const [{ ageCheckConfirm }, set] = useKeys(Home.keys);
 
   return (
     <StyledAgeWarningDialog
