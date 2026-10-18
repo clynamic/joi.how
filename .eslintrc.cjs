@@ -1,7 +1,7 @@
 const layers = [
   { type: 'shared', pattern: ['src/types', 'src/utils'] },
   { type: 'engine', pattern: 'src/engine' },
-  { type: 'services', pattern: 'src/toy' },
+  { type: 'services', pattern: ['src/toy', 'src/services'] },
   { type: 'app', pattern: 'src/game/components' },
   { type: 'game', pattern: 'src/game' },
   {
