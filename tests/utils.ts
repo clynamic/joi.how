@@ -39,6 +39,13 @@ const declared = [
   displayKeys,
 ];
 
+export const defaults = Object.assign(
+  {},
+  ...declared.map(keys => keys.defaults)
+) as {
+  [K in keyof (typeof declared)[number]['defaults']]: unknown;
+} & Record<string, unknown>;
+
 const sectioned = (values: Record<string, unknown>) =>
   Object.fromEntries(
     declared.map(keys => [

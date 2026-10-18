@@ -17,10 +17,10 @@ export const doublePaceModule: Module = {
   update: Composer.pipe(
     seq.on(() =>
       Composer.bind(paceState, pace =>
-        Composer.do(({ get }) => {
+        Composer.do(({ get, pipe }) => {
           const { max } = Pace.bounds(get());
           const newPace = Math.min(round(pace.pace * 2), max);
-          return Composer.pipe(
+          pipe(
             Pace.setPace(newPace),
             seq.message({ title: 'Double pace!', description: '3...' }),
             seq.after(3000, 'step2')

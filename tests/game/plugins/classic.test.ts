@@ -13,9 +13,8 @@ import Storage from '../../../src/engine/plugins/Storage';
 import Saves from '../../../src/game/plugins/saves';
 import Intensity from '../../../src/game/plugins/intensity';
 import Classic from '../../../src/game/plugins/classic';
-import { defaultSettings } from '../../../src/settings/Settings';
 import pkg from '../../../package.json';
-import { makeFrame, makeGame, seed, tick } from '../../utils';
+import { defaults, makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse, until } = makeGame();
 
@@ -39,7 +38,7 @@ function flush(frame: GameFrame): GameFrame {
 
 function bootstrap(): GameFrame {
   let frame = gamePipe(makeFrame());
-  frame = seed(defaultSettings)(frame);
+  frame = seed(defaults)(frame);
   frame = Composer.set(['images'], [])(frame);
   for (const p of [
     Scene,
@@ -188,7 +187,7 @@ describe('Classic', () => {
 
   it('should read its slot once at boot', () => {
     let frame = gamePipe(makeFrame());
-    frame = seed(defaultSettings)(frame);
+    frame = seed(defaults)(frame);
     frame = Composer.set(['images'], [])(frame);
     for (const p of [
       Scene,

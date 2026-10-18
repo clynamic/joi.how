@@ -10,8 +10,7 @@ import RandomImages, {
   getImageSwitchDuration,
 } from '../../../src/game/plugins/randomImages';
 import { ImageItem, ImageServiceType, ImageType } from '../../../src/types';
-import { defaultSettings } from '../../../src/settings/Settings';
-import { makeFrame, makeGame, seed, tick } from '../../utils';
+import { defaults, makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
 
@@ -25,11 +24,11 @@ const makeImage = (id: string): ImageItem => ({
   service: ImageServiceType.local,
 });
 
-function startImages(overrides?: Partial<typeof defaultSettings>): GameFrame {
+function startImages(overrides?: Partial<typeof defaults>): GameFrame {
   let frame = gamePipe(makeFrame());
 
   frame = seed({
-    ...defaultSettings,
+    ...defaults,
     ...overrides,
   })(frame);
   frame = Composer.set(typedPath(['images']), [

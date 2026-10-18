@@ -17,8 +17,7 @@ import { doublePaceChance } from '../../../src/game/plugins/dice/doublePace';
 import { DiceEvent } from '../../../src/types';
 import { climaxKeys } from '../../../src/game/plugins/dice/climax';
 import { OUTCOME_DONE } from '../../../src/game/plugins/dice/types';
-import { defaultSettings } from '../../../src/settings/Settings';
-import { makeFrame, makeGame, seed, tick } from '../../utils';
+import { defaults, makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
 
@@ -26,7 +25,7 @@ function startGame(intensityOverride = 0.5): GameFrame {
   let frame = gamePipe(makeFrame());
 
   frame = seed({
-    ...defaultSettings,
+    ...defaults,
     events: Object.values(DiceEvent),
   })(frame);
   frame = Composer.set(typedPath(['images']), [])(frame);
@@ -109,7 +108,7 @@ describe('Dealer integration', () => {
     let frame = gamePipe(makeFrame());
 
     frame = seed({
-      ...defaultSettings,
+      ...defaults,
       events: Object.values(DiceEvent),
     })(frame);
     frame = Composer.set(typedPath(['images']), [])(frame);
@@ -208,6 +207,13 @@ describe('Dealer integration', () => {
     expect(getDiceState(frame)!.log.map(e => e.event)).toEqual([
       DiceEvent.doublePace,
     ]);
+
+    const paceBefore = frame.core.pace.pace;
+    frame = gamePipe(tick(frame, 100));
+    frame = gamePipe(tick(frame, 100));
+    expect(frame.core.pace.pace).toBeGreaterThan(paceBefore);
+    for (let i = 0; i < 120; i++) frame = gamePipe(tick(frame, 100));
+    expect(getDiceState(frame)!.busy).toBe(false);
   });
 
   it('should end a ruined climax on good job after clenching', () => {

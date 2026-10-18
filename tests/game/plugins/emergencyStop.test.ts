@@ -7,15 +7,14 @@ import Messages from '../../../src/game/plugins/messages';
 import Pace from '../../../src/game/plugins/pace';
 import Pause from '../../../src/game/plugins/pause';
 import Phase, { GamePhase } from '../../../src/game/plugins/phase';
-import { defaultSettings } from '../../../src/settings/Settings';
-import { makeFrame, makeGame, seed, tick } from '../../utils';
+import { defaults, makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
 
 function bootstrap(): GameFrame {
   let frame = gamePipe(makeFrame());
   frame = Composer.pipe(
-    seed({ ...defaultSettings, minPace: 1, maxPace: 5 }),
+    seed({ ...defaults, minPace: 1, maxPace: 5 }),
     Composer.set(['core.intensity'], { intensity: 0.5 })
   )(frame);
   for (const plugin of [Pause, Phase, Pace, Messages, EmergencyStop]) {

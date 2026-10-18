@@ -1,6 +1,7 @@
 import { Fields, JoiStack, SettingsDescription, Space } from '../../common';
-import type { Settings } from '../Settings';
-import { useSettings } from '../SettingsProvider';
+import { Document } from '../../game/plugins/documents';
+import Presets from '../../game/plugins/presets';
+import { useDispatchEvent, useGameFrame } from '../../game/hooks';
 import { ImageItem } from '../../types';
 import { useImages } from '../ImageProvider';
 import { ChangeEvent } from 'react';
@@ -9,19 +10,20 @@ import { WaButton, WaDivider, WaIcon } from '@awesome.me/webawesome/dist/react';
 interface TradeFormat {
   name: string;
   version: string;
-  settings: Settings;
+  settings: Document;
   images: ImageItem[];
 }
 
 export const TradeSettings = () => {
-  const [settings, setSettings] = useSettings();
+  const settings = useGameFrame<Document | undefined>(Presets.paths.document);
+  const { inject } = useDispatchEvent();
   const [images, setImages] = useImages();
 
   const onExport = () => {
     const tradeFormat: TradeFormat = {
       name: `Export from ${new Date().toLocaleString()}`,
       version: '1',
-      settings: settings,
+      settings: settings ?? {},
       // local images could be base64 encoded, but this would cause significant bloat
       images,
     };
@@ -48,7 +50,7 @@ export const TradeSettings = () => {
           return;
         }
         const tradeFormat = JSON.parse(data) as TradeFormat;
-        setSettings(tradeFormat.settings);
+        inject(Presets.replace(tradeFormat.settings));
         setImages(tradeFormat.images);
       };
       reader.readAsText(file);

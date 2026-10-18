@@ -1,18 +1,18 @@
 import { useMemo, ReactNode } from 'react';
 import { GameEngineProvider } from './GameProvider';
-import { useSettingsPipe } from './pipes';
+import { Pipe } from '../engine/State';
 import { moduleManagerPipe } from '../engine/modules/ModuleManager';
 import { registerPlugins } from './plugins';
 
 type Props = {
   children: ReactNode;
+  pipes?: Pipe[];
 };
 
-export const GameShell = ({ children }: Props) => {
-  const settingsPipe = useSettingsPipe();
+export const GameShell = ({ children, pipes: extra = [] }: Props) => {
   const pipes = useMemo(
-    () => [moduleManagerPipe, registerPlugins, settingsPipe],
-    [settingsPipe]
+    () => [moduleManagerPipe, registerPlugins, ...extra],
+    [extra]
   );
 
   return <GameEngineProvider pipes={pipes}>{children}</GameEngineProvider>;
