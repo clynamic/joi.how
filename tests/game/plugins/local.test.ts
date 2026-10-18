@@ -1,0 +1,128 @@
+import 'fake-indexeddb/auto';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('../../../src/services/resize', () => ({
+  LowResImageSize: { thumbnail: 'thumbnail', preview: 'preview' },
+  generateLowResImage: vi.fn(async () => {
+    throw new Error('no canvas');
+  }),
+}));
+
+import { Composer } from '../../../src/engine/Composer';
+import { Effects } from '../../../src/engine/pipes/Effects';
+import { Requests } from '../../../src/engine/pipes/Requests';
+import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
+import { GameFrame, Pipe } from '../../../src/engine/State';
+import Storage from '../../../src/engine/plugins/Storage';
+import Assets from '../../../src/game/plugins/assets';
+import Local from '../../../src/game/plugins/local';
+import { localImageService } from '../../../src/services/localImages';
+import { ImageType } from '../../../src/types';
+import { makeFrame, makeGame, tick } from '../../utils';
+
+const { pipe: gamePipe, withImpulse } = makeGame();
+
+if (!Blob.prototype.arrayBuffer) {
+  Blob.prototype.arrayBuffer = function () {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsArrayBuffer(this);
+    });
+  };
+}
+
+const settle = () => new Promise(resolve => setTimeout(resolve, 0));
+
+const injected: Pipe[] = [];
+
+async function step(
+  frame: GameFrame,
+  impulse: Pipe = f => f
+): Promise<GameFrame> {
+  Effects.flush(frame, pipe => injected.push(pipe));
+  await settle();
+  return withImpulse(Composer.pipe(...injected.splice(0), impulse))(
+    tick(frame)
+  );
+}
+
+async function boot(): Promise<GameFrame> {
+  let frame = gamePipe(makeFrame());
+  for (const plugin of [Storage, Assets, Local]) {
+    frame = ModuleManager.load(plugin)(frame);
+  }
+  frame = gamePipe(tick(frame));
+  for (let i = 0; i < 20; i++) {
+    frame = await step(frame);
+    if (i >= 3 && Requests.pending(frame).length === 0) break;
+  }
+  return frame;
+}
+
+const picture = (name: string) => ({
+  blob: new Blob([name], { type: 'image/png' }),
+  type: ImageType.image,
+  name,
+});
+
+describe('Local', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    URL.createObjectURL = vi.fn(() => 'blob:stored');
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+
+  it('should import files into records a holder can keep and resolve', async () => {
+    const [item] = await Local.import([picture('one.png')]);
+    expect(item.record).toMatchObject({ kind: 'image', name: 'one.png' });
+
+    let frame = await step(
+      await boot(),
+      Composer.pipe(
+        Assets.keep('core.local', item.id, item.record, 'classic'),
+        Assets.use([`core.local:${item.id}`])
+      )
+    );
+    frame = await step(frame, Assets.load(`core.local:${item.id}`, 'full'));
+    frame = await step(frame);
+    frame = await step(frame);
+
+    expect(Assets.entry(frame, `core.local:${item.id}`)).toMatchObject({
+      state: 'loaded',
+      urls: { full: 'blob:stored' },
+    });
+  });
+
+  it('should forget a kept record whose file is gone at startup', async () => {
+    const [item] = await Local.import([picture('gone.png')]);
+    const frame = await step(
+      await boot(),
+      Assets.keep('core.local', item.id, item.record, 'classic')
+    );
+    await step(frame);
+    await localImageService.removeImage(item.id);
+
+    const again = await boot();
+
+    expect(again.core.assets.library[`core.local:${item.id}`]).toBeUndefined();
+    expect(localStorage.getItem(`core.assets.local:${item.id}`)).toBeNull();
+  });
+
+  it('should drop the file when the last holder releases it', async () => {
+    const [item] = await Local.import([picture('drop.png')]);
+    let frame = await step(
+      await boot(),
+      Assets.keep('core.local', item.id, item.record, 'classic')
+    );
+    frame = await step(
+      frame,
+      Assets.release(`core.local:${item.id}`, 'classic')
+    );
+    await step(frame);
+    await settle();
+
+    expect(await localImageService.listIds()).not.toContain(item.id);
+  });
+});

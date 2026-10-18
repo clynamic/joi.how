@@ -196,6 +196,20 @@ const Assets = definePlugin({
     });
   },
 
+  forget(key: AssetKey): Pipe {
+    return Composer.do<GameFrame>(({ get, set, pipe }) => {
+      const library = get(paths.library);
+      if (!library?.[key]) return;
+      const rest = { ...library };
+      delete rest[key];
+      set(paths.library, rest);
+      const inUse = { ...(get(paths.inUse) ?? {}) };
+      delete inUse[key];
+      set(paths.inUse, inUse);
+      pipe(Storage.remove(storageKey(key)));
+    });
+  },
+
   use(keys: AssetKey[]): Pipe {
     return Composer.do<GameFrame>(({ get, set }) => {
       if (!get(paths)) return;
