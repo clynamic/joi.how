@@ -226,7 +226,11 @@ const Toy = definePlugin({
   },
 
   disconnect(): Pipe {
-    return disconnect.emit();
+    return Composer.do(({ get, set, pipe }) => {
+      if (!get(toy)) return;
+      set(toy.error, undefined);
+      pipe(disconnect.emit());
+    });
   },
 
   activate: Composer.pipe(

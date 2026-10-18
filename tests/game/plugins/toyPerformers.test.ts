@@ -187,6 +187,9 @@ describe('Toy performers', () => {
     expect(frame.core.toy.connecting).toBe(false);
     expect(frame.core.toy.connection).toBeUndefined();
     expect(frame.core.toy.error).toContain('refused');
+
+    frame = await flushAndApply(Toy.disconnect()(frame));
+    expect(frame.core.toy.error).toBeUndefined();
   });
 
   it('should stop every device on a stop effect and clear on disconnect', async () => {
