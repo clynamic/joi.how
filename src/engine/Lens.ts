@@ -20,17 +20,17 @@ export function typedPath<T>(
   const list = typeof segments === 'string' ? [segments] : segments;
   return new Proxy(list, {
     get(target, prop, receiver) {
-      if (prop in target || typeof prop === 'symbol') {
+      if (typeof prop === 'symbol' || prop === 'length' || /^\d+$/.test(prop)) {
         return Reflect.get(target, prop, receiver);
       }
-      return typedPath([...target, prop as string]);
+      return typedPath([...target, prop]);
     },
   }) as unknown as TypedPath<T>;
 }
 
 export function normalizePath(path: Path): (string | number | symbol)[] {
   if (Array.isArray(path)) {
-    return path.flatMap<string | number | symbol>(segment => {
+    return Array.from(path).flatMap<string | number | symbol>(segment => {
       if (typeof segment === 'string') {
         return segment.split('.') as string[];
       }

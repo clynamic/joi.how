@@ -23,6 +23,16 @@ describe('Lens', () => {
       expect(normalizePath(['arr', 0, 'prop'])).toEqual(['arr', 0, 'prop']);
     });
 
+    it('should address a field named like an array method', () => {
+      const paths = typedPath<{ keys: { entries: number } }>(['core.thing']);
+      expect(normalizePath(paths.keys.entries)).toEqual([
+        'core',
+        'thing',
+        'keys',
+        'entries',
+      ]);
+    });
+
     it('should handle symbol keys', () => {
       const sym = Symbol('test');
       expect(normalizePath(['obj', sym])).toEqual(['obj', sym]);
