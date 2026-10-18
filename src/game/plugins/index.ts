@@ -18,6 +18,8 @@ import Rand from './rand';
 import Sound from './sound';
 import Messages from './messages';
 import Toy from './toy';
+import Settings from './settings';
+import Presets from './presets';
 
 const plugins = [
   Scene,
@@ -39,6 +41,8 @@ const plugins = [
 
 export const registerPlugins: Pipe = Composer.pipe(
   ModuleManager.load(Storage),
+  ModuleManager.load(Settings),
+  ModuleManager.load(Presets),
   ModuleManager.load(PluginInstaller),
   ...plugins.map(ModuleManager.load)
 );
