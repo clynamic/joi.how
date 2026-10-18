@@ -1,5 +1,7 @@
 import styled from 'styled-components';
-import { useSetting } from '../../settings';
+import { useKeys } from '../hooks';
+import { displayKeys } from './displayKeys';
+import { imageKeys } from '../plugins/randomImages';
 import { motion } from 'framer-motion';
 import { JoiImage } from '../../common';
 import { useImagePreloader } from './useImagePreloader';
@@ -45,14 +47,11 @@ const StyledBackgroundImage = motion.create(styled.div`
 
   filter: blur(30px);
 `);
-
 export const GameImages = () => {
   const { currentImage, nextImages = [] } = useGameFrame(Image.paths);
   const { intensity = 0 } = useGameFrame(Intensity.paths);
-  const [videoSound] = useSetting('videoSound');
-  const [highRes] = useSetting('highRes');
-  const [imageDuration] = useSetting('imageDuration');
-  const [intenseImages] = useSetting('intenseImages');
+  const [{ videoSound, highRes }] = useKeys(displayKeys);
+  const [{ imageDuration, intenseImages }] = useKeys(imageKeys);
 
   useImagePreloader(nextImages, highRes ? ImageSize.full : ImageSize.preview);
 

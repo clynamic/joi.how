@@ -1,5 +1,7 @@
 import { ImageGrid, ImageDialog, Space, Fields, JoiStack } from '../../common';
-import { useImages, useSetting } from '../../settings';
+import { useImages } from '../../settings';
+import { useKeys } from '../../game/hooks';
+import { displayKeys } from '../../game/components/displayKeys';
 import { useState } from 'react';
 import { ImageItem } from '../../types';
 import { useLocalImages } from '../../local/LocalProvider';
@@ -10,7 +12,7 @@ export const ImageSettings = () => {
   const { removeImage } = useLocalImages();
   const [selected, setSelected] = useState<ImageItem[]>([]);
   const [clicked, setClicked] = useState<ImageItem | undefined>(undefined);
-  const [videoSound] = useSetting('videoSound');
+  const [{ videoSound }] = useKeys(displayKeys);
 
   return (
     <Fields label='Images' style={{ gridColumn: '1 / -1' }}>

@@ -9,7 +9,9 @@ import { warmupKeys } from '../src/game/plugins/warmup';
 import { dealerKeys } from '../src/game/plugins/dealer';
 import { climaxKeys } from '../src/game/plugins/dice/climax';
 import { hypnoKeys } from '../src/game/plugins/hypno';
+import { imageKeys } from '../src/game/plugins/randomImages';
 import { playerKeys } from '../src/game/plugins/player';
+import { displayKeys } from '../src/game/components/displayKeys';
 
 export const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
   tick: 0,
@@ -32,7 +34,9 @@ const declared = [
   dealerKeys,
   climaxKeys,
   hypnoKeys,
+  imageKeys,
   playerKeys,
+  displayKeys,
 ];
 
 const sectioned = (values: Record<string, unknown>) =>

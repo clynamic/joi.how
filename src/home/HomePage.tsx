@@ -1,4 +1,6 @@
 import styled from 'styled-components';
+import { useGameFrame } from '../game/hooks';
+import Scene from '../game/plugins/scene';
 import {
   HomeTitle,
   ReleaseNotes,
@@ -9,7 +11,6 @@ import {
   StartButton,
 } from './components';
 import { SettingsSection } from '../settings';
-import { HomeProvider } from './HomeProvider';
 
 const StyledHomePage = styled.div`
   display: flex;
@@ -30,18 +31,22 @@ const StyledHomePage = styled.div`
 `;
 
 export const HomePage = () => {
+  const scene = useGameFrame<string | undefined>(Scene.paths.current);
+  const ready = typeof scene === 'string' && scene !== 'boot';
   return (
-    <HomeProvider>
-      <StyledHomePage>
-        <HomeTitle />
-        <AgeWarning />
-        <Introduction />
-        <SettingsSection />
-        <VersionDisplay />
-        <ReleaseNotes />
-        <Instructions />
-        <StartButton />
-      </StyledHomePage>
-    </HomeProvider>
+    <StyledHomePage>
+      <HomeTitle />
+      {ready && (
+        <>
+          <AgeWarning />
+          <Introduction />
+          <SettingsSection />
+          <VersionDisplay />
+          <ReleaseNotes />
+          <Instructions />
+          <StartButton />
+        </>
+      )}
+    </StyledHomePage>
   );
 };

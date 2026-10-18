@@ -1,6 +1,7 @@
 import { JoiStack, Space } from '../../common';
 import styled from 'styled-components';
-import { useHomeValue } from '../HomeProvider';
+import { useKeys } from '../../game/hooks';
+import Settings from '../../game/plugins/settings';
 import { WaButton, WaDialog, WaIcon } from '@awesome.me/webawesome/dist/react';
 
 const StyledAgeWarningDialog = styled(WaDialog)`
@@ -17,13 +18,14 @@ const StyledAgeWarningDialog = styled(WaDialog)`
   }
 `;
 
+const ageKeys = Settings.keys('core.home', { ageCheckConfirm: false });
 export const AgeWarning = () => {
-  const [ageCheckConfirm, setAgeCheckConfirm] = useHomeValue('ageCheckConfirm');
+  const [{ ageCheckConfirm }, set] = useKeys(ageKeys);
 
   return (
     <StyledAgeWarningDialog
       open={!ageCheckConfirm}
-      onWaHide={() => setAgeCheckConfirm(true)}
+      onWaHide={() => set('ageCheckConfirm', true)}
       className='dialog-deny-close'
       label={'Age Confirmation'}
     >
@@ -37,7 +39,7 @@ export const AgeWarning = () => {
           <span>I am not an adult</span>
           <WaIcon slot='end' name={'ban'} />
         </WaButton>
-        <WaButton onClick={() => setAgeCheckConfirm(true)}>
+        <WaButton onClick={() => set('ageCheckConfirm', true)}>
           <span>I am an adult</span>
           <WaIcon slot='end' name={'check'} />
         </WaButton>
