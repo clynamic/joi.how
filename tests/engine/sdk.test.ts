@@ -7,7 +7,13 @@ describe('sdk.index', () => {
     const { engine, plugins } = sdk.index();
 
     expect(engine).toEqual(
-      expect.arrayContaining(['Composer', 'Effects', 'Events', 'Scheduler'])
+      expect.arrayContaining([
+        'Composer',
+        'Effects',
+        'Events',
+        'Requests',
+        'Scheduler',
+      ])
     );
     expect(engine).not.toContain('index');
     expect(plugins.map(p => p.sdk)).not.toContain('Composer');

@@ -1,6 +1,7 @@
 import { Composer } from './Composer';
 import { Effects } from './pipes/Effects';
 import { Events } from './pipes/Events';
+import { Requests } from './pipes/Requests';
 import { Scheduler } from './pipes/Scheduler';
 import { definePlugin, pluginPaths } from './plugins/Plugins';
 import { registry } from './registry';
@@ -29,6 +30,7 @@ export interface SDK extends PluginSDK {
   Composer: typeof Composer;
   Effects: typeof Effects;
   Events: typeof Events;
+  Requests: typeof Requests;
   Scheduler: typeof Scheduler;
   pluginPaths: typeof pluginPaths;
   definePlugin: typeof definePlugin;
@@ -92,6 +94,7 @@ export const sdk: SDK = Object.assign(registry, {
   Composer,
   Effects,
   Events,
+  Requests,
   Scheduler,
   pluginPaths,
   definePlugin,
