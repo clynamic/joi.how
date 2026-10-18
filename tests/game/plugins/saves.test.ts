@@ -38,7 +38,7 @@ const store = (
 ) =>
   localStorage.setItem(
     `${SAVES_ID}.${slot}`,
-    JSON.stringify({ version, savedAt: 1, ...extra, blobs })
+    JSON.stringify({ version, savedAt: 1, ...extra, data: blobs })
   );
 
 const counter = (id: string, n: number): Module => ({
@@ -88,14 +88,14 @@ describe('Saves', () => {
         version: pkg.version,
         savedAt: 1234,
         meta: { mode: 'test' },
-        blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+        data: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
       },
     });
     expect(stored('one')).toEqual({
       version: pkg.version,
       savedAt: 1234,
       meta: { mode: 'test' },
-      blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+      data: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
     });
     expect(frame.core.saves.restored).toEqual({
       slot: 'one',
@@ -114,10 +114,10 @@ describe('Saves', () => {
 
     expect(stored('one')).toMatchObject({
       meta: { mode: 'x' },
-      blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+      data: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
     });
     expect(stored('two')).toMatchObject({
-      blobs: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+      data: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
     });
     expect(stored('two')).not.toHaveProperty('meta');
   });
@@ -157,7 +157,7 @@ describe('Saves', () => {
 
     expect(frame.test.a).toEqual({ n: 1 });
     expect(frame.test.b).toEqual({ n: 2 });
-    expect(stored('auto')?.blobs).toEqual({ 'test.a': { n: 9 } });
+    expect(stored('auto')?.data).toEqual({ 'test.a': { n: 9 } });
   });
 
   it('should ignore a save written by another major version and say so', () => {
@@ -173,7 +173,7 @@ describe('Saves', () => {
         type: 'core.log/line',
         payload: expect.objectContaining({
           level: 'warn',
-          message: 'ignored save {slot} from version {version}',
+          message: 'set aside slot {slot} from version {version}',
           data: { slot: 'one', version: '0.0.1' },
         }),
       })
@@ -234,7 +234,7 @@ describe('Saves', () => {
     for (let i = 0; i < 5; i++) frame = gamePipe(tick(frame, 100));
     frame = withImpulse(Saves.save('one'))(tick(frame));
     flush(frame);
-    const file = stored('one')!.blobs as Record<string, any>;
+    const file = stored('one')!.data as Record<string, any>;
 
     let fresh = playing();
     fresh = Composer.set(Pause.paths.paused, true)(fresh);

@@ -28,7 +28,7 @@ const autoSlot = () => localStorage.getItem('core.saves.classic');
 const store = (slot: string, blobs: Record<string, unknown>) =>
   localStorage.setItem(
     `core.saves.${slot}`,
-    JSON.stringify({ version: pkg.version, savedAt: 1, blobs })
+    JSON.stringify({ version: pkg.version, savedAt: 1, data: blobs })
   );
 
 function flush(frame: GameFrame): GameFrame {
@@ -127,7 +127,7 @@ describe('Classic', () => {
 
     expect(JSON.parse(autoSlot()!)).toMatchObject({
       meta: { mode: 'classic' },
-      blobs: { 'core.intensity': { intensity: 0.3 } },
+      data: { 'core.intensity': { intensity: 0.3 } },
     });
   });
 
@@ -181,7 +181,7 @@ describe('Classic', () => {
     for (let i = 0; i < 4; i++) frame = flush(frame);
 
     expect(JSON.parse(autoSlot()!)).toMatchObject({
-      blobs: { 'core.intensity': { intensity: 0.6 } },
+      data: { 'core.intensity': { intensity: 0.6 } },
     });
     expect(frame.core.saves.restored).toMatchObject({ slot: 'classic' });
   });
