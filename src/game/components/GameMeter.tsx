@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { defaultTransition } from '../../utils';
 import { useGameFrame } from '../hooks';
 import Phase, { GamePhase } from '../plugins/phase';
-import Stroke, { StrokeDirection } from '../plugins/stroke';
+import Stroke from '../plugins/stroke';
+import { StrokeDirection } from '../../types';
 import Pace from '../plugins/pace';
 
 const StyledGameMeter = styled.div`

@@ -5,7 +5,8 @@ import { typedPath } from '../../engine/Lens';
 import { Pipe } from '../../engine/State';
 import Sound from './sound';
 import { GamePhase, PhaseState } from './phase';
-import Stroke, { StrokeDirection } from './stroke';
+import Stroke from './stroke';
+import { StrokeDirection } from '../../types';
 import { GameMessage, MessageState } from './messages';
 
 const PLUGIN_ID = 'core.cues';

@@ -5,7 +5,7 @@ import {
   LinearActuator,
   OscillateActuator,
 } from './ToyActuator';
-import { StrokeDirection } from '../game/plugins/stroke';
+import { StrokeDirection } from '../types';
 
 let index = 0;
 

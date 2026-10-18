@@ -1,5 +1,5 @@
 import { type GenericDeviceMessageAttributes, ActuatorType } from 'buttplug';
-import { StrokeDirection } from '../game/plugins/stroke';
+import { StrokeDirection } from '../types';
 
 export enum VibrateMode {
   alwaysOn = 'alwaysOn',

@@ -1,3 +1,30 @@
+const layers = [
+  { type: 'shared', pattern: ['src/types', 'src/utils'] },
+  { type: 'engine', pattern: 'src/engine' },
+  { type: 'services', pattern: 'src/toy' },
+  { type: 'settings', pattern: 'src/settings' },
+  { type: 'app', pattern: 'src/game/components' },
+  { type: 'game', pattern: 'src/game' },
+  {
+    type: 'app',
+    pattern: [
+      'src/app',
+      'src/common',
+      'src/e621',
+      'src/end',
+      'src/env',
+      'src/home',
+      'src/local',
+      'src/walltaker',
+    ],
+  },
+];
+
+const mayImport = (from, types) => ({
+  from: { element: { type: from } },
+  allow: { to: { element: { types: { anyOf: types } } } },
+});
+
 module.exports = {
   root: true,
   env: { browser: true, es2020: true },
@@ -9,7 +36,14 @@ module.exports = {
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parser: '@typescript-eslint/parser',
-  plugins: ['react-refresh'],
+  plugins: ['react-refresh', 'boundaries'],
+  settings: {
+    'boundaries/elements': layers,
+    'boundaries/ignore': ['src/index.tsx'],
+    'import/resolver': {
+      node: { extensions: ['.js', '.ts', '.tsx'] },
+    },
+  },
   rules: {
     'react-refresh/only-export-components': [
       'warn',
@@ -20,4 +54,38 @@ module.exports = {
     // Lets just. put this aside for now.
     '@typescript-eslint/no-explicit-any': 'off',
   },
+  overrides: [
+    {
+      files: ['src/**'],
+      rules: {
+        'boundaries/no-unknown-files': 'error',
+        'boundaries/dependencies': [
+          'error',
+          {
+            default: 'disallow',
+            policies: [
+              mayImport('engine', ['shared']),
+              mayImport('services', ['shared']),
+              mayImport('game', ['engine', 'services', 'settings', 'shared']),
+              mayImport('settings', [
+                'app',
+                'game',
+                'engine',
+                'services',
+                'shared',
+              ]),
+              mayImport('app', [
+                'app',
+                'settings',
+                'game',
+                'engine',
+                'services',
+                'shared',
+              ]),
+            ],
+          },
+        ],
+      },
+    },
+  ],
 };

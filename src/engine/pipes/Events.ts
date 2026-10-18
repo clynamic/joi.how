@@ -2,7 +2,7 @@ import { lensFromPath } from '../Lens';
 import { Composer } from '../Composer';
 import { pluginPaths } from '../plugins/Plugins';
 import { GameFrame, Pipe } from '../State';
-import { CamelCase, toCamel } from '../../utils/case';
+import { CamelCase, toCamel } from '../case';
 
 export type GameEvent<T = any> = { type: string } & (unknown extends T
   ? { payload?: T }

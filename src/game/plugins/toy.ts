@@ -16,7 +16,8 @@ import Storage from '../../engine/plugins/Storage';
 import { PLAY_TIMELINE } from '../timelines';
 import Phase, { GamePhase, PhaseState } from './phase';
 import Pause from './pause';
-import { StrokeDirection, StrokeState } from './stroke';
+import { StrokeState } from './stroke';
+import { StrokeDirection } from '../../types';
 import { PaceState } from './pace';
 import { IntensityState } from './intensity';
 

@@ -1,17 +1,17 @@
 import styled from 'styled-components';
-import { GameMessages } from './components/GameMessages';
-import { GameImages } from './components/GameImages';
-import { GameMeter } from './components/GameMeter';
-import { GameHypno } from './components/GameHypno';
-import { GameInstructions } from './components/GameInstructions';
-import { GameEmergencyStop } from './components/GameEmergencyStop';
-import { GamePauseMenu } from './components/GamePauseMenu';
-import { GameResume } from './components/GameResume';
-import { WhenLoaded } from './components/WhenLoaded';
-import Pace from './plugins/pace';
-import Stroke from './plugins/stroke';
-import Hypno from './plugins/hypno';
-import EmergencyStop from './plugins/emergencyStop';
+import { GameMessages } from './GameMessages';
+import { GameImages } from './GameImages';
+import { GameMeter } from './GameMeter';
+import { GameHypno } from './GameHypno';
+import { GameInstructions } from './GameInstructions';
+import { GameEmergencyStop } from './GameEmergencyStop';
+import { GamePauseMenu } from './GamePauseMenu';
+import { GameResume } from './GameResume';
+import { WhenLoaded } from './WhenLoaded';
+import Pace from '../plugins/pace';
+import Stroke from '../plugins/stroke';
+import Hypno from '../plugins/hypno';
+import EmergencyStop from '../plugins/emergencyStop';
 
 const StyledGamePage = styled.div`
   position: relative;

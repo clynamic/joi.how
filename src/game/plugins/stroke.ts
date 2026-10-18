@@ -8,12 +8,9 @@ import Pause from './pause';
 import { PaceState } from './pace';
 import Saves from './saves';
 
-const PLUGIN_ID = 'core.stroke';
+import { StrokeDirection } from '../../types';
 
-export enum StrokeDirection {
-  up = 'up',
-  down = 'down',
-}
+const PLUGIN_ID = 'core.stroke';
 
 export type StrokeState = {
   stroke: StrokeDirection;

@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HomePage } from '../home';
-import { GamePage } from '../game';
+import { GamePage } from '../game/components';
 import { EndPage } from '../end';
 import { GameShell } from '../game/GameShell';
 import { SceneBridge } from '../game/SceneBridge';
