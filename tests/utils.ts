@@ -32,6 +32,7 @@ export const makeGame = (plugins: Pipe[] = [moduleManagerPipe]) => {
     predicate: (frame: GameFrame) => boolean,
     { maxTicks = 100, step = 16 } = {}
   ): GameFrame => {
+    if (predicate(frame)) return frame;
     for (let i = 0; i < maxTicks; i++) {
       frame = pipe(tick(frame, step));
       if (predicate(frame)) return frame;

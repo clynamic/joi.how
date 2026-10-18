@@ -148,7 +148,10 @@ describe('Classic', () => {
     frame = until(frame, persisted, { step: 1000, maxTicks: 12 });
     const first = frame.tick;
     flush(frame);
-    frame = until(frame, persisted, { step: 1000, maxTicks: 12 });
+    frame = until(frame, f => f.tick > first && persisted(f), {
+      step: 1000,
+      maxTicks: 12,
+    });
 
     expect(whilePaused).toBeNull();
     expect(frame.tick - first).toBeGreaterThanOrEqual(10);

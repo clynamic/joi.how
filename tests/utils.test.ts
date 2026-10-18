@@ -26,6 +26,9 @@ describe('makeGame until', () => {
 
     expect(fired(frame)).toEqual(['test/a']);
     expect(frame.tick).toBe(7);
+
+    const same = until(frame, f => fired(f).includes('test/a'));
+    expect(same).toBe(frame);
   });
 
   it('should throw past the tick budget', () => {
