@@ -290,6 +290,11 @@ export class Composer<T extends object> {
       if (result && typeof (result as any).then === 'function') {
         throw new Error('Composer.do() callback must not be async');
       }
+      if (typeof result === 'function') {
+        throw new Error(
+          'Composer.do() callback must not return a pipe, call pipe() instead'
+        );
+      }
       sealed = true;
 
       return c.get();

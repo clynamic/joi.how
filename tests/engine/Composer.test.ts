@@ -442,6 +442,14 @@ describe('Composer', () => {
         expect(result.user.profile.score).toBe(150);
       });
 
+      it('should throw if the callback returns a pipe instead of calling pipe', () => {
+        expect(() => {
+          const fn = Composer.do<{ x: number }>((() =>
+            Composer.set(['x'], 1)) as any);
+          fn({ x: 0 });
+        }).toThrow('must not return a pipe');
+      });
+
       it('should throw if callback is async', () => {
         expect(() => {
           const fn = Composer.do<{ x: number }>((async (scope: any) => {
