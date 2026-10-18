@@ -8,6 +8,7 @@ import { intensityKeys } from '../src/game/plugins/intensity';
 import { warmupKeys } from '../src/game/plugins/warmup';
 import { dealerKeys } from '../src/game/plugins/dealer';
 import { climaxKeys } from '../src/game/plugins/dice/climax';
+import { hypnoKeys } from '../src/game/plugins/hypno';
 import { playerKeys } from '../src/game/plugins/player';
 
 export const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
@@ -30,6 +31,7 @@ const declared = [
   warmupKeys,
   dealerKeys,
   climaxKeys,
+  hypnoKeys,
   playerKeys,
 ];
 

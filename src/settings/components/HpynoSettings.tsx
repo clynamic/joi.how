@@ -5,7 +5,8 @@ import {
   GameHypnoDescriptions,
   GameHypnoLabels,
 } from '../../types';
-import { useSetting } from '../SettingsProvider';
+import { useKeys } from '../../game/hooks';
+import { hypnoKeys } from '../../game/plugins/hypno';
 import {
   faCat,
   faCow,
@@ -15,7 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export const HypnoSettings = () => {
-  const [hypno, setHypno] = useSetting('hypno');
+  const [{ hypno }, set] = useKeys(hypnoKeys);
 
   return (
     <Fields label={'Hypno'} role='radiogroup'>
@@ -26,7 +27,7 @@ export const HypnoSettings = () => {
           <JoiToggleTile
             key={current}
             value={hypno === current}
-            onChange={() => setHypno(current)}
+            onChange={() => set('hypno', current)}
             type={'radio'}
           >
             <h6 className='subtitle'>{GameHypnoLabels[current]}</h6>

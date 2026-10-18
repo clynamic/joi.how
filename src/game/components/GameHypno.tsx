@@ -1,5 +1,7 @@
 import styled from 'styled-components';
-import { useSetting, useTranslate } from '../../settings';
+import { useTranslate } from '../../settings';
+import { useKeys } from '../hooks';
+import { hypnoKeys } from '../plugins/hypno';
 import { GameHypnoType, HypnoPhrases } from '../../types';
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
@@ -15,7 +17,7 @@ const StyledGameHypno = motion.create(styled.div`
 `);
 
 export const GameHypno = () => {
-  const [hypno] = useSetting('hypno');
+  const [{ hypno }] = useKeys(hypnoKeys);
   const { currentPhrase = 0 } = useGameFrame(Hypno.paths) ?? {};
   const { intensity = 0 } = useGameFrame(Intensity.paths) ?? {};
   const translate = useTranslate();

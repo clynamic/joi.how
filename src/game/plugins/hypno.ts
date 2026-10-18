@@ -5,7 +5,7 @@ import { GameTiming } from '../../engine/State';
 import { GamePhase, PhaseState } from './phase';
 import Pause from './pause';
 import { IntensityState } from './intensity';
-import { Settings } from '../../settings/Settings';
+import Presets from './presets';
 import { GameHypnoType, HypnoPhrases } from '../../types';
 import Rand from './rand';
 
@@ -20,7 +20,9 @@ const hypno = pluginPaths<HypnoState>(PLUGIN_ID);
 const timing = typedPath<GameTiming>([]);
 const phaseState = typedPath<PhaseState>(['core.phase']);
 const intensityState = typedPath<IntensityState>(['core.intensity']);
-const settings = typedPath<Settings>(['settings']);
+export const hypnoKeys = Presets.keys(PLUGIN_ID, {
+  hypno: GameHypnoType.joi as GameHypnoType,
+});
 
 const Hypno = definePlugin({
   id: PLUGIN_ID,
@@ -38,7 +40,7 @@ const Hypno = definePlugin({
       const phase = get(phaseState).current;
       if (phase !== GamePhase.active) return;
 
-      const s = get(settings);
+      const s = hypnoKeys.get(get());
       if (s.hypno === GameHypnoType.off) return;
 
       const i = get(intensityState).intensity * 100;
