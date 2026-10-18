@@ -4,8 +4,7 @@ import { Events } from '../../engine/pipes/Events';
 import Messages from './messages';
 import { ScheduledEvent, Scheduler } from '../../engine/pipes/Scheduler';
 import Saves from './saves';
-import { typedPath } from '../../engine/Lens';
-import { Settings } from '../../settings/Settings';
+import Presets from './presets';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
 import { PLAY_TIMELINE } from '../timelines';
@@ -17,7 +16,7 @@ type WarmupState = {
 };
 
 const warmup = pluginPaths<WarmupState>(PLUGIN_ID);
-const settings = typedPath<Settings>(['settings']);
+export const warmupKeys = Presets.keys(PLUGIN_ID, { warmupDuration: 0 });
 
 const AUTOSTART_KEY = Scheduler.getKey(PLUGIN_ID, 'autoStart');
 
@@ -55,7 +54,7 @@ const Warmup = definePlugin({
       Phase.whenPhase(
         GamePhase.warmup,
         Composer.do(({ get, set, pipe }) => {
-          const s = get(settings);
+          const s = warmupKeys.get(get());
 
           if (s.warmupDuration === 0) {
             pipe(Phase.setPhase(GamePhase.active));

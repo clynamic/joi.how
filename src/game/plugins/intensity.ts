@@ -1,7 +1,7 @@
 import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
 import { Composer } from '../../engine/Composer';
 import { typedPath } from '../../engine/Lens';
-import { Settings } from '../../settings/Settings';
+import Presets from './presets';
 import { GameTiming } from '../../engine/State';
 import Phase, { GamePhase } from './phase';
 import Pause from './pause';
@@ -15,7 +15,7 @@ export type IntensityState = {
 
 const intensity = pluginPaths<IntensityState>(PLUGIN_ID);
 const timing = typedPath<GameTiming>([]);
-const settings = typedPath<Settings>(['settings']);
+export const intensityKeys = Presets.keys(PLUGIN_ID, { gameDuration: 900 });
 
 const fresh = Composer.set(intensity, { intensity: 0 });
 
@@ -38,7 +38,7 @@ const Intensity = definePlugin({
         GamePhase.active,
         Composer.do(({ get, over }) => {
           const delta = get(timing.step);
-          const s = get(settings);
+          const s = intensityKeys.get(get());
           over(intensity, ({ intensity: i = 0 }) => ({
             intensity: Math.min(1, i + delta / (s.gameDuration * 1000)),
           }));

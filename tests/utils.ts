@@ -4,6 +4,8 @@ import { Impulses } from '../src/engine/Impulses';
 import { moduleManagerPipe } from '../src/engine/modules/ModuleManager';
 import { gamePipes } from '../src/game/pipes/Game';
 import Pace from '../src/game/plugins/pace';
+import { intensityKeys } from '../src/game/plugins/intensity';
+import { warmupKeys } from '../src/game/plugins/warmup';
 
 export const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
   tick: 0,
@@ -19,7 +21,7 @@ export const tick = (frame: GameFrame, step = 16): GameFrame => ({
   time: frame.time + step,
 });
 
-const declared = [Pace.keys];
+const declared = [Pace.keys, intensityKeys, warmupKeys];
 
 const sectioned = (values: Record<string, unknown>) =>
   Object.fromEntries(

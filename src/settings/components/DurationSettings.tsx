@@ -7,12 +7,14 @@ import {
   SettingsRow,
   SettingsDivider,
 } from '../../common';
-import { useSetting } from '../SettingsProvider';
+import { useKeys } from '../../game/hooks';
+import { intensityKeys } from '../../game/plugins/intensity';
+import { warmupKeys } from '../../game/plugins/warmup';
 import { WaSlider } from '@awesome.me/webawesome/dist/react';
 
 export const DurationSettings = () => {
-  const [warmupDuration, setWarmupDuration] = useSetting('warmupDuration');
-  const [gameDuration, setGameDuration] = useSetting('gameDuration');
+  const [{ warmupDuration }, setWarmup] = useKeys(warmupKeys);
+  const [{ gameDuration }, setIntensity] = useKeys(intensityKeys);
 
   return (
     <Fields label='Duration'>
@@ -27,7 +29,10 @@ export const DurationSettings = () => {
           step={60}
           value={warmupDuration}
           onInput={e =>
-            setWarmupDuration(parseFloat(e.currentTarget.value.toString()))
+            setWarmup(
+              'warmupDuration',
+              parseFloat(e.currentTarget.value.toString())
+            )
           }
           style={{ width: '100%' }}
         />
@@ -46,7 +51,10 @@ export const DurationSettings = () => {
           step={60}
           value={gameDuration}
           onInput={e =>
-            setGameDuration(parseFloat(e.currentTarget.value.toString()))
+            setIntensity(
+              'gameDuration',
+              parseFloat(e.currentTarget.value.toString())
+            )
           }
           style={{ width: '100%' }}
         />
