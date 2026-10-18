@@ -166,6 +166,22 @@ describe('Toy performers', () => {
     expect(localStorage.getItem('core.toy.connection')).toBeNull();
   });
 
+  it('should ignore its verbs while unloaded', async () => {
+    let frame = await flushAndApply(ModuleManager.unload(Toy.id)(bootstrap()));
+    frame = await flushAndApply(frame);
+
+    frame = await flushAndApply(
+      Composer.pipe(
+        Toy.connect('ws://127.0.0.1:12345'),
+        Toy.disconnect()
+      )(frame)
+    );
+    frame = await flushAndApply(frame);
+
+    expect(frame.core.toy).toBeUndefined();
+    expect(fake.state.instances).toHaveLength(0);
+  });
+
   it('should forget the address on disconnect without a live client', async () => {
     let frame = bootstrap();
     for (let i = 0; i < 3; i++) frame = await flushAndApply(frame);

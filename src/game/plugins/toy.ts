@@ -218,11 +218,12 @@ const Toy = definePlugin({
   },
 
   connect(url: string): Pipe {
-    return Composer.pipe(
-      Composer.set(toy.error, undefined),
-      Composer.set(toy.connecting, true),
-      connect.emit({ url })
-    );
+    return Composer.do(({ get, set, pipe }) => {
+      if (!get(toy)) return;
+      set(toy.error, undefined);
+      set(toy.connecting, true);
+      pipe(connect.emit({ url }));
+    });
   },
 
   disconnect(): Pipe {
