@@ -3,6 +3,7 @@ import { Composer } from '../../engine/Composer';
 import { Pipe } from '../../engine/State';
 import PluginInstaller from '../../engine/plugins/PluginInstaller';
 import Storage from '../../engine/plugins/Storage';
+import Bytes from './bytes';
 import Scene from './scene';
 import Mode from './mode';
 import Keys from './keys';
@@ -48,6 +49,7 @@ const plugins = [
 
 export const registerPlugins: Pipe = Composer.pipe(
   ModuleManager.load(Storage),
+  ModuleManager.load(Bytes),
   ModuleManager.load(Settings),
   ModuleManager.load(Presets),
   ModuleManager.load(Player),
