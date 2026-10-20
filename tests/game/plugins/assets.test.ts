@@ -12,6 +12,7 @@ const { pipe: gamePipe, withImpulse } = makeGame();
 const image: AssetRecord = { kind: 'image', sizes: ['thumbnail', 'full'] };
 
 const dropped: string[] = [];
+const freed: string[] = [];
 const fakeSource = {
   id: 'test.source',
   effects: [
@@ -21,6 +22,9 @@ const fakeSource = {
     }),
     Assets.source('fake').drop.perform(({ id }) => {
       dropped.push(id);
+    }),
+    Assets.source('fake').free.perform(({ id }) => {
+      freed.push(id);
     }),
   ],
 };
@@ -55,6 +59,7 @@ describe('Assets', () => {
   beforeEach(() => {
     localStorage.clear();
     dropped.length = 0;
+    freed.length = 0;
   });
 
   it('should keep a record for a holder and list it again at startup', async () => {
@@ -149,6 +154,54 @@ describe('Assets', () => {
       state: 'loaded',
       urls: { full: 'blob:late/full' },
     });
+  });
+
+  it('should free the urls of an asset that leaves use', async () => {
+    const keys = ['fake:a', 'fake:b', 'fake:c', 'fake:d'];
+    let frame = await step(
+      await boot(),
+      Composer.pipe(
+        ...['a', 'b', 'c', 'd'].map(id =>
+          Assets.keep('fake', id, image, 'classic')
+        ),
+        Assets.use(keys)
+      )
+    );
+    frame = await step(
+      frame,
+      Composer.pipe(...keys.map(key => Assets.load(key, 'full')))
+    );
+    frame = await step(frame);
+    frame = await step(frame);
+    expect(freed).toEqual([]);
+
+    frame = await step(
+      frame,
+      Composer.pipe(
+        Assets.unuse(['fake:a']),
+        Assets.release('fake:b', 'classic'),
+        Assets.forget('fake:c')
+      )
+    );
+    await step(frame);
+
+    expect(freed.sort()).toEqual(['a', 'b', 'c']);
+  });
+
+  it('should free a url that arrives after its asset left use', async () => {
+    let frame = await step(
+      await boot(),
+      Composer.pipe(
+        Assets.keep('fake', 'late', image, 'classic'),
+        Assets.use(['fake:late'])
+      )
+    );
+    frame = await step(frame, Assets.load('fake:late', 'full'));
+    frame = await step(frame, Assets.unuse(['fake:late']));
+    frame = await step(frame);
+    await step(frame);
+
+    expect(freed).toEqual(['late']);
   });
 
   it('should list a declared record without persisting it', async () => {

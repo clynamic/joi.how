@@ -82,6 +82,7 @@ const E621 = definePlugin({
     }),
     source.resolve.perform(async ({ record, size }) => urlOf(record, size)),
     source.drop.perform(() => undefined),
+    source.free.perform(() => undefined),
   ],
 });
 

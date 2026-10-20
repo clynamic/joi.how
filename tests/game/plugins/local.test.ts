@@ -15,8 +15,7 @@ import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
 import Storage from '../../../src/engine/plugins/Storage';
 import Assets from '../../../src/game/plugins/assets';
-import Local from '../../../src/game/plugins/local';
-import { localImageService } from '../../../src/services/localImages';
+import Local, { localImageService } from '../../../src/game/plugins/local';
 import { ImageType } from '../../../src/types';
 import { makeFrame, makeGame, tick } from '../../utils';
 
@@ -71,6 +70,7 @@ describe('Local', () => {
   beforeEach(() => {
     localStorage.clear();
     URL.createObjectURL = vi.fn(() => 'blob:stored');
+    URL.revokeObjectURL = vi.fn();
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
 
@@ -93,6 +93,28 @@ describe('Local', () => {
       state: 'loaded',
       urls: { full: 'blob:stored' },
     });
+  });
+
+  it('should free the urls of an image that leaves use', async () => {
+    const [item] = await Local.import([picture('shown.png')]);
+    const key = `core.local:${item.id}`;
+    let frame = await step(
+      await boot(),
+      Composer.pipe(
+        Assets.keep('core.local', item.id, item.record, 'classic'),
+        Assets.use([key])
+      )
+    );
+    frame = await step(frame, Assets.load(key, 'full'));
+    frame = await step(frame);
+    frame = await step(frame);
+    expect(Assets.entry(frame, key)?.state).toBe('loaded');
+    expect(URL.revokeObjectURL).not.toHaveBeenCalled();
+
+    frame = await step(frame, Assets.unuse([key]));
+    await step(frame);
+
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:stored');
   });
 
   it('should forget a kept record whose file is gone at startup', async () => {

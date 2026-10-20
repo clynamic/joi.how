@@ -1,23 +1,14 @@
-import { openDB, IDBPDatabase } from 'idb';
+import { openDB, deleteDB } from 'idb';
 import { ImageSize, ImageType } from '../types';
 import { generateLowResImage, LowResImageSize } from './resize';
+import { PluginBytes } from './bytes';
 import SparkMD5 from 'spark-md5';
 
 export interface LocalImage {
-  thumbnail?: Blob;
-  preview?: Blob;
-  full: Blob;
   type: ImageType;
   hash: string;
   name: string;
   id: string;
-}
-
-interface LocalImagesDB {
-  images: {
-    key: string;
-    value: LocalImage;
-  };
 }
 
 export interface LocalImageRequest {
@@ -26,140 +17,113 @@ export interface LocalImageRequest {
   name: string;
 }
 
-class LocalImageService {
-  private dbPromise: Promise<IDBPDatabase<LocalImagesDB>>;
-  private resolveRequests = new Map<string, Promise<string>>();
+type LegacyImage = LocalImage & {
+  full: Blob;
+  thumbnail?: Blob;
+  preview?: Blob;
+};
+
+const fileKey = (id: string, size: ImageSize | `${ImageSize}`) =>
+  `${id}/${size}`;
+
+export class LocalImageService {
+  private ready?: Promise<void>;
+  private making = new Map<string, Promise<void>>();
   private persistRequested = false;
 
-  constructor() {
-    this.dbPromise = this.initDB();
-  }
+  constructor(
+    private store: PluginBytes,
+    private legacy = 'local-images'
+  ) {}
 
-  private async initDB(): Promise<IDBPDatabase<LocalImagesDB>> {
-    return openDB<LocalImagesDB>('local-images', 1, {
-      upgrade(db) {
-        const store = db.createObjectStore('images', { keyPath: 'id' });
-        store.createIndex('by-id', 'id');
-      },
-    });
-  }
-
-  async resolveUrl(url: string): Promise<string> {
-    const db = await this.dbPromise;
-
-    const match = url.match(/^local:\/\/(thumbnail|preview|full)\/(.+)$/);
-
-    if (!match) return url;
-
-    const [, size, id] = match;
-    const key = `${size}-${id}`;
-
-    if (this.resolveRequests.has(key)) {
-      return this.resolveRequests.get(key)!;
+  async url(
+    id: string,
+    size: ImageSize | `${ImageSize}`,
+    type: ImageType
+  ): Promise<string> {
+    await this.migrated();
+    if (size === ImageSize.full) return this.store.url(fileKey(id, size));
+    const key = fileKey(id, size);
+    const full = fileKey(id, ImageSize.full);
+    if (!(await this.store.get(key))) {
+      const blob = await this.store.get(full);
+      if (!blob || !(await this.lowRes(key, blob, size, type)))
+        return this.store.url(full);
     }
-
-    const requestPromise = (async () => {
-      const tx = db.transaction('images', 'readonly');
-      const store = tx.objectStore('images');
-      const image: LocalImage = await store.get(id);
-
-      if (!image) throw new Error('Image not found in database');
-
-      let blob: Blob | undefined;
-
-      switch (size as ImageSize) {
-        case ImageSize.thumbnail:
-          blob = await this.lowRes(db, image, ImageSize.thumbnail);
-          break;
-        case ImageSize.preview:
-          blob = await this.lowRes(db, image, ImageSize.preview);
-          break;
-        case ImageSize.full:
-          blob = image.full;
-          break;
-      }
-
-      if (!blob) throw new Error('Failed to resolve image blob');
-      return URL.createObjectURL(blob);
-    })();
-
-    this.resolveRequests.set(key, requestPromise);
-
-    try {
-      const result = await requestPromise;
-      return result;
-    } finally {
-      this.resolveRequests.delete(key);
-    }
+    return this.store.url(key);
   }
 
   async listIds(): Promise<string[]> {
-    const db = await this.dbPromise;
-    const keys = await db.getAllKeys('images');
-    return keys.map(String);
-  }
-
-  async getImage(id: string): Promise<LocalImage | undefined> {
-    const db = await this.dbPromise;
-
-    const tx = db.transaction('images', 'readonly');
-    const store = tx.objectStore('images');
-    return store.get(id);
+    await this.migrated();
+    const keys = await this.store.keys();
+    return [...new Set(keys.map(key => key.slice(0, key.lastIndexOf('/'))))];
   }
 
   async storeImage<T extends LocalImageRequest | LocalImageRequest[]>(
     request: T
   ): Promise<T extends LocalImageRequest ? LocalImage : LocalImage[]> {
-    const db = await this.dbPromise;
+    await this.migrated();
     const requests: LocalImageRequest[] = Array.isArray(request)
       ? request
       : [request];
 
-    const preparedImages: LocalImage[] = [];
-    for (const { blob, type, name } of requests) {
-      const hash = await this.generateHash(blob);
-      const id = this.generateImageId(name, hash);
-
-      const newImage: LocalImage = {
-        full: blob,
-        type,
-        hash,
-        name,
-        id,
-      };
-
-      preparedImages.push(newImage);
-    }
-
     this.persist();
 
-    const tx = db.transaction('images', 'readwrite');
-    const store = tx.objectStore('images');
-
-    for (const image of preparedImages) {
-      await store.put(image);
+    const stored: LocalImage[] = [];
+    for (const { blob, type, name } of requests) {
+      const hash = await this.generateHash(blob);
+      const id = `${name}-${hash}`;
+      await this.store.put(fileKey(id, ImageSize.full), blob);
+      stored.push({ type, hash, name, id });
     }
 
-    await tx.done;
-
     return (
-      Array.isArray(request) ? preparedImages : preparedImages[0]
+      Array.isArray(request) ? stored : stored[0]
     ) as T extends LocalImageRequest ? LocalImage : LocalImage[];
   }
 
   async removeImage(id: string | string[]) {
-    const db = await this.dbPromise;
-
-    const tx = db.transaction('images', 'readwrite');
-    const store = tx.objectStore('images');
-    if (Array.isArray(id)) {
-      for (const imageId of id) {
-        await store.delete(imageId);
-      }
-    } else {
-      await store.delete(id);
+    await this.migrated();
+    const ids = Array.isArray(id) ? id : [id];
+    for (const imageId of ids) {
+      await this.store.delete(await this.store.keys(`${imageId}/`));
     }
-    await tx.done;
+  }
+
+  free(id: string): void {
+    for (const size of Object.values(ImageSize))
+      this.store.free(fileKey(id, size));
+  }
+
+  private migrated(): Promise<void> {
+    this.ready ??= this.migrate();
+    return this.ready;
+  }
+
+  private async migrate(): Promise<void> {
+    const names = (await indexedDB.databases?.())?.map(d => d.name);
+    if (names && !names.includes(this.legacy)) return;
+    const db = await openDB(this.legacy, 1, {
+      upgrade(db) {
+        db.createObjectStore('images', { keyPath: 'id' });
+      },
+    });
+    const images: LegacyImage[] = await db.getAll('images');
+    db.close();
+    for (const image of images) {
+      await this.store.put(fileKey(image.id, ImageSize.full), image.full);
+      if (image.thumbnail)
+        await this.store.put(
+          fileKey(image.id, ImageSize.thumbnail),
+          image.thumbnail
+        );
+      if (image.preview)
+        await this.store.put(
+          fileKey(image.id, ImageSize.preview),
+          image.preview
+        );
+    }
+    await deleteDB(this.legacy);
   }
 
   private persist() {
@@ -170,47 +134,33 @@ class LocalImageService {
   }
 
   private async lowRes(
-    db: IDBPDatabase<LocalImagesDB>,
-    image: LocalImage,
-    size: ImageSize.thumbnail | ImageSize.preview
-  ): Promise<Blob> {
-    const cached = image[size];
-    if (cached) return cached;
-    try {
-      const blob = await this.createThumbnailOrPreview(image, size);
-      image[size] = blob;
-      await db.put('images', image);
-      return blob;
-    } catch (error) {
-      console.warn(
-        `Failed to resize ${image.name}, using the full file:`,
-        error
-      );
-      return image.full;
+    key: string,
+    full: Blob,
+    size: `${ImageSize.thumbnail}` | `${ImageSize.preview}`,
+    type: ImageType
+  ): Promise<boolean> {
+    let making = this.making.get(key);
+    if (!making) {
+      making = generateLowResImage(
+        full,
+        type,
+        size as unknown as LowResImageSize
+      ).then(blob => this.store.put(key, blob));
+      this.making.set(key, making);
     }
-  }
-
-  private generateImageId(name: string, hash: string): string {
-    return `${name}-${hash}`;
+    try {
+      await making;
+      return true;
+    } catch (error) {
+      console.warn(`Failed to resize ${key}, using the full file:`, error);
+      return false;
+    } finally {
+      this.making.delete(key);
+    }
   }
 
   private async generateHash(blob: Blob): Promise<string> {
     const buffer = await blob.arrayBuffer();
-    const hash = SparkMD5.ArrayBuffer.hash(buffer);
-    return hash;
-  }
-
-  private async createThumbnailOrPreview(
-    image: LocalImage,
-    size: ImageSize
-  ): Promise<Blob> {
-    if (size === ImageSize.full) throw new Error('Invalid image size provided');
-    return generateLowResImage(
-      image.full,
-      image.type,
-      size as unknown as LowResImageSize
-    );
+    return SparkMD5.ArrayBuffer.hash(buffer);
   }
 }
-
-export const localImageService = new LocalImageService();

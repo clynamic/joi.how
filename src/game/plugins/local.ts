@@ -4,15 +4,18 @@ import { GameFrame } from '../../engine/State';
 import { Requests } from '../../engine/pipes/Requests';
 import { ImageType } from '../../types';
 import {
-  localImageService,
+  LocalImageService,
   LocalImage,
   LocalImageRequest,
 } from '../../services/localImages';
+import { bytes } from '../../services/bytes';
 import Assets, { AssetKind, AssetRecord, assetKey } from './assets';
 
 const PLUGIN_ID = 'core.local';
 
 export const SOURCE = PLUGIN_ID;
+
+export const localImageService = new LocalImageService(bytes.for(PLUGIN_ID));
 
 const source = Assets.source(SOURCE);
 
@@ -20,6 +23,13 @@ const check = Requests.define<void, string[]>(PLUGIN_ID, 'check');
 
 const kindOf = (type: ImageType): AssetKind =>
   type === ImageType.video ? 'video' : type === ImageType.gif ? 'gif' : 'image';
+
+const typeOf = (kind: AssetKind): ImageType =>
+  kind === 'video'
+    ? ImageType.video
+    : kind === 'gif'
+      ? ImageType.gif
+      : ImageType.image;
 
 export const localRecord = (image: LocalImage): AssetRecord => ({
   kind: kindOf(image.type),
@@ -57,12 +67,13 @@ const Local = definePlugin({
   ),
 
   effects: [
-    source.resolve.perform(({ id, size }) =>
-      localImageService.resolveUrl(`local://${size}/${id}`)
+    source.resolve.perform(({ id, record, size }) =>
+      localImageService.url(id, size, typeOf(record.kind))
     ),
     source.drop.perform(({ id }) => {
       localImageService.removeImage(id).catch(() => undefined);
     }),
+    source.free.perform(({ id }) => localImageService.free(id)),
     check.perform(() => localImageService.listIds()),
   ],
 });

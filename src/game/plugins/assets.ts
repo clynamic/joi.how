@@ -49,6 +49,7 @@ export type ResolvePayload = {
   size: AssetSize;
 };
 export type DropPayload = { id: string; record: AssetRecord };
+export type FreePayload = { id: string };
 
 const paths = pluginPaths<AssetsState>(PLUGIN_ID);
 
@@ -69,6 +70,7 @@ const sources = new Map<
   {
     resolve: ReturnType<typeof Requests.define<ResolvePayload, string>>;
     drop: ReturnType<typeof Effects.define<DropPayload>>;
+    free: ReturnType<typeof Effects.define<FreePayload>>;
   }
 >();
 
@@ -81,6 +83,7 @@ const sourceOf = (source: string) => {
         `resolve/${source}`
       ),
       drop: Effects.define<DropPayload>(PLUGIN_ID, `drop/${source}`),
+      free: Effects.define<FreePayload>(PLUGIN_ID, `free/${source}`),
     };
     sources.set(source, def);
   }
@@ -100,6 +103,16 @@ const fromStorage = (entries: StoredEntry[]): Record<AssetKey, LibraryEntry> =>
     entries.flatMap(({ key, value }) =>
       isLibraryEntry(value) ? [[key.slice(STORAGE_PREFIX.length), value]] : []
     )
+  );
+
+const free = (key: AssetKey): Pipe => {
+  const { source, id } = parseKey(key);
+  return sourceOf(source).free.emit({ id });
+};
+
+const leaving = (entries: (AssetEntry | undefined)[]): Pipe[] =>
+  entries.flatMap(entry =>
+    entry && Object.keys(entry.urls).length > 0 ? [free(entry.key)] : []
   );
 
 const resolve = (key: AssetKey, library: LibraryEntry, size: AssetSize): Pipe =>
@@ -184,9 +197,11 @@ const Assets = definePlugin({
       delete rest[key];
       set(paths.library, rest);
       const entries = { ...(get(paths.inUse) ?? {}) };
+      const gone = entries[key];
       delete entries[key];
       set(paths.inUse, entries);
       pipe(
+        ...leaving([gone]),
         Storage.remove(storageKey(key)),
         sourceOf(existing.source).drop.emit({
           id: existing.id,
@@ -204,9 +219,10 @@ const Assets = definePlugin({
       delete rest[key];
       set(paths.library, rest);
       const inUse = { ...(get(paths.inUse) ?? {}) };
+      const gone = inUse[key];
       delete inUse[key];
       set(paths.inUse, inUse);
-      pipe(Storage.remove(storageKey(key)));
+      pipe(...leaving([gone]), Storage.remove(storageKey(key)));
     });
   },
 
@@ -222,11 +238,13 @@ const Assets = definePlugin({
   },
 
   unuse(keys: AssetKey[]): Pipe {
-    return Composer.do<GameFrame>(({ get, set }) => {
+    return Composer.do<GameFrame>(({ get, set, pipe }) => {
       if (!get(paths)) return;
       const entries = { ...(get(paths.inUse) ?? {}) };
+      const gone = keys.map(key => entries[key]);
       for (const key of keys) delete entries[key];
       set(paths.inUse, entries);
+      pipe(...leaving(gone));
     });
   },
 
@@ -281,13 +299,16 @@ const Assets = definePlugin({
       )
     ),
     Events.handle<Done<string, ResolvePayload>>(Requests.doneType, event =>
-      Composer.do<GameFrame>(({ get, set }) => {
+      Composer.do<GameFrame>(({ get, set, pipe }) => {
         const match = /^core\.assets\/resolve\/(.+)$/.exec(event.payload.type);
         if (!match) return;
         const { payload } = event.payload;
         const key = assetKey(match[1], payload.id);
         const entry = get(paths.inUse)?.[key];
-        if (!entry) return;
+        if (!entry) {
+          pipe(free(key));
+          return;
+        }
         set(paths.inUse, {
           ...get(paths.inUse),
           [key]: {
