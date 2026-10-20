@@ -100,6 +100,26 @@ describe('Assets', () => {
     expect(dropped).toEqual(['a']);
   });
 
+  it('should release every hold of a holder and keep the holds of others', async () => {
+    let frame = await step(
+      await boot(),
+      Composer.pipe(
+        Assets.keep('fake', 'a', image, 'classic'),
+        Assets.keep('fake', 'b', image, 'classic'),
+        Assets.keep('fake', 'b', image, 'novel'),
+        Assets.keep('fake', 'c', image, 'novel')
+      )
+    );
+
+    frame = await step(frame, Assets.releaseAll('classic'));
+    await step(frame);
+
+    expect(library(frame)['fake:a']).toBeUndefined();
+    expect(library(frame)['fake:b'].holders).toEqual(['novel']);
+    expect(library(frame)['fake:c'].holders).toEqual(['novel']);
+    expect(dropped).toEqual(['a']);
+  });
+
   it('should resolve a used asset through its source and keep the url on the entry', async () => {
     let frame = await step(
       await boot(),

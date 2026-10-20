@@ -211,6 +211,14 @@ const Assets = definePlugin({
     });
   },
 
+  releaseAll(holder: string): Pipe {
+    return Composer.do<GameFrame>(({ get, pipe }) => {
+      for (const [key, entry] of Object.entries(get(paths.library) ?? {})) {
+        if (entry.holders.includes(holder)) pipe(Assets.release(key, holder));
+      }
+    });
+  },
+
   forget(key: AssetKey): Pipe {
     return Composer.do<GameFrame>(({ get, set, pipe }) => {
       const library = get(paths.library);
