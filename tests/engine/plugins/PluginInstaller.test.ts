@@ -71,9 +71,54 @@ function seed(
   }
 }
 
+const seen = (frame: GameFrame): unknown[] => frame.seen ?? [];
+const record = (label: unknown): Pipe =>
+  Composer.over(['seen'], (list: unknown[]) => [...list, label], []);
+
+const watcher = {
+  id: 'test.watch',
+  update: PluginInstaller.onRemove(id => record(`removed ${id}`)),
+};
+
+function watched(): GameFrame {
+  const frame0 = fullPipe(makeFrame());
+  const frame1 = Composer.pipe(
+    ModuleManager.load(Storage),
+    ModuleManager.load(watcher),
+    ModuleManager.load(PluginInstaller)
+  )(frame0);
+  return settle(fullPipe(tick(frame1)));
+}
+
 describe('Plugin Installer', () => {
   beforeEach(() => {
     localStorage.clear();
+  });
+
+  it('should list the defined plugins and installed mods once its index is read', () => {
+    seed(['me.on', 'me.off'], ['me.off']);
+    const loading = fullPipe(
+      tick(ModuleManager.load(PluginInstaller)(fullPipe(makeFrame())))
+    );
+    expect(PluginInstaller.plugins(loading)).toBeUndefined();
+
+    const frame = watched();
+
+    expect(PluginInstaller.plugins(frame)).toEqual(
+      expect.arrayContaining(['me.on', 'me.off', PluginInstaller.id])
+    );
+    expect(PluginInstaller.plugins(frame)).not.toContain('me.never');
+  });
+
+  it('should report a removal with the id', () => {
+    seed(['me.gone', 'me.kept']);
+    let frame = watched();
+
+    frame = settle(Composer.pipe(PluginInstaller.remove('me.gone'))(frame));
+
+    expect(seen(frame)).toEqual(['removed me.gone']);
+    expect(PluginInstaller.plugins(frame)).toContain('me.kept');
+    expect(PluginInstaller.plugins(frame)).not.toContain('me.gone');
   });
 
   it('should initialize with empty state', () => {

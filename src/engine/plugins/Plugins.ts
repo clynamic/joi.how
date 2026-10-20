@@ -28,9 +28,14 @@ export type Plugin = Module & {
 
 export type PluginRegistry = Record<PluginId, Plugin>;
 
+const defined = new Set<PluginId>();
+
+export const definedIds = (): PluginId[] => [...defined];
+
 export function definePlugin<T extends Plugin & { [key: string]: unknown }>(
   plugin: T
 ): T {
+  defined.add(plugin.id);
   if (plugin.sdk) registry[plugin.sdk] = plugin;
   return plugin;
 }

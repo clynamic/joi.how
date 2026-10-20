@@ -1,5 +1,6 @@
 import {
   definePlugin,
+  definedIds,
   pluginPaths,
   type Plugin,
   type PluginId,
@@ -7,7 +8,8 @@ import {
 } from './Plugins';
 import { Composer } from '../Composer';
 import { Effects, type Inject } from '../pipes/Effects';
-import { Pipe } from '../State';
+import { Events } from '../pipes/Events';
+import { GameFrame, Pipe } from '../State';
 import { ModuleManager } from '../modules/ModuleManager';
 import Storage from './Storage';
 
@@ -33,6 +35,8 @@ const INDEX_KEY = `${PLUGIN_ID}.index`;
 const CODE_PREFIX = `${PLUGIN_ID}.code/`;
 const codeKey = (id: PluginId) => `${CODE_PREFIX}${id}`;
 const idOf = (key: string) => key.slice(CODE_PREFIX.length);
+
+const eventType = Events.getKeys(PLUGIN_ID, 'removed');
 
 const compile = Effects.define<{ code: string; id?: PluginId }>(
   PLUGIN_ID,
@@ -190,8 +194,20 @@ const PluginInstaller = definePlugin({
       })),
       persistNow,
       Storage.remove(codeKey(id)),
-      ModuleManager.unload(id)
+      ModuleManager.unload(id),
+      Events.dispatch({ type: eventType.removed, payload: { id } })
     ),
+
+  onRemove: (fn: (id: PluginId) => Pipe): Pipe =>
+    Events.handle<{ id: PluginId }>(eventType.removed, event =>
+      fn(event.payload.id)
+    ),
+
+  plugins: (frame: GameFrame): PluginId[] | undefined => {
+    const state = Composer.get(ins)(frame);
+    if (!state?.ready) return undefined;
+    return [...new Set([...definedIds(), ...state.installed])];
+  },
 
   enable: (id: PluginId): Pipe =>
     Composer.pipe(
