@@ -65,6 +65,18 @@ describe('Storage', () => {
     ]);
   });
 
+  it('should clear the entries under a prefix and keep the rest', () => {
+    localStorage.setItem('t.one', '1');
+    localStorage.setItem('t.two', '{');
+    localStorage.setItem('u.other', '3');
+
+    flush(withImpulse(Storage.clear('t.'))(tick(bootstrap())));
+
+    expect(localStorage.getItem('t.one')).toBeNull();
+    expect(localStorage.getItem('t.two')).toBeNull();
+    expect(localStorage.getItem('u.other')).toBe('3');
+  });
+
   it('should list the entries under a prefix with their values', () => {
     localStorage.setItem('t.one', '{"n":1}');
     localStorage.setItem('t.two', '"two"');

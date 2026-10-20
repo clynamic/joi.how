@@ -17,6 +17,7 @@ const write = Effects.define<StoredEntry>(PLUGIN_ID, 'write');
 const remove = Effects.define<{ key: string }>(PLUGIN_ID, 'remove');
 const read = Effects.define<{ key: string }>(PLUGIN_ID, 'read');
 const list = Effects.define<{ prefix: string }>(PLUGIN_ID, 'list');
+const clear = Effects.define<{ prefix: string }>(PLUGIN_ID, 'clear');
 
 const unreadable = (key: string): Pipe =>
   Log.warn(PLUGIN_ID, 'ignored {key}, not valid JSON', { key });
@@ -62,6 +63,8 @@ const Storage = definePlugin({
 
   list: (prefix: string): Pipe => list.emit({ prefix }),
 
+  clear: (prefix: string): Pipe => clear.emit({ prefix }),
+
   onRead: (key: string, fn: (value: unknown | null) => Pipe): Pipe =>
     Events.handle<ReadPayload>(eventType.read, event =>
       event.payload.key === key ? fn(event.payload.value) : frame => frame
@@ -89,6 +92,14 @@ const Storage = definePlugin({
       localStorage.setItem(key, JSON.stringify(value))
     ),
     remove.perform(({ key }) => localStorage.removeItem(key)),
+    clear.perform(({ prefix }) => {
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(prefix)) keys.push(key);
+      }
+      for (const key of keys) localStorage.removeItem(key);
+    }),
     read.perform(({ key }, inject) =>
       inject(
         Events.dispatch({
