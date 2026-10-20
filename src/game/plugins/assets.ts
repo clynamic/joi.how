@@ -5,6 +5,7 @@ import { Effects } from '../../engine/pipes/Effects';
 import { Events } from '../../engine/pipes/Events';
 import { Done, Failed, Requests } from '../../engine/pipes/Requests';
 import Storage, { StoredEntry } from '../../engine/plugins/Storage';
+import PluginInstaller from '../../engine/plugins/PluginInstaller';
 
 const PLUGIN_ID = 'core.assets';
 
@@ -41,6 +42,8 @@ export type AssetEntry = {
 export type AssetsState = {
   library: Record<AssetKey, LibraryEntry>;
   inUse: Record<AssetKey, AssetEntry>;
+  listed?: boolean;
+  sweeping?: boolean;
 };
 
 export type ResolvePayload = {
@@ -292,7 +295,7 @@ const Assets = definePlugin({
   },
 
   activate: Composer.pipe(
-    Composer.set(paths, { library: {}, inUse: {} }),
+    Composer.set(paths, { library: {}, inUse: {}, sweeping: true }),
     Storage.list(STORAGE_PREFIX)
   ),
 
@@ -303,9 +306,28 @@ const Assets = definePlugin({
           ...fromStorage(entries),
           ...library,
         })),
+        Composer.set(paths.listed, true),
         flushWanted()
       )
     ),
+    PluginInstaller.onRemove(() => Composer.set(paths.sweeping, true)),
+    Composer.do<GameFrame>(({ get, set, pipe }) => {
+      const state = get(paths);
+      if (!state?.sweeping || !state.listed) return;
+      const plugins = PluginInstaller.plugins(get());
+      if (!plugins) return;
+      const live = new Set(plugins);
+      set(paths.sweeping, false);
+      for (const [key, entry] of Object.entries(state.library ?? {})) {
+        if (!live.has(entry.source)) {
+          pipe(Assets.forget(key));
+          continue;
+        }
+        for (const holder of entry.holders) {
+          if (!live.has(holder)) pipe(Assets.release(key, holder));
+        }
+      }
+    }),
     Events.handle<Done<string, ResolvePayload>>(Requests.doneType, event =>
       Composer.do<GameFrame>(({ get, set, pipe }) => {
         const match = /^core\.assets\/resolve\/(.+)$/.exec(event.payload.type);

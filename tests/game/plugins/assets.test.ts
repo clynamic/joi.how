@@ -3,7 +3,11 @@ import { Composer } from '../../../src/engine/Composer';
 import { Effects } from '../../../src/engine/pipes/Effects';
 import { ModuleManager } from '../../../src/engine/modules/ModuleManager';
 import { GameFrame, Pipe } from '../../../src/engine/State';
+import { Module } from '../../../src/engine/modules/Module';
 import Storage from '../../../src/engine/plugins/Storage';
+import PluginInstaller from '../../../src/engine/plugins/PluginInstaller';
+import { definePlugin } from '../../../src/engine/plugins/Plugins';
+import { Log } from '../../../src/engine/pipes/Log';
 import Assets, { AssetRecord } from '../../../src/game/plugins/assets';
 import { makeFrame, makeGame, tick } from '../../utils';
 
@@ -29,6 +33,17 @@ const fakeSource = {
   ],
 };
 
+const liveSource = definePlugin({
+  id: 'test.live',
+  effects: [
+    Assets.source('test.live').resolve.perform(async ({ id }) => `blob:${id}`),
+    Assets.source('test.live').drop.perform(({ id }) => {
+      dropped.push(id);
+    }),
+    Assets.source('test.live').free.perform(() => undefined),
+  ],
+});
+
 const settle = () => new Promise(resolve => setTimeout(resolve, 0));
 
 async function step(
@@ -52,6 +67,32 @@ async function boot(): Promise<GameFrame> {
 }
 
 const library = (frame: GameFrame) => frame.core.assets.library;
+
+const storeRecord = (source: string, id: string, holders: string[]) =>
+  localStorage.setItem(
+    `core.assets.${source}:${id}`,
+    JSON.stringify({ source, id, record: image, holders })
+  );
+
+async function bootWithMods(
+  installed: string[],
+  first: Module = PluginInstaller,
+  then: Module = Assets
+): Promise<GameFrame> {
+  localStorage.setItem(
+    'core.plugin_installer.index',
+    JSON.stringify({ installed, disabled: [], meta: {} })
+  );
+  let frame = gamePipe(makeFrame());
+  for (const plugin of [Storage, first, liveSource]) {
+    frame = ModuleManager.load(plugin)(frame);
+  }
+  frame = gamePipe(tick(frame));
+  for (let i = 0; i < 4; i++) frame = await step(frame);
+  frame = await step(frame, ModuleManager.load(then));
+  for (let i = 0; i < 6; i++) frame = await step(frame);
+  return frame;
+}
 const stored = (key: string) =>
   JSON.parse(localStorage.getItem(`core.assets.${key}`) ?? 'null');
 
@@ -222,6 +263,44 @@ describe('Assets', () => {
     await step(frame);
 
     expect(freed).toEqual(['late']);
+  });
+
+  it('should sweep the holds and records of plugins that are gone', async () => {
+    storeRecord('test.live', 'shared', ['me.mod', 'me.gone']);
+    storeRecord('test.live', 'orphan', ['me.gone']);
+    storeRecord('me.dead', 'x', ['me.mod']);
+    Log.clear();
+
+    const frame = await step(await bootWithMods(['me.mod']));
+
+    expect(library(frame)['test.live:shared'].holders).toEqual(['me.mod']);
+    expect(library(frame)['test.live:orphan']).toBeUndefined();
+    expect(library(frame)['me.dead:x']).toBeUndefined();
+    expect(stored('me.dead:x')).toBeNull();
+    expect(dropped).toEqual(['orphan']);
+    expect(Log.entries().map(entry => entry.message)).not.toContain(
+      'nothing performs {type}'
+    );
+  });
+
+  it('should wait for the installed mods before it sweeps', async () => {
+    storeRecord('test.live', 'shared', ['me.mod', 'me.gone']);
+
+    const frame = await bootWithMods(['me.mod'], Assets, PluginInstaller);
+
+    expect(library(frame)['test.live:shared'].holders).toEqual(['me.mod']);
+  });
+
+  it('should sweep the holds of a mod once it is removed', async () => {
+    storeRecord('test.live', 'kept', ['me.mod']);
+    let frame = await bootWithMods(['me.mod']);
+    expect(library(frame)['test.live:kept'].holders).toEqual(['me.mod']);
+
+    frame = await step(frame, PluginInstaller.remove('me.mod'));
+    for (let i = 0; i < 4; i++) frame = await step(frame);
+
+    expect(library(frame)['test.live:kept']).toBeUndefined();
+    expect(dropped).toEqual(['kept']);
   });
 
   it('should list a declared record without persisting it', async () => {
