@@ -224,8 +224,8 @@ describe('Effects', () => {
         ],
       });
 
-      Effects.flush(ping.emit(2)(frame), noInject, (owner, type, duration) =>
-        seen.push([owner, type, duration])
+      Effects.flush(ping.emit(2)(frame), noInject, (module, type, duration) =>
+        seen.push([module, type, duration])
       );
 
       expect(seen).toHaveLength(1);
@@ -273,7 +273,7 @@ describe('Effects', () => {
       expect(getQueue(basePipe(tick(unloaded)))).toEqual([]);
     });
 
-    it('should keep the first owner of a duplicated effect type', () => {
+    it('should keep the first performer of a duplicated effect type', () => {
       const ping = Effects.define('test.plugin', 'ping');
       const seen: string[] = [];
 

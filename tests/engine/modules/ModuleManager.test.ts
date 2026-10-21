@@ -184,7 +184,7 @@ describe('ModuleManager', () => {
         expect.objectContaining({
           level: 'error',
           source: 'mod.clash',
-          message: 'sdk name {name} is taken by {owner}',
+          message: 'sdk name {name} is taken by {module}',
         })
       );
     });
@@ -207,7 +207,7 @@ describe('ModuleManager', () => {
         expect.objectContaining({
           level: 'error',
           source: 'mod.second',
-          message: 'effect {type} is already performed by {owner}',
+          message: 'effect {type} is already performed by {module}',
         })
       );
     });

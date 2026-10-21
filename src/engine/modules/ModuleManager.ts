@@ -219,27 +219,27 @@ const transitionPipe: Pipe = Composer.do(({ get, pipe, set }) => {
       (sdk as any)[mod.sdk] = mod;
     } else {
       pipe(
-        Log.error(id, 'sdk name {name} is taken by {owner}', {
+        Log.error(id, 'sdk name {name} is taken by {module}', {
           name: mod.sdk,
-          owner: taken?.id ?? 'the engine',
+          module: taken?.id ?? 'the engine',
         })
       );
     }
   }
 
-  const owners = new Map<string, ModuleId>(
+  const performedBy = new Map<string, ModuleId>(
     Effects.engineTypes().map(type => [type, 'the engine'])
   );
   for (const id of newOrder) {
     for (const performer of registry[id]?.effects ?? []) {
-      const owner = owners.get(performer.type);
-      if (owner === undefined) {
-        owners.set(performer.type, id);
-      } else if (owner !== id && loadOrder.includes(id)) {
+      const performing = performedBy.get(performer.type);
+      if (performing === undefined) {
+        performedBy.set(performer.type, id);
+      } else if (performing !== id && loadOrder.includes(id)) {
         pipe(
-          Log.error(id, 'effect {type} is already performed by {owner}', {
+          Log.error(id, 'effect {type} is already performed by {module}', {
             type: performer.type,
-            owner,
+            module: performing,
           })
         );
       }

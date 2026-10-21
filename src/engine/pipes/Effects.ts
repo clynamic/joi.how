@@ -11,7 +11,7 @@ export type Effect<T = unknown> = { type: EffectKey<T>; payload: T };
 
 export type Inject = (pipe: Pipe) => void;
 
-export type Observe = (owner: string, type: string, duration: number) => void;
+export type Observe = (module: string, type: string, duration: number) => void;
 
 export type Performer<T> = {
   type: EffectKey<T>;
@@ -34,12 +34,12 @@ type ModuleState = {
   retired: Module[];
 };
 
-type Owned = { performer: Performer<unknown>; owner: string };
+type Registered = { performer: Performer<unknown>; module: string };
 
 type Cached = {
   registry: Record<ModuleId, Module>;
   order: ModuleId[];
-  found: Map<string, Owned>;
+  found: Map<string, Registered>;
 };
 
 let cached: Cached | null = null;
@@ -49,9 +49,9 @@ const PLUGIN_NAMESPACE = 'core.effects';
 const effects = pluginPaths<EffectState>(PLUGIN_NAMESPACE);
 const modules = typedPath<ModuleState>(['core.modules']);
 
-const engine: Owned[] = [
+const engine: Registered[] = [
   {
-    owner: 'core.log',
+    module: 'core.log',
     performer: {
       type: LOG_LINE as EffectKey<unknown>,
       perform: payload => Log.perform(payload as LogEntry),
@@ -80,7 +80,7 @@ export class Effects {
 
   static pipe: Pipe = Composer.set(effects.queue, []);
 
-  static performers(frame: GameFrame): Map<string, Owned> {
+  static performers(frame: GameFrame): Map<string, Registered> {
     const {
       registry = {},
       order = [],
@@ -94,20 +94,20 @@ export class Effects {
     ) {
       return cached.found;
     }
-    const found = new Map<string, Owned>();
-    for (const { performer, owner } of engine) {
-      found.set(performer.type, { performer, owner });
+    const found = new Map<string, Registered>();
+    for (const { performer, module } of engine) {
+      found.set(performer.type, { performer, module });
     }
     for (const id of order) {
       for (const performer of registry[id]?.effects ?? []) {
         if (!found.has(performer.type))
-          found.set(performer.type, { performer, owner: id });
+          found.set(performer.type, { performer, module: id });
       }
     }
     for (const module of retired) {
       for (const performer of module.effects ?? []) {
         if (!found.has(performer.type))
-          found.set(performer.type, { performer, owner: module.id });
+          found.set(performer.type, { performer, module: module.id });
       }
     }
     cached = retired.length === 0 ? { registry, order, found } : null;
@@ -120,8 +120,8 @@ export class Effects {
 
     const performers = Effects.performers(frame);
     for (const effect of queue) {
-      const owned = performers.get(effect.type);
-      if (!owned) {
+      const registered = performers.get(effect.type);
+      if (!registered) {
         inject(
           Log.warn(PLUGIN_NAMESPACE, 'nothing performs {type}', {
             type: effect.type,
@@ -131,12 +131,12 @@ export class Effects {
       }
       try {
         const before = observe ? performance.now() : 0;
-        owned.performer.perform(effect.payload, inject);
+        registered.performer.perform(effect.payload, inject);
         if (observe)
-          observe(owned.owner, effect.type, performance.now() - before);
+          observe(registered.module, effect.type, performance.now() - before);
       } catch (error) {
         inject(
-          Log.error(owned.owner, 'effect {type} failed: {error}', {
+          Log.error(registered.module, 'effect {type} failed: {error}', {
             type: effect.type,
             error: String(error),
           })

@@ -47,9 +47,9 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
     sdk.inject = inject;
     sdk.frame = () => engineRef.current?.getFrame() ?? null;
     const engineTypes = new Set(Effects.engineTypes());
-    const observe = (owner: string, type: string, duration: number) => {
+    const observe = (module: string, type: string, duration: number) => {
       if (engineTypes.has(type)) return;
-      inject(Perf.record(owner, `perform ${type.split('/').pop()}`, duration));
+      inject(Perf.record(module, `perform ${type.split('/').pop()}`, duration));
     };
 
     const STEP = 16;
