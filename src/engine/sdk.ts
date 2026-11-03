@@ -4,6 +4,8 @@ import { Events } from './pipes/Events';
 import { Requests } from './pipes/Requests';
 import { Scheduler } from './pipes/Scheduler';
 import { definePlugin, pluginPaths } from './plugins/Plugins';
+import { Slots } from './plugins/Slots';
+import { Documents } from './plugins/Documents';
 import { registry } from './registry';
 import { GameFrame, Pipe } from './State';
 
@@ -32,6 +34,8 @@ export interface SDK extends PluginSDK {
   Events: typeof Events;
   Requests: typeof Requests;
   Scheduler: typeof Scheduler;
+  Slots: typeof Slots;
+  Documents: typeof Documents;
   pluginPaths: typeof pluginPaths;
   definePlugin: typeof definePlugin;
   index: () => SdkIndex;
@@ -96,6 +100,8 @@ export const sdk: SDK = Object.assign(registry, {
   Events,
   Requests,
   Scheduler,
+  Slots,
+  Documents,
   pluginPaths,
   definePlugin,
   index,

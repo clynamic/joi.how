@@ -2,18 +2,18 @@ import type { GameFrame, Pipe } from '../src/engine/State';
 import { Composer } from '../src/engine/Composer';
 import { Impulses } from '../src/engine/Impulses';
 import { moduleManagerPipe } from '../src/engine/modules/ModuleManager';
-import { gamePipes } from '../src/game/pipes/Game';
-import Pace from '../src/game/plugins/pace';
-import { intensityKeys } from '../src/game/plugins/intensity';
-import { warmupKeys } from '../src/game/plugins/warmup';
-import { dealerKeys } from '../src/game/plugins/dealer';
-import { climaxKeys } from '../src/game/plugins/dice/climax';
-import { hypnoKeys } from '../src/game/plugins/hypno';
-import { imageKeys } from '../src/game/plugins/randomImages';
-import { playerKeys } from '../src/game/plugins/player';
-import { displayKeys } from '../src/game/plugins/image';
-import ClassicImages from '../src/game/plugins/classicImages';
-import Home from '../src/game/plugins/home';
+import { gamePipes } from '../src/game';
+import Pace from '../src/game/classic/pace';
+import { intensityKeys } from '../src/game/classic/intensity';
+import { warmupKeys } from '../src/game/classic/warmup';
+import { dealerKeys } from '../src/game/classic/dice';
+import { climaxKeys } from '../src/game/classic/dice/climax';
+import { hypnoKeys } from '../src/game/classic/hypno';
+import { imageKeys } from '../src/game/classic/randomImages';
+import { playerKeys } from '../src/game/player';
+import { displayKeys } from '../src/game/classic/image';
+import ClassicImages from '../src/game/classic/images';
+import Home from '../src/game/home';
 
 export const makeFrame = (overrides?: Partial<GameFrame>): GameFrame => ({
   tick: 0,

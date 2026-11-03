@@ -1,0 +1,52 @@
+import styled from 'styled-components';
+import { useTranslate } from '../settings';
+import { useKeys, useGameFrame } from '../bridge/hooks';
+import {
+  hypnoKeys,
+  GameHypnoType,
+  HypnoPhrases,
+} from '../../game/classic/hypno';
+import { useMemo } from 'react';
+import { motion } from 'framer-motion';
+import Intensity from '../../game/classic/intensity';
+import Hypno from '../../game/classic/hypno';
+
+const StyledGameHypno = motion.create(styled.div`
+  pointer-events: none;
+  font-size: 4rem;
+  font-weight: bold;
+  -webkit-text-stroke: black 1px;
+`);
+
+export const GameHypno = () => {
+  const [{ hypno }] = useKeys(hypnoKeys);
+  const { currentPhrase = 0 } = useGameFrame(Hypno.paths) ?? {};
+  const { intensity = 0 } = useGameFrame(Intensity.paths) ?? {};
+  const translate = useTranslate();
+
+  const phrase = useMemo(() => {
+    if (hypno === GameHypnoType.off) return '';
+    const phrases = HypnoPhrases[hypno];
+    if (phrases.length <= 0) return '';
+    return translate(phrases[currentPhrase % phrases.length]);
+  }, [currentPhrase, hypno, translate]);
+
+  const delay = useMemo(() => 3000 - intensity * 100 * 29, [intensity]);
+
+  if (hypno === GameHypnoType.off || !phrase) return null;
+
+  return (
+    <StyledGameHypno
+      key={`${phrase}-${currentPhrase}`}
+      initial={{ opacity: 0.3 }}
+      animate={{ opacity: 0 }}
+      exit={{ opacity: 0.3 }}
+      transition={{
+        ease: [0.19, 1, 0.22, 1],
+        duration: delay * 0.001 * 0.5,
+      }}
+    >
+      {phrase}
+    </StyledGameHypno>
+  );
+};

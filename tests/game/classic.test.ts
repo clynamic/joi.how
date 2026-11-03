@@ -1,0 +1,254 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { Composer } from '../../src/engine/Composer';
+import { Effects } from '../../src/engine/pipes/Effects';
+import { ModuleManager } from '../../src/engine/modules/ModuleManager';
+import { GameFrame, Pipe } from '../../src/engine/State';
+import Scene from '../../src/game/scene';
+import Mode from '../../src/game/mode';
+import Phase from '../../src/game/phase';
+import Pause from '../../src/game/pause';
+import Rand from '../../src/game/rand';
+import Messages from '../../src/game/messages';
+import Storage from '../../src/engine/plugins/Storage';
+import Saves from '../../src/game/saves';
+import Intensity from '../../src/game/classic/intensity';
+import Classic from '../../src/game/classic';
+import pkg from '../../package.json';
+import { defaults, makeFrame, makeGame, seed, tick } from '../utils';
+
+const { pipe: gamePipe, withImpulse, until } = makeGame();
+
+const RUN = [
+  'how.joi.classic.dice',
+  'how.joi.classic.intensity',
+  'how.joi.classic.warmup',
+  'how.joi.classic.cues',
+];
+
+const loaded = (frame: GameFrame): string[] =>
+  frame.core.modules.order.filter((id: string) => RUN.includes(id));
+
+const autoSlot = () => localStorage.getItem('how.joi.saves.classic');
+const store = (slot: string, blobs: Record<string, unknown>) =>
+  localStorage.setItem(
+    `how.joi.saves.${slot}`,
+    JSON.stringify({ version: pkg.version, savedAt: 1, data: blobs })
+  );
+
+function flush(frame: GameFrame): GameFrame {
+  const injected: Pipe[] = [];
+  Effects.flush(frame, pipe => injected.push(pipe));
+  return withImpulse(Composer.pipe(...injected))(tick(frame));
+}
+
+function bootstrap(): GameFrame {
+  let frame = gamePipe(makeFrame());
+  frame = seed(defaults)(frame);
+  frame = Composer.set(['images'], [])(frame);
+  for (const p of [
+    Scene,
+    Mode,
+    Phase,
+    Pause,
+    Rand,
+    Messages,
+    Storage,
+    Saves,
+    Classic,
+  ]) {
+    frame = ModuleManager.load(p)(frame);
+  }
+  frame = gamePipe(tick(frame));
+  frame = flush(frame);
+  return until(frame, f => loaded(f).length === RUN.length);
+}
+
+function enter(frame: GameFrame, scene: string): GameFrame {
+  frame = withImpulse(Scene.setScene(scene))(tick(frame));
+  return gamePipe(tick(frame));
+}
+
+describe('Classic', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('should register itself and load its run while classic is the mode', () => {
+    const frame = bootstrap();
+
+    expect(frame.how.joi.mode.modes.classic).toEqual({
+      id: 'classic',
+      name: 'Classic',
+    });
+    expect(loaded(frame).sort()).toEqual([...RUN].sort());
+  });
+
+  it('should unload its run when the mode leaves and load it again on return', () => {
+    let frame = bootstrap();
+    frame = withImpulse(Mode.register({ id: 'other', name: 'Other' }))(
+      tick(frame)
+    );
+
+    frame = withImpulse(Mode.setMode('other'))(tick(frame));
+    frame = until(frame, f => loaded(f).length === 0);
+    const gone = frame.how.joi.classic.intensity;
+
+    frame = withImpulse(Mode.setMode('classic'))(tick(frame));
+    frame = until(frame, f => loaded(f).length === RUN.length);
+
+    expect(gone).toBeUndefined();
+    expect(frame.how.joi.classic.intensity).toEqual({ intensity: 0 });
+  });
+
+  it('should start the next run fresh after the end screen', () => {
+    let frame = enter(bootstrap(), 'game');
+    frame = Composer.set(Intensity.paths.intensity, 0.7)(frame);
+    frame = withImpulse(Saves.save('classic'))(tick(frame));
+    frame = flush(frame);
+    const savedBefore = autoSlot();
+
+    frame = enter(frame, 'end');
+    frame = enter(frame, 'home');
+    for (let i = 0; i < 4; i++) frame = flush(frame);
+
+    expect(savedBefore).not.toBeNull();
+    expect(autoSlot()).toBeNull();
+    expect(frame.how.joi.classic.intensity.intensity).toBe(0);
+    expect(loaded(frame).sort()).toEqual([...RUN].sort());
+  });
+
+  it('should autosave with its mode when play stops', () => {
+    let frame = enter(bootstrap(), 'game');
+    frame = Composer.set(Pause.paths.paused, false)(frame);
+    frame = until(frame, f => f.core.scheduler.rates.play === 1);
+    frame = Composer.set(Intensity.paths.intensity, 0.3)(frame);
+
+    frame = withImpulse(Pause.setPaused(true))(tick(frame));
+    frame = until(frame, f =>
+      (f.core.effects?.queue ?? []).some(
+        (e: { type: string }) => e.type === 'core.storage/write'
+      )
+    );
+    flush(frame);
+
+    expect(JSON.parse(autoSlot()!)).toMatchObject({
+      meta: { mode: 'classic' },
+      data: { 'how.joi.classic.intensity': { intensity: 0.3 } },
+    });
+  });
+
+  it('should autosave every ten seconds of play and not while paused', () => {
+    const persisted = (f: GameFrame) =>
+      (f.core.effects?.queue ?? []).some(
+        (e: { type: string }) => e.type === 'core.storage/write'
+      );
+    let frame = enter(bootstrap(), 'game');
+    for (let i = 0; i < 15; i++) {
+      frame = gamePipe(tick(frame, 1000));
+      flush(frame);
+    }
+    const whilePaused = autoSlot();
+
+    frame = Composer.set(Pause.paths.paused, false)(frame);
+    frame = until(frame, f => f.core.scheduler.rates.play === 1);
+    frame = until(frame, persisted, { step: 1000, maxTicks: 12 });
+    const first = frame.tick;
+    flush(frame);
+    frame = until(frame, f => f.tick > first && persisted(f), {
+      step: 1000,
+      maxTicks: 12,
+    });
+
+    expect(whilePaused).toBeNull();
+    expect(frame.tick - first).toBeGreaterThanOrEqual(10);
+    expect(JSON.parse(autoSlot()!).meta).toEqual({ mode: 'classic' });
+  });
+
+  it('should not save a run that has reached the end screen', () => {
+    let frame = enter(bootstrap(), 'game');
+    frame = Composer.set(Pause.paths.paused, false)(frame);
+    frame = until(frame, f => f.core.scheduler.rates.play === 1);
+    frame = Composer.set(Intensity.paths.intensity, 0.3)(frame);
+
+    frame = enter(frame, 'end');
+    frame = withImpulse(Pause.setPaused(true))(tick(frame));
+    frame = until(frame, f => f.core.scheduler.rates.play === 0);
+    for (let i = 0; i < 4; i++) frame = flush(frame);
+
+    expect(autoSlot()).toBeNull();
+    expect(frame.how.joi.saves.restored).toBeNull();
+  });
+
+  it('should save a run that leaves the game scene for home', () => {
+    let frame = enter(bootstrap(), 'game');
+    frame = Composer.set(Intensity.paths.intensity, 0.6)(frame);
+
+    frame = enter(frame, 'home');
+    for (let i = 0; i < 4; i++) frame = flush(frame);
+
+    expect(JSON.parse(autoSlot()!)).toMatchObject({
+      data: { 'how.joi.classic.intensity': { intensity: 0.6 } },
+    });
+    expect(frame.how.joi.saves.restored).toMatchObject({ slot: 'classic' });
+  });
+
+  it('should read its slot once at boot', () => {
+    let frame = gamePipe(makeFrame());
+    frame = seed(defaults)(frame);
+    frame = Composer.set(['images'], [])(frame);
+    for (const p of [
+      Scene,
+      Mode,
+      Phase,
+      Pause,
+      Rand,
+      Messages,
+      Storage,
+      Saves,
+      Classic,
+    ]) {
+      frame = ModuleManager.load(p)(frame);
+    }
+    const slotReads = (f: GameFrame) =>
+      (f.core.effects?.queue ?? []).filter(
+        (e: { type: string; payload?: { key?: string } }) =>
+          e.type === 'core.storage/read' &&
+          e.payload?.key === 'how.joi.saves.classic'
+      ).length;
+    let reads = 0;
+    for (let i = 0; i < 12; i++) {
+      frame = gamePipe(tick(frame));
+      reads += slotReads(frame);
+      const injected: Pipe[] = [];
+      Effects.flush(frame, pipe => injected.push(pipe));
+      frame = withImpulse(Composer.pipe(...injected))(tick(frame));
+      reads += slotReads(frame);
+    }
+
+    expect(reads).toBe(1);
+  });
+
+  it("should resume its own slot on enter and leave another mode's slot alone", () => {
+    store('dice', { 'how.joi.classic.intensity': { intensity: 0.9 } });
+    const other = bootstrap();
+    const untouched = other.how.joi.classic.intensity.intensity;
+
+    localStorage.clear();
+    store('classic', { 'how.joi.classic.intensity': { intensity: 0.4 } });
+    let frame = bootstrap();
+    frame = until(frame, f => f.how.joi.classic.intensity.intensity === 0.4, {
+      maxTicks: 10,
+    });
+
+    expect(untouched).toBe(0);
+    expect(frame.how.joi.saves.restored).toMatchObject({ slot: 'classic' });
+  });
+
+  it('should keep a run alone when the end screen is not involved', () => {
+    let frame = enter(bootstrap(), 'game');
+    frame = Composer.set(Intensity.paths.intensity, 0.7)(frame);
+
+    frame = enter(frame, 'home');
+    for (let i = 0; i < 4; i++) frame = flush(frame);
+
+    expect(frame.how.joi.classic.intensity.intensity).toBe(0.7);
+  });
+});

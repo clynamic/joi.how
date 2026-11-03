@@ -1,0 +1,288 @@
+import {
+  ToyActuator,
+  VibrationActuator,
+  LinearActuator,
+  VibrateMode,
+  LinearMode,
+  VibrateModeLabels,
+  LinearModeLabels,
+  OscillateActuator,
+  OscillateModeLabels,
+  OscillateMode,
+} from '../../../game/toy/actuator';
+import { FormEvent, PropsWithChildren, useState } from 'react';
+import { defaultTransition } from '../../common/utils/animation';
+import { SettingsGrid, SettingsRow } from '../../common';
+import { SettingsDescription } from '../../common/SettingsDescription';
+import {
+  WaButton,
+  WaIcon,
+  WaOption,
+  WaSelect,
+  WaSlider,
+} from '@awesome.me/webawesome/dist/react';
+import { ActuatorType } from 'buttplug';
+import { Space } from '../../common/Space';
+import { WaSliderProps } from '@awesome.me/webawesome/dist/custom-elements-jsx.d.ts';
+import { AnimatePresence, motion } from 'framer-motion';
+
+export interface ToySettingsProps extends PropsWithChildren<
+  React.HTMLAttributes<HTMLFieldSetElement>
+> {
+  toyActuator: ToyActuator;
+}
+
+export const ToyActuatorSettings: React.FC<ToySettingsProps> = ({
+  toyActuator,
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const [icon, setIcon] = useState('angle-right');
+  return (
+    <div>
+      <WaButton
+        onClick={() => {
+          if (expanded) setIcon('angle-right');
+          else setIcon('angle-down');
+          setExpanded(!expanded);
+        }}
+      >
+        <WaIcon name={icon} slot='start'></WaIcon>
+        {`${toyActuator.actuatorType} ${toyActuator.index + 1}`}
+      </WaButton>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={defaultTransition}
+          >
+            <SettingsGrid
+              key={`${toyActuator.actuatorType} ${toyActuator.index + 1}`}
+            >
+              <SettingsRow>
+                {(() => {
+                  switch (toyActuator.actuatorType) {
+                    case ActuatorType.Vibrate:
+                      return (
+                        <VibratorActuatorSettings toyActuator={toyActuator} />
+                      );
+                    case ActuatorType.Position:
+                      return (
+                        <PositionActuatorSettings toyActuator={toyActuator} />
+                      );
+                    case ActuatorType.Oscillate:
+                      return (
+                        <OscillateActuatorSettings toyActuator={toyActuator} />
+                      );
+                    default:
+                      return <UnknownActuatorSettings />;
+                  }
+                })()}
+              </SettingsRow>
+              <Space size='small' />
+            </SettingsGrid>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export const VibratorActuatorSettings: React.FC<ToySettingsProps> = ({
+  toyActuator,
+}) => {
+  const vibratorActuator = toyActuator as VibrationActuator;
+  const descriptor = `${vibratorActuator.actuatorType}_${vibratorActuator.index}`;
+  const [mode, setMode] = useState(vibratorActuator.mode);
+  const [min, setMin] = useState(vibratorActuator.currentMinIntensity);
+  const [max, setMax] = useState(vibratorActuator.currentMaxIntensity);
+
+  return (
+    <div key={`${descriptor}_settings`}>
+      <SettingsDescription>
+        Select when this component will activate.
+      </SettingsDescription>
+      <WaSelect
+        id={`${descriptor}_mode`}
+        className='joi-wide'
+        value={mode}
+        onInput={event => {
+          const newMode = event.currentTarget.value as VibrateMode;
+          setMode(newMode);
+          vibratorActuator.setMode(newMode);
+        }}
+      >
+        {Object.values(VibrateMode).map(value => (
+          <WaOption value={value} key={`${descriptor}_${value}`}>
+            {VibrateModeLabels[value]}
+          </WaOption>
+        ))}
+      </WaSelect>
+      <Space size='medium' />
+      <SettingsDescription>
+        Change the range of intensity for this component.
+      </SettingsDescription>
+      <WaSlider
+        id={`{${descriptor}_range}`}
+        range={true}
+        min={vibratorActuator.absMinIntensity}
+        max={vibratorActuator.absMaxIntensity}
+        minValue={min}
+        maxValue={max}
+        step={vibratorActuator.intensityStepSize}
+        withTooltip={true}
+        valueFormatter={value =>
+          Intl.NumberFormat('en-US', { style: 'percent' }).format(value)
+        }
+        onInput={(event: FormEvent) => {
+          const sliderProps = event.target as WaSliderProps;
+          setMin(sliderProps.minValue as number);
+          setMax(sliderProps.maxValue as number);
+          vibratorActuator.setMinIntensity(sliderProps.minValue as number);
+          vibratorActuator.setMaxIntensity(sliderProps.maxValue as number);
+        }}
+      >
+        <span slot='reference'>{vibratorActuator.absMinIntensity * 100}%</span>
+        <span slot='reference'>
+          {(vibratorActuator.absMaxIntensity * 100) / 2}%
+        </span>
+        <span slot='reference'>{vibratorActuator.absMaxIntensity * 100}%</span>
+      </WaSlider>
+    </div>
+  );
+};
+
+export const PositionActuatorSettings: React.FC<ToySettingsProps> = ({
+  toyActuator,
+}) => {
+  const linearActuator = toyActuator as LinearActuator;
+  const descriptor = `${linearActuator.actuatorType}_${linearActuator.index}`;
+  const [mode, setMode] = useState(linearActuator.mode);
+  const [min, setMin] = useState(linearActuator.currentMinPosition);
+  const [max, setMax] = useState(linearActuator.currentMaxPosition);
+
+  return (
+    <div>
+      <SettingsDescription>
+        Select when this component will activate.
+      </SettingsDescription>
+      <WaSelect
+        id={`${descriptor}_mode`}
+        className='joi-wide'
+        value={mode}
+        onInput={event => {
+          const newMode = event.currentTarget.value as LinearMode;
+          setMode(newMode);
+          linearActuator.setMode(newMode);
+        }}
+      >
+        {Object.values(LinearMode).map(value => (
+          <WaOption value={value} key={`${descriptor}_${value}`}>
+            {LinearModeLabels[value]}
+          </WaOption>
+        ))}
+      </WaSelect>
+      <SettingsDescription>
+        Change the range of motion for this component.
+      </SettingsDescription>
+      <WaSlider
+        id={`{${descriptor}_range}`}
+        range={true}
+        min={linearActuator.absMinPosition}
+        max={linearActuator.absMaxPosition}
+        minValue={min}
+        maxValue={max}
+        step={linearActuator.positionStepSize}
+        withTooltip={true}
+        valueFormatter={value =>
+          Intl.NumberFormat('en-US', { style: 'percent' }).format(value)
+        }
+        onInput={(event: FormEvent) => {
+          const sliderProps = event.target as WaSliderProps;
+          setMin(sliderProps.minValue as number);
+          setMax(sliderProps.maxValue as number);
+          linearActuator.setMinPosition(sliderProps.minValue as number);
+          linearActuator.setMaxPosition(sliderProps.maxValue as number);
+        }}
+      >
+        <span slot='reference'>{linearActuator.absMinPosition * 100}%</span>
+        <span slot='reference'>
+          {(linearActuator.absMaxPosition * 100) / 2}%
+        </span>
+        <span slot='reference'>{linearActuator.absMaxPosition * 100}%</span>
+      </WaSlider>
+    </div>
+  );
+};
+
+export const OscillateActuatorSettings: React.FC<ToySettingsProps> = ({
+  toyActuator,
+}) => {
+  const oscillateActuator = toyActuator as OscillateActuator;
+  const descriptor = `${oscillateActuator.actuatorType}_${oscillateActuator.index}`;
+  const [mode, setMode] = useState(oscillateActuator.mode);
+  const [min, setMin] = useState(oscillateActuator.currentMinSpeed);
+  const [max, setMax] = useState(oscillateActuator.currentMaxSpeed);
+
+  return (
+    <div>
+      <SettingsDescription>
+        Select how this component's speed will be calculated.
+      </SettingsDescription>
+      <WaSelect
+        id={`${descriptor}_mode`}
+        className='joi-wide'
+        value={mode}
+        onInput={event => {
+          const newMode = event.currentTarget.value as OscillateMode;
+          setMode(newMode);
+          oscillateActuator.setMode(newMode);
+        }}
+      >
+        {Object.values(OscillateMode).map(value => (
+          <WaOption value={value} key={`${descriptor}_${value}`}>
+            {OscillateModeLabels[value]}
+          </WaOption>
+        ))}
+      </WaSelect>
+      <SettingsDescription>
+        Change the range of speed for this component.
+      </SettingsDescription>
+      <WaSlider
+        id={`{${descriptor}_range}`}
+        range={true}
+        min={oscillateActuator.absMinSpeed}
+        max={oscillateActuator.absMaxSpeed}
+        minValue={min}
+        maxValue={max}
+        step={oscillateActuator.speedStepSize}
+        withTooltip={true}
+        valueFormatter={value =>
+          Intl.NumberFormat('en-US', { style: 'percent' }).format(value)
+        }
+        onInput={(event: FormEvent) => {
+          const sliderProps = event.target as WaSliderProps;
+          setMin(sliderProps.minValue as number);
+          setMax(sliderProps.maxValue as number);
+          oscillateActuator.setMinSpeed(sliderProps.minValue as number);
+          oscillateActuator.setMaxSpeed(sliderProps.maxValue as number);
+        }}
+      >
+        <span slot='reference'>{oscillateActuator.absMinSpeed * 100}%</span>
+        <span slot='reference'>
+          {(oscillateActuator.absMaxSpeed * 100) / 2}%
+        </span>
+        <span slot='reference'>{oscillateActuator.absMaxSpeed * 100}%</span>
+      </WaSlider>
+    </div>
+  );
+};
+
+export const UnknownActuatorSettings = () => {
+  return (
+    <SettingsDescription>
+      This component is not currently supported.
+    </SettingsDescription>
+  );
+};

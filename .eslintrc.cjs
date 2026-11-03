@@ -1,23 +1,7 @@
 const layers = [
-  { type: 'shared', pattern: ['src/types', 'src/utils'] },
   { type: 'engine', pattern: 'src/engine' },
-  { type: 'services', pattern: ['src/toy', 'src/services'] },
-  { type: 'app', pattern: 'src/game/components' },
   { type: 'game', pattern: 'src/game' },
-  {
-    type: 'app',
-    pattern: [
-      'src/app',
-      'src/common',
-      'src/e621',
-      'src/end',
-      'src/env',
-      'src/home',
-      'src/local',
-      'src/settings',
-      'src/walltaker',
-    ],
-  },
+  { type: 'view', pattern: ['src/view', 'src/env'] },
 ];
 
 const mayImport = (from, types) => ({
@@ -64,10 +48,8 @@ module.exports = {
           {
             default: 'disallow',
             policies: [
-              mayImport('engine', ['shared']),
-              mayImport('services', ['shared']),
-              mayImport('game', ['engine', 'services', 'shared']),
-              mayImport('app', ['app', 'game', 'engine', 'services', 'shared']),
+              mayImport('game', ['engine']),
+              mayImport('view', ['view', 'game', 'engine']),
             ],
           },
         ],

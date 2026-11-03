@@ -4,7 +4,7 @@ import { ModuleManager } from '../../src/engine/modules/ModuleManager';
 import { Scheduler } from '../../src/engine/pipes/Scheduler';
 import { GameFrame, Pipe } from '../../src/engine/State';
 import { Sequence } from '../../src/game/Sequence';
-import Messages from '../../src/game/plugins/messages';
+import Messages from '../../src/game/messages';
 import { PLAY_TIMELINE } from '../../src/game/timelines';
 import { makeFrame, makeGame, tick } from '../utils';
 

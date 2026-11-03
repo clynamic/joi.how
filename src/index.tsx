@@ -3,10 +3,10 @@ ReactiveElement.disableWarning?.('change-in-update');
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { App } from './app/App.tsx';
+import { App } from './view/App.tsx';
 import './index.css';
-import { E621Provider } from './e621';
-import { registerServiceWorker } from './utils/serviceWorker.ts';
+import { E621Provider } from './view/e621';
+import { registerServiceWorker } from './view/serviceWorker.ts';
 
 registerServiceWorker();
 

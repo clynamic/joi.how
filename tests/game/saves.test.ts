@@ -1,0 +1,332 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { Composer } from '../../src/engine/Composer';
+import { Effects } from '../../src/engine/pipes/Effects';
+import { ModuleManager } from '../../src/engine/modules/ModuleManager';
+import { Module } from '../../src/engine/modules/Module';
+import { GameFrame, Pipe } from '../../src/engine/State';
+import { Scheduler } from '../../src/engine/pipes/Scheduler';
+import Pause from '../../src/game/pause';
+import Storage from '../../src/engine/plugins/Storage';
+import Saves, { SaveFile } from '../../src/game/saves';
+import Rand from '../../src/game/rand';
+import Intensity from '../../src/game/classic/intensity';
+import Phase, { GamePhase } from '../../src/game/phase';
+import Pace from '../../src/game/classic/pace';
+import Clock from '../../src/game/classic/clock';
+import Stroke from '../../src/game/classic/stroke';
+import Messages from '../../src/game/messages';
+import Warmup from '../../src/game/classic/warmup';
+import pkg from '../../package.json';
+import { defaults, makeFrame, makeGame, seed, tick } from '../utils';
+
+const { pipe: gamePipe, withImpulse, until } = makeGame();
+
+const SAVES_ID = 'how.joi.saves';
+
+type Queued = { type: string; payload?: any };
+const queue = (frame: GameFrame): Queued[] => frame.core?.effects?.queue ?? [];
+
+const stored = (slot: string): SaveFile | null =>
+  JSON.parse(localStorage.getItem(`${SAVES_ID}.${slot}`) ?? 'null');
+
+const store = (
+  slot: string,
+  blobs: Record<string, unknown>,
+  version = pkg.version,
+  extra: Record<string, unknown> = {}
+) =>
+  localStorage.setItem(
+    `${SAVES_ID}.${slot}`,
+    JSON.stringify({ version, savedAt: 1, ...extra, data: blobs })
+  );
+
+const counter = (id: string, n: number): Module => ({
+  id,
+  activate: Composer.set([id], { n }),
+  update: Composer.pipe(
+    Saves.onSave(id, get => get([id])),
+    Saves.onLoad<{ n: number }>(id, data => Composer.set([id], data ?? { n }))
+  ),
+  deactivate: Composer.set([id], undefined),
+});
+
+const a = counter('test.a', 1);
+const b = counter('test.b', 2);
+
+function flush(frame: GameFrame): GameFrame {
+  const injected: Pipe[] = [];
+  Effects.flush(frame, pipe => injected.push(pipe));
+  return withImpulse(Composer.pipe(...injected))(tick(frame));
+}
+
+function bootstrap(...modules: Module[]): GameFrame {
+  let frame = gamePipe(makeFrame());
+  frame = Composer.pipe(...modules.map(ModuleManager.load))(frame);
+  frame = gamePipe(tick(frame));
+  frame = flush(frame);
+  return gamePipe(tick(frame));
+}
+
+describe('Saves', () => {
+  afterEach(() => vi.useRealTimers());
+
+  beforeEach(() => localStorage.clear());
+
+  it('should collect each plugin blob under its id and persist them with the version', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1234);
+    let frame = bootstrap(Storage, Saves, a, b);
+
+    frame = withImpulse(Saves.save('one', { mode: 'test' }))(tick(frame));
+    const write = queue(frame).find(e => e.type === 'core.storage/write');
+    flush(frame);
+
+    expect(write?.payload).toMatchObject({
+      key: `${SAVES_ID}.one`,
+      value: {
+        version: pkg.version,
+        savedAt: 1234,
+        meta: { mode: 'test' },
+        data: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+      },
+    });
+    expect(stored('one')).toEqual({
+      version: pkg.version,
+      savedAt: 1234,
+      meta: { mode: 'test' },
+      data: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+    });
+    expect(frame.how.joi.saves.restored).toEqual({
+      slot: 'one',
+      savedAt: 1234,
+      meta: { mode: 'test' },
+    });
+  });
+
+  it('should write two slots asked for in the same tick', () => {
+    let frame = bootstrap(Storage, Saves, a, b);
+
+    frame = withImpulse(
+      Composer.pipe(Saves.save('one', { mode: 'x' }), Saves.save('two'))
+    )(tick(frame));
+    flush(frame);
+
+    expect(stored('one')).toMatchObject({
+      meta: { mode: 'x' },
+      data: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+    });
+    expect(stored('two')).toMatchObject({
+      data: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
+    });
+    expect(stored('two')).not.toHaveProperty('meta');
+  });
+
+  it('should accept a save from another minor version of the same major', () => {
+    const [major] = pkg.version.split('.');
+    store('one', { 'test.a': { n: 9 } }, `${major}.99.99`);
+    let frame = bootstrap(Storage, Saves, a);
+
+    frame = withImpulse(Saves.load('one'))(tick(frame));
+    frame = flush(frame);
+    frame = gamePipe(tick(frame));
+
+    expect(frame.test.a).toEqual({ n: 9 });
+  });
+
+  it('should hand each plugin its own blob on load and start plugins without one fresh', () => {
+    store('one', { 'test.a': { n: 9 } });
+    let frame = bootstrap(Storage, Saves, a, b);
+    frame = Composer.set(['test.b'], { n: 5 })(frame);
+
+    frame = withImpulse(Saves.load('one'))(tick(frame));
+    frame = flush(frame);
+    frame = gamePipe(tick(frame));
+
+    expect(frame.test.a).toEqual({ n: 9 });
+    expect(frame.test.b).toEqual({ n: 2 });
+  });
+
+  it('should start every plugin fresh on reset without touching storage', () => {
+    store('auto', { 'test.a': { n: 9 } });
+    let frame = bootstrap(Storage, Saves, a, b);
+    frame = Composer.set(['test.b'], { n: 5 })(frame);
+
+    frame = withImpulse(Saves.reset())(tick(frame));
+    flush(frame);
+
+    expect(frame.test.a).toEqual({ n: 1 });
+    expect(frame.test.b).toEqual({ n: 2 });
+    expect(stored('auto')?.data).toEqual({ 'test.a': { n: 9 } });
+  });
+
+  it('should ignore a save written by another major version and say so', () => {
+    store('one', { 'test.a': { n: 9 } }, '0.0.1');
+    let frame = bootstrap(Storage, Saves, a);
+
+    frame = withImpulse(Saves.load('one'))(tick(frame));
+    frame = flush(frame);
+
+    expect(frame.test.a).toEqual({ n: 1 });
+    expect(queue(frame)).toContainEqual(
+      expect.objectContaining({
+        type: 'core.log/line',
+        payload: expect.objectContaining({
+          level: 'warn',
+          message: 'set aside slot {slot} from version {version}',
+          data: { slot: 'one', version: '0.0.1' },
+        }),
+      })
+    );
+  });
+
+  it('should list but not restore any slot when it activates', () => {
+    store('auto', { 'test.a': { n: 5 } });
+
+    const frame = bootstrap(Storage, Saves, a);
+
+    expect(frame.test.a).toEqual({ n: 1 });
+    expect(frame.how.joi.saves.restored).toBeNull();
+    expect(
+      frame.how.joi.saves.slots.map((s: { slot: string }) => s.slot)
+    ).toEqual(['auto']);
+  });
+
+  it('should resume the game plugins and their timers from a slot', () => {
+    const plugins = [
+      Pause,
+      Storage,
+      Saves,
+      Rand,
+      Intensity,
+      Phase,
+      Pace,
+      Clock,
+      Stroke,
+      Messages,
+      Warmup,
+    ];
+    const playing = (): GameFrame => {
+      let frame = gamePipe(makeFrame());
+      frame = seed({
+        ...defaults,
+        warmupDuration: 30,
+      })(frame);
+      frame = Composer.pipe(...plugins.map(ModuleManager.load))(frame);
+      frame = gamePipe(tick(frame));
+      frame = flush(frame);
+      frame = Composer.set(Pause.paths.paused, false)(frame);
+      return until(
+        frame,
+        f => Scheduler.remaining(f, 'how.joi.classic.warmup') !== undefined,
+        { step: 100 }
+      );
+    };
+
+    let frame = playing();
+    frame = Composer.pipe(
+      Composer.set(['how.joi.rand'], { seed: 'saved', cursor: 42 }),
+      Composer.set(Intensity.paths.intensity, 0.5),
+      Pace.setPace(3),
+      Phase.setPhase(GamePhase.active)
+    )(frame);
+    frame = Composer.set(Clock.paths.elapsed, 1234)(frame);
+    for (let i = 0; i < 5; i++) frame = gamePipe(tick(frame, 100));
+    frame = withImpulse(Saves.save('one'))(tick(frame));
+    flush(frame);
+    const file = stored('one')!.data as Record<string, any>;
+
+    let fresh = playing();
+    fresh = Composer.set(Pause.paths.paused, true)(fresh);
+    fresh = until(fresh, f => f.core.scheduler.rates.play === 0);
+    fresh = withImpulse(Saves.load('one'))(tick(fresh));
+    fresh = flush(fresh);
+    fresh = gamePipe(tick(fresh));
+    fresh = gamePipe(tick(fresh));
+
+    expect(file['how.joi.classic.warmup'].timers[0].duration).toBeLessThan(
+      30000
+    );
+    expect(fresh.how.joi.rand).toEqual({ seed: 'saved', cursor: 42 });
+    expect(fresh.how.joi.classic.intensity.intensity).toBe(
+      file['how.joi.classic.intensity'].intensity
+    );
+    expect(fresh.how.joi.classic.intensity.intensity).toBeGreaterThan(0.5);
+    expect(fresh.how.joi.classic.pace.pace).toBe(3);
+    expect(fresh.how.joi.phase.current).toBe(GamePhase.active);
+    expect(fresh.how.joi.classic.clock).toEqual({
+      elapsed: file['how.joi.classic.clock'].elapsed,
+      lastWall: null,
+    });
+    expect(fresh.how.joi.classic.clock.elapsed).toBeGreaterThan(1234);
+    expect(fresh.how.joi.classic.stroke).toEqual(
+      file['how.joi.classic.stroke']
+    );
+    expect(Scheduler.snapshot(fresh, 'how.joi.classic.warmup')).toEqual(
+      file['how.joi.classic.warmup'].timers
+    );
+  });
+
+  it('should record what it restored and forget it when starting fresh', () => {
+    store('auto', { 'test.a': { n: 5 } });
+    let frame = bootstrap(Storage, Saves, a);
+    frame = withImpulse(Saves.load('auto'))(tick(frame));
+    frame = flush(frame);
+    frame = gamePipe(tick(frame));
+    const afterLoad = frame.how.joi.saves.restored;
+
+    frame = withImpulse(Saves.fresh('auto'))(tick(frame));
+    flush(frame);
+
+    expect(afterLoad).toEqual({ slot: 'auto', savedAt: 1 });
+    expect(frame.how.joi.saves.restored).toBeNull();
+    expect(frame.test.a).toEqual({ n: 1 });
+    expect(stored('auto')).toBeNull();
+  });
+
+  it('should list the slots newest first with their metadata and keep the list current', () => {
+    store('old', { 'test.a': { n: 1 } }, pkg.version, { meta: { mode: 'x' } });
+    store('auto', { 'test.a': { n: 2 } }, pkg.version, { savedAt: 2 });
+    let frame = bootstrap(Storage, Saves, a);
+    const atBoot = frame.how.joi.saves.slots;
+
+    frame = withImpulse(Saves.drop('old'))(tick(frame));
+    frame = flush(frame);
+
+    expect(atBoot).toEqual([
+      { slot: 'auto', version: pkg.version, savedAt: 2 },
+      { slot: 'old', version: pkg.version, savedAt: 1, meta: { mode: 'x' } },
+    ]);
+    expect(frame.how.joi.saves.slots).toEqual([
+      { slot: 'auto', version: pkg.version, savedAt: 2 },
+    ]);
+  });
+
+  it('should find the slots under a prefix without the caller knowing their keys', () => {
+    store('vn/1', { 'test.a': { n: 1 } }, pkg.version, {
+      meta: { name: 'Cafe' },
+    });
+    store('vn/2', { 'test.a': { n: 2 } }, pkg.version, {
+      savedAt: 5,
+      meta: { name: 'Roof' },
+    });
+    store('classic', { 'test.a': { n: 3 } });
+    const frame = bootstrap(Storage, Saves, a);
+
+    expect(Saves.find(frame, 'vn/').map(s => [s.slot, s.meta])).toEqual([
+      ['vn/2', { name: 'Roof' }],
+      ['vn/1', { name: 'Cafe' }],
+    ]);
+    expect(Saves.find(frame, 'dice').length).toBe(0);
+  });
+
+  it('should drop a slot', () => {
+    store('one', { 'test.a': { n: 9 } });
+    const frame = withImpulse(Saves.drop('one'))(
+      tick(bootstrap(Storage, Saves))
+    );
+
+    flush(frame);
+
+    expect(stored('one')).toBeNull();
+  });
+});

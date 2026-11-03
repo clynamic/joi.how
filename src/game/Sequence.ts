@@ -1,7 +1,7 @@
 import { Pipe } from '../engine/State';
 import { Events, GameEvent, Scheduler } from '../engine/pipes';
 import { sdk } from '../engine/sdk';
-import Messages from './plugins/messages';
+import Messages from './messages';
 import { PLAY_TIMELINE } from './timelines';
 
 type MessageInput = Omit<Parameters<typeof Messages.send>[0], 'id'>;
