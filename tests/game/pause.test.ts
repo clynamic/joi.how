@@ -7,7 +7,6 @@ import Scene from '../../src/game/scene';
 import Keys from '../../src/game/keys';
 import { Effects } from '../../src/engine/pipes/Effects';
 import { Composer } from '../../src/engine/Composer';
-import { PLAY_TIMELINE } from '../../src/game/timelines';
 import { makeFrame, makeGame, tick } from '../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
@@ -42,7 +41,7 @@ const playEntry = (duration: number): Pipe =>
   Scheduler.schedule({
     id: `${DEALER_ID}/schedule/check`,
     duration,
-    timeline: PLAY_TIMELINE,
+    timeline: Pause.timeline,
     event: { type: `${DEALER_ID}/roll.check` },
   });
 
@@ -59,7 +58,7 @@ describe('Pause + Scheduler resume', () => {
     const frame = bootstrap();
 
     expect(getPauseState(frame)?.paused).toBe(true);
-    expect(getRates(frame)[PLAY_TIMELINE]).toBe(0);
+    expect(getRates(frame)[Pause.timeline]).toBe(0);
   });
 
   it('should keep play entries frozen while paused from the start', () => {
@@ -92,7 +91,7 @@ describe('Pause + Scheduler resume', () => {
 
     frame = gamePipe(tick(frame));
 
-    expect(getRates(frame)[PLAY_TIMELINE]).toBe(1);
+    expect(getRates(frame)[Pause.timeline]).toBe(1);
     expect(getDealerScheduled(frame)[0]?.duration).toBeLessThan(before!);
   });
 
@@ -107,7 +106,7 @@ describe('Pause + Scheduler resume', () => {
       frame = gamePipe(tick(frame));
     }
 
-    expect(getRates(frame)[PLAY_TIMELINE]).toBe(0);
+    expect(getRates(frame)[Pause.timeline]).toBe(0);
     const durationAfterPause = getDealerScheduled(frame)[0]?.duration;
 
     for (let i = 0; i < 10; i++) {
@@ -140,7 +139,7 @@ describe('Pause + Scheduler resume', () => {
     const pauseState = getPauseState(frame);
 
     expect(pauseState?.paused).toBe(false);
-    expect(getRates(frame)[PLAY_TIMELINE]).toBe(1);
+    expect(getRates(frame)[Pause.timeline]).toBe(1);
     expect(dealerEvent?.duration).toBeLessThan(durationBeforeResume!);
   });
 
@@ -197,7 +196,7 @@ describe('Pause + Scheduler resume', () => {
     }
 
     expect(getPauseState(frame)?.paused).toBe(true);
-    expect(getRates(frame)[PLAY_TIMELINE]).toBe(0);
+    expect(getRates(frame)[Pause.timeline]).toBe(0);
   });
 
   it('should stop play entries where they are on unload', () => {
@@ -208,7 +207,7 @@ describe('Pause + Scheduler resume', () => {
     const held = getDealerScheduled(frame)[0]?.duration;
     frame = gamePipe(tick(frame));
 
-    expect(getRates(frame)[PLAY_TIMELINE]).toBeUndefined();
+    expect(getRates(frame)[Pause.timeline]).toBeUndefined();
     expect(held).toBeLessThan(1000);
     expect(getDealerScheduled(frame)[0]?.duration).toBe(held);
   });

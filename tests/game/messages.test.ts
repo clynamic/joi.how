@@ -6,7 +6,7 @@ import { Events } from '../../src/engine/pipes/Events';
 import { GameFrame, Pipe } from '../../src/engine/State';
 import Messages from '../../src/game/messages';
 import Saves from '../../src/game/saves';
-import { PLAY_TIMELINE } from '../../src/game/timelines';
+import Pause from '../../src/game/pause';
 import { makeFrame, makeGame, tick } from '../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
@@ -19,7 +19,7 @@ const titles = (frame: GameFrame): string[] =>
 function bootstrap(): GameFrame {
   const frame = gamePipe(makeFrame());
   const booted = Composer.pipe(
-    Scheduler.setRate(PLAY_TIMELINE, 1),
+    Scheduler.setRate(Pause.timeline, 1),
     ModuleManager.load(Messages)
   );
   return gamePipe(tick(booted(frame)));
@@ -67,7 +67,7 @@ describe('Messages', () => {
     frame = step(
       frame,
       Composer.pipe(
-        Scheduler.setRate(PLAY_TIMELINE, 0),
+        Scheduler.setRate(Pause.timeline, 0),
         Messages.send({ id: 'b', title: 'Waiting', duration: 1000 }),
         Messages.send({
           id: 'c',

@@ -5,7 +5,7 @@ import { Scheduler } from '../../src/engine/pipes/Scheduler';
 import { GameFrame, Pipe } from '../../src/engine/State';
 import { Sequence } from '../../src/game/Sequence';
 import Messages from '../../src/game/messages';
-import { PLAY_TIMELINE } from '../../src/game/timelines';
+import Pause from '../../src/game/pause';
 import { makeFrame, makeGame, tick } from '../utils';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
@@ -18,7 +18,7 @@ const titles = (frame: GameFrame): string[] =>
 function bootstrap(): GameFrame {
   const frame = gamePipe(makeFrame());
   const booted = Composer.pipe(
-    Scheduler.setRate(PLAY_TIMELINE, 0),
+    Scheduler.setRate(Pause.timeline, 0),
     ModuleManager.load(Messages)
   );
   return gamePipe(tick(booted(frame)));

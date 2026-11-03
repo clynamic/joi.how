@@ -2,8 +2,12 @@ import { definePlugin, pluginPaths } from '../engine/plugins/Plugins';
 import { Pipe } from '../engine/State';
 import { Composer } from '../engine/Composer';
 import { Events, GameEvent } from '../engine/pipes/Events';
-import { ScheduledEvent, Scheduler } from '../engine/pipes/Scheduler';
-import { PLAY_TIMELINE } from './timelines';
+import {
+  ENGINE_TIMELINE,
+  ScheduledEvent,
+  Scheduler,
+} from '../engine/pipes/Scheduler';
+import { sdk } from '../engine/sdk';
 import Saves from './saves';
 
 export interface GameMessagePrompt {
@@ -105,7 +109,8 @@ const Messages = definePlugin({
               Scheduler.schedule({
                 id: scheduleId,
                 duration: updated.duration,
-                timeline: updated.timeline ?? PLAY_TIMELINE,
+                timeline:
+                  updated.timeline ?? sdk.Pause?.timeline ?? ENGINE_TIMELINE,
                 event: {
                   type: eventType.expireMessage,
                   payload: { id: updated.id, version },

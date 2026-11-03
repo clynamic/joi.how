@@ -4,7 +4,7 @@ import { ModuleManager } from '../../engine/modules/ModuleManager';
 import { Module } from '../../engine/modules/Module';
 import { Scheduler } from '../../engine/pipes/Scheduler';
 import { Sequence } from '../Sequence';
-import { PLAY_TIMELINE } from '../timelines';
+import Pause from '../pause';
 import Mode from '../mode';
 import Scene from '../scene';
 import Saves from '../saves';
@@ -75,7 +75,7 @@ const Classic = definePlugin({
   update: Composer.pipe(
     Mode.onEnter(MODE, () => start),
     Mode.onLeave(MODE, () => stop),
-    Scheduler.onStop(PLAY_TIMELINE, () => Scene.whenScene('game', save)),
+    Scheduler.onStop(Pause.timeline, () => Scene.whenScene('game', save)),
     Scene.onLeave('game', () =>
       Composer.bind(Scene.paths, scene =>
         Composer.when(scene.current !== 'end', save)

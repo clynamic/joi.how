@@ -4,11 +4,12 @@ import { Composer } from '../engine/Composer';
 import { Events } from '../engine/pipes/Events';
 import { ENGINE_TIMELINE, Scheduler } from '../engine/pipes/Scheduler';
 import { Sequence } from './Sequence';
-import { PLAY_TIMELINE } from './timelines';
 import Scene from './scene';
 import Keys from './keys';
 
 const PLUGIN_ID = 'how.joi.pause';
+
+const PLAY_TIMELINE = 'play';
 
 export type PauseState = {
   paused: boolean;

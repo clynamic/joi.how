@@ -7,7 +7,6 @@ import Saves from '../saves';
 import Presets from '../presets';
 import Phase, { GamePhase } from '../phase';
 import Pause from '../pause';
-import { PLAY_TIMELINE } from '../timelines';
 
 const PLUGIN_ID = 'how.joi.classic.warmup';
 
@@ -81,7 +80,7 @@ const Warmup = definePlugin({
             Scheduler.schedule({
               id: AUTOSTART_KEY,
               duration: s.warmupDuration * 1000,
-              timeline: PLAY_TIMELINE,
+              timeline: Pause.timeline,
               event: { type: eventType.startGame },
             })
           );

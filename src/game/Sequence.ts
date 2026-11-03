@@ -2,7 +2,6 @@ import { Pipe } from '../engine/State';
 import { Events, GameEvent, Scheduler } from '../engine/pipes';
 import { sdk } from '../engine/sdk';
 import Messages from './messages';
-import { PLAY_TIMELINE } from './timelines';
 
 type MessageInput = Omit<Parameters<typeof Messages.send>[0], 'id'>;
 type MessagePrompt = NonNullable<MessageInput['prompts']>[number];
@@ -31,7 +30,8 @@ export class Sequence {
     name: string,
     options: SequenceOptions = {}
   ): SequenceScope {
-    const timeline = options.timeline ?? PLAY_TIMELINE;
+    const timeline =
+      options.timeline ?? sdk.Pause?.timeline ?? Scheduler.ENGINE_TIMELINE;
     const rootKey = Events.getKey(namespace, name);
     const nodeKey = (n: string) => Events.getKey(namespace, `${name}.${n}`);
     const schedKey = (n: string) => Scheduler.getKey(namespace, `${name}.${n}`);

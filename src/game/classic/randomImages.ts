@@ -5,7 +5,7 @@ import { Scheduler } from '../../engine/pipes/Scheduler';
 import { typedPath } from '../../engine/Lens';
 import { Pipe } from '../../engine/State';
 import Presets from '../presets';
-import { PLAY_TIMELINE } from '../timelines';
+import Pause from '../pause';
 import Image from './image';
 import ClassicImages from './images';
 import { IntensityState } from './intensity';
@@ -131,7 +131,7 @@ const RandomImages = definePlugin({
               Scheduler.schedule({
                 id: scheduleId,
                 duration: getImageSwitchDuration(s, intensity),
-                timeline: PLAY_TIMELINE,
+                timeline: Pause.timeline,
                 event: { type: eventType.scheduleNext },
               })
             );
