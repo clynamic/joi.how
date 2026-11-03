@@ -9,7 +9,7 @@ const { pipe: gamePipe, withImpulse } = makeGame();
 
 const img = (id: string) => `local:${id}`;
 
-const state = (frame: GameFrame) => frame.core.images;
+const state = (frame: GameFrame) => frame.how.joi.classic.image;
 
 function bootstrap(): GameFrame {
   return gamePipe(tick(ModuleManager.load(Image)(gamePipe(makeFrame()))));

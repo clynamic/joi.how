@@ -3,7 +3,7 @@ import { Composer } from '../../engine';
 import { Effects } from '../../engine/pipes/Effects';
 import Debug from './debug';
 
-const PLUGIN_ID = 'core.fps';
+const PLUGIN_ID = 'how.joi.debug.fps';
 const ELEMENT_ATTR = 'data-plugin-id';
 const STYLE_ID = `${PLUGIN_ID}-styles`;
 const HISTORY_SIZE = 30;

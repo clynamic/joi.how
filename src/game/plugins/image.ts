@@ -5,7 +5,7 @@ import { Events } from '../../engine/pipes/Events';
 import Assets, { AssetKey, AssetSize } from './assets';
 import Settings from './settings';
 
-const PLUGIN_ID = 'core.images';
+const PLUGIN_ID = 'how.joi.classic.image';
 
 export type ImageState = {
   currentImage?: AssetKey;

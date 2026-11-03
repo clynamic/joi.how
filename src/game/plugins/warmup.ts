@@ -9,7 +9,7 @@ import Phase, { GamePhase } from './phase';
 import Pause from './pause';
 import { PLAY_TIMELINE } from '../timelines';
 
-const PLUGIN_ID = 'core.warmup';
+const PLUGIN_ID = 'how.joi.classic.warmup';
 
 type WarmupState = {
   initialized: boolean;

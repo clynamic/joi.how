@@ -85,7 +85,7 @@ describe('e621', () => {
       score: undefined,
     });
     expect(seen(frame)).toEqual([
-      { ids: ['123'], request: 'core.e621/search#0' },
+      { ids: ['123'], request: 'how.joi.e621/search#0' },
     ]);
   });
 
@@ -104,15 +104,15 @@ describe('e621', () => {
     let frame = await step(
       await boot(),
       Composer.pipe(
-        Assets.keep('core.e621', '123', rec, 'classic'),
-        Assets.use(['core.e621:123'])
+        Assets.keep('how.joi.e621', '123', rec, 'classic'),
+        Assets.use(['how.joi.e621:123'])
       )
     );
-    frame = await step(frame, Assets.load('core.e621:123', 'preview'));
+    frame = await step(frame, Assets.load('how.joi.e621:123', 'preview'));
     frame = await step(frame);
     frame = await step(frame);
 
-    expect(Assets.entry(frame, 'core.e621:123')).toMatchObject({
+    expect(Assets.entry(frame, 'how.joi.e621:123')).toMatchObject({
       state: 'loaded',
       urls: { preview: 'https://cdn/preview.jpg' },
     });

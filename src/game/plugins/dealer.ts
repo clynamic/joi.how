@@ -104,7 +104,7 @@ const Dealer = definePlugin({
     name: 'Dealer',
   },
   ordering: {
-    loadAfter: ['core.mode'],
+    loadAfter: ['how.joi.mode'],
   },
 
   events: DiceEvent,

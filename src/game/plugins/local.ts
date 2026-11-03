@@ -11,7 +11,7 @@ import {
 import { bytes } from '../../services/bytes';
 import Assets, { AssetKind, AssetRecord, assetKey } from './assets';
 
-const PLUGIN_ID = 'core.local';
+const PLUGIN_ID = 'how.joi.local';
 
 export const SOURCE = PLUGIN_ID;
 

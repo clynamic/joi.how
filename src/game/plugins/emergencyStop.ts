@@ -7,9 +7,9 @@ import Phase, { GamePhase } from './phase';
 import Pace from './pace';
 import { IntensityState } from './intensity';
 
-const PLUGIN_ID = 'core.emergency_stop';
+const PLUGIN_ID = 'how.joi.classic.emergency_stop';
 
-const intensityState = typedPath<IntensityState>(['core.intensity']);
+const intensityState = typedPath<IntensityState>(['how.joi.classic.intensity']);
 
 type CountdownPayload = { remaining: number };
 

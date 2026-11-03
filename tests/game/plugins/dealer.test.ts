@@ -11,7 +11,7 @@ import Rand from '../../../src/game/plugins/rand';
 import Dealer, { dealerKeys } from '../../../src/game/plugins/dealer';
 import Saves from '../../../src/game/plugins/saves';
 
-const DEALER_ID = 'core.dice';
+const DEALER_ID = 'how.joi.classic.dice';
 import Messages from '../../../src/game/plugins/messages';
 import { doublePaceChance } from '../../../src/game/plugins/dice/doublePace';
 import { DiceEvent } from '../../../src/types';
@@ -29,15 +29,15 @@ function startGame(intensityOverride = 0.5): GameFrame {
     events: Object.values(DiceEvent),
   })(frame);
   frame = Composer.set(typedPath(['images']), [])(frame);
-  frame = Composer.set(typedPath(['core.intensity']), {
+  frame = Composer.set(typedPath(['how.joi.classic.intensity']), {
     intensity: intensityOverride,
   })(frame);
-  frame = Composer.set(typedPath(['core.pace']), {
+  frame = Composer.set(typedPath(['how.joi.classic.pace']), {
     pace: 2,
     prevPace: 2,
     history: [],
   })(frame);
-  frame = Composer.set(typedPath(['core.clock']), {
+  frame = Composer.set(typedPath(['how.joi.classic.clock']), {
     elapsed: 0,
     lastWall: null,
   })(frame);
@@ -63,7 +63,7 @@ function startGame(intensityOverride = 0.5): GameFrame {
 }
 
 function getDiceState(frame: GameFrame) {
-  return (frame as any)?.core?.dice as
+  return (frame as any)?.how?.joi?.classic?.dice as
     | { busy: boolean; log: any[] }
     | undefined;
 }
@@ -112,15 +112,15 @@ describe('Dealer integration', () => {
       events: Object.values(DiceEvent),
     })(frame);
     frame = Composer.set(typedPath(['images']), [])(frame);
-    frame = Composer.set(typedPath(['core.intensity']), { intensity: 0.5 })(
-      frame
-    );
-    frame = Composer.set(typedPath(['core.pace']), {
+    frame = Composer.set(typedPath(['how.joi.classic.intensity']), {
+      intensity: 0.5,
+    })(frame);
+    frame = Composer.set(typedPath(['how.joi.classic.pace']), {
       pace: 2,
       prevPace: 2,
       history: [],
     })(frame);
-    frame = Composer.set(typedPath(['core.clock']), {
+    frame = Composer.set(typedPath(['how.joi.classic.clock']), {
       elapsed: 0,
       lastWall: null,
     })(frame);
@@ -173,7 +173,7 @@ describe('Dealer integration', () => {
 
   it('should regrip silently whenever the phase returns to active', () => {
     let frame = startGame();
-    const before = (frame as any).core.dice.paws;
+    const before = (frame as any).how.joi.classic.dice.paws;
     const logBefore = getDiceState(frame)!.log.length;
 
     frame = withImpulse(Phase.setPhase(GamePhase.break))(tick(frame, 1));
@@ -182,7 +182,7 @@ describe('Dealer integration', () => {
     frame = gamePipe(tick(frame, 1));
     frame = gamePipe(tick(frame, 1));
 
-    expect((frame as any).core.dice.paws).not.toBe(before);
+    expect((frame as any).how.joi.classic.dice.paws).not.toBe(before);
     expect(getDiceState(frame)!.log).toHaveLength(logBefore);
   });
 
@@ -197,7 +197,7 @@ describe('Dealer integration', () => {
     let frame = startGame(0.99);
     frame = Composer.pipe(
       dealerKeys.set('events', [DiceEvent.doublePace]),
-      Composer.set(typedPath(['core.rand']), { seed: 'fixed', cursor: 4242 })
+      Composer.set(typedPath(['how.joi.rand']), { seed: 'fixed', cursor: 4242 })
     )(frame);
 
     for (let i = 0; i < 3000 && !getDiceState(frame)?.busy; i++) {
@@ -208,10 +208,10 @@ describe('Dealer integration', () => {
       DiceEvent.doublePace,
     ]);
 
-    const paceBefore = frame.core.pace.pace;
+    const paceBefore = frame.how.joi.classic.pace.pace;
     frame = gamePipe(tick(frame, 100));
     frame = gamePipe(tick(frame, 100));
-    expect(frame.core.pace.pace).toBeGreaterThan(paceBefore);
+    expect(frame.how.joi.classic.pace.pace).toBeGreaterThan(paceBefore);
     for (let i = 0; i < 120; i++) frame = gamePipe(tick(frame, 100));
     expect(getDiceState(frame)!.busy).toBe(false);
   });
@@ -230,7 +230,7 @@ describe('Dealer integration', () => {
 
     const titles: string[] = [];
     const seen = (f: GameFrame) => {
-      for (const m of (f as any).core.messages?.messages ?? []) {
+      for (const m of (f as any).how.joi.messages?.messages ?? []) {
         if (titles.at(-1) !== m.title) titles.push(m.title);
       }
     };
@@ -241,7 +241,7 @@ describe('Dealer integration', () => {
       if (!edged && titles.includes('Are you edging?')) {
         edged = true;
         frame = withImpulse(
-          Events.dispatch({ type: 'core.dice/climax.edging' })
+          Events.dispatch({ type: 'how.joi.classic.dice/climax.edging' })
         )(tick(frame, 1));
       }
       if (titles.includes('Good job, $player')) break;
@@ -252,7 +252,7 @@ describe('Dealer integration', () => {
     expect(titles).toContain('$HANDS OFF! Ruin your orgasm!');
     expect(clench).toBeGreaterThan(-1);
     expect(good).toBeGreaterThan(clench);
-    const last = (frame as any).core.messages.messages.at(-1);
+    const last = (frame as any).how.joi.messages.messages.at(-1);
     expect(last.prompts?.map((p: { title: string }) => p.title)).toEqual([
       'Leave',
     ]);
@@ -266,7 +266,7 @@ describe('Dealer integration', () => {
     frame = withImpulse(Saves.reset())(tick(frame));
     frame = gamePipe(tick(frame));
     expect(getDiceState(frame)).toMatchObject({ busy: false, log: [] });
-    expect(frame.core.phase.current).toBe(GamePhase.warmup);
+    expect(frame.how.joi.phase.current).toBe(GamePhase.warmup);
 
     frame = withImpulse(Phase.setPhase(GamePhase.active))(tick(frame));
     frame = runUntilBusy(frame);

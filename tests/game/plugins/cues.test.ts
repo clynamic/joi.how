@@ -16,7 +16,7 @@ type Tone = { frequency: number; delay: number };
 
 const tones = (frame: GameFrame): Tone[] =>
   (frame?.core?.effects?.queue ?? [])
-    .filter((e: { type: string }) => e.type === 'core.sound/tone')
+    .filter((e: { type: string }) => e.type === 'how.joi.sound/tone')
     .map((e: { payload: Tone }) => e.payload);
 
 const frequencies = (frame: GameFrame): number[] =>
@@ -24,7 +24,7 @@ const frequencies = (frame: GameFrame): number[] =>
 
 function bootstrap(): GameFrame {
   let frame = gamePipe(makeFrame());
-  frame = Composer.set(['core.pace'], { pace: 2 })(frame);
+  frame = Composer.set(['how.joi.classic.pace'], { pace: 2 })(frame);
   frame = Composer.pipe(
     ModuleManager.load(Sound),
     ModuleManager.load(Pause),

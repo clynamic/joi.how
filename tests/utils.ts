@@ -66,8 +66,8 @@ export const seed = (values: object): Pipe => {
   const document = sectioned(values as Record<string, unknown>);
   return Composer.pipe(
     Composer.set(['settings'], values),
-    Composer.set(['core', 'presets'], { document, loaded: true }),
-    Composer.set(['core', 'settings'], { document, loaded: true })
+    Composer.set(['how.joi.presets'], { document, loaded: true }),
+    Composer.set(['how.joi.settings'], { document, loaded: true })
   );
 };
 

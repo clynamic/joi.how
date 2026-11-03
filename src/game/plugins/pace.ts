@@ -5,7 +5,7 @@ import Clock from './clock';
 import Saves from './saves';
 import Presets from './presets';
 
-const PLUGIN_ID = 'core.pace';
+const PLUGIN_ID = 'how.joi.classic.pace';
 
 export type PaceEntry = { time: number; pace: number };
 

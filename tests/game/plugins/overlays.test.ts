@@ -18,7 +18,7 @@ const getEffects = (frame: GameFrame, prefix: string): Emitted[] =>
   );
 
 const setVisible = (visible: boolean): Pipe =>
-  Composer.set(['core.debug', 'visible'], visible);
+  Composer.set(['how.joi.debug.overlay', 'visible'], visible);
 
 function load(module: Module): GameFrame {
   const frame0 = gamePipe(makeFrame());
@@ -31,7 +31,7 @@ function step(frame: GameFrame, impulse: Pipe = f => f): GameFrame {
 }
 
 describe('Fps', () => {
-  const ID = 'core.fps';
+  const ID = 'how.joi.debug.fps';
 
   it('should emit show on every tick while debug is visible', () => {
     let frame = step(load(Fps), setVisible(true));
@@ -65,12 +65,12 @@ describe('Fps', () => {
     const frame = step(load(Fps), ModuleManager.unload(ID));
 
     expect(getEffects(frame, ID).map(e => e.type)).toEqual([`${ID}/unmount`]);
-    expect(frame.core.fps).toBeUndefined();
+    expect(frame.how.joi.debug.fps).toBeUndefined();
   });
 });
 
 describe('Fps performers', () => {
-  const ID = 'core.fps';
+  const ID = 'how.joi.debug.fps';
   const element = () =>
     document.querySelector(`[data-plugin-id="${ID}"]`) as HTMLElement | null;
   const flush = (frame: GameFrame) => Effects.flush(frame, () => undefined);
@@ -97,7 +97,7 @@ describe('Fps performers', () => {
 });
 
 describe('PerfOverlay performers', () => {
-  const ID = 'core.perf_overlay';
+  const ID = 'how.joi.debug.perf';
   const element = () =>
     document.querySelector(`[data-plugin-id="${ID}"]`) as HTMLElement | null;
   const flush = (frame: GameFrame) => Effects.flush(frame, () => undefined);
@@ -110,8 +110,12 @@ describe('PerfOverlay performers', () => {
         Composer.set(['core.perf'], {
           config: { pluginBudget: 2 },
           plugins: {
-            core: {
-              pace: { update: { perFrame: 0.5, max: 1.25, lastTick: 1 } },
+            how: {
+              joi: {
+                classic: {
+                  pace: { update: { perFrame: 0.5, max: 1.25, lastTick: 1 } },
+                },
+              },
             },
           },
         })
@@ -119,7 +123,7 @@ describe('PerfOverlay performers', () => {
     );
     flush(frame);
 
-    expect(element()?.textContent).toContain('core.pace');
+    expect(element()?.textContent).toContain('how.joi.classic.pace');
     expect(element()?.textContent).toContain('0.50');
     expect(element()?.textContent).toContain('1.25');
     expect(element()?.textContent).toContain('frame');
@@ -130,14 +134,20 @@ describe('PerfOverlay performers', () => {
 });
 
 describe('PerfOverlay', () => {
-  const ID = 'core.perf_overlay';
+  const ID = 'how.joi.debug.perf';
 
   const perfData: Pipe = Composer.set(['core.perf'], {
     config: { pluginBudget: 2 },
     plugins: {
-      core: {
-        pace: { update: { perFrame: 0.5, max: 2, lastTick: 1 } },
-        perf_overlay: { update: { perFrame: 9, max: 9, lastTick: 1 } },
+      how: {
+        joi: {
+          classic: {
+            pace: { update: { perFrame: 0.5, max: 2, lastTick: 1 } },
+          },
+          debug: {
+            perf: { update: { perFrame: 9, max: 9, lastTick: 1 } },
+          },
+        },
       },
       'net.mod': { update: { perFrame: 1.25, max: 3, lastTick: 1 } },
     },
@@ -156,7 +166,7 @@ describe('PerfOverlay', () => {
       budget: 2,
       rows: [
         { id: 'net.mod', phase: 'update', perFrame: 1.25, max: 3 },
-        { id: 'core.pace', phase: 'update', perFrame: 0.5, max: 2 },
+        { id: 'how.joi.classic.pace', phase: 'update', perFrame: 0.5, max: 2 },
       ],
     });
   });
@@ -193,6 +203,6 @@ describe('PerfOverlay', () => {
     const frame = step(load(PerfOverlay), ModuleManager.unload(ID));
 
     expect(getEffects(frame, ID).map(e => e.type)).toEqual([`${ID}/unmount`]);
-    expect(frame.core.perf_overlay).toBeUndefined();
+    expect(frame.how.joi.debug.perf).toBeUndefined();
   });
 });

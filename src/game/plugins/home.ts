@@ -5,7 +5,7 @@ import Scene from './scene';
 import Settings from './settings';
 import Presets from './presets';
 
-const PLUGIN_ID = 'core.home';
+const PLUGIN_ID = 'how.joi.home';
 
 const Home = definePlugin({
   sdk: 'Home',

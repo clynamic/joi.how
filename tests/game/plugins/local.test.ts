@@ -81,15 +81,15 @@ describe('Local', () => {
     let frame = await step(
       await boot(),
       Composer.pipe(
-        Assets.keep('core.local', item.id, item.record, 'classic'),
-        Assets.use([`core.local:${item.id}`])
+        Assets.keep('how.joi.local', item.id, item.record, 'classic'),
+        Assets.use([`how.joi.local:${item.id}`])
       )
     );
-    frame = await step(frame, Assets.load(`core.local:${item.id}`, 'full'));
+    frame = await step(frame, Assets.load(`how.joi.local:${item.id}`, 'full'));
     frame = await step(frame);
     frame = await step(frame);
 
-    expect(Assets.entry(frame, `core.local:${item.id}`)).toMatchObject({
+    expect(Assets.entry(frame, `how.joi.local:${item.id}`)).toMatchObject({
       state: 'loaded',
       urls: { full: 'blob:stored' },
     });
@@ -97,11 +97,11 @@ describe('Local', () => {
 
   it('should free the urls of an image that leaves use', async () => {
     const [item] = await Local.import([picture('shown.png')]);
-    const key = `core.local:${item.id}`;
+    const key = `how.joi.local:${item.id}`;
     let frame = await step(
       await boot(),
       Composer.pipe(
-        Assets.keep('core.local', item.id, item.record, 'classic'),
+        Assets.keep('how.joi.local', item.id, item.record, 'classic'),
         Assets.use([key])
       )
     );
@@ -121,26 +121,28 @@ describe('Local', () => {
     const [item] = await Local.import([picture('gone.png')]);
     const frame = await step(
       await boot(),
-      Assets.keep('core.local', item.id, item.record, 'classic')
+      Assets.keep('how.joi.local', item.id, item.record, 'classic')
     );
     await step(frame);
     await localImageService.removeImage(item.id);
 
     const again = await boot();
 
-    expect(again.core.assets.library[`core.local:${item.id}`]).toBeUndefined();
-    expect(localStorage.getItem(`core.assets.local:${item.id}`)).toBeNull();
+    expect(
+      again.how.joi.assets.library[`how.joi.local:${item.id}`]
+    ).toBeUndefined();
+    expect(localStorage.getItem(`how.joi.assets.local:${item.id}`)).toBeNull();
   });
 
   it('should drop the file when the last holder releases it', async () => {
     const [item] = await Local.import([picture('drop.png')]);
     let frame = await step(
       await boot(),
-      Assets.keep('core.local', item.id, item.record, 'classic')
+      Assets.keep('how.joi.local', item.id, item.record, 'classic')
     );
     frame = await step(
       frame,
-      Assets.release(`core.local:${item.id}`, 'classic')
+      Assets.release(`how.joi.local:${item.id}`, 'classic')
     );
     await step(frame);
     await settle();

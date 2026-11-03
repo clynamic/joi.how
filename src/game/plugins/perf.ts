@@ -7,7 +7,7 @@ import { typedPath } from '../../engine/Lens';
 import { GameTiming } from '../../engine/State';
 import Debug from './debug';
 
-const PLUGIN_ID = 'core.perf_overlay';
+const PLUGIN_ID = 'how.joi.debug.perf';
 const ELEMENT_ATTR = 'data-plugin-id';
 const STYLE_ID = `${PLUGIN_ID}-styles`;
 const REPAINT_TICKS = 15;

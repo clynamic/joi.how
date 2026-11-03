@@ -18,15 +18,20 @@ import { defaults, makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse, until } = makeGame();
 
-const RUN = ['core.dice', 'core.intensity', 'core.warmup', 'core.cues'];
+const RUN = [
+  'how.joi.classic.dice',
+  'how.joi.classic.intensity',
+  'how.joi.classic.warmup',
+  'how.joi.classic.cues',
+];
 
 const loaded = (frame: GameFrame): string[] =>
   frame.core.modules.order.filter((id: string) => RUN.includes(id));
 
-const autoSlot = () => localStorage.getItem('core.saves.classic');
+const autoSlot = () => localStorage.getItem('how.joi.saves.classic');
 const store = (slot: string, blobs: Record<string, unknown>) =>
   localStorage.setItem(
-    `core.saves.${slot}`,
+    `how.joi.saves.${slot}`,
     JSON.stringify({ version: pkg.version, savedAt: 1, data: blobs })
   );
 
@@ -69,7 +74,7 @@ describe('Classic', () => {
   it('should register itself and load its run while classic is the mode', () => {
     const frame = bootstrap();
 
-    expect(frame.core.mode.modes.classic).toEqual({
+    expect(frame.how.joi.mode.modes.classic).toEqual({
       id: 'classic',
       name: 'Classic',
     });
@@ -84,13 +89,13 @@ describe('Classic', () => {
 
     frame = withImpulse(Mode.setMode('other'))(tick(frame));
     frame = until(frame, f => loaded(f).length === 0);
-    const gone = frame.core.intensity;
+    const gone = frame.how.joi.classic.intensity;
 
     frame = withImpulse(Mode.setMode('classic'))(tick(frame));
     frame = until(frame, f => loaded(f).length === RUN.length);
 
     expect(gone).toBeUndefined();
-    expect(frame.core.intensity).toEqual({ intensity: 0 });
+    expect(frame.how.joi.classic.intensity).toEqual({ intensity: 0 });
   });
 
   it('should start the next run fresh after the end screen', () => {
@@ -106,7 +111,7 @@ describe('Classic', () => {
 
     expect(savedBefore).not.toBeNull();
     expect(autoSlot()).toBeNull();
-    expect(frame.core.intensity.intensity).toBe(0);
+    expect(frame.how.joi.classic.intensity.intensity).toBe(0);
     expect(loaded(frame).sort()).toEqual([...RUN].sort());
   });
 
@@ -126,7 +131,7 @@ describe('Classic', () => {
 
     expect(JSON.parse(autoSlot()!)).toMatchObject({
       meta: { mode: 'classic' },
-      data: { 'core.intensity': { intensity: 0.3 } },
+      data: { 'how.joi.classic.intensity': { intensity: 0.3 } },
     });
   });
 
@@ -169,7 +174,7 @@ describe('Classic', () => {
     for (let i = 0; i < 4; i++) frame = flush(frame);
 
     expect(autoSlot()).toBeNull();
-    expect(frame.core.saves.restored).toBeNull();
+    expect(frame.how.joi.saves.restored).toBeNull();
   });
 
   it('should save a run that leaves the game scene for home', () => {
@@ -180,9 +185,9 @@ describe('Classic', () => {
     for (let i = 0; i < 4; i++) frame = flush(frame);
 
     expect(JSON.parse(autoSlot()!)).toMatchObject({
-      data: { 'core.intensity': { intensity: 0.6 } },
+      data: { 'how.joi.classic.intensity': { intensity: 0.6 } },
     });
-    expect(frame.core.saves.restored).toMatchObject({ slot: 'classic' });
+    expect(frame.how.joi.saves.restored).toMatchObject({ slot: 'classic' });
   });
 
   it('should read its slot once at boot', () => {
@@ -206,7 +211,7 @@ describe('Classic', () => {
       (f.core.effects?.queue ?? []).filter(
         (e: { type: string; payload?: { key?: string } }) =>
           e.type === 'core.storage/read' &&
-          e.payload?.key === 'core.saves.classic'
+          e.payload?.key === 'how.joi.saves.classic'
       ).length;
     let reads = 0;
     for (let i = 0; i < 12; i++) {
@@ -222,19 +227,19 @@ describe('Classic', () => {
   });
 
   it("should resume its own slot on enter and leave another mode's slot alone", () => {
-    store('dice', { 'core.intensity': { intensity: 0.9 } });
+    store('dice', { 'how.joi.classic.intensity': { intensity: 0.9 } });
     const other = bootstrap();
-    const untouched = other.core.intensity.intensity;
+    const untouched = other.how.joi.classic.intensity.intensity;
 
     localStorage.clear();
-    store('classic', { 'core.intensity': { intensity: 0.4 } });
+    store('classic', { 'how.joi.classic.intensity': { intensity: 0.4 } });
     let frame = bootstrap();
-    frame = until(frame, f => f.core.intensity.intensity === 0.4, {
+    frame = until(frame, f => f.how.joi.classic.intensity.intensity === 0.4, {
       maxTicks: 10,
     });
 
     expect(untouched).toBe(0);
-    expect(frame.core.saves.restored).toMatchObject({ slot: 'classic' });
+    expect(frame.how.joi.saves.restored).toMatchObject({ slot: 'classic' });
   });
 
   it('should keep a run alone when the end screen is not involved', () => {
@@ -244,6 +249,6 @@ describe('Classic', () => {
     frame = enter(frame, 'home');
     for (let i = 0; i < 4; i++) frame = flush(frame);
 
-    expect(frame.core.intensity.intensity).toBe(0.7);
+    expect(frame.how.joi.classic.intensity.intensity).toBe(0.7);
   });
 });

@@ -8,7 +8,7 @@ import Debug from '../../../src/game/plugins/debug';
 import Keys from '../../../src/game/plugins/keys';
 import { makeFrame, makeGame, tick } from '../../utils';
 
-const ID = 'core.debug';
+const ID = 'how.joi.debug.overlay';
 
 const { pipe: gamePipe, withImpulse } = makeGame();
 
@@ -59,10 +59,10 @@ describe('Debug', () => {
     frame = ModuleManager.load(Debug)(frame);
     frame = gamePipe(tick(frame));
 
-    expect(frame.core.debug).toEqual({ visible: false, speed: 1 });
+    expect(frame.how.joi.debug.overlay).toEqual({ visible: false, speed: 1 });
     expect(sdk.debug).toBe(false);
     expect(frame.core.effects.queue).toContainEqual({
-      type: 'core.keys/capture',
+      type: 'how.joi.keys/capture',
       payload: { key: 'F3' },
     });
   });
@@ -70,9 +70,9 @@ describe('Debug', () => {
   it('should flip visibility and the sdk flag on toggle', () => {
     const frame = Debug.toggle()(load().frame);
 
-    expect(frame.core.debug.visible).toBe(true);
+    expect(frame.how.joi.debug.overlay.visible).toBe(true);
     expect(sdk.debug).toBe(true);
-    expect(Debug.toggle()(frame).core.debug.visible).toBe(false);
+    expect(Debug.toggle()(frame).how.joi.debug.overlay.visible).toBe(false);
   });
 
   it('should toggle on F3 and ignore other keys', () => {
@@ -83,8 +83,8 @@ describe('Debug', () => {
     press('F3');
     const toggled = apply(untouched, injected);
 
-    expect(untouched.core.debug.visible).toBe(false);
-    expect(toggled.core.debug.visible).toBe(true);
+    expect(untouched.how.joi.debug.overlay.visible).toBe(false);
+    expect(toggled.how.joi.debug.overlay.visible).toBe(true);
   });
 
   it('should double the speed on plus while visible, up to sixteen', () => {
@@ -95,7 +95,7 @@ describe('Debug', () => {
     for (let i = 0; i < 6; i++) {
       press('+');
       frame = apply(frame, injected);
-      speeds.push(frame.core.debug.speed);
+      speeds.push(frame.how.joi.debug.overlay.speed);
     }
 
     expect(speeds).toEqual([2, 4, 8, 16, 16, 16]);
@@ -117,7 +117,7 @@ describe('Debug', () => {
       type: `${ID}/speed`,
       payload: { factor: 4 },
     });
-    expect(frame.core.debug.speed).toBe(1);
+    expect(frame.how.joi.debug.overlay.speed).toBe(1);
     expect(floored).toEqual([]);
   });
 
@@ -127,7 +127,7 @@ describe('Debug', () => {
     press('+');
     const next = apply(frame, injected);
 
-    expect(next.core.debug.speed).toBe(1);
+    expect(next.how.joi.debug.overlay.speed).toBe(1);
   });
 
   it('should put the loop back to normal speed when the overlay hides', () => {
@@ -136,7 +136,7 @@ describe('Debug', () => {
 
     frame = withImpulse(Debug.toggle())(tick(frame));
 
-    expect(frame.core.debug).toEqual({ visible: false, speed: 1 });
+    expect(frame.how.joi.debug.overlay).toEqual({ visible: false, speed: 1 });
     expect(getEffects(frame)).toContainEqual({
       type: `${ID}/speed`,
       payload: { factor: 1 },
@@ -152,10 +152,10 @@ describe('Debug', () => {
 
     expect(frame.core.effects.queue).toEqual(
       expect.arrayContaining([
-        { type: 'core.keys/release', payload: { key: 'F3' } },
+        { type: 'how.joi.keys/release', payload: { key: 'F3' } },
         { type: `${ID}/speed`, payload: { factor: 1 } },
       ])
     );
-    expect(frame.core.debug).toBeUndefined();
+    expect(frame.how.joi.debug.overlay).toBeUndefined();
   });
 });

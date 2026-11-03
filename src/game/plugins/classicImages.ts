@@ -8,7 +8,7 @@ import E621, { E621SearchPayload, e621Record } from './e621';
 import Local from './local';
 import Presets from './presets';
 
-const PLUGIN_ID = 'core.classic_images';
+const PLUGIN_ID = 'how.joi.classic.images';
 
 export const HOLDER = PLUGIN_ID;
 

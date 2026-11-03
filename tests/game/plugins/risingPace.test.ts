@@ -14,7 +14,9 @@ import { defaults, makeFrame, makeGame, seed, tick } from '../../utils';
 const { pipe: gamePipe, withImpulse, until } = makeGame();
 
 const titles = (frame: GameFrame): string[] =>
-  (frame.core.messages?.messages ?? []).map((m: { title: string }) => m.title);
+  (frame.how.joi.messages?.messages ?? []).map(
+    (m: { title: string }) => m.title
+  );
 
 function playing(maxPace: number, intensity = 1): GameFrame {
   let frame = gamePipe(makeFrame());
@@ -23,7 +25,7 @@ function playing(maxPace: number, intensity = 1): GameFrame {
     minPace: 1,
     maxPace,
   })(frame);
-  frame = Composer.set(['core.intensity'], { intensity })(frame);
+  frame = Composer.set(['how.joi.classic.intensity'], { intensity })(frame);
   for (const p of [Pause, Phase, Pace, Messages, risingPaceModule]) {
     frame = ModuleManager.load(p)(frame);
   }
@@ -42,7 +44,9 @@ describe('rising pace', () => {
       { min: 1, max: 10 }
     );
     frame = withImpulse(
-      Events.dispatch({ type: Events.getKey('core.dice', 'risingPace') })
+      Events.dispatch({
+        type: Events.getKey('how.joi.classic.dice', 'risingPace'),
+      })
     )(tick(frame));
 
     const announced: number[] = [];
@@ -62,14 +66,16 @@ describe('rising pace', () => {
   it('should climb from the minimum to the maximum without overshooting', () => {
     let frame = playing(4.5);
     frame = withImpulse(
-      Events.dispatch({ type: Events.getKey('core.dice', 'risingPace') })
+      Events.dispatch({
+        type: Events.getKey('how.joi.classic.dice', 'risingPace'),
+      })
     )(tick(frame));
 
     const announced: number[] = [];
     const paces = new Set<number>();
     for (let i = 0; i < 60; i++) {
       frame = gamePipe(tick(frame, 1000));
-      paces.add(frame.core.pace.pace);
+      paces.add(frame.how.joi.classic.pace.pace);
       for (const title of titles(frame)) {
         const match = title.match(/^Pace rising to (.+)!$/);
         if (match) announced.push(Number(match[1]));

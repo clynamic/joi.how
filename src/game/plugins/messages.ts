@@ -29,7 +29,7 @@ export type MessageState = {
 
 type ExpirePayload = { id: string; version: number };
 
-const PLUGIN_ID = 'core.messages';
+const PLUGIN_ID = 'how.joi.messages';
 
 const paths = pluginPaths<MessageState>(PLUGIN_ID);
 

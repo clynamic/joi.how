@@ -66,11 +66,11 @@ async function boot(): Promise<GameFrame> {
   return frame;
 }
 
-const library = (frame: GameFrame) => frame.core.assets.library;
+const library = (frame: GameFrame) => frame.how.joi.assets.library;
 
 const storeRecord = (source: string, id: string, holders: string[]) =>
   localStorage.setItem(
-    `core.assets.${source}:${id}`,
+    `how.joi.assets.${source}:${id}`,
     JSON.stringify({ source, id, record: image, holders })
   );
 
@@ -94,7 +94,7 @@ async function bootWithMods(
   return frame;
 }
 const stored = (key: string) =>
-  JSON.parse(localStorage.getItem(`core.assets.${key}`) ?? 'null');
+  JSON.parse(localStorage.getItem(`how.joi.assets.${key}`) ?? 'null');
 
 describe('Assets', () => {
   beforeEach(() => {

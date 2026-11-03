@@ -19,7 +19,7 @@ import Warmup from './warmup';
 import EmergencyStop from './emergencyStop';
 import Cues from './cues';
 
-const PLUGIN_ID = 'core.classic';
+const PLUGIN_ID = 'how.joi.classic.mode';
 
 const MODE = 'classic';
 

@@ -15,7 +15,7 @@ function bootstrap(): GameFrame {
   let frame = gamePipe(makeFrame());
   frame = Composer.pipe(
     seed({ ...defaults, minPace: 1, maxPace: 5 }),
-    Composer.set(['core.intensity'], { intensity: 0.5 })
+    Composer.set(['how.joi.classic.intensity'], { intensity: 0.5 })
   )(frame);
   for (const plugin of [Pause, Phase, Pace, Messages, EmergencyStop]) {
     frame = ModuleManager.load(plugin)(frame);
@@ -39,11 +39,11 @@ describe('EmergencyStop', () => {
     frame = withImpulse(EmergencyStop.trigger())(tick(frame, 1));
     frame = gamePipe(tick(frame, 1));
 
-    expect(frame.core.phase.current).toBe(GamePhase.break);
-    expect(frame.core.intensity.intensity).toBeCloseTo(0.2);
-    expect(frame.core.pace.pace).toBe(1);
+    expect(frame.how.joi.phase.current).toBe(GamePhase.break);
+    expect(frame.how.joi.classic.intensity.intensity).toBeCloseTo(0.2);
+    expect(frame.how.joi.classic.pace.pace).toBe(1);
     expect(
-      frame.core.messages.messages.map((m: { title: string }) => m.title)
+      frame.how.joi.messages.messages.map((m: { title: string }) => m.title)
     ).toContain('Calm down with your $hands off.');
   });
 
@@ -55,10 +55,13 @@ describe('EmergencyStop', () => {
     const descriptions = new Set<string>();
     const titles = new Set<string>();
     let elapsed = 0;
-    while (frame.core.phase.current !== GamePhase.active && elapsed < 90000) {
+    while (
+      frame.how.joi.phase.current !== GamePhase.active &&
+      elapsed < 90000
+    ) {
       frame = gamePipe(tick(frame, 100));
       elapsed += 100;
-      for (const m of frame.core.messages.messages as {
+      for (const m of frame.how.joi.messages.messages as {
         title: string;
         description?: string;
       }[]) {
@@ -72,7 +75,7 @@ describe('EmergencyStop', () => {
     expect(counts).toContain('35...');
     expect(counts).toContain('1...');
     expect(titles).toContain('Put your $hands back.');
-    expect(frame.core.phase.current).toBe(GamePhase.active);
+    expect(frame.how.joi.phase.current).toBe(GamePhase.active);
     expect(elapsed).toBeGreaterThanOrEqual(42000);
   });
 
@@ -83,7 +86,7 @@ describe('EmergencyStop', () => {
     )(tick(frame, 1));
     frame = gamePipe(tick(frame, 1));
 
-    expect(frame.core.intensity.intensity).toBeCloseTo(0.2);
+    expect(frame.how.joi.classic.intensity.intensity).toBeCloseTo(0.2);
   });
 
   it('should ignore a trigger outside the active phase', () => {
@@ -93,8 +96,8 @@ describe('EmergencyStop', () => {
     frame = withImpulse(EmergencyStop.trigger())(tick(frame, 1));
     frame = gamePipe(tick(frame, 1));
 
-    expect(frame.core.phase.current).toBe(GamePhase.warmup);
-    expect(frame.core.intensity.intensity).toBe(0.5);
+    expect(frame.how.joi.phase.current).toBe(GamePhase.warmup);
+    expect(frame.how.joi.classic.intensity.intensity).toBe(0.5);
   });
 
   it('should hold the calm down while paused', () => {
@@ -105,6 +108,6 @@ describe('EmergencyStop', () => {
 
     frame = run(frame, 60000);
 
-    expect(frame.core.phase.current).toBe(GamePhase.break);
+    expect(frame.how.joi.phase.current).toBe(GamePhase.break);
   });
 });

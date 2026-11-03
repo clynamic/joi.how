@@ -10,28 +10,28 @@ export type LegacyFields = Record<string, Record<string, string>>;
 
 export const legacySettings: LegacyFields = {
   settings: {
-    highRes: 'core.images',
-    videoSound: 'core.images',
-    gender: 'core.player',
-    body: 'core.player',
+    highRes: 'how.joi.classic.image',
+    videoSound: 'how.joi.classic.image',
+    gender: 'how.joi.player',
+    body: 'how.joi.player',
   },
-  home: { ageCheckConfirm: 'core.home' },
+  home: { ageCheckConfirm: 'how.joi.home' },
 };
 
 export const legacyPresets: LegacyFields = {
   settings: {
-    gameDuration: 'core.intensity',
-    warmupDuration: 'core.warmup',
-    climaxChance: 'core.dice.climax',
-    ruinChance: 'core.dice.climax',
-    minPace: 'core.pace',
-    maxPace: 'core.pace',
-    steepness: 'core.pace',
-    timeshift: 'core.pace',
-    events: 'core.dice',
-    hypno: 'core.hypno',
-    imageDuration: 'core.random_images',
-    intenseImages: 'core.random_images',
+    gameDuration: 'how.joi.classic.intensity',
+    warmupDuration: 'how.joi.classic.warmup',
+    climaxChance: 'how.joi.classic.dice.climax',
+    ruinChance: 'how.joi.classic.dice.climax',
+    minPace: 'how.joi.classic.pace',
+    maxPace: 'how.joi.classic.pace',
+    steepness: 'how.joi.classic.pace',
+    timeshift: 'how.joi.classic.pace',
+    events: 'how.joi.classic.dice',
+    hypno: 'how.joi.classic.hypno',
+    imageDuration: 'how.joi.classic.random_images',
+    intenseImages: 'how.joi.classic.random_images',
   },
 };
 

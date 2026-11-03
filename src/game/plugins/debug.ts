@@ -5,7 +5,7 @@ import { sdk } from '../../engine/sdk';
 import type { Pipe } from '../../engine/State';
 import Keys from './keys';
 
-const PLUGIN_ID = 'core.debug';
+const PLUGIN_ID = 'how.joi.debug.overlay';
 const TOGGLE_KEY = 'F3';
 const FASTER_KEYS = ['+', '='];
 const SLOWER_KEYS = ['-', '_'];

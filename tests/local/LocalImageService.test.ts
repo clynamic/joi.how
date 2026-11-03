@@ -37,7 +37,7 @@ const fresh = () => {
   return {
     store,
     legacy,
-    service: new LocalImageService(store.for('core.local'), legacy),
+    service: new LocalImageService(store.for('how.joi.local'), legacy),
   };
 };
 
@@ -67,8 +67,8 @@ describe('LocalImageService', () => {
       name: 'kept.png',
     });
 
-    expect(await store.keys('core.local/')).toEqual([
-      `core.local/${stored.id}/full`,
+    expect(await store.keys('how.joi.local/')).toEqual([
+      `how.joi.local/${stored.id}/full`,
     ]);
   });
 
@@ -83,9 +83,9 @@ describe('LocalImageService', () => {
 
     await service.url(stored.id, 'thumbnail', ImageType.image);
 
-    expect((await store.keys('core.local/')).sort()).toEqual([
-      `core.local/${stored.id}/full`,
-      `core.local/${stored.id}/thumbnail`,
+    expect((await store.keys('how.joi.local/')).sort()).toEqual([
+      `how.joi.local/${stored.id}/full`,
+      `how.joi.local/${stored.id}/thumbnail`,
     ]);
   });
 
@@ -128,8 +128,8 @@ describe('LocalImageService', () => {
 
     await service.removeImage(gone.id);
 
-    expect(await store.keys('core.local/')).toEqual([
-      `core.local/${kept.id}/full`,
+    expect(await store.keys('how.joi.local/')).toEqual([
+      `how.joi.local/${kept.id}/full`,
     ]);
   });
 
@@ -151,9 +151,9 @@ describe('LocalImageService', () => {
     db.close();
 
     expect(await service.listIds()).toEqual(['old.png-abc']);
-    expect((await store.keys('core.local/')).sort()).toEqual([
-      'core.local/old.png-abc/full',
-      'core.local/old.png-abc/thumbnail',
+    expect((await store.keys('how.joi.local/')).sort()).toEqual([
+      'how.joi.local/old.png-abc/full',
+      'how.joi.local/old.png-abc/thumbnail',
     ]);
     expect((await indexedDB.databases()).map(d => d.name)).not.toContain(
       legacy

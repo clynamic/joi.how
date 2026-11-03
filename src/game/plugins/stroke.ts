@@ -10,7 +10,7 @@ import Saves from './saves';
 
 import { StrokeDirection } from '../../types';
 
-const PLUGIN_ID = 'core.stroke';
+const PLUGIN_ID = 'how.joi.classic.stroke';
 
 export type StrokeState = {
   stroke: StrokeDirection;
@@ -19,8 +19,8 @@ export type StrokeState = {
 
 const stroke = pluginPaths<StrokeState>(PLUGIN_ID);
 const timing = typedPath<GameTiming>([]);
-const phaseState = typedPath<PhaseState>(['core.phase']);
-const paceState = typedPath<PaceState>(['core.pace']);
+const phaseState = typedPath<PhaseState>(['how.joi.phase']);
+const paceState = typedPath<PaceState>(['how.joi.classic.pace']);
 
 const flipped = Events.define<StrokeDirection>(PLUGIN_ID, 'flipped');
 

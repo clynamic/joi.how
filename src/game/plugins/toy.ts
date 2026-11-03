@@ -21,7 +21,7 @@ import { StrokeDirection } from '../../types';
 import Pace, { PaceState } from './pace';
 import { IntensityState } from './intensity';
 
-const PLUGIN_ID = 'core.toy';
+const PLUGIN_ID = 'how.joi.toy';
 
 const CLIMAX_STEPS = 15;
 const CLIMAX_INTERVAL = 400;
@@ -54,10 +54,10 @@ export type ActuatePayload = {
 };
 
 const toy = pluginPaths<ToyState>(PLUGIN_ID);
-const phaseState = typedPath<PhaseState>(['core.phase']);
-const strokeState = typedPath<StrokeState>(['core.stroke']);
-const paceState = typedPath<PaceState>(['core.pace']);
-const intensityState = typedPath<IntensityState>(['core.intensity']);
+const phaseState = typedPath<PhaseState>(['how.joi.phase']);
+const strokeState = typedPath<StrokeState>(['how.joi.classic.stroke']);
+const paceState = typedPath<PaceState>(['how.joi.classic.pace']);
+const intensityState = typedPath<IntensityState>(['how.joi.classic.intensity']);
 
 const seq = Sequence.for(PLUGIN_ID, 'climax');
 

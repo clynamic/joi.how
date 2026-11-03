@@ -12,14 +12,14 @@ import { IntensityState } from './intensity';
 import Rand from './rand';
 import Scene from './scene';
 
-const PLUGIN_ID = 'core.random_images';
+const PLUGIN_ID = 'how.joi.classic.random_images';
 
 type RandomImagesState = {
   seenImages: string[];
 };
 
 const state = pluginPaths<RandomImagesState>(PLUGIN_ID);
-const intensityState = typedPath<IntensityState>(['core.intensity']);
+const intensityState = typedPath<IntensityState>(['how.joi.classic.intensity']);
 export const imageKeys = Presets.keys(PLUGIN_ID, {
   imageDuration: 20,
   intenseImages: true,

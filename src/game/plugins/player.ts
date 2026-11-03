@@ -2,7 +2,7 @@ import { definePlugin } from '../../engine/plugins/Plugins';
 import { PlayerBody, PlayerGender } from '../../types';
 import Settings from './settings';
 
-const PLUGIN_ID = 'core.player';
+const PLUGIN_ID = 'how.joi.player';
 
 export const playerKeys = Settings.keys(PLUGIN_ID, {
   gender: PlayerGender.male as PlayerGender,

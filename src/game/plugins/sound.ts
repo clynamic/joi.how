@@ -4,7 +4,7 @@ import { Effects } from '../../engine/pipes/Effects';
 import { Pipe } from '../../engine/State';
 import { playTone } from '../../utils/sound';
 
-const PLUGIN_ID = 'core.sound';
+const PLUGIN_ID = 'how.joi.sound';
 
 export type TonePayload = { frequency: number; delay: number };
 

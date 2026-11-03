@@ -8,7 +8,7 @@ import {
 } from '../../services/e621';
 import Assets, { AssetKind, AssetRecord, AssetSize } from './assets';
 
-const PLUGIN_ID = 'core.e621';
+const PLUGIN_ID = 'how.joi.e621';
 
 export const SOURCE = PLUGIN_ID;
 

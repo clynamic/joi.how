@@ -9,7 +9,7 @@ import Stroke from './stroke';
 import { StrokeDirection } from '../../types';
 import { GameMessage, MessageState } from './messages';
 
-const PLUGIN_ID = 'core.cues';
+const PLUGIN_ID = 'how.joi.classic.cues';
 
 const STROKE_UP_TONE = 425;
 const STROKE_DOWN_TONE = 625;
@@ -25,8 +25,8 @@ type CuesState = {
 };
 
 const paths = pluginPaths<CuesState>(PLUGIN_ID);
-const phaseState = typedPath<PhaseState>(['core.phase']);
-const messageState = typedPath<MessageState>(['core.messages']);
+const phaseState = typedPath<PhaseState>(['how.joi.phase']);
+const messageState = typedPath<MessageState>(['how.joi.messages']);
 
 const strokeCue: Pipe = Stroke.onFlip(stroke =>
   Sound.play(stroke === StrokeDirection.up ? STROKE_UP_TONE : STROKE_DOWN_TONE)

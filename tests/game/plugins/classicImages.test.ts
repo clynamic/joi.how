@@ -79,8 +79,8 @@ async function boot(): Promise<GameFrame> {
 }
 
 const selection = (frame: GameFrame) => ClassicImages.keys.get(frame).images;
-const library = (frame: GameFrame) => frame.core.assets.library;
-const inUse = (frame: GameFrame) => Object.keys(frame.core.assets.inUse);
+const library = (frame: GameFrame) => frame.how.joi.assets.library;
+const inUse = (frame: GameFrame) => Object.keys(frame.how.joi.assets.inUse);
 
 describe('Classic images', () => {
   beforeEach(() => {
@@ -97,7 +97,9 @@ describe('Classic images', () => {
     frame = await step(frame);
 
     expect(selection(frame)).toEqual(['fake:a']);
-    expect(library(frame)['fake:a'].holders).toEqual(['core.classic_images']);
+    expect(library(frame)['fake:a'].holders).toEqual([
+      'how.joi.classic.images',
+    ]);
     expect(inUse(frame)).toEqual(['fake:a']);
   });
 
@@ -129,35 +131,35 @@ describe('Classic images', () => {
       ClassicImages.searchE621({ tags: 'cat' })
     );
     for (let i = 0; i < 4; i++) frame = await step(frame);
-    expect(selection(frame)).toEqual(['core.e621:77']);
+    expect(selection(frame)).toEqual(['how.joi.e621:77']);
 
     frame = await step(frame, E621.search({ tags: 'dog', holder: 'novel' }));
     for (let i = 0; i < 4; i++) frame = await step(frame);
-    expect(selection(frame)).toEqual(['core.e621:77']);
+    expect(selection(frame)).toEqual(['how.joi.e621:77']);
   });
 
   it('should add the legacy image list to a selection that already exists', async () => {
     localStorage.setItem(
-      'core.presets.default',
+      'how.joi.presets.default',
       JSON.stringify({
         version: '3.0.1',
         savedAt: 1,
-        data: { 'core.classic_images': { images: ['fake:a'] } },
+        data: { 'how.joi.classic.images': { images: ['fake:a'] } },
       })
     );
     localStorage.setItem('images', JSON.stringify([post]));
     const frame = await boot();
 
-    expect(selection(frame)).toEqual(['fake:a', 'core.e621:77']);
+    expect(selection(frame)).toEqual(['fake:a', 'how.joi.e621:77']);
   });
 
   it('should take the legacy image list as its selection once', async () => {
     localStorage.setItem('images', JSON.stringify([post]));
     const frame = await boot();
 
-    expect(selection(frame)).toEqual(['core.e621:77']);
-    expect(library(frame)['core.e621:77']).toMatchObject({
-      holders: ['core.classic_images'],
+    expect(selection(frame)).toEqual(['how.joi.e621:77']);
+    expect(library(frame)['how.joi.e621:77']).toMatchObject({
+      holders: ['how.joi.classic.images'],
     });
     expect(localStorage.getItem('images')).toBeNull();
   });

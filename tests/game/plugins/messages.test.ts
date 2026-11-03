@@ -12,7 +12,9 @@ import { makeFrame, makeGame, tick } from '../../utils';
 const { pipe: gamePipe, withImpulse } = makeGame();
 
 const titles = (frame: GameFrame): string[] =>
-  (frame.core.messages?.messages ?? []).map((m: { title: string }) => m.title);
+  (frame.how.joi.messages?.messages ?? []).map(
+    (m: { title: string }) => m.title
+  );
 
 function bootstrap(): GameFrame {
   const frame = gamePipe(makeFrame());
@@ -37,7 +39,7 @@ describe('Messages', () => {
     let frame = step(bootstrap(), Messages.send({ id: 'a', title: 'Hello' }));
     frame = step(frame, Messages.send({ id: 'a', description: 'there' }));
 
-    expect(frame.core.messages.messages).toEqual([
+    expect(frame.how.joi.messages.messages).toEqual([
       { id: 'a', title: 'Hello', description: 'there' },
     ]);
   });
@@ -117,7 +119,7 @@ describe('Messages', () => {
     frame = step(frame);
 
     const pending = (frame.core.scheduler.scheduled ?? []).filter(
-      (s: { id?: string }) => s.id === 'core.messages/schedule/message/a'
+      (s: { id?: string }) => s.id === 'how.joi.messages/schedule/message/a'
     );
     expect(pending).toEqual([]);
     expect(titles(run(frame, 2000))).toEqual(['Timed']);
@@ -130,14 +132,14 @@ describe('Messages', () => {
     );
     frame = run(frame, 2000);
     frame = step(frame, Saves.save('slot'));
-    const blob = frame.core.saves.collecting[0].blobs['core.messages'];
+    const blob = frame.how.joi.saves.collecting[0].blobs['how.joi.messages'];
 
     let other = step(bootstrap(), Messages.send({ id: 'b', title: 'Other' }));
     other = step(
       other,
       Events.dispatch({
-        type: 'core.saves/load',
-        payload: { restored: null, blobs: { 'core.messages': blob } },
+        type: 'how.joi.saves/load',
+        payload: { restored: null, blobs: { 'how.joi.messages': blob } },
       })
     );
     other = step(other);

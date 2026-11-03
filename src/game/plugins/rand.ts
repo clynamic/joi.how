@@ -3,7 +3,7 @@ import { Composer } from '../../engine/Composer';
 import { Pipe } from '../../engine/State';
 import Saves from './saves';
 
-const PLUGIN_ID = 'core.rand';
+const PLUGIN_ID = 'how.joi.rand';
 
 type RandState = {
   seed: string;

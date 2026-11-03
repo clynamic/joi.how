@@ -12,10 +12,10 @@ import { makeFrame, makeGame, tick } from '../../utils';
 const { pipe: gamePipe, withImpulse } = makeGame();
 
 const prefs = Settings.keys('test.prefs', { volume: 0.5, loud: false });
-const game = Presets.keys('core.pace', { minPace: 1, maxPace: 5 });
+const game = Presets.keys('how.joi.classic.pace', { minPace: 1, maxPace: 5 });
 
 const prefsDoc = (values: object) => ({ 'test.prefs': values });
-const paceDoc = (values: object) => ({ 'core.pace': values });
+const paceDoc = (values: object) => ({ 'how.joi.classic.pace': values });
 
 const file = (data: unknown) =>
   JSON.stringify({ version: pkg.version, savedAt: 1, data });
@@ -48,7 +48,7 @@ describe('document plugins', () => {
 
   it('should fill declared keys from defaults until the slot loads', () => {
     localStorage.setItem(
-      'core.settings.default',
+      'how.joi.settings.default',
       file(prefsDoc({ volume: 0.9 }))
     );
     const early = boot(0);
@@ -62,24 +62,24 @@ describe('document plugins', () => {
 
   it('should keep a write made before the slot loads', () => {
     localStorage.setItem(
-      'core.settings.default',
+      'how.joi.settings.default',
       file(prefsDoc({ volume: 0.9 }))
     );
     let frame = step(boot(1), prefs.set('loud', true));
     expect(prefs.get(frame)).toEqual({ volume: 0.9, loud: true });
-    expect(storedData('core.settings.default')).toEqual(
+    expect(storedData('how.joi.settings.default')).toEqual(
       prefsDoc({ volume: 0.9 })
     );
     frame = settle(frame);
 
     expect(prefs.get(frame)).toEqual({ volume: 0.9, loud: true });
-    expect(storedData('core.settings.default')).toEqual(
+    expect(storedData('how.joi.settings.default')).toEqual(
       prefsDoc({ volume: 0.9, loud: true })
     );
 
     frame = step(frame, prefs.set('volume', 0.2));
     frame = settle(frame);
-    expect(storedData('core.settings.default')).toEqual(
+    expect(storedData('how.joi.settings.default')).toEqual(
       prefsDoc({ volume: 0.2, loud: true })
     );
   });
@@ -92,7 +92,7 @@ describe('document plugins', () => {
 
     expect(first.get(frame)).toEqual({ speed: 3 });
     expect(second.get(frame)).toEqual({ speed: 1 });
-    expect(storedData('core.presets.default')).toEqual({
+    expect(storedData('how.joi.presets.default')).toEqual({
       'me.first': { speed: 3 },
     });
   });
@@ -106,18 +106,20 @@ describe('document plugins', () => {
     const frame = boot(6);
 
     expect(game.get(frame)).toEqual({ minPace: 3, maxPace: 5 });
-    expect(storedData('core.settings.default')).toEqual({
-      'core.images': { highRes: true },
-      'core.home': { ageCheckConfirm: true },
+    expect(storedData('how.joi.settings.default')).toEqual({
+      'how.joi.classic.image': { highRes: true },
+      'how.joi.home': { ageCheckConfirm: true },
     });
-    expect(storedData('core.presets.default')).toEqual(paceDoc({ minPace: 3 }));
+    expect(storedData('how.joi.presets.default')).toEqual(
+      paceDoc({ minPace: 3 })
+    );
     expect(localStorage.getItem('settings')).toBeNull();
     expect(localStorage.getItem('home')).toBeNull();
   });
 
   it('should start fresh when its file is unusable', () => {
     localStorage.setItem(
-      'core.presets.default',
+      'how.joi.presets.default',
       JSON.stringify({
         version: '99.0.0',
         savedAt: 1,
@@ -126,41 +128,52 @@ describe('document plugins', () => {
     );
     let frame = boot(8);
     expect(game.get(frame)).toEqual({ minPace: 1, maxPace: 5 });
-    expect(frame.core.presets.loaded).toBe(true);
+    expect(frame.how.joi.presets.loaded).toBe(true);
 
     frame = step(frame, game.set('maxPace', 7));
     frame = settle(frame);
-    expect(storedData('core.presets.default')).toEqual(paceDoc({ maxPace: 7 }));
-    expect(localStorage.getItem('core.presets.default~99.0.0')).not.toBeNull();
+    expect(storedData('how.joi.presets.default')).toEqual(
+      paceDoc({ maxPace: 7 })
+    );
+    expect(
+      localStorage.getItem('how.joi.presets.default~99.0.0')
+    ).not.toBeNull();
   });
 
   it('should start a new slot empty on select', () => {
-    localStorage.setItem('core.presets.default', file(paceDoc({ minPace: 2 })));
+    localStorage.setItem(
+      'how.joi.presets.default',
+      file(paceDoc({ minPace: 2 }))
+    );
     localStorage.setItem('settings', JSON.stringify({ minPace: 9 }));
     let frame = boot();
     frame = step(frame, Presets.select('new'));
     frame = settle(frame);
 
     expect(game.get(frame)).toEqual({ minPace: 1, maxPace: 5 });
-    expect(storedData('core.presets.new')).toEqual({});
-    expect(storedData('core.presets.default')).toEqual(paceDoc({ minPace: 2 }));
+    expect(storedData('how.joi.presets.new')).toEqual({});
+    expect(storedData('how.joi.presets.default')).toEqual(
+      paceDoc({ minPace: 2 })
+    );
   });
 
   it('should replace the document even before the slot loads', () => {
     localStorage.setItem(
-      'core.presets.default',
+      'how.joi.presets.default',
       file(paceDoc({ minPace: 2, extra: 1 }))
     );
     let frame = step(boot(1), Presets.replace(paceDoc({ minPace: 3 })));
     frame = settle(frame);
 
     expect(game.get(frame)).toEqual({ minPace: 3, maxPace: 5 });
-    expect(storedData('core.presets.default')).toEqual(paceDoc({ minPace: 3 }));
+    expect(storedData('how.joi.presets.default')).toEqual(
+      paceDoc({ minPace: 3 })
+    );
   });
 
   it('should replace the whole document and persist it', () => {
     localStorage.setItem(
-      'core.presets.default',
+      'how.joi.presets.default',
       file(paceDoc({ minPace: 2, extra: 1 }))
     );
     let frame = boot();
@@ -168,20 +181,25 @@ describe('document plugins', () => {
     frame = settle(frame);
 
     expect(game.get(frame)).toEqual({ minPace: 3, maxPace: 5 });
-    expect(storedData('core.presets.default')).toEqual(paceDoc({ minPace: 3 }));
+    expect(storedData('how.joi.presets.default')).toEqual(
+      paceDoc({ minPace: 3 })
+    );
   });
 
   it('should write an empty document when nothing is stored', () => {
     const frame = boot(6);
 
     expect(game.get(frame)).toEqual({ minPace: 1, maxPace: 5 });
-    expect(storedData('core.presets.default')).toEqual({});
+    expect(storedData('how.joi.presets.default')).toEqual({});
   });
 
   it('should switch documents on select and remember the choice', () => {
-    localStorage.setItem('core.presets.default', file(paceDoc({ minPace: 2 })));
     localStorage.setItem(
-      'core.presets.fast',
+      'how.joi.presets.default',
+      file(paceDoc({ minPace: 2 }))
+    );
+    localStorage.setItem(
+      'how.joi.presets.fast',
       file(paceDoc({ minPace: 4, maxPace: 9 }))
     );
     let frame = boot();
@@ -191,7 +209,7 @@ describe('document plugins', () => {
     expect(game.get(selecting)).toEqual({ minPace: 2, maxPace: 5 });
     frame = settle(selecting);
     expect(game.get(frame)).toEqual({ minPace: 4, maxPace: 9 });
-    expect(frame.core.presets.current).toBe('fast');
+    expect(frame.how.joi.presets.current).toBe('fast');
     expect(
       Presets.find(frame, '')
         .map(s => s.slot)
@@ -200,10 +218,12 @@ describe('document plugins', () => {
 
     frame = step(frame, game.set('maxPace', 7));
     frame = settle(frame);
-    expect(storedData('core.presets.fast')).toEqual(
+    expect(storedData('how.joi.presets.fast')).toEqual(
       paceDoc({ minPace: 4, maxPace: 7 })
     );
-    expect(storedData('core.presets.default')).toEqual(paceDoc({ minPace: 2 }));
+    expect(storedData('how.joi.presets.default')).toEqual(
+      paceDoc({ minPace: 2 })
+    );
 
     frame = step(frame, ModuleManager.unload(Presets.id));
     frame = settle(frame);

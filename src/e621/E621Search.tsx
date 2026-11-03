@@ -54,7 +54,7 @@ export const E621Search = () => {
     'pending',
   ]);
   const loading = Object.values(pending ?? {}).some(
-    request => request.type === 'core.e621/search'
+    request => request.type === 'how.joi.e621/search'
   );
 
   const runSearch = useCallback(() => {

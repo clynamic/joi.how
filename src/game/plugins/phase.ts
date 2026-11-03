@@ -4,7 +4,7 @@ import { Events } from '../../engine/pipes/Events';
 import { Composer } from '../../engine';
 import Saves from './saves';
 
-const PLUGIN_ID = 'core.phase';
+const PLUGIN_ID = 'how.joi.phase';
 
 export enum GamePhase {
   warmup = 'warmup',

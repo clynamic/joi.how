@@ -9,7 +9,7 @@ import Presets from './presets';
 import { GameHypnoType, HypnoPhrases } from '../../types';
 import Rand from './rand';
 
-const PLUGIN_ID = 'core.hypno';
+const PLUGIN_ID = 'how.joi.classic.hypno';
 
 export type HypnoState = {
   currentPhrase: number;
@@ -18,8 +18,8 @@ export type HypnoState = {
 
 const hypno = pluginPaths<HypnoState>(PLUGIN_ID);
 const timing = typedPath<GameTiming>([]);
-const phaseState = typedPath<PhaseState>(['core.phase']);
-const intensityState = typedPath<IntensityState>(['core.intensity']);
+const phaseState = typedPath<PhaseState>(['how.joi.phase']);
+const intensityState = typedPath<IntensityState>(['how.joi.classic.intensity']);
 export const hypnoKeys = Presets.keys(PLUGIN_ID, {
   hypno: GameHypnoType.joi as GameHypnoType,
 });

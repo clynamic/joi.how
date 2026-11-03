@@ -4,7 +4,7 @@ import { Pipe } from '../../engine/State';
 import { Events } from '../../engine/pipes/Events';
 import { Effects, type Inject } from '../../engine/pipes/Effects';
 
-const PLUGIN_ID = 'core.keys';
+const PLUGIN_ID = 'how.joi.keys';
 
 export type KeyPress = {
   key: string;

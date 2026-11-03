@@ -30,7 +30,7 @@ describe('Mode', () => {
   it('should start in classic without announcing an entry', () => {
     const frame = bootstrap();
 
-    expect(frame.core.mode.current).toBe('classic');
+    expect(frame.how.joi.mode.current).toBe('classic');
     expect(seen(frame)).toEqual([]);
   });
 
@@ -42,7 +42,7 @@ describe('Mode', () => {
         Mode.register({ id: 'dj', name: 'DJ', description: 'Beats' })
       )
     )(tick(frame));
-    const both = frame.core.mode.modes;
+    const both = frame.how.joi.mode.modes;
 
     frame = withImpulse(Mode.setMode('dj'))(tick(frame));
     frame = withImpulse(Mode.unregister('dj'))(tick(frame));
@@ -51,10 +51,10 @@ describe('Mode', () => {
       classic: { id: 'classic', name: 'Classic' },
       dj: { id: 'dj', name: 'DJ', description: 'Beats' },
     });
-    expect(frame.core.mode.modes).toEqual({
+    expect(frame.how.joi.mode.modes).toEqual({
       classic: { id: 'classic', name: 'Classic' },
     });
-    expect(frame.core.mode.current).toBe('classic');
+    expect(frame.how.joi.mode.current).toBe('classic');
   });
 
   it('should keep the current mode and say so when the target is not registered', () => {
@@ -64,7 +64,7 @@ describe('Mode', () => {
     frame = gamePipe(tick(frame));
     frame = gamePipe(tick(frame));
 
-    expect(frame.core.mode.current).toBe('classic');
+    expect(frame.how.joi.mode.current).toBe('classic');
     expect(seen(frame)).toEqual([]);
   });
 
@@ -76,7 +76,7 @@ describe('Mode', () => {
     frame = gamePipe(tick(frame));
     frame = gamePipe(tick(frame));
 
-    expect(frame.core.mode.current).toBe('dj');
+    expect(frame.how.joi.mode.current).toBe('dj');
     expect(seen(frame)).toEqual(['left classic', 'entered dj']);
   });
 
@@ -86,7 +86,7 @@ describe('Mode', () => {
     frame = withImpulse(ModuleManager.unload(Mode.id))(tick(frame));
     frame = gamePipe(tick(frame));
 
-    expect(frame.core.mode).toBeUndefined();
+    expect(frame.how.joi.mode).toBeUndefined();
   });
 
   it('should keep its registry across a reload', () => {
@@ -100,8 +100,8 @@ describe('Mode', () => {
     frame = gamePipe(tick(frame));
     frame = gamePipe(tick(frame));
 
-    expect(frame.core.mode.modes).toEqual({ dj: { id: 'dj', name: 'DJ' } });
-    expect(frame.core.mode.current).toBe('dj');
+    expect(frame.how.joi.mode.modes).toEqual({ dj: { id: 'dj', name: 'DJ' } });
+    expect(frame.how.joi.mode.current).toBe('dj');
     expect(seen(frame)).toEqual(['left classic', 'entered dj']);
   });
 });

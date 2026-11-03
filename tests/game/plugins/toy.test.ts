@@ -30,7 +30,7 @@ function collect(
   return { frame, effects };
 }
 
-const TOY_ID = 'core.toy';
+const TOY_ID = 'how.joi.toy';
 const CLIMAX_INTERVAL = 400;
 const CLIMAX_TICKS = 60;
 const SETTLE_TICKS = 6;
@@ -81,8 +81,8 @@ describe('Toy', () => {
   it('should start with no devices', () => {
     const frame = bootstrap();
 
-    expect(frame?.core?.toy?.toys).toEqual([]);
-    expect(frame?.core?.toy?.connection).toBeUndefined();
+    expect(frame?.how?.joi?.toy?.toys).toEqual([]);
+    expect(frame?.how?.joi?.toy?.connection).toBeUndefined();
   });
 
   it('should schedule a climax ramp step on entering climax', () => {
@@ -156,13 +156,13 @@ describe('Toy', () => {
     frame = withImpulse(
       Composer.pipe(
         Composer.set(
-          ['core.toy', 'toys'],
+          ['how.joi.toy', 'toys'],
           [{ name: 't', index: 0, actuators: [] }]
         ),
-        Composer.set(['core.intensity', 'intensity'], 0.5),
-        Composer.set(['core.pace', 'pace'], 2),
-        Composer.set(['core', 'presets', 'document', 'maxPace'], 5),
-        Composer.set(['core.stroke', 'stroke'], 'up')
+        Composer.set(['how.joi.classic.intensity', 'intensity'], 0.5),
+        Composer.set(['how.joi.classic.pace', 'pace'], 2),
+        Composer.set(['how.joi.presets', 'document', 'maxPace'], 5),
+        Composer.set(['how.joi.classic.stroke', 'stroke'], 'up')
       )
     )(tick(frame));
 
@@ -179,10 +179,11 @@ describe('Toy', () => {
 
   it('should not actuate while paused, outside active, or without toys', () => {
     const withToys = Composer.set(
-      ['core.toy', 'toys'],
+      ['how.joi.toy', 'toys'],
       [{ name: 't', index: 0, actuators: [] }]
     );
-    const flip = (dir: string) => Composer.set(['core.stroke', 'stroke'], dir);
+    const flip = (dir: string) =>
+      Composer.set(['how.joi.classic.stroke', 'stroke'], dir);
     const actuates = (frame: GameFrame) =>
       [...getEffects(frame), ...collect(frame, 2).effects].filter(
         e => e.type === `${TOY_ID}/actuate`
@@ -210,10 +211,10 @@ describe('Toy', () => {
     frame = withImpulse(
       Composer.pipe(
         Composer.set(
-          ['core.toy', 'toys'],
+          ['how.joi.toy', 'toys'],
           [{ name: 't', index: 0, actuators: [] }]
         ),
-        Composer.set(['core.stroke', 'stroke'], 'up')
+        Composer.set(['how.joi.classic.stroke', 'stroke'], 'up')
       )
     )(tick(frame));
 
@@ -225,8 +226,8 @@ describe('Toy', () => {
   it('should mark connecting and queue a connect effect', () => {
     const frame = Toy.connect('ws://127.0.0.1:12345')(bootstrap());
 
-    expect(frame.core.toy.connecting).toBe(true);
-    expect(frame.core.toy.error).toBeUndefined();
+    expect(frame.how.joi.toy.connecting).toBe(true);
+    expect(frame.how.joi.toy.error).toBeUndefined();
     expect(getEffects(frame)).toEqual([
       {
         type: `${TOY_ID}/connect`,
@@ -243,7 +244,7 @@ describe('Toy', () => {
     const unloaded = gamePipe(tick(ModuleManager.unload(TOY_ID)(frame)));
 
     expect(getEffects(unloaded).map(e => e.type)).toEqual([`${TOY_ID}/stop`]);
-    expect(unloaded.core.toy).toBeUndefined();
+    expect(unloaded.how.joi.toy).toBeUndefined();
   });
 
   it('should hold ramp steps while paused', () => {

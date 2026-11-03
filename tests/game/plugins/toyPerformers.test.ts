@@ -93,11 +93,11 @@ describe('Toy performers', () => {
 
   it('should connect, report the connection and list the devices', async () => {
     let frame = Toy.connect('ws://127.0.0.1:12345')(bootstrap());
-    expect(frame.core.toy.connecting).toBe(true);
+    expect(frame.how.joi.toy.connecting).toBe(true);
 
     frame = await flushAndApply(frame);
 
-    expect(frame.core.toy).toMatchObject({
+    expect(frame.how.joi.toy).toMatchObject({
       connection: 'ws://127.0.0.1:12345',
       connecting: false,
       toys: [{ name: 'Fake Wand', actuators: [] }],
@@ -117,7 +117,7 @@ describe('Toy performers', () => {
     frame = await flushAndApply(frame);
 
     expect(fake.state.instances).toHaveLength(1);
-    expect(frame.core.toy).toMatchObject({
+    expect(frame.how.joi.toy).toMatchObject({
       connection: 'ws://127.0.0.1:12345',
       toys: [{ name: 'Fake Wand' }],
     });
@@ -128,17 +128,17 @@ describe('Toy performers', () => {
       Toy.connect('ws://127.0.0.1:12345')(bootstrap())
     );
     frame = await flushAndApply(frame);
-    const remembered = localStorage.getItem('core.toy.connection');
+    const remembered = localStorage.getItem('how.joi.toy.connection');
 
     frame = await flushAndApply(Toy.disconnect()(frame));
     await flushAndApply(frame);
 
     expect(remembered).toBe('"ws://127.0.0.1:12345"');
-    expect(localStorage.getItem('core.toy.connection')).toBeNull();
+    expect(localStorage.getItem('how.joi.toy.connection')).toBeNull();
   });
 
   it('should connect at boot to a remembered address', async () => {
-    localStorage.setItem('core.toy.connection', '"ws://127.0.0.1:12345"');
+    localStorage.setItem('how.joi.toy.connection', '"ws://127.0.0.1:12345"');
 
     let frame = gamePipe(makeFrame());
     for (const plugin of [Storage, Pause, Phase, Toy]) {
@@ -148,11 +148,11 @@ describe('Toy performers', () => {
     for (let i = 0; i < 4; i++) frame = await flushAndApply(frame);
 
     expect(fake.state.instances).toHaveLength(1);
-    expect(frame.core.toy.connection).toBe('ws://127.0.0.1:12345');
+    expect(frame.how.joi.toy.connection).toBe('ws://127.0.0.1:12345');
   });
 
   it('should forget a remembered address that refuses the connection', async () => {
-    localStorage.setItem('core.toy.connection', '"ws://127.0.0.1:12345"');
+    localStorage.setItem('how.joi.toy.connection', '"ws://127.0.0.1:12345"');
     fake.state.connectShouldFail = true;
 
     let frame = gamePipe(makeFrame());
@@ -162,8 +162,8 @@ describe('Toy performers', () => {
     frame = gamePipe(tick(frame));
     for (let i = 0; i < 5; i++) frame = await flushAndApply(frame);
 
-    expect(frame.core.toy.error).toContain('refused');
-    expect(localStorage.getItem('core.toy.connection')).toBeNull();
+    expect(frame.how.joi.toy.error).toContain('refused');
+    expect(localStorage.getItem('how.joi.toy.connection')).toBeNull();
   });
 
   it('should ignore its verbs while unloaded', async () => {
@@ -178,20 +178,20 @@ describe('Toy performers', () => {
     );
     frame = await flushAndApply(frame);
 
-    expect(frame.core.toy).toBeUndefined();
+    expect(frame.how.joi.toy).toBeUndefined();
     expect(fake.state.instances).toHaveLength(0);
   });
 
   it('should forget the address on disconnect without a live client', async () => {
     let frame = bootstrap();
     for (let i = 0; i < 3; i++) frame = await flushAndApply(frame);
-    localStorage.setItem('core.toy.connection', '"ws://127.0.0.1:12345"');
+    localStorage.setItem('how.joi.toy.connection', '"ws://127.0.0.1:12345"');
 
     frame = await flushAndApply(Toy.disconnect()(frame));
     await flushAndApply(frame);
 
     expect(fake.state.instances).toHaveLength(0);
-    expect(localStorage.getItem('core.toy.connection')).toBeNull();
+    expect(localStorage.getItem('how.joi.toy.connection')).toBeNull();
   });
 
   it('should report a refused connection as an error', async () => {
@@ -200,12 +200,12 @@ describe('Toy performers', () => {
 
     frame = await flushAndApply(frame);
 
-    expect(frame.core.toy.connecting).toBe(false);
-    expect(frame.core.toy.connection).toBeUndefined();
-    expect(frame.core.toy.error).toContain('refused');
+    expect(frame.how.joi.toy.connecting).toBe(false);
+    expect(frame.how.joi.toy.connection).toBeUndefined();
+    expect(frame.how.joi.toy.error).toContain('refused');
 
     frame = await flushAndApply(Toy.disconnect()(frame));
-    expect(frame.core.toy.error).toBeUndefined();
+    expect(frame.how.joi.toy.error).toBeUndefined();
   });
 
   it('should stop every device on a stop effect and clear on disconnect', async () => {
@@ -220,8 +220,8 @@ describe('Toy performers', () => {
 
     frame = await flushAndApply(Toy.disconnect()(frame));
 
-    expect(frame.core.toy.connection).toBeUndefined();
-    expect(frame.core.toy.toys).toEqual([]);
+    expect(frame.how.joi.toy.connection).toBeUndefined();
+    expect(frame.how.joi.toy.toys).toEqual([]);
     expect(Toy.devices()).toEqual([]);
   });
 });

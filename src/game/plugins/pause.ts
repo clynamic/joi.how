@@ -8,7 +8,7 @@ import { PLAY_TIMELINE } from '../timelines';
 import Scene from './scene';
 import Keys from './keys';
 
-const PLUGIN_ID = 'core.pause';
+const PLUGIN_ID = 'how.joi.pause';
 
 export type PauseState = {
   paused: boolean;

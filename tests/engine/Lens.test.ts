@@ -239,10 +239,10 @@ describe('Lens', () => {
 
 describe('typedPath', () => {
   it('should accept a dotted string as the root', () => {
-    const path = typedPath<{ cursor: number }>('core.rand');
-    const frame = { core: { rand: { cursor: 7 } } };
+    const path = typedPath<{ cursor: number }>('how.joi.rand');
+    const frame = { how: { joi: { rand: { cursor: 7 } } } };
 
     expect(lensFromPath(path.cursor).get(frame)).toBe(7);
-    expect(normalizePath(path)).toEqual(['core', 'rand']);
+    expect(normalizePath(path)).toEqual(['how', 'joi', 'rand']);
   });
 });

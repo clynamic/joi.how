@@ -3,7 +3,7 @@ import { Composer } from '../../engine/Composer';
 import { Documents, DocumentState } from './documents';
 import { legacyDocument, LegacyState, legacyPresets } from './legacy';
 
-const PLUGIN_ID = 'core.presets';
+const PLUGIN_ID = 'how.joi.presets';
 
 const paths = pluginPaths<DocumentState & LegacyState>(PLUGIN_ID);
 

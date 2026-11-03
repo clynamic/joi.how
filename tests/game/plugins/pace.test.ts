@@ -29,28 +29,28 @@ describe('Pace', () => {
     let frame = gamePipe(makeFrame());
     frame = ModuleManager.load(Pace)(frame);
     frame = gamePipe(tick(frame));
-    frame = Composer.set(['core', 'pace', 'pace'], 4)(frame);
+    frame = Composer.set(['how.joi.classic.pace', 'pace'], 4)(frame);
     frame = gamePipe(tick(frame));
-    expect(frame.core.pace.pace).toBe(4);
+    expect(frame.how.joi.classic.pace.pace).toBe(4);
 
-    frame = Composer.set(['core', 'presets'], {
-      document: { 'core.pace': { minPace: 2, maxPace: 8 } },
+    frame = Composer.set(['how.joi.presets'], {
+      document: { 'how.joi.classic.pace': { minPace: 2, maxPace: 8 } },
       loaded: true,
     })(frame);
     frame = gamePipe(tick(frame));
-    expect(frame.core.pace.pace).toBe(4);
+    expect(frame.how.joi.classic.pace.pace).toBe(4);
   });
 
   it('should keep the pace within its bounds', () => {
     let frame = booted({ minPace: 2, maxPace: 5 });
-    expect(frame.core.pace.pace).toBe(2);
+    expect(frame.how.joi.classic.pace.pace).toBe(2);
 
     frame = Pace.keys.set('minPace', 3)(frame);
     frame = gamePipe(tick(frame));
-    expect(frame.core.pace.pace).toBe(3);
+    expect(frame.how.joi.classic.pace.pace).toBe(3);
 
-    frame = Composer.set(['core', 'pace', 'pace'], 9)(frame);
+    frame = Composer.set(['how.joi.classic.pace', 'pace'], 9)(frame);
     frame = gamePipe(tick(frame));
-    expect(frame.core.pace.pace).toBe(5);
+    expect(frame.how.joi.classic.pace.pace).toBe(5);
   });
 });

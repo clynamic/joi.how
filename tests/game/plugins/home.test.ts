@@ -34,7 +34,7 @@ describe('Home', () => {
     const scenes: string[] = [];
     for (let i = 0; i < 8; i++) {
       frame = step(frame);
-      scenes.push(frame.core.scene.current);
+      scenes.push(frame.how.joi.scene.current);
     }
 
     expect(scenes[0]).toBe('boot');
@@ -46,13 +46,13 @@ describe('Home', () => {
 
   it('should stay in boot while a store has not loaded', () => {
     let frame = boot();
-    frame = Composer.set(['core', 'presets', 'loaded'], false)(frame);
+    frame = Composer.set(['how.joi.presets', 'loaded'], false)(frame);
     for (let i = 0; i < 3; i++) {
-      frame = withImpulse(Composer.set(['core', 'presets', 'loaded'], false))(
+      frame = withImpulse(Composer.set(['how.joi.presets', 'loaded'], false))(
         tick(frame)
       );
     }
 
-    expect(frame.core.scene.current).toBe('boot');
+    expect(frame.how.joi.scene.current).toBe('boot');
   });
 });

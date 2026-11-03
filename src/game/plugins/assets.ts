@@ -7,7 +7,7 @@ import { Done, Failed, Requests } from '../../engine/pipes/Requests';
 import Storage, { StoredEntry } from '../../engine/plugins/Storage';
 import PluginInstaller from '../../engine/plugins/PluginInstaller';
 
-const PLUGIN_ID = 'core.assets';
+const PLUGIN_ID = 'how.joi.assets';
 
 export type AssetKind = 'image' | 'gif' | 'video' | 'audio' | 'text';
 
@@ -76,6 +76,13 @@ const sources = new Map<
     free: ReturnType<typeof Effects.define<FreePayload>>;
   }
 >();
+
+const RESOLVE_PREFIX = `${PLUGIN_ID}/resolve/`;
+
+const resolvedSource = (type: string): string | undefined =>
+  type.startsWith(RESOLVE_PREFIX)
+    ? type.slice(RESOLVE_PREFIX.length)
+    : undefined;
 
 const sourceOf = (source: string) => {
   let def = sources.get(source);
@@ -330,10 +337,10 @@ const Assets = definePlugin({
     }),
     Events.handle<Done<string, ResolvePayload>>(Requests.doneType, event =>
       Composer.do<GameFrame>(({ get, set, pipe }) => {
-        const match = /^core\.assets\/resolve\/(.+)$/.exec(event.payload.type);
-        if (!match) return;
+        const source = resolvedSource(event.payload.type);
+        if (!source) return;
         const { payload } = event.payload;
-        const key = assetKey(match[1], payload.id);
+        const key = assetKey(source, payload.id);
         const entry = get(paths.inUse)?.[key];
         if (!entry) {
           pipe(free(key));
@@ -351,9 +358,9 @@ const Assets = definePlugin({
     ),
     Events.handle<Failed<ResolvePayload>>(Requests.failedType, event =>
       Composer.do<GameFrame>(({ get, set }) => {
-        const match = /^core\.assets\/resolve\/(.+)$/.exec(event.payload.type);
-        if (!match) return;
-        const key = assetKey(match[1], event.payload.payload.id);
+        const source = resolvedSource(event.payload.type);
+        if (!source) return;
+        const key = assetKey(source, event.payload.payload.id);
         const entry = get(paths.inUse)?.[key];
         if (!entry) return;
         set(paths.inUse, {

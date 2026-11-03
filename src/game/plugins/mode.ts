@@ -6,7 +6,7 @@ import { Log } from '../../engine/pipes/Log';
 import { GameFrame } from '../../engine/State';
 import { ModuleManager } from '../../engine/modules/ModuleManager';
 
-const PLUGIN_ID = 'core.mode';
+const PLUGIN_ID = 'how.joi.mode';
 
 export type ModeInfo = {
   id: string;

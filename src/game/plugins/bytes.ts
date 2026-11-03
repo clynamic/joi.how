@@ -5,7 +5,7 @@ import { GameFrame, Pipe } from '../../engine/State';
 import PluginInstaller from '../../engine/plugins/PluginInstaller';
 import { bytes, PluginBytes } from '../../services/bytes';
 
-const PLUGIN_ID = 'core.bytes';
+const PLUGIN_ID = 'how.joi.bytes';
 
 type BytesState = { sweeping?: boolean };
 

@@ -22,7 +22,9 @@ function startImages(overrides?: Partial<typeof defaults>): GameFrame {
     images: ['local:a', 'local:b', 'local:c'],
     ...overrides,
   })(frame);
-  frame = Composer.set(typedPath(['core.intensity']), { intensity: 0 })(frame);
+  frame = Composer.set(typedPath(['how.joi.classic.intensity']), {
+    intensity: 0,
+  })(frame);
 
   frame = ModuleManager.load(Rand)(frame);
   frame = ModuleManager.load(Image)(frame);
@@ -40,7 +42,7 @@ function getScheduled(frame: GameFrame) {
 
 function switchDuration(frame: GameFrame): number | undefined {
   return getScheduled(frame).find((s: { id?: string }) =>
-    s.id?.startsWith('core.random_images')
+    s.id?.startsWith('how.joi.classic.random_images')
   )?.duration;
 }
 
@@ -92,7 +94,8 @@ describe('getImageSwitchDuration', () => {
 });
 
 describe('RandomImages lookahead', () => {
-  const imageState = (frame: GameFrame) => (frame as any)?.core?.images ?? {};
+  const imageState = (frame: GameFrame) =>
+    (frame as any)?.how?.joi?.classic?.image ?? {};
 
   it('should show the first image and keep three queued after the first switch', () => {
     let frame = withImpulse(RandomImages.start())(tick(startImages()));
@@ -112,7 +115,7 @@ describe('RandomImages lookahead', () => {
     const first = imageState(frame);
 
     frame = withImpulse(
-      Events.dispatch({ type: 'core.random_images/schedule_next' })
+      Events.dispatch({ type: 'how.joi.classic.random_images/schedule_next' })
     )(tick(frame));
     frame = gamePipe(tick(frame));
     const second = imageState(frame);
@@ -130,7 +133,7 @@ describe('RandomImages on the game scene', () => {
     frame = withImpulse(Scene.setScene('game'))(tick(frame));
     for (let i = 0; i < 3; i++) frame = gamePipe(tick(frame));
 
-    expect(frame.core.images.nextImages.length).toBeGreaterThan(0);
+    expect(frame.how.joi.classic.image.nextImages.length).toBeGreaterThan(0);
     expect(switchDuration(frame)).toBeDefined();
 
     frame = withImpulse(Scene.setScene('home'))(tick(frame));
@@ -153,9 +156,9 @@ describe('RandomImages scheduling', () => {
 
   it('should shorten the switch as intensity rises', () => {
     let frame = startImages({ imageDuration: 20, intenseImages: true });
-    frame = Composer.set(typedPath(['core.intensity']), { intensity: 0.75 })(
-      frame
-    );
+    frame = Composer.set(typedPath(['how.joi.classic.intensity']), {
+      intensity: 0.75,
+    })(frame);
 
     frame = withImpulse(RandomImages.start())(tick(frame, 0));
     frame = gamePipe(tick(frame, 0));

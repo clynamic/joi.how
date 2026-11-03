@@ -3,7 +3,7 @@ import { Composer } from '../../engine/Composer';
 import Pause from './pause';
 import Saves from './saves';
 
-const PLUGIN_ID = 'core.clock';
+const PLUGIN_ID = 'how.joi.classic.clock';
 
 export type ClockState = {
   elapsed: number;

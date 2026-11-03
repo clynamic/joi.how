@@ -31,7 +31,7 @@ function getRates(frame: GameFrame): Record<string, number> {
 }
 
 function getPauseState(frame: GameFrame): PauseState | undefined {
-  return frame?.core?.pause;
+  return frame?.how?.joi?.pause;
 }
 
 function getDealerScheduled(frame: GameFrame): ScheduledEvent[] {
@@ -250,7 +250,7 @@ describe('Pause + Scheduler resume', () => {
       );
       teardown(next);
 
-      expect(next.core.pause.paused).toBe(true);
+      expect(next.how.joi.pause.paused).toBe(true);
     });
 
     it('should pause on Escape during the resume countdown', () => {
@@ -267,8 +267,8 @@ describe('Pause + Scheduler resume', () => {
       );
       teardown(next);
 
-      expect(next.core.pause.paused).toBe(true);
-      expect(next.core.pause.countdown).toBeNull();
+      expect(next.how.joi.pause.paused).toBe(true);
+      expect(next.how.joi.pause.countdown).toBeNull();
     });
 
     it('should ignore Escape outside the game scene', () => {
@@ -280,7 +280,7 @@ describe('Pause + Scheduler resume', () => {
       );
       teardown(next);
 
-      expect(next.core.pause.paused).toBe(false);
+      expect(next.how.joi.pause.paused).toBe(false);
     });
   });
 });

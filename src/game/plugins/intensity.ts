@@ -7,7 +7,7 @@ import Phase, { GamePhase } from './phase';
 import Pause from './pause';
 import Saves from './saves';
 
-const PLUGIN_ID = 'core.intensity';
+const PLUGIN_ID = 'how.joi.classic.intensity';
 
 export type IntensityState = {
   intensity: number;

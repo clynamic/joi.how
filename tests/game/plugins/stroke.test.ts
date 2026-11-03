@@ -21,7 +21,7 @@ const watcher = {
 
 function bootstrap(pace = 2): GameFrame {
   let frame = gamePipe(makeFrame());
-  frame = Composer.set(['core.pace'], { pace })(frame);
+  frame = Composer.set(['how.joi.classic.pace'], { pace })(frame);
   for (const plugin of [Pause, Phase, Stroke, watcher]) {
     frame = ModuleManager.load(plugin)(frame);
   }
@@ -38,7 +38,7 @@ describe('Stroke', () => {
     for (let i = 0; i < 12; i++) frame = gamePipe(tick(frame, 100));
 
     expect(seen(frame)).toEqual(['down', 'up']);
-    expect(frame.core.stroke.stroke).toBe('up');
+    expect(frame.how.joi.classic.stroke.stroke).toBe('up');
   });
 
   it('should not flip outside the active and finale phases', () => {

@@ -42,7 +42,7 @@ describe('Sound', () => {
     const frame = Sound.play(440)(basePipe(makeFrame()));
 
     expect(getQueue(frame)).toEqual([
-      { type: 'core.sound/tone', payload: { frequency: 440, delay: 0 } },
+      { type: 'how.joi.sound/tone', payload: { frequency: 440, delay: 0 } },
     ]);
     expect(audio.played).toEqual([]);
   });

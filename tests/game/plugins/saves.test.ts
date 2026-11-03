@@ -21,7 +21,7 @@ import { defaults, makeFrame, makeGame, seed, tick } from '../../utils';
 
 const { pipe: gamePipe, withImpulse, until } = makeGame();
 
-const SAVES_ID = 'core.saves';
+const SAVES_ID = 'how.joi.saves';
 
 type Queued = { type: string; payload?: any };
 const queue = (frame: GameFrame): Queued[] => frame.core?.effects?.queue ?? [];
@@ -96,7 +96,7 @@ describe('Saves', () => {
       meta: { mode: 'test' },
       data: { 'test.a': { n: 1 }, 'test.b': { n: 2 } },
     });
-    expect(frame.core.saves.restored).toEqual({
+    expect(frame.how.joi.saves.restored).toEqual({
       slot: 'one',
       savedAt: 1234,
       meta: { mode: 'test' },
@@ -185,10 +185,10 @@ describe('Saves', () => {
     const frame = bootstrap(Storage, Saves, a);
 
     expect(frame.test.a).toEqual({ n: 1 });
-    expect(frame.core.saves.restored).toBeNull();
-    expect(frame.core.saves.slots.map((s: { slot: string }) => s.slot)).toEqual(
-      ['auto']
-    );
+    expect(frame.how.joi.saves.restored).toBeNull();
+    expect(
+      frame.how.joi.saves.slots.map((s: { slot: string }) => s.slot)
+    ).toEqual(['auto']);
   });
 
   it('should resume the game plugins and their timers from a slot', () => {
@@ -217,14 +217,14 @@ describe('Saves', () => {
       frame = Composer.set(Pause.paths.paused, false)(frame);
       return until(
         frame,
-        f => Scheduler.remaining(f, 'core.warmup') !== undefined,
+        f => Scheduler.remaining(f, 'how.joi.classic.warmup') !== undefined,
         { step: 100 }
       );
     };
 
     let frame = playing();
     frame = Composer.pipe(
-      Composer.set(['core.rand'], { seed: 'saved', cursor: 42 }),
+      Composer.set(['how.joi.rand'], { seed: 'saved', cursor: 42 }),
       Composer.set(Intensity.paths.intensity, 0.5),
       Pace.setPace(3),
       Phase.setPhase(GamePhase.active)
@@ -243,22 +243,26 @@ describe('Saves', () => {
     fresh = gamePipe(tick(fresh));
     fresh = gamePipe(tick(fresh));
 
-    expect(file['core.warmup'].timers[0].duration).toBeLessThan(30000);
-    expect(fresh.core.rand).toEqual({ seed: 'saved', cursor: 42 });
-    expect(fresh.core.intensity.intensity).toBe(
-      file['core.intensity'].intensity
+    expect(file['how.joi.classic.warmup'].timers[0].duration).toBeLessThan(
+      30000
     );
-    expect(fresh.core.intensity.intensity).toBeGreaterThan(0.5);
-    expect(fresh.core.pace.pace).toBe(3);
-    expect(fresh.core.phase.current).toBe(GamePhase.active);
-    expect(fresh.core.clock).toEqual({
-      elapsed: file['core.clock'].elapsed,
+    expect(fresh.how.joi.rand).toEqual({ seed: 'saved', cursor: 42 });
+    expect(fresh.how.joi.classic.intensity.intensity).toBe(
+      file['how.joi.classic.intensity'].intensity
+    );
+    expect(fresh.how.joi.classic.intensity.intensity).toBeGreaterThan(0.5);
+    expect(fresh.how.joi.classic.pace.pace).toBe(3);
+    expect(fresh.how.joi.phase.current).toBe(GamePhase.active);
+    expect(fresh.how.joi.classic.clock).toEqual({
+      elapsed: file['how.joi.classic.clock'].elapsed,
       lastWall: null,
     });
-    expect(fresh.core.clock.elapsed).toBeGreaterThan(1234);
-    expect(fresh.core.stroke).toEqual(file['core.stroke']);
-    expect(Scheduler.snapshot(fresh, 'core.warmup')).toEqual(
-      file['core.warmup'].timers
+    expect(fresh.how.joi.classic.clock.elapsed).toBeGreaterThan(1234);
+    expect(fresh.how.joi.classic.stroke).toEqual(
+      file['how.joi.classic.stroke']
+    );
+    expect(Scheduler.snapshot(fresh, 'how.joi.classic.warmup')).toEqual(
+      file['how.joi.classic.warmup'].timers
     );
   });
 
@@ -268,13 +272,13 @@ describe('Saves', () => {
     frame = withImpulse(Saves.load('auto'))(tick(frame));
     frame = flush(frame);
     frame = gamePipe(tick(frame));
-    const afterLoad = frame.core.saves.restored;
+    const afterLoad = frame.how.joi.saves.restored;
 
     frame = withImpulse(Saves.fresh('auto'))(tick(frame));
     flush(frame);
 
     expect(afterLoad).toEqual({ slot: 'auto', savedAt: 1 });
-    expect(frame.core.saves.restored).toBeNull();
+    expect(frame.how.joi.saves.restored).toBeNull();
     expect(frame.test.a).toEqual({ n: 1 });
     expect(stored('auto')).toBeNull();
   });
@@ -283,7 +287,7 @@ describe('Saves', () => {
     store('old', { 'test.a': { n: 1 } }, pkg.version, { meta: { mode: 'x' } });
     store('auto', { 'test.a': { n: 2 } }, pkg.version, { savedAt: 2 });
     let frame = bootstrap(Storage, Saves, a);
-    const atBoot = frame.core.saves.slots;
+    const atBoot = frame.how.joi.saves.slots;
 
     frame = withImpulse(Saves.drop('old'))(tick(frame));
     frame = flush(frame);
@@ -292,7 +296,7 @@ describe('Saves', () => {
       { slot: 'auto', version: pkg.version, savedAt: 2 },
       { slot: 'old', version: pkg.version, savedAt: 1, meta: { mode: 'x' } },
     ]);
-    expect(frame.core.saves.slots).toEqual([
+    expect(frame.how.joi.saves.slots).toEqual([
       { slot: 'auto', version: pkg.version, savedAt: 2 },
     ]);
   });

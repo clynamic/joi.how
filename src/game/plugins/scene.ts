@@ -3,7 +3,7 @@ import { Pipe } from '../../engine/State';
 import { Events } from '../../engine/pipes/Events';
 import { Composer } from '../../engine';
 
-const PLUGIN_ID = 'core.scene';
+const PLUGIN_ID = 'how.joi.scene';
 
 export type SceneState = {
   current: string;

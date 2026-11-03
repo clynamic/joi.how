@@ -9,7 +9,7 @@ import {
   SlotsState,
 } from '../../engine/plugins/Slots';
 
-const PLUGIN_ID = 'core.saves';
+const PLUGIN_ID = 'how.joi.saves';
 
 export type SaveFile = SlotFile;
 

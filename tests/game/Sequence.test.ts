@@ -11,7 +11,9 @@ import { makeFrame, makeGame, tick } from '../utils';
 const { pipe: gamePipe, withImpulse } = makeGame();
 
 const titles = (frame: GameFrame): string[] =>
-  (frame.core.messages?.messages ?? []).map((m: { title: string }) => m.title);
+  (frame.how.joi.messages?.messages ?? []).map(
+    (m: { title: string }) => m.title
+  );
 
 function bootstrap(): GameFrame {
   const frame = gamePipe(makeFrame());

@@ -3,7 +3,7 @@ import { Composer } from '../../engine/Composer';
 import { Documents, DocumentState } from './documents';
 import { legacyDocument, LegacyState, legacySettings } from './legacy';
 
-const PLUGIN_ID = 'core.settings';
+const PLUGIN_ID = 'how.joi.settings';
 
 const paths = pluginPaths<DocumentState & LegacyState>(PLUGIN_ID);
 
