@@ -1,6 +1,5 @@
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import '../../../elements/JoiFields';
 import '../../../elements/JoiText';
 import '../../../elements/JoiToggleTile';
@@ -8,6 +7,7 @@ import { Frames } from '../../../engine/Frames';
 import { Document } from '../../../engine/plugins/Documents';
 import { sdk } from '../../../engine/sdk';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 import {
   GameHypnoDescriptions,
   GameHypnoLabels,
@@ -25,7 +25,6 @@ const icons: Record<GameHypnoType, string> = {
   [GameHypnoType.femdom]: 'cat',
 };
 
-@customElement(HYPNO_SETTINGS_TAG)
 export class HypnoSettingsElement extends LitElement {
   static styles = [
     ...base,
@@ -64,6 +63,8 @@ export class HypnoSettingsElement extends LitElement {
     `;
   }
 }
+
+defineElement(HYPNO_SETTINGS_TAG, HypnoSettingsElement);
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -1,6 +1,5 @@
 import '@awesome.me/webawesome/dist/components/button/button.js';
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { Frames } from '../../engine/Frames';
 import { Document } from '../../engine/plugins/Documents';
 import { sdk } from '../../engine/sdk';
@@ -8,6 +7,7 @@ import Saves, { Restored } from '../saves';
 import Scene from '../scene';
 import ClassicImages from './images';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const START_TAG = 'how-joi-classic-start';
 
@@ -20,7 +20,6 @@ const savedAgo = (savedAt: number): string => {
   return `saved ${Math.round(hours / 24)} days ago`;
 };
 
-@customElement(START_TAG)
 export class ClassicStartElement extends LitElement {
   static styles = [
     ...base,
@@ -121,6 +120,8 @@ export class ClassicStartElement extends LitElement {
     `;
   }
 }
+
+defineElement(START_TAG, ClassicStartElement);
 
 declare global {
   interface HTMLElementTagNameMap {

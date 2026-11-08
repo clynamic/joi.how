@@ -1,16 +1,15 @@
 import '@awesome.me/webawesome/dist/components/button/button.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { Frames } from '../../../engine/Frames';
 import { sdk } from '../../../engine/sdk';
 import Phase, { GamePhase, PhaseState } from '../../phase';
 import EmergencyStop from './index';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 export const EMERGENCY_STOP_TAG = 'how-joi-classic-emergency-stop';
 
-@customElement(EMERGENCY_STOP_TAG)
 export class ClassicEmergencyStopElement extends LitElement {
   static styles = [
     ...base,
@@ -43,6 +42,8 @@ export class ClassicEmergencyStopElement extends LitElement {
     `;
   }
 }
+
+defineElement(EMERGENCY_STOP_TAG, ClassicEmergencyStopElement);
 
 declare global {
   interface HTMLElementTagNameMap {

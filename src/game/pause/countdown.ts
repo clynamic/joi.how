@@ -1,16 +1,15 @@
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { Frames } from '../../engine/Frames';
 import Pause, { PauseState } from './index';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const COUNTDOWN_TAG = 'how-joi-pause-countdown';
 
 const display = (countdown: number) =>
   countdown === 4 ? 'Ready?' : `${countdown}`;
 
-@customElement(COUNTDOWN_TAG)
 export class PauseCountdownElement extends LitElement {
   static styles = [
     ...base,
@@ -56,6 +55,8 @@ export class PauseCountdownElement extends LitElement {
     );
   }
 }
+
+defineElement(COUNTDOWN_TAG, PauseCountdownElement);
 
 declare global {
   interface HTMLElementTagNameMap {

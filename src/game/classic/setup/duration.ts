@@ -1,6 +1,5 @@
 import '@awesome.me/webawesome/dist/components/slider/slider.js';
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import '../../../elements/JoiDivider';
 import '../../../elements/JoiFields';
 import '../../../elements/JoiMeasure';
@@ -12,12 +11,12 @@ import { sdk } from '../../../engine/sdk';
 import { intensityKeys } from '../intensity';
 import { warmupKeys } from '../warmup';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 export const DURATION_SETTINGS_TAG = 'how-joi-classic-duration-settings';
 
 const minutes = (seconds: number) => Math.ceil(seconds / 60);
 
-@customElement(DURATION_SETTINGS_TAG)
 export class DurationSettingsElement extends LitElement {
   static styles = [
     ...base,
@@ -92,6 +91,8 @@ export class DurationSettingsElement extends LitElement {
     `;
   }
 }
+
+defineElement(DURATION_SETTINGS_TAG, DurationSettingsElement);
 
 declare global {
   interface HTMLElementTagNameMap {

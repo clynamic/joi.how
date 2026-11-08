@@ -1,6 +1,5 @@
 import '@awesome.me/webawesome/dist/components/button/button.js';
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { Frames } from '../../engine/Frames';
 import { sdk } from '../../engine/sdk';
 import Rand, { RandState } from '../rand';
@@ -9,10 +8,10 @@ import './dice/result';
 import './timeline';
 import Scene from '../scene';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const SUMMARY_TAG = 'how-joi-classic-summary';
 
-@customElement(SUMMARY_TAG)
 export class ClassicSummaryElement extends LitElement {
   static styles = [
     ...base,
@@ -168,6 +167,8 @@ export class ClassicSummaryElement extends LitElement {
     `;
   }
 }
+
+defineElement(SUMMARY_TAG, ClassicSummaryElement);
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -1,5 +1,4 @@
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import '../messages/list';
 import '../pause/menu';
 import '../pause/countdown';
@@ -9,10 +8,10 @@ import './image/backdrop';
 import './instructions';
 import './stroke/meter';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const PLAY_TAG = 'how-joi-classic-play';
 
-@customElement(PLAY_TAG)
 export class ClassicPlayElement extends LitElement {
   static styles = [
     ...base,
@@ -96,6 +95,8 @@ export class ClassicPlayElement extends LitElement {
     `;
   }
 }
+
+defineElement(PLAY_TAG, ClassicPlayElement);
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -2,16 +2,16 @@ import '@awesome.me/webawesome/dist/components/button/button.js';
 import '@awesome.me/webawesome/dist/components/dialog/dialog.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import { LitElement, html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { Frames } from '../../engine/Frames';
 import { sdk } from '../../engine/sdk';
 import Scene, { SceneState } from '../scene';
 import Pause, { PauseState } from './index';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const PAUSE_MENU_TAG = 'how-joi-pause-menu';
 
-@customElement(PAUSE_MENU_TAG)
 export class PauseMenuElement extends LitElement {
   static styles = [
     ...base,
@@ -171,6 +171,8 @@ export class PauseMenuElement extends LitElement {
     `;
   }
 }
+
+defineElement(PAUSE_MENU_TAG, PauseMenuElement);
 
 declare global {
   interface HTMLElementTagNameMap {

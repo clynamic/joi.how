@@ -1,8 +1,8 @@
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { Frames } from '../../../engine/Frames';
 import { climax, type ClimaxResultType } from './climax';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 type OutcomeDisplay = { label: string; description: string };
 
@@ -16,7 +16,6 @@ const earlyEnd: OutcomeDisplay = { label: 'Ended early', description: '' };
 
 export const RESULT_TAG = 'how-joi-dice-result';
 
-@customElement(RESULT_TAG)
 export class DiceResultElement extends LitElement {
   static styles = [
     ...base,
@@ -53,6 +52,8 @@ export class DiceResultElement extends LitElement {
     `;
   }
 }
+
+defineElement(RESULT_TAG, DiceResultElement);
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -7,7 +7,7 @@ import '@awesome.me/webawesome/dist/components/slider/slider.js';
 import '@awesome.me/webawesome/dist/components/textarea/textarea.js';
 import '@awesome.me/webawesome/dist/components/tooltip/tooltip.js';
 import { LitElement, html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { collapse } from '../../elements/collapse';
 import '../../elements/JoiDivider';
 import '../../elements/JoiMeasure';
@@ -27,6 +27,7 @@ import {
 } from './client';
 import { e621Keys } from './index';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const E621_SEARCH_TAG = 'how-joi-e621-search';
 export const E621_CREDENTIALS_TAG = 'how-joi-e621-credentials';
@@ -53,7 +54,6 @@ const grid = css`
   }
 `;
 
-@customElement(E621_CREDENTIALS_TAG)
 export class E621CredentialsElement extends LitElement {
   static styles = [
     ...base,
@@ -152,7 +152,6 @@ export class E621CredentialsElement extends LitElement {
   }
 }
 
-@customElement(E621_SEARCH_TAG)
 export class E621SearchElement extends LitElement {
   static styles = [
     ...base,
@@ -424,6 +423,9 @@ export class E621SearchElement extends LitElement {
     `;
   }
 }
+
+defineElement(E621_CREDENTIALS_TAG, E621CredentialsElement);
+defineElement(E621_SEARCH_TAG, E621SearchElement);
 
 declare global {
   interface HTMLElementTagNameMap {

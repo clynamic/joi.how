@@ -2,7 +2,7 @@ import '@awesome.me/webawesome/dist/components/button/button.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/progress-bar/progress-bar.js';
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { chunk } from 'lodash';
 import '../../elements/JoiDivider';
 import '../../elements/JoiText';
@@ -12,12 +12,12 @@ import { discoverImageFiles, imageTypeFromExtension } from './files';
 import { LocalImageRequest } from './images';
 import Local from './index';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const LOCAL_IMPORT_TAG = 'how-joi-local-import';
 
 const CHUNK = 30;
 
-@customElement(LOCAL_IMPORT_TAG)
 export class LocalImportElement extends LitElement {
   static styles = [
     ...base,
@@ -114,6 +114,8 @@ export class LocalImportElement extends LitElement {
     `;
   }
 }
+
+defineElement(LOCAL_IMPORT_TAG, LocalImportElement);
 
 declare global {
   interface HTMLElementTagNameMap {

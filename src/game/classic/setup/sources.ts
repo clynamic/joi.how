@@ -1,11 +1,12 @@
 import '@awesome.me/webawesome/dist/components/tab-group/tab-group.js';
 import '@awesome.me/webawesome/dist/components/tab/tab.js';
 import { LitElement, html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import '../../../elements/JoiFields';
 import '../../e621/search';
 import '../../local/import';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 export const SOURCES_TAG = 'how-joi-classic-sources';
 
@@ -16,7 +17,6 @@ const tabs = {
 
 type Tab = keyof typeof tabs;
 
-@customElement(SOURCES_TAG)
 export class ClassicSourcesElement extends LitElement {
   static styles = [
     ...base,
@@ -72,6 +72,8 @@ export class ClassicSourcesElement extends LitElement {
     `;
   }
 }
+
+defineElement(SOURCES_TAG, ClassicSourcesElement);
 
 declare global {
   interface HTMLElementTagNameMap {

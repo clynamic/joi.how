@@ -1,5 +1,4 @@
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import '../../../elements/JoiFields';
 import '../../../elements/JoiText';
 import '../../../elements/JoiToggleTile';
@@ -9,10 +8,10 @@ import { sdk } from '../../../engine/sdk';
 import { DiceEvent, DiceEventDescriptions, DiceEventLabels } from './events';
 import { dealerKeys } from './index';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 export const DICE_SETTINGS_TAG = 'how-joi-dice-settings';
 
-@customElement(DICE_SETTINGS_TAG)
 export class DiceSettingsElement extends LitElement {
   static styles = [
     ...base,
@@ -57,6 +56,8 @@ export class DiceSettingsElement extends LitElement {
     `;
   }
 }
+
+defineElement(DICE_SETTINGS_TAG, DiceSettingsElement);
 
 declare global {
   interface HTMLElementTagNameMap {

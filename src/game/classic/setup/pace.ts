@@ -1,6 +1,5 @@
 import '@awesome.me/webawesome/dist/components/slider/slider.js';
 import { LitElement, html, css, svg } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import '../../../elements/JoiDivider';
 import '../../../elements/JoiFields';
 import '../../../elements/JoiMeasure';
@@ -11,6 +10,7 @@ import { Document } from '../../../engine/plugins/Documents';
 import { sdk } from '../../../engine/sdk';
 import Pace, { paceGraphPoint } from '../pace';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 export const PACE_SETTINGS_TAG = 'how-joi-classic-pace-settings';
 
@@ -21,7 +21,6 @@ const Y_TOP = 12;
 
 type PaceKey = 'minPace' | 'maxPace' | 'steepness' | 'timeshift';
 
-@customElement(PACE_SETTINGS_TAG)
 export class PaceSettingsElement extends LitElement {
   static styles = [
     ...base,
@@ -182,6 +181,8 @@ export class PaceSettingsElement extends LitElement {
     `;
   }
 }
+
+defineElement(PACE_SETTINGS_TAG, PaceSettingsElement);
 
 declare global {
   interface HTMLElementTagNameMap {

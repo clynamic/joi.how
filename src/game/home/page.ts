@@ -5,7 +5,7 @@ import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/spinner/spinner.js';
 import '@awesome.me/webawesome/dist/components/tooltip/tooltip.js';
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { marked } from 'marked';
 import { version } from '../../../package.json';
@@ -17,6 +17,7 @@ import { sdk } from '../../engine/sdk';
 import Scene, { SceneState } from '../scene';
 import Home from './index';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const HOME_TAG = 'how-joi-home';
 
@@ -44,7 +45,6 @@ const links = [
   },
 ];
 
-@customElement(HOME_TAG)
 export class HomeElement extends LitElement {
   static styles = [
     ...base,
@@ -336,6 +336,8 @@ export class HomeElement extends LitElement {
     `;
   }
 }
+
+defineElement(HOME_TAG, HomeElement);
 
 declare global {
   interface HTMLElementTagNameMap {

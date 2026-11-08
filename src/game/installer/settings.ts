@@ -3,7 +3,7 @@ import '@awesome.me/webawesome/dist/components/details/details.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/switch/switch.js';
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import '../../elements/JoiDivider';
@@ -16,6 +16,7 @@ import PluginInstaller, {
 import type { PluginMeta } from '../../engine/plugins/Plugins';
 import { sdk } from '../../engine/sdk';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const INSTALLER_SETTINGS_TAG = 'how-joi-installer-settings';
 
@@ -26,7 +27,6 @@ type InstallerSlice = {
   failed?: InstallFailure[];
 };
 
-@customElement(INSTALLER_SETTINGS_TAG)
 export class InstallerSettingsElement extends LitElement {
   static styles = [
     ...base,
@@ -182,6 +182,8 @@ export class InstallerSettingsElement extends LitElement {
     `;
   }
 }
+
+defineElement(INSTALLER_SETTINGS_TAG, InstallerSettingsElement);
 
 declare global {
   interface HTMLElementTagNameMap {

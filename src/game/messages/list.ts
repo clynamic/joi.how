@@ -1,5 +1,5 @@
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { Frames } from '../../engine/Frames';
 import { Events } from '../../engine/pipes/Events';
@@ -10,12 +10,12 @@ import { playerKeys } from '../player';
 import { translateWith } from '../translate';
 import Messages, { GameMessage, MessageState } from './index';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const MESSAGES_TAG = 'how-joi-messages';
 
 const LEAVE_MS = 400;
 
-@customElement(MESSAGES_TAG)
 export class MessagesElement extends LitElement {
   static styles = [
     ...base,
@@ -145,6 +145,8 @@ export class MessagesElement extends LitElement {
     );
   }
 }
+
+defineElement(MESSAGES_TAG, MessagesElement);
 
 declare global {
   interface HTMLElementTagNameMap {

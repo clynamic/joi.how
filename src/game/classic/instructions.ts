@@ -1,7 +1,6 @@
 import '@awesome.me/webawesome/dist/components/divider/divider.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { Frames } from '../../engine/Frames';
 import { Document } from '../../engine/plugins/Documents';
@@ -10,10 +9,10 @@ import { DiceEvent } from './dice/events';
 import Intensity, { IntensityState } from './intensity';
 import Pace, { PaceState } from './pace';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const INSTRUCTIONS_TAG = 'how-joi-classic-instructions';
 
-@customElement(INSTRUCTIONS_TAG)
 export class ClassicInstructionsElement extends LitElement {
   static styles = [
     ...base,
@@ -172,6 +171,8 @@ export class ClassicInstructionsElement extends LitElement {
     `;
   }
 }
+
+defineElement(INSTRUCTIONS_TAG, ClassicInstructionsElement);
 
 declare global {
   interface HTMLElementTagNameMap {

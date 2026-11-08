@@ -1,5 +1,4 @@
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { Frames } from '../../../engine/Frames';
 import { Document } from '../../../engine/plugins/Documents';
@@ -7,6 +6,7 @@ import { playerKeys } from '../../player';
 import { translateWith } from '../../translate';
 import Intensity, { IntensityState } from '../intensity';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 import Hypno, {
   hypnoKeys,
   GameHypnoType,
@@ -16,7 +16,6 @@ import Hypno, {
 
 export const HYPNO_TAG = 'how-joi-classic-hypno';
 
-@customElement(HYPNO_TAG)
 export class ClassicHypnoElement extends LitElement {
   static styles = [
     ...base,
@@ -70,6 +69,8 @@ export class ClassicHypnoElement extends LitElement {
     );
   }
 }
+
+defineElement(HYPNO_TAG, ClassicHypnoElement);
 
 declare global {
   interface HTMLElementTagNameMap {

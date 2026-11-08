@@ -1,6 +1,5 @@
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import '../../elements/JoiDivider';
 import '../../elements/JoiFields';
 import '../../elements/JoiText';
@@ -9,6 +8,7 @@ import { Frames } from '../../engine/Frames';
 import { Document } from '../../engine/plugins/Documents';
 import { sdk } from '../../engine/sdk';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 import {
   PlayerBody,
   PlayerBodyDescriptions,
@@ -33,7 +33,6 @@ const bodyIcons: Record<PlayerBody, string> = {
   [PlayerBody.neuter]: '🥝',
 };
 
-@customElement(PLAYER_SETTINGS_TAG)
 export class PlayerSettingsElement extends LitElement {
   static styles = [
     ...base,
@@ -85,6 +84,8 @@ export class PlayerSettingsElement extends LitElement {
     `;
   }
 }
+
+defineElement(PLAYER_SETTINGS_TAG, PlayerSettingsElement);
 
 declare global {
   interface HTMLElementTagNameMap {

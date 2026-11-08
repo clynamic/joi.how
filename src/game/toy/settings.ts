@@ -3,7 +3,7 @@ import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/input/input.js';
 import '@awesome.me/webawesome/dist/components/tooltip/tooltip.js';
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { collapse } from '../../elements/collapse';
 import '../../elements/JoiDivider';
@@ -15,12 +15,12 @@ import { sdk } from '../../engine/sdk';
 import './deviceSettings';
 import Toy, { ToyState } from './index';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const TOY_SETTINGS_TAG = 'how-joi-toy-settings';
 
 const LOCAL_HOSTS = ['localhost', '127.0.0.1', '::1'];
 
-@customElement(TOY_SETTINGS_TAG)
 export class ToySettingsElement extends LitElement {
   static styles = [
     ...base,
@@ -195,6 +195,8 @@ export class ToySettingsElement extends LitElement {
     `;
   }
 }
+
+defineElement(TOY_SETTINGS_TAG, ToySettingsElement);
 
 declare global {
   interface HTMLElementTagNameMap {

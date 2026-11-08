@@ -5,7 +5,7 @@ import '@awesome.me/webawesome/dist/components/select/select.js';
 import '@awesome.me/webawesome/dist/components/slider/slider.js';
 import { ActuatorType } from 'buttplug';
 import { LitElement, html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { collapse } from '../../elements/collapse';
 import '../../elements/JoiDivider';
 import '../../elements/JoiFields';
@@ -25,6 +25,7 @@ import {
 } from './actuator';
 import { ToyClient } from './client';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const TOY_DEVICE_TAG = 'how-joi-toy-device';
 export const TOY_ACTUATOR_TAG = 'how-joi-toy-actuator';
@@ -110,7 +111,6 @@ const describe = (actuator: ToyActuator): Range | null => {
   }
 };
 
-@customElement(TOY_ACTUATOR_TAG)
 export class ToyActuatorElement extends LitElement {
   static styles = [
     ...base,
@@ -193,7 +193,6 @@ export class ToyActuatorElement extends LitElement {
   }
 }
 
-@customElement(TOY_DEVICE_TAG)
 export class ToyDeviceElement extends LitElement {
   static styles = [
     ...base,
@@ -222,6 +221,9 @@ export class ToyDeviceElement extends LitElement {
     `;
   }
 }
+
+defineElement(TOY_ACTUATOR_TAG, ToyActuatorElement);
+defineElement(TOY_DEVICE_TAG, ToyDeviceElement);
 
 declare global {
   interface HTMLElementTagNameMap {

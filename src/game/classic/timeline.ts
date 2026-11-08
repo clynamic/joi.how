@@ -1,5 +1,5 @@
 import { LitElement, html, css, svg, nothing } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { Frames } from '../../engine/Frames';
 import Clock, { ClockState } from './clock';
 import Pace, { PaceEntry, PaceState } from './pace';
@@ -7,6 +7,7 @@ import Dealer from './dice';
 import { DiceEvent, DiceEventLabels } from './dice/events';
 import { DiceLogEntry, DiceState } from './dice/types';
 import { base } from '../../elements/base';
+import { defineElement } from '../../engine/defineElement';
 
 export const TIMELINE_TAG = 'how-joi-classic-timeline';
 
@@ -54,7 +55,6 @@ const points = (
   return result;
 };
 
-@customElement(TIMELINE_TAG)
 export class ClassicTimelineElement extends LitElement {
   static styles = [
     ...base,
@@ -230,6 +230,8 @@ export class ClassicTimelineElement extends LitElement {
     `;
   }
 }
+
+defineElement(TIMELINE_TAG, ClassicTimelineElement);
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -1,6 +1,5 @@
 import '@awesome.me/webawesome/dist/components/slider/slider.js';
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import '../../../elements/JoiDivider';
 import '../../../elements/JoiFields';
 import '../../../elements/JoiMeasure';
@@ -11,6 +10,7 @@ import { Document } from '../../../engine/plugins/Documents';
 import { sdk } from '../../../engine/sdk';
 import { climaxKeys } from './climax';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 export const CLIMAX_SETTINGS_TAG = 'how-joi-dice-climax-settings';
 
@@ -26,7 +26,6 @@ const ruinText = (chance: number) => {
   return `${chance}% chance you'll have a ruined orgasm`;
 };
 
-@customElement(CLIMAX_SETTINGS_TAG)
 export class ClimaxSettingsElement extends LitElement {
   static styles = [
     ...base,
@@ -85,6 +84,8 @@ export class ClimaxSettingsElement extends LitElement {
     `;
   }
 }
+
+defineElement(CLIMAX_SETTINGS_TAG, ClimaxSettingsElement);
 
 declare global {
   interface HTMLElementTagNameMap {

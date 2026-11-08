@@ -1,5 +1,4 @@
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import '../../../elements/JoiImage';
 import { Frames } from '../../../engine/Frames';
 import { Document } from '../../../engine/plugins/Documents';
@@ -8,10 +7,10 @@ import Intensity, { IntensityState } from '../intensity';
 import { imageKeys, getImageSwitchDuration } from '../randomImages';
 import Image, { displayKeys, ImageState } from './index';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 export const BACKDROP_TAG = 'how-joi-classic-backdrop';
 
-@customElement(BACKDROP_TAG)
 export class ClassicBackdropElement extends LitElement {
   static styles = [
     ...base,
@@ -138,6 +137,8 @@ export class ClassicBackdropElement extends LitElement {
     `;
   }
 }
+
+defineElement(BACKDROP_TAG, ClassicBackdropElement);
 
 declare global {
   interface HTMLElementTagNameMap {

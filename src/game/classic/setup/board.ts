@@ -1,7 +1,6 @@
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/slider/slider.js';
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import '../../../elements/JoiDivider';
 import '../../../elements/JoiFields';
 import '../../../elements/JoiMeasure';
@@ -14,10 +13,10 @@ import { sdk } from '../../../engine/sdk';
 import { displayKeys } from '../image';
 import { imageKeys } from '../randomImages';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 export const BOARD_SETTINGS_TAG = 'how-joi-classic-board-settings';
 
-@customElement(BOARD_SETTINGS_TAG)
 export class BoardSettingsElement extends LitElement {
   static styles = [
     ...base,
@@ -96,6 +95,8 @@ export class BoardSettingsElement extends LitElement {
     `;
   }
 }
+
+defineElement(BOARD_SETTINGS_TAG, BoardSettingsElement);
 
 declare global {
   interface HTMLElementTagNameMap {

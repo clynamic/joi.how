@@ -1,15 +1,14 @@
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { Frames } from '../../../engine/Frames';
 import Phase, { GamePhase, PhaseState } from '../../phase';
 import Pace, { PaceState } from '../pace';
 import Stroke, { StrokeDirection, StrokeState } from './index';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 export const METER_TAG = 'how-joi-classic-meter';
 
-@customElement(METER_TAG)
 export class ClassicMeterElement extends LitElement {
   static styles = [
     ...base,
@@ -71,6 +70,8 @@ export class ClassicMeterElement extends LitElement {
     `;
   }
 }
+
+defineElement(METER_TAG, ClassicMeterElement);
 
 declare global {
   interface HTMLElementTagNameMap {

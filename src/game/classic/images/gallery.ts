@@ -5,7 +5,7 @@ import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/popup/popup.js';
 import '@awesome.me/webawesome/dist/components/tooltip/tooltip.js';
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import '../../../elements/JoiDivider';
@@ -24,6 +24,7 @@ import Assets, {
 import { displayKeys } from '../image';
 import ClassicImages from './index';
 import { base } from '../../../elements/base';
+import { defineElement } from '../../../engine/defineElement';
 
 export const GALLERY_TAG = 'how-joi-classic-gallery';
 export const GALLERY_TILE_TAG = 'how-joi-classic-gallery-tile';
@@ -37,7 +38,6 @@ export type GalleryImage = {
 const kindOf = (image: GalleryImage) =>
   image.record.kind === 'video' ? 'video' : 'image';
 
-@customElement(GALLERY_TILE_TAG)
 export class GalleryTileElement extends LitElement {
   static styles = [
     ...base,
@@ -156,7 +156,6 @@ export class GalleryTileElement extends LitElement {
   }
 }
 
-@customElement(GALLERY_TAG)
 export class ClassicGalleryElement extends LitElement {
   static styles = [
     ...base,
@@ -391,6 +390,9 @@ export class ClassicGalleryElement extends LitElement {
     `;
   }
 }
+
+defineElement(GALLERY_TILE_TAG, GalleryTileElement);
+defineElement(GALLERY_TAG, ClassicGalleryElement);
 
 declare global {
   interface HTMLElementTagNameMap {
