@@ -5,7 +5,7 @@ import Saves from './saves';
 
 const PLUGIN_ID = 'how.joi.rand';
 
-type RandState = {
+export type RandState = {
   seed: string;
   cursor: number;
 };
