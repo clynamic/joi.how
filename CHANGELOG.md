@@ -1,3 +1,24 @@
+## 3.1.0 - 2026-11-08
+
+### Added
+
+- Back button closes menus
+
+### Changed
+
+- Faster loading
+
+### Fixed
+
+- Blank page after updates
+- Local images not showing
+- Missing icons in private browsing
+- Muted videos
+
+### Removed
+
+- Trade
+
 ## 3.0.0 - 2026-10-17
 
 ### Added
