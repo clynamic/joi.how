@@ -24,6 +24,7 @@ import Assets, {
 import { displayKeys } from '../image';
 import ClassicImages from './index';
 import { base } from '../../../elements/base';
+import { BackController } from '../../../elements/back';
 import { defineElement } from '../../../engine/defineElement';
 
 export const GALLERY_TAG = 'how-joi-classic-gallery';
@@ -223,6 +224,7 @@ export class ClassicGalleryElement extends LitElement {
   @state() private accessor selected: AssetKey[] = [];
   @state() private accessor clicked: AssetKey | null = null;
   @state() private accessor viewing = false;
+  private back = new BackController(this, () => (this.viewing = false));
 
   private images(): GalleryImage[] {
     const { images } = ClassicImages.keys.from(this.selection.value);
@@ -239,6 +241,7 @@ export class ClassicGalleryElement extends LitElement {
   private open(image: GalleryImage) {
     this.clicked = image.key;
     this.viewing = true;
+    this.back.open();
     sdk.inject(
       Assets.load(image.key, image.record.kind === 'video' ? 'full' : 'preview')
     );
@@ -333,7 +336,10 @@ export class ClassicGalleryElement extends LitElement {
       <wa-dialog
         light-dismiss
         .open=${this.viewing && !!clicked}
-        @wa-after-hide=${() => (this.clicked = null)}
+        @wa-after-hide=${() => {
+          this.clicked = null;
+          this.back.close();
+        }}
       >
         ${clicked
           ? html`

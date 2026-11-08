@@ -8,6 +8,7 @@ import { sdk } from '../../engine/sdk';
 import Scene, { SceneState } from '../scene';
 import Pause, { PauseState } from './index';
 import { base } from '../../elements/base';
+import { BackController } from '../../elements/back';
 import { defineElement } from '../../engine/defineElement';
 
 export const PAUSE_MENU_TAG = 'how-joi-pause-menu';
@@ -69,6 +70,21 @@ export class PauseMenuElement extends LitElement {
 
   private pause = Frames.watch<PauseState>(this, Pause.paths);
   private scene = Frames.watch<SceneState>(this, Scene.paths);
+  private back = new BackController(this, () => {
+    if (this.visible()) sdk.inject(Pause.setPaused(false));
+  });
+
+  private visible() {
+    const { paused, countdown } = this.pause.value ?? {};
+    return (
+      this.scene.value?.current === 'game' && !!paused && countdown == null
+    );
+  }
+
+  updated() {
+    if (this.visible()) this.back.open();
+    else this.back.close();
+  }
 
   @state() private accessor fullscreen = false;
 
@@ -116,9 +132,7 @@ export class PauseMenuElement extends LitElement {
   }
 
   render() {
-    const { paused, countdown } = this.pause.value ?? {};
-    const visible =
-      this.scene.value?.current === 'game' && !!paused && countdown == null;
+    const visible = this.visible();
     return html`
       <div class="trigger">
         <wa-button
