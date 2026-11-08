@@ -1,9 +1,9 @@
-import { definePlugin } from '../engine/plugins/Plugins';
-import { Composer } from '../engine/Composer';
-import { GameFrame } from '../engine/State';
-import Scene from './scene';
-import Settings from './settings';
-import Presets from './presets';
+import { definePlugin } from '../../engine/plugins/Plugins';
+import { Composer } from '../../engine/Composer';
+import { GameFrame } from '../../engine/State';
+import Scene from '../scene';
+import Settings from '../settings';
+import Presets from '../presets';
 
 const PLUGIN_ID = 'how.joi.home';
 
@@ -29,7 +29,7 @@ const Home = definePlugin({
   ),
 });
 
-declare module '../engine/sdk' {
+declare module '../../engine/sdk' {
   interface PluginSDK {
     Home: typeof Home;
   }

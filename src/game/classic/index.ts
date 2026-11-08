@@ -29,6 +29,7 @@ import './setup/board';
 import './images/gallery';
 import './setup/pace';
 import './setup/sources';
+import './start';
 
 const PLUGIN_ID = 'how.joi.classic';
 

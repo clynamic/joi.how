@@ -24,6 +24,7 @@ import {
   VibrationActuator,
 } from './actuator';
 import { ToyClient } from './client';
+import { base } from '../../elements/base';
 
 export const TOY_DEVICE_TAG = 'how-joi-toy-device';
 export const TOY_ACTUATOR_TAG = 'how-joi-toy-actuator';
@@ -112,6 +113,7 @@ const describe = (actuator: ToyActuator): Range | null => {
 @customElement(TOY_ACTUATOR_TAG)
 export class ToyActuatorElement extends LitElement {
   static styles = [
+    ...base,
     collapse,
     css`
       :host {
@@ -150,7 +152,7 @@ export class ToyActuatorElement extends LitElement {
             ? html`
                 <joi-description>${range.description}</joi-description>
                 <wa-select
-                  .value=${range.mode}
+                  value=${range.mode}
                   @input=${(e: Event) => {
                     range.setMode((e.currentTarget as any).value);
                     this.requestUpdate();
@@ -193,11 +195,14 @@ export class ToyActuatorElement extends LitElement {
 
 @customElement(TOY_DEVICE_TAG)
 export class ToyDeviceElement extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-    }
-  `;
+  static styles = [
+    ...base,
+    css`
+      :host {
+        display: block;
+      }
+    `,
+  ];
 
   @property({ attribute: false }) accessor device!: ToyClient;
 

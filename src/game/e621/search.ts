@@ -26,6 +26,7 @@ import {
   e621SortOrderLabels,
 } from './client';
 import { e621Keys } from './index';
+import { base } from '../../elements/base';
 
 export const E621_SEARCH_TAG = 'how-joi-e621-search';
 export const E621_CREDENTIALS_TAG = 'how-joi-e621-credentials';
@@ -55,6 +56,7 @@ const grid = css`
 @customElement(E621_CREDENTIALS_TAG)
 export class E621CredentialsElement extends LitElement {
   static styles = [
+    ...base,
     grid,
     css`
       :host {
@@ -136,7 +138,7 @@ export class E621CredentialsElement extends LitElement {
         <div class="actions">
           <wa-button
             size="small"
-            ?disabled=${!(this.username && this.apiKey)}
+            ?disabled=${locked || !(this.username && this.apiKey)}
             ?loading=${this.loading}
             @click=${this.save}
           >
@@ -153,6 +155,7 @@ export class E621CredentialsElement extends LitElement {
 @customElement(E621_SEARCH_TAG)
 export class E621SearchElement extends LitElement {
   static styles = [
+    ...base,
     grid,
     collapse,
     css`
@@ -180,9 +183,8 @@ export class E621SearchElement extends LitElement {
 
       .any {
         white-space: nowrap;
-        text-align: end;
         font-family: 'Courier New', Courier, monospace;
-        font-weight: bold;
+        font-weight: var(--wa-font-weight-bold);
       }
 
       wa-textarea {
@@ -198,6 +200,7 @@ export class E621SearchElement extends LitElement {
   ]);
 
   @state() private accessor addingCredentials = false;
+  @state() private accessor blacklistDraft: string | null = null;
 
   private service = new E621Service();
 
@@ -231,8 +234,11 @@ export class E621SearchElement extends LitElement {
   }
 
   private async fetchBlacklist(credentials: E621Credentials) {
-    const blacklist = await this.service.getBlacklist(credentials);
-    this.set('blacklist', blacklist);
+    try {
+      this.set('blacklist', await this.service.getBlacklist(credentials));
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private onSaved(event: CustomEvent<E621Credentials>) {
@@ -274,7 +280,7 @@ export class E621SearchElement extends LitElement {
         <joi-row>
           <joi-label>Order</joi-label>
           <wa-select
-            .value=${order}
+            value=${order}
             ?disabled=${loading}
             @input=${(e: Event) =>
               this.set(
@@ -390,16 +396,21 @@ export class E621SearchElement extends LitElement {
               </div>
             </div>
             <wa-textarea
-              .value=${blacklist.join('\n')}
+              .value=${this.blacklistDraft ?? blacklist.join('\n')}
               placeholder="Enter tags..."
-              @input=${(e: Event) =>
+              @focus=${() => (this.blacklistDraft = blacklist.join('\n'))}
+              @blur=${() => (this.blacklistDraft = null)}
+              @input=${(e: Event) => {
+                const text = (e.currentTarget as any).value || '';
+                this.blacklistDraft = text;
                 this.set(
                   'blacklist',
-                  ((e.currentTarget as any).value || '')
+                  text
                     .split('\n')
                     .map((tag: string) => tag.trim())
                     .filter((tag: string) => tag)
-                )}
+                );
+              }}
             ></wa-textarea>
           </div>
         </div>

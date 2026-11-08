@@ -118,7 +118,6 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
       cancelAnimationFrame(frameId);
       sdk.inject = () => undefined;
       sdk.frame = () => null;
-      Frames.reset();
       engineRef.current = null;
       impulses.clear();
     };

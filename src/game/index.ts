@@ -37,6 +37,7 @@ import { Errors } from '../engine/pipes/Errors';
 import { Impulses } from '../engine/Impulses';
 import './installer/settings';
 import './toy/settings';
+import './home/page';
 
 export const gamePipes = (impulses: Impulses, plugins: Pipe[]): Pipe[] => [
   Effects.pipe,

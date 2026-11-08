@@ -1,8 +1,8 @@
 import { createElement } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { HomePage } from './home';
 import { GameShell } from './bridge/GameShell';
 import { SceneBridge } from './bridge/SceneBridge';
+import { HOME_TAG } from '../game/home/page';
 import { PLAY_TAG } from '../game/classic/play';
 import { SUMMARY_TAG } from '../game/classic/summary';
 
@@ -16,7 +16,7 @@ export const App = () => {
       >
         <SceneBridge />
         <Routes>
-          <Route path='/' element={<HomePage />} />
+          <Route path='/' element={createElement(HOME_TAG)} />
           <Route path='/play' element={createElement(PLAY_TAG)} />
           <Route path='/end' element={createElement(SUMMARY_TAG)} />
         </Routes>
