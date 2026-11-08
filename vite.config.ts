@@ -1,7 +1,18 @@
 import { defineConfig } from 'vitest/config';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  plugins: [
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'node_modules/@fortawesome/fontawesome-free/svgs/{solid,regular,brands}',
+          dest: 'icons',
+        },
+      ],
+    }),
+  ],
   esbuild: {
     target: 'es2022',
   },

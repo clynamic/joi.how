@@ -2,6 +2,7 @@ import { ReactiveElement } from 'lit';
 ReactiveElement.disableWarning?.('change-in-update');
 
 import '@awesome.me/webawesome/dist/styles/webawesome.css';
+import { registerIconLibrary } from '@awesome.me/webawesome/dist/webawesome.js';
 import './index.css';
 import { HOME_TAG } from './game/home/page';
 import { PLAY_TAG } from './game/classic/play';
@@ -10,6 +11,18 @@ import { startLoop } from './view/loop';
 import { startRouter } from './view/router';
 import { startStage } from './view/stage';
 import { registerServiceWorker } from './view/serviceWorker';
+
+registerIconLibrary('default', {
+  resolver: (name, family, variant) => {
+    const folder =
+      family === 'brands'
+        ? 'brands'
+        : variant === 'regular'
+          ? 'regular'
+          : 'solid';
+    return `/icons/${folder}/${name}.svg`;
+  },
+});
 
 registerServiceWorker();
 startLoop();
