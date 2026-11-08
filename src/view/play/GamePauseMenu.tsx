@@ -7,6 +7,7 @@ import { useFullscreen } from '../common/utils/fullscreen';
 import { useGameFrame } from '../bridge/hooks';
 import { useDispatchEvent } from '../bridge/hooks/UseDispatchEvent';
 import Pause from '../../game/pause';
+import Scene from '../../game/scene';
 
 const StyledTrigger = styled.div`
   display: flex;
@@ -63,12 +64,13 @@ const StyledMenuButton = styled(WaButton)`
 
 export const GamePauseMenu = () => {
   const { paused, countdown } = useGameFrame(Pause.paths) ?? {};
+  const scene = useGameFrame(Scene.paths)?.current;
   const [fullscreen, setFullscreen] = useFullscreen();
   const { inject } = useDispatchEvent();
   const navigate = useNavigate();
   const dialogRef = useRef<any>(null);
 
-  const visible = !!paused && countdown == null;
+  const visible = scene === 'game' && !!paused && countdown == null;
 
   useEffect(() => {
     if (dialogRef.current) dialogRef.current.open = visible;
