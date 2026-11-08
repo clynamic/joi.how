@@ -1,11 +1,11 @@
-import { definePlugin, pluginPaths } from '../engine/plugins/Plugins';
-import { Pipe } from '../engine/State';
-import { Composer } from '../engine/Composer';
-import { Events } from '../engine/pipes/Events';
-import { ENGINE_TIMELINE, Scheduler } from '../engine/pipes/Scheduler';
-import { Sequence } from './Sequence';
-import Scene from './scene';
-import Keys from './keys';
+import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
+import { Pipe } from '../../engine/State';
+import { Composer } from '../../engine/Composer';
+import { Events } from '../../engine/pipes/Events';
+import { ENGINE_TIMELINE, Scheduler } from '../../engine/pipes/Scheduler';
+import { Sequence } from '../Sequence';
+import Scene from '../scene';
+import Keys from '../keys';
 
 const PLUGIN_ID = 'how.joi.pause';
 
@@ -146,7 +146,7 @@ const Pause = definePlugin({
   },
 });
 
-declare module '../engine/sdk' {
+declare module '../../engine/sdk' {
   interface PluginSDK {
     Pause: typeof Pause;
   }

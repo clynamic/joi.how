@@ -1,13 +1,13 @@
-import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
-import { Composer } from '../../engine/Composer';
-import { typedPath } from '../../engine/Lens';
-import { GameTiming } from '../../engine/State';
-import { GamePhase, PhaseState } from '../phase';
-import Pause from '../pause';
-import { IntensityState } from './intensity';
-import Presets from '../presets';
+import { definePlugin, pluginPaths } from '../../../engine/plugins/Plugins';
+import { Composer } from '../../../engine/Composer';
+import { typedPath } from '../../../engine/Lens';
+import { GameTiming } from '../../../engine/State';
+import { GamePhase, PhaseState } from '../../phase';
+import Pause from '../../pause';
+import { IntensityState } from '../intensity';
+import Presets from '../../presets';
 
-import Rand from '../rand';
+import Rand from '../../rand';
 
 export enum GameHypnoType {
   off = 'off',

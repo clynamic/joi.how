@@ -1,12 +1,12 @@
-import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
-import { Composer } from '../../engine/Composer';
-import { typedPath } from '../../engine/Lens';
-import { Events } from '../../engine/pipes/Events';
-import { GameTiming, Pipe } from '../../engine/State';
-import { PhaseState, GamePhase } from '../phase';
-import Pause from '../pause';
-import { PaceState } from './pace';
-import Saves from '../saves';
+import { definePlugin, pluginPaths } from '../../../engine/plugins/Plugins';
+import { Composer } from '../../../engine/Composer';
+import { typedPath } from '../../../engine/Lens';
+import { Events } from '../../../engine/pipes/Events';
+import { GameTiming, Pipe } from '../../../engine/State';
+import { PhaseState, GamePhase } from '../../phase';
+import Pause from '../../pause';
+import { PaceState } from '../pace';
+import Saves from '../../saves';
 
 export enum StrokeDirection {
   up = 'up',
@@ -86,7 +86,7 @@ const Stroke = definePlugin({
   },
 });
 
-declare module '../../engine/sdk' {
+declare module '../../../engine/sdk' {
   interface PluginSDK {
     Stroke: typeof Stroke;
   }

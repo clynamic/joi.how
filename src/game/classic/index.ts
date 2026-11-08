@@ -18,6 +18,7 @@ import Dealer from './dice';
 import Warmup from './warmup';
 import EmergencyStop from './emergencyStop';
 import Cues from './cues';
+import './play';
 import './summary';
 
 const PLUGIN_ID = 'how.joi.classic';

@@ -1,11 +1,11 @@
-import { definePlugin } from '../../engine/plugins/Plugins';
-import { Composer } from '../../engine/Composer';
-import { typedPath } from '../../engine/Lens';
-import { Pipe } from '../../engine/State';
-import { Sequence } from '../Sequence';
-import Phase, { GamePhase } from '../phase';
-import Pace from './pace';
-import { IntensityState } from './intensity';
+import { definePlugin } from '../../../engine/plugins/Plugins';
+import { Composer } from '../../../engine/Composer';
+import { typedPath } from '../../../engine/Lens';
+import { Pipe } from '../../../engine/State';
+import { Sequence } from '../../Sequence';
+import Phase, { GamePhase } from '../../phase';
+import Pace from '../pace';
+import { IntensityState } from '../intensity';
 
 const PLUGIN_ID = 'how.joi.classic.emergency_stop';
 

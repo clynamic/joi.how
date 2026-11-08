@@ -1,9 +1,9 @@
-import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
-import { GameFrame, Pipe } from '../../engine/State';
-import { Composer } from '../../engine';
-import { Events } from '../../engine/pipes/Events';
-import Assets, { AssetKey, AssetSize } from '../assets';
-import Settings from '../settings';
+import { definePlugin, pluginPaths } from '../../../engine/plugins/Plugins';
+import { GameFrame, Pipe } from '../../../engine/State';
+import { Composer } from '../../../engine';
+import { Events } from '../../../engine/pipes/Events';
+import Assets, { AssetKey, AssetSize } from '../../assets';
+import Settings from '../../settings';
 
 const PLUGIN_ID = 'how.joi.classic.image';
 
@@ -124,7 +124,7 @@ const Image = definePlugin({
   },
 });
 
-declare module '../../engine/sdk' {
+declare module '../../../engine/sdk' {
   interface PluginSDK {
     Image: typeof Image;
   }

@@ -1,14 +1,14 @@
-import { definePlugin, pluginPaths } from '../engine/plugins/Plugins';
-import { Pipe } from '../engine/State';
-import { Composer } from '../engine/Composer';
-import { Events, GameEvent } from '../engine/pipes/Events';
+import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
+import { Pipe } from '../../engine/State';
+import { Composer } from '../../engine/Composer';
+import { Events, GameEvent } from '../../engine/pipes/Events';
 import {
   ENGINE_TIMELINE,
   ScheduledEvent,
   Scheduler,
-} from '../engine/pipes/Scheduler';
-import { sdk } from '../engine/sdk';
-import Saves from './saves';
+} from '../../engine/pipes/Scheduler';
+import { sdk } from '../../engine/sdk';
+import Saves from '../saves';
 
 export interface GameMessagePrompt {
   title: string;
@@ -140,7 +140,7 @@ const Messages = definePlugin({
   },
 });
 
-declare module '../engine/sdk' {
+declare module '../../engine/sdk' {
   interface PluginSDK {
     Messages: typeof Messages;
   }

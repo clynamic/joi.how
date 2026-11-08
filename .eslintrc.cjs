@@ -1,5 +1,6 @@
 const layers = [
   { type: 'engine', pattern: 'src/engine' },
+  { type: 'elements', pattern: 'src/elements' },
   { type: 'game', pattern: 'src/game' },
   { type: 'view', pattern: ['src/view', 'src/env'] },
 ];
@@ -48,8 +49,8 @@ module.exports = {
           {
             default: 'disallow',
             policies: [
-              mayImport('game', ['engine']),
-              mayImport('view', ['view', 'game', 'engine']),
+              mayImport('game', ['engine', 'elements']),
+              mayImport('view', ['view', 'game', 'engine', 'elements']),
             ],
           },
         ],
