@@ -21,6 +21,15 @@ export const legacySettings: LegacyFields = {
     body: 'how.joi.player',
   },
   home: { ageCheckConfirm: 'how.joi.home' },
+  e621: {
+    search: 'how.joi.e621',
+    limit: 'how.joi.e621',
+    order: 'how.joi.e621',
+    minScore: 'how.joi.e621',
+    credentials: 'how.joi.e621',
+    blacklist: 'how.joi.e621',
+    enableBlacklist: 'how.joi.e621',
+  },
 };
 
 export const legacyPresets: LegacyFields = {

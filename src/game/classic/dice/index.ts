@@ -28,7 +28,6 @@ import { risingPaceModule } from './risingPace';
 import { randomGripModule } from './randomGrip';
 import { cleanUpModule } from './cleanUp';
 import { climaxModule } from './climax';
-import './result';
 
 type Getter = Composer<GameFrame>['get'];
 

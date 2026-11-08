@@ -5,15 +5,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './view/App.tsx';
 import './index.css';
-import { E621Provider } from './view/e621';
 import { registerServiceWorker } from './view/serviceWorker.ts';
 
 registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <E621Provider>
-      <App />
-    </E621Provider>
+    <App />
   </React.StrictMode>
 );

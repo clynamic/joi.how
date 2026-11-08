@@ -18,8 +18,17 @@ import Dealer from './dice';
 import Warmup from './warmup';
 import EmergencyStop from './emergencyStop';
 import Cues from './cues';
+import './dice/result';
+import './dice/settings';
+import './dice/climaxSettings';
+import './hypno/settings';
 import './play';
 import './summary';
+import './setup/duration';
+import './setup/board';
+import './images/gallery';
+import './setup/pace';
+import './setup/sources';
 
 const PLUGIN_ID = 'how.joi.classic';
 

@@ -23,6 +23,7 @@ import Settings from './settings';
 import Presets from './presets';
 import Home from './home';
 import Player from './player';
+import './player/settings';
 import Assets from './assets';
 import Local from './local';
 import E621 from './e621';
@@ -34,6 +35,8 @@ import { Scheduler } from '../engine/pipes/Scheduler';
 import { Perf } from '../engine/pipes/Perf';
 import { Errors } from '../engine/pipes/Errors';
 import { Impulses } from '../engine/Impulses';
+import './installer/settings';
+import './toy/settings';
 
 export const gamePipes = (impulses: Impulses, plugins: Pipe[]): Pipe[] => [
   Effects.pipe,

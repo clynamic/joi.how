@@ -3,6 +3,7 @@ import { Requests } from '../../engine/pipes/Requests';
 import { ImageItem, ImageType } from '../assets';
 import { E621Credentials, E621Service, E621SortOrder } from './client';
 import Assets, { AssetKind, AssetRecord, AssetSize } from '../assets';
+import Settings from '../settings';
 
 const PLUGIN_ID = 'how.joi.e621';
 
@@ -19,6 +20,16 @@ export type E621SearchPayload = {
 };
 
 export type E621Item = { id: string; record: AssetRecord };
+
+export const e621Keys = Settings.keys(PLUGIN_ID, {
+  search: '',
+  limit: 75,
+  order: E621SortOrder.Random as E621SortOrder,
+  minScore: -1,
+  credentials: null as E621Credentials | null,
+  blacklist: [] as string[],
+  enableBlacklist: false,
+});
 
 const source = Assets.source(SOURCE);
 

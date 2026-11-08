@@ -1,17 +1,16 @@
+import { createElement } from 'react';
 import styled from 'styled-components';
-import {
-  ClimaxSettings,
-  DurationSettings,
-  EventSettings,
-  HypnoSettings,
-  PaceSettings,
-  PlayerSettings,
-  PluginSettings,
-  ServiceSettings,
-  ImageSettings,
-  BoardSettings,
-  ToyListSettings,
-} from './components';
+import { PLAYER_SETTINGS_TAG } from '../../game/player/settings';
+import { DICE_SETTINGS_TAG } from '../../game/classic/dice/settings';
+import { CLIMAX_SETTINGS_TAG } from '../../game/classic/dice/climaxSettings';
+import { HYPNO_SETTINGS_TAG } from '../../game/classic/hypno/settings';
+import { DURATION_SETTINGS_TAG } from '../../game/classic/setup/duration';
+import { BOARD_SETTINGS_TAG } from '../../game/classic/setup/board';
+import { PACE_SETTINGS_TAG } from '../../game/classic/setup/pace';
+import { SOURCES_TAG } from '../../game/classic/setup/sources';
+import { GALLERY_TAG } from '../../game/classic/images/gallery';
+import { TOY_SETTINGS_TAG } from '../../game/toy/settings';
+import { INSTALLER_SETTINGS_TAG } from '../../game/installer/settings';
 import { ContentSection } from '../common';
 
 const StyledSettingsSection = styled(ContentSection)`
@@ -27,17 +26,17 @@ const StyledSettingsSection = styled(ContentSection)`
 export const SettingsSection = () => {
   return (
     <StyledSettingsSection>
-      <PaceSettings />
-      <DurationSettings />
-      <PlayerSettings />
-      <EventSettings />
-      <HypnoSettings />
-      <ClimaxSettings />
-      <BoardSettings />
-      <ServiceSettings />
-      <ImageSettings />
-      <ToyListSettings />
-      <PluginSettings />
+      {createElement(PACE_SETTINGS_TAG)}
+      {createElement(DURATION_SETTINGS_TAG)}
+      {createElement(PLAYER_SETTINGS_TAG)}
+      {createElement(DICE_SETTINGS_TAG)}
+      {createElement(HYPNO_SETTINGS_TAG)}
+      {createElement(CLIMAX_SETTINGS_TAG)}
+      {createElement(BOARD_SETTINGS_TAG)}
+      {createElement(SOURCES_TAG)}
+      {createElement(GALLERY_TAG)}
+      {createElement(TOY_SETTINGS_TAG)}
+      {createElement(INSTALLER_SETTINGS_TAG)}
     </StyledSettingsSection>
   );
 };
