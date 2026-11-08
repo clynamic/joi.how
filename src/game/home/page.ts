@@ -11,12 +11,12 @@ import { marked } from 'marked';
 import { version } from '../../../package.json';
 import '../../elements/JoiDivider';
 import '../../elements/JoiSection';
-import { native } from '../../elements/native';
 import { Frames } from '../../engine/Frames';
 import { Document } from '../../engine/plugins/Documents';
 import { sdk } from '../../engine/sdk';
 import Scene, { SceneState } from '../scene';
 import Home from './index';
+import { base } from '../../elements/base';
 
 export const HOME_TAG = 'how-joi-home';
 
@@ -47,7 +47,7 @@ const links = [
 @customElement(HOME_TAG)
 export class HomeElement extends LitElement {
   static styles = [
-    native,
+    ...base,
     css`
       :host {
         display: flex;
@@ -125,10 +125,6 @@ export class HomeElement extends LitElement {
         display: flex;
         align-items: center;
         gap: var(--wa-space-xs);
-      }
-
-      .version wa-icon {
-        font-size: var(--wa-font-size-l);
       }
 
       .notes::part(header) {
@@ -222,9 +218,11 @@ export class HomeElement extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    if (this.changelog !== null) return;
     fetch('/CHANGELOG.md')
       .then(response => response.text())
-      .then(async text => (this.changelog = await marked(text)));
+      .then(async text => (this.changelog = await marked(text)))
+      .catch(() => (this.changelog = '<p>Release notes are unavailable.</p>'));
   }
 
   private confirmAge() {
@@ -238,10 +236,7 @@ export class HomeElement extends LitElement {
     return html`
       <joi-section class="title">
         <img src="/logo.svg" alt="JOI.how" />
-        <h1>
-          <abbr title="Jack Off Instructions">JOI</abbr>
-          <sup>.how</sup>
-        </h1>
+        <h1><abbr title="Jack Off Instructions">JOI</abbr><sup>.how</sup></h1>
       </joi-section>
       ${ready
         ? html`
@@ -249,7 +244,7 @@ export class HomeElement extends LitElement {
               class="age"
               label="Age Confirmation"
               .open=${!ageCheckConfirm}
-              @wa-hide=${this.confirmAge}
+              @wa-hide=${(e: Event) => ageCheckConfirm || e.preventDefault()}
             >
               <p>
                 This app is meant for adults only. By clicking "I am an adult",
@@ -308,6 +303,7 @@ export class HomeElement extends LitElement {
                       <wa-icon
                         name=${link.icon}
                         family=${link.family ?? nothing}
+                        style="font-size: var(--wa-font-size-l)"
                       ></wa-icon>
                     </wa-button>
                   `

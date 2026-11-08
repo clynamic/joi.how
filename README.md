@@ -29,7 +29,7 @@ Head over to [joi.how](https://joi.how) and try it out!
 
 ### Build
 
-The app is made with react and nodejs and fully open source.  
+The app is made with lit and nodejs and fully open source.  
 To locally run it:
 
 1. install [node 20](https://nodejs.org/en/blog/release/v20.12.0/)

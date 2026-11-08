@@ -4,130 +4,135 @@ import { customElement } from 'lit/decorators.js';
 import { Frames } from '../../engine/Frames';
 import { sdk } from '../../engine/sdk';
 import Rand, { RandState } from '../rand';
-import Scene from '../scene';
 import Clock, { ClockState } from './clock';
 import './dice/result';
 import './timeline';
+import Scene from '../scene';
+import { base } from '../../elements/base';
 
 export const SUMMARY_TAG = 'how-joi-classic-summary';
 
 @customElement(SUMMARY_TAG)
 export class ClassicSummaryElement extends LitElement {
-  static styles = css`
-    @keyframes fade-in-up {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
+  static styles = [
+    ...base,
+    css`
+      @keyframes fade-in-up {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
-      to {
-        opacity: 1;
-        transform: translateY(0);
+
+      :host {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--wa-space-l);
+        min-height: 100%;
+        width: 100%;
+        padding: 16px;
+        box-sizing: border-box;
       }
-    }
 
-    :host {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: var(--wa-space-l);
-      min-height: 100%;
-      width: 100%;
-      padding: 16px;
-      box-sizing: border-box;
-    }
+      :host > * {
+        max-width: 480px;
+        width: 100%;
+        animation: fade-in-up 500ms cubic-bezier(0.23, 1, 0.32, 1) both;
+      }
 
-    :host > * {
-      max-width: 480px;
-      width: 100%;
-      animation: fade-in-up 500ms cubic-bezier(0.23, 1, 0.32, 1) both;
-    }
+      :host > :nth-child(1) {
+        animation-delay: 100ms;
+      }
 
-    :host > :nth-child(1) {
-      animation-delay: 100ms;
-    }
+      :host > :nth-child(2) {
+        animation-delay: 250ms;
+      }
 
-    :host > :nth-child(2) {
-      animation-delay: 250ms;
-    }
+      :host > :nth-child(3) {
+        animation-delay: 400ms;
+      }
 
-    :host > :nth-child(3) {
-      animation-delay: 400ms;
-    }
+      h1 {
+        margin: 0;
+        text-align: center;
+        font-size: clamp(2rem, 8vw, 3.5rem);
+        font-weight: bold;
+        line-height: 1;
+      }
 
-    h1 {
-      margin: 0;
-      text-align: center;
-      font-size: clamp(2rem, 8vw, 3.5rem);
-      font-weight: bold;
-      line-height: 1;
-    }
+      .card {
+        display: flex;
+        margin-bottom: 14px;
+        flex-direction: column;
+        gap: var(--wa-space-m);
+        padding: 20px;
+        background: var(--card-background);
+        color: var(--card-color);
+        border-radius: var(--border-radius);
+        font-size: 0.9rem;
+        line-height: 25px;
+        box-sizing: border-box;
+      }
 
-    .card {
-      display: flex;
-      flex-direction: column;
-      gap: var(--wa-space-m);
-      padding: 20px;
-      background: var(--card-background);
-      color: var(--card-color);
-      border-radius: var(--border-radius);
-      font-size: 0.9rem;
-      line-height: 25px;
-      box-sizing: border-box;
-    }
+      hr {
+        border: none;
+        border-top: 1px solid currentColor;
+        width: 100%;
+        margin: 0;
+      }
 
-    hr {
-      border: none;
-      border-top: 1px solid currentColor;
-      width: 100%;
-      margin: 0;
-    }
+      .stats {
+        display: flex;
+        justify-content: space-around;
+      }
 
-    .stats {
-      display: flex;
-      justify-content: space-around;
-    }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
 
-    .stat {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
+      .value {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: var(--text-color);
+      }
 
-    .value {
-      font-size: 1.25rem;
-      font-weight: bold;
-      color: var(--text-color);
-    }
+      .seed {
+        font-family: monospace;
+        font-size: 1rem;
+      }
 
-    .seed {
-      font-family: monospace;
-      font-size: 1rem;
-    }
+      .label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.4;
+      }
 
-    .label {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      opacity: 0.4;
-    }
+      .actions {
+        display: flex;
+        justify-content: center;
+      }
 
-    .actions {
-      display: flex;
-      justify-content: center;
-    }
+      wa-button::part(base) {
+        height: fit-content;
+        padding: 12px 40px;
+      }
 
-    wa-button::part(base) {
-      height: fit-content;
-      padding: 12px 40px;
-    }
-
-    wa-button::part(label) {
-      font-size: 1.25rem;
-      text-transform: uppercase;
-    }
-  `;
+      wa-button::part(label) {
+        font-size: 1.25rem;
+        text-transform: uppercase;
+      }
+    `,
+  ];
 
   private clock = Frames.watch<ClockState>(this, Clock.paths);
   private rand = Frames.watch<RandState>(this, Rand.paths);
