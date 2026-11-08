@@ -94,7 +94,6 @@ export class ClassicBackdropElement extends LitElement {
         ${key
           ? html`<joi-image
               .thumb=${urls.thumbnail ?? ''}
-              .preview=${urls.preview ?? ''}
               kind=${kind}
               object-fit="cover"
             ></joi-image>`
