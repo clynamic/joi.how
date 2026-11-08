@@ -105,6 +105,7 @@ export class HomeElement extends LitElement {
 
       .age .actions {
         display: flex;
+        flex-wrap: wrap;
         justify-content: flex-end;
         gap: var(--wa-space-s);
       }
