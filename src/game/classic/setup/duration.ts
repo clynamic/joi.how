@@ -44,8 +44,9 @@ export class DurationSettingsElement extends LitElement {
         <joi-description>Determine game length</joi-description>
         <joi-info>Warmup period has no beats</joi-info>
         <joi-row>
-          <joi-label>Warmup duration</joi-label>
+          <label for="warmup-duration">Warmup duration</label>
           <wa-slider
+            id="warmup-duration"
             min="0"
             max="300"
             step="60"
@@ -67,8 +68,9 @@ export class DurationSettingsElement extends LitElement {
         <joi-divider></joi-divider>
         <joi-info>A climax event will trigger roughly after this time</joi-info>
         <joi-row>
-          <joi-label>Session duration</joi-label>
+          <label for="session-duration">Session duration</label>
           <wa-slider
+            id="session-duration"
             min="180"
             max="1800"
             step="60"

@@ -2,15 +2,17 @@ import '@awesome.me/webawesome/dist/components/button/button.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/progress-bar/progress-bar.js';
 import { LitElement, html, css, nothing } from 'lit';
-import { query, state } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { chunk } from 'lodash';
 import '../../elements/JoiDivider';
 import '../../elements/JoiText';
+import { Composer } from '../../engine/Composer';
 import { sdk } from '../../engine/sdk';
 import ClassicImages from '../classic/images';
 import { discoverImageFiles, imageTypeFromExtension } from './files';
 import { LocalImageRequest } from './images';
-import Local from './index';
+import Local, { LocalState } from './index';
+import { Frames } from '../../engine/Frames';
 import { base } from '../../elements/base';
 import { defineElement } from '../../engine/defineElement';
 
@@ -45,23 +47,19 @@ export class LocalImportElement extends LitElement {
 
   @query('input') private accessor picker!: HTMLInputElement;
 
-  @state() private accessor loading = false;
-  @state() private accessor total: number | null = null;
-  @state() private accessor progress = 0;
+  private local = Frames.watch<LocalState>(this, Local.paths);
 
   private async select(event: Event) {
     const fileList = (event.currentTarget as HTMLInputElement).files;
     if (!fileList) return;
+    let done = 0;
     try {
-      this.loading = true;
-      this.total = 0;
-      this.progress = 0;
+      sdk.inject(Local.importing({ total: 0, done }));
       const files = await discoverImageFiles(fileList);
-      this.total = files.length;
+      sdk.inject(Local.importing({ total: files.length, done }));
       for (const part of chunk(files, CHUNK)) {
         const requests = part.map<LocalImageRequest>(file => {
           const extension = file.name.split('.').pop()?.toLowerCase();
-          this.progress += 1;
           return {
             blob: file,
             type: imageTypeFromExtension(extension!),
@@ -69,23 +67,26 @@ export class LocalImportElement extends LitElement {
           };
         });
         const items = await Local.import(requests);
+        done += part.length;
         sdk.inject(
-          ClassicImages.add(
-            items.map(item => ({ source: Local.source, ...item }))
+          Composer.pipe(
+            ClassicImages.add(
+              items.map(item => ({ source: Local.source, ...item }))
+            ),
+            Local.importing({ total: files.length, done })
           )
         );
       }
     } catch (error) {
       console.error(error);
     } finally {
-      this.loading = false;
-      this.total = null;
-      this.progress = 0;
+      sdk.inject(Local.importing(null));
       this.picker.value = '';
     }
   }
 
   render() {
+    const importing = this.local.value?.importing ?? null;
     return html`
       <joi-description>Add images from your device</joi-description>
       <joi-space size="medium"></joi-space>
@@ -95,17 +96,21 @@ export class LocalImportElement extends LitElement {
         accept="image/*,video/*"
         @change=${this.select}
       />
-      <wa-button ?disabled=${this.loading} @click=${() => this.picker.click()}>
+      <wa-button ?disabled=${!!importing} @click=${() => this.picker.click()}>
         <span>Select Files</span>
         <wa-icon slot="end" name="upload"></wa-icon>
       </wa-button>
       <joi-space size="small"></joi-space>
-      ${this.total !== null
+      ${importing
         ? html`
             <div class="progress">
-              <span>${this.progress} / ${this.total} files processed</span>
+              <span
+                >${importing.done} / ${importing.total} files processed</span
+              >
               <wa-progress-bar
-                value=${this.total ? (this.progress / this.total) * 100 : 0}
+                value=${importing.total
+                  ? (importing.done / importing.total) * 100
+                  : 0}
               ></wa-progress-bar>
             </div>
           `

@@ -58,8 +58,9 @@ export class ClimaxSettingsElement extends LitElement {
         <joi-description>At the game's climax...</joi-description>
         <joi-info>${climaxText(climaxChance)}</joi-info>
         <joi-row>
-          <joi-label>Orgasm</joi-label>
+          <label for="orgasm">Orgasm</label>
           <wa-slider
+            id="orgasm"
             min="0"
             max="100"
             .value=${climaxChance}
@@ -71,8 +72,9 @@ export class ClimaxSettingsElement extends LitElement {
         <joi-description>Given an orgasm occurs...</joi-description>
         <joi-info>${ruinText(ruinChance)}</joi-info>
         <joi-row>
-          <joi-label>Ruin</joi-label>
+          <label for="ruin">Ruin</label>
           <wa-slider
+            id="ruin"
             min="0"
             max="100"
             .value=${ruinChance}

@@ -138,8 +138,9 @@ export class ToySettingsElement extends LitElement {
           <div>
             <joi-space size="medium"></joi-space>
             <div class="server">
-              <joi-label>Server</joi-label>
+              <label for="server">Server</label>
               <wa-input
+                id="server"
                 placeholder="Host"
                 .value=${this.host}
                 ?disabled=${connecting}

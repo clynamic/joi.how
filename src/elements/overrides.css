@@ -1,5 +1,13 @@
 /* #region utility classes */
 
+label {
+  display: inline-block;
+  color: #b9bad6;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  padding: 0 4px;
+}
+
 .joi-wide {
   width: 100%;
 }

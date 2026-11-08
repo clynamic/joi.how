@@ -48,24 +48,32 @@ export class ClassicHypnoElement extends LitElement {
   private intensity = Frames.watch<IntensityState>(this, Intensity.paths);
   private player = Frames.watch<Document>(this, playerKeys.path);
 
-  render() {
-    if (!this.hypno.value) return nothing;
+  private current() {
+    if (!this.hypno.value) return null;
     const { hypno } = hypnoKeys.from(this.keys.value);
-    if (hypno === GameHypnoType.off) return nothing;
+    if (hypno === GameHypnoType.off) return null;
     const phrases = HypnoPhrases[hypno];
-    if (phrases.length <= 0) return nothing;
+    if (phrases.length <= 0) return null;
     const index = this.hypno.value.currentPhrase ?? 0;
     const { gender, body } = playerKeys.from(this.player.value);
-    const phrase = translateWith(
+    const text = translateWith(
       { gender, body, hypno },
       phrases[index % phrases.length]
     );
-    if (!phrase) return nothing;
+    if (!text) return null;
     const intensity = this.intensity.value?.intensity ?? 0;
-    const delay = 3000 - intensity * 100 * 29;
+    const fade = (3000 - intensity * 100 * 29) * 0.5;
+    return { key: `${text}-${index}`, text, fade };
+  }
+
+  render() {
+    const current = this.current();
+    if (!current) return nothing;
     return keyed(
-      `${phrase}-${index}`,
-      html`<div class="phrase" style="--fade: ${delay * 0.5}ms">${phrase}</div>`
+      current.key,
+      html`<div class="phrase" style="--fade: ${current.fade}ms">
+        ${current.text}
+      </div>`
     );
   }
 }

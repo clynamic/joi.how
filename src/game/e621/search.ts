@@ -101,8 +101,9 @@ export class E621CredentialsElement extends LitElement {
       <div class="grid">
         <joi-space size="small"></joi-space>
         <joi-row>
-          <joi-label>Username</joi-label>
+          <label for="username">Username</label>
           <wa-input
+            id="username"
             .value=${this.username}
             placeholder="e.g. eggplant_enjoyer"
             autocomplete="username"
@@ -113,8 +114,9 @@ export class E621CredentialsElement extends LitElement {
         </joi-row>
         <joi-space size="small"></joi-space>
         <joi-row>
-          <joi-label>API Key</joi-label>
+          <label for="api-key">API Key</label>
           <wa-input
+            id="api-key"
             .value=${this.apiKey}
             placeholder="pws gimmi ur keys :3"
             type="password"
@@ -265,8 +267,9 @@ export class E621SearchElement extends LitElement {
       <div class="grid">
         <joi-description>Add images from e621</joi-description>
         <joi-row>
-          <joi-label>Tags</joi-label>
+          <label for="tags">Tags</label>
           <wa-input
+            id="tags"
             .value=${search}
             placeholder="e.g. dragon huge_penis"
             ?disabled=${loading}
@@ -277,8 +280,9 @@ export class E621SearchElement extends LitElement {
         </joi-row>
         <joi-space size="medium"></joi-space>
         <joi-row>
-          <joi-label>Order</joi-label>
+          <label for="order">Order</label>
           <wa-select
+            id="order"
             value=${order}
             ?disabled=${loading}
             @input=${(e: Event) =>
@@ -297,8 +301,9 @@ export class E621SearchElement extends LitElement {
         </joi-row>
         <joi-space size="medium"></joi-space>
         <joi-row>
-          <joi-label>Count</joi-label>
+          <label for="count">Count</label>
           <wa-slider
+            id="count"
             min="1"
             max="200"
             step="1"
@@ -310,8 +315,9 @@ export class E621SearchElement extends LitElement {
         </joi-row>
         <joi-space size="medium"></joi-space>
         <joi-row>
-          <joi-label>Score</joi-label>
+          <label for="score">Score</label>
           <wa-slider
+            id="score"
             min="-1"
             max="50"
             step="1"

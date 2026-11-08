@@ -36,29 +36,9 @@ export class JoiInfoElement extends LitElement {
   }
 }
 
-@customElement('joi-label')
-export class JoiLabelElement extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-      color: #b9bad6;
-      font-size: 0.9rem;
-      font-weight: var(--wa-form-control-label-font-weight);
-      line-height: var(--wa-form-control-label-line-height);
-      white-space: nowrap;
-      padding: 0 4px;
-    }
-  `;
-
-  render() {
-    return html`<slot></slot>`;
-  }
-}
-
 declare global {
   interface HTMLElementTagNameMap {
     'joi-description': JoiDescriptionElement;
     'joi-info': JoiInfoElement;
-    'joi-label': JoiLabelElement;
   }
 }

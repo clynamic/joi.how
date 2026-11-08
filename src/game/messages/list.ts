@@ -1,5 +1,6 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { state } from 'lit/decorators.js';
+import { keyed } from 'lit/directives/keyed.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { Frames } from '../../engine/Frames';
 import { Events } from '../../engine/pipes/Events';
@@ -129,9 +130,15 @@ export class MessagesElement extends LitElement {
       message => (leaving.has(message) ? `leaving:${message.id}` : message.id),
       message => html`
         <div class="message ${leaving.has(message) ? 'leaving' : ''}">
-          <div class="title">${this.text(message.title)}</div>
+          ${keyed(
+            message.title,
+            html`<div class="title">${this.text(message.title)}</div>`
+          )}
           ${message.description
-            ? html`<p class="description">${message.description}</p>`
+            ? keyed(
+                message.description,
+                html`<p class="description">${message.description}</p>`
+              )
             : nothing}
           ${message.prompts?.map(
             prompt => html`

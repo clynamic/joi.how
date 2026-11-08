@@ -1,4 +1,5 @@
-import { definePlugin } from '../../engine/plugins/Plugins';
+import { definePlugin, pluginPaths } from '../../engine/plugins/Plugins';
+import { Pipe } from '../../engine/State';
 import { Composer } from '../../engine/Composer';
 import { GameFrame } from '../../engine/State';
 import { Requests } from '../../engine/pipes/Requests';
@@ -12,6 +13,12 @@ const PLUGIN_ID = 'how.joi.local';
 export const SOURCE = PLUGIN_ID;
 
 export const localImageService = new LocalImageService(bytes.for(PLUGIN_ID));
+
+export type LocalState = {
+  importing: { total: number; done: number } | null;
+};
+
+const paths = pluginPaths<LocalState>(PLUGIN_ID);
 
 const source = Assets.source(SOURCE);
 
@@ -50,7 +57,14 @@ const Local = definePlugin({
     return stored.map(image => ({ id: image.id, record: localRecord(image) }));
   },
 
-  activate: check.start(),
+  importing(progress: LocalState['importing']): Pipe {
+    return Composer.set(paths.importing, progress);
+  },
+
+  activate: Composer.pipe(
+    Composer.set(paths, { importing: null }),
+    check.start()
+  ),
 
   update: check.onDone(ids =>
     Composer.do<GameFrame>(({ get, pipe }) => {
@@ -72,6 +86,12 @@ const Local = definePlugin({
     source.free.perform(({ id }) => localImageService.free(id)),
     check.perform(() => localImageService.listIds()),
   ],
+
+  deactivate: Composer.set(paths, undefined),
+
+  get paths() {
+    return paths;
+  },
 });
 
 declare module '../../engine/sdk' {

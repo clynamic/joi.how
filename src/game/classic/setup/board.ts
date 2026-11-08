@@ -52,8 +52,9 @@ export class BoardSettingsElement extends LitElement {
         </joi-toggle-tile>
         <joi-space size="small"></joi-space>
         <joi-row>
-          <joi-label>Image Duration</joi-label>
+          <label for="image-duration">Image Duration</label>
           <wa-slider
+            id="image-duration"
             min="10"
             max="60"
             step="1"

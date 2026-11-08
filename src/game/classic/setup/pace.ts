@@ -112,8 +112,9 @@ export class PaceSettingsElement extends LitElement {
         <joi-description>Choose beat speed</joi-description>
         <joi-info>The game will run in beats per second (b/s)</joi-info>
         <joi-row>
-          <joi-label>Minimum</joi-label>
+          <label for="minimum">Minimum</label>
           <wa-slider
+            id="minimum"
             min=${MIN_PACE}
             max=${MAX_PACE}
             step="0.05"
@@ -123,8 +124,9 @@ export class PaceSettingsElement extends LitElement {
           <joi-measure .value=${minPace} chars="4" unit="b/s"></joi-measure>
         </joi-row>
         <joi-row>
-          <joi-label>Maximum</joi-label>
+          <label for="maximum">Maximum</label>
           <wa-slider
+            id="maximum"
             min=${MIN_PACE}
             max=${MAX_PACE}
             step="0.05"
@@ -138,8 +140,9 @@ export class PaceSettingsElement extends LitElement {
           >The random pace event will pick a pace from this curve</joi-info
         >
         <joi-row>
-          <joi-label>Steepness</joi-label>
+          <label for="steepness">Steepness</label>
           <wa-slider
+            id="steepness"
             min="0"
             max="1"
             step="0.05"
@@ -153,8 +156,9 @@ export class PaceSettingsElement extends LitElement {
           ></joi-measure>
         </joi-row>
         <joi-row>
-          <joi-label>Timeshift</joi-label>
+          <label for="timeshift">Timeshift</label>
           <wa-slider
+            id="timeshift"
             min="0"
             max="1"
             step="0.05"
@@ -169,13 +173,13 @@ export class PaceSettingsElement extends LitElement {
         </joi-row>
         <joi-space size="medium"></joi-space>
         <joi-row>
-          <joi-label class="start">start</joi-label>
+          <label class="start">start</label>
           <div class="chart">
             <svg viewBox="0 0 100 100" preserveAspectRatio="none">
               ${svg`<path class="area" d=${this.curve(steepness, timeshift).area} /><path class="curve" d=${this.curve(steepness, timeshift).curve} />`}
             </svg>
           </div>
-          <joi-label class="end">end</joi-label>
+          <label class="end">end</label>
         </joi-row>
       </joi-fields>
     `;
