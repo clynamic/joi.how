@@ -128,6 +128,19 @@ export class GalleryTileElement extends LitElement {
             object-fit="cover"
             alt="thumbnail #${image.key}"
           ></joi-image>
+          <div
+            class=${classMap({
+              check: true,
+              selecting: this.selecting,
+              selected: this.selected,
+            })}
+            @click=${(e: Event) => {
+              e.stopPropagation();
+              this.dispatchEvent(new Event('toggle'));
+            }}
+          >
+            <wa-icon name="check"></wa-icon>
+          </div>
         </div>
         ${this.hovered
           ? html`<div class="preview">
@@ -143,16 +156,6 @@ export class GalleryTileElement extends LitElement {
             </div>`
           : nothing}
       </wa-popup>
-      <div
-        class=${classMap({
-          check: true,
-          selecting: this.selecting,
-          selected: this.selected,
-        })}
-        @click=${() => this.dispatchEvent(new Event('toggle'))}
-      >
-        <wa-icon name="check"></wa-icon>
-      </div>
     `;
   }
 }
