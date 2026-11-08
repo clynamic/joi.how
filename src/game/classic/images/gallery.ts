@@ -254,12 +254,11 @@ export class ClassicGalleryElement extends LitElement {
       : [...this.selected, key];
   }
 
-  private browse(image: GalleryImage) {
+  private sourceOf(image: GalleryImage) {
     const source = image.record.meta?.source as string | undefined;
-    const url = source?.startsWith('local://')
+    return source?.startsWith('local://')
       ? (image.urls.full ?? '')
       : (source ?? image.urls.full ?? '');
-    if (url) window.open(url, '_blank');
   }
 
   render() {
@@ -356,7 +355,11 @@ export class ClassicGalleryElement extends LitElement {
                   alt="file #${clicked.key}"
                 ></joi-image>
                 <wa-card appearance="filled">
-                  <joi-toggle-tile @change=${() => this.browse(clicked)}>
+                  <joi-toggle-tile
+                    href=${this.sourceOf(clicked)}
+                    target="_blank"
+                    ?disabled=${!this.sourceOf(clicked)}
+                  >
                     <h6 class="subtitle">Browse</h6>
                     <p class="caption">Open source in new tab</p>
                     <wa-icon

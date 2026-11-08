@@ -1,6 +1,6 @@
 import '@awesome.me/webawesome/dist/components/card/card.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 export type JoiToggleTileType = 'none' | 'check' | 'radio';
@@ -17,6 +17,7 @@ export class JoiToggleTileElement extends LitElement {
 
       .action {
         display: block;
+        box-sizing: border-box;
         width: 100%;
         cursor: pointer;
         text-align: left;
@@ -35,6 +36,15 @@ export class JoiToggleTileElement extends LitElement {
         transition:
           opacity var(--wa-transition-normal),
           background var(--wa-transition-normal);
+      }
+
+      a.action {
+        color: ButtonText;
+        font-family: sans-serif;
+        font-size: 13.3333px;
+        line-height: normal;
+        font: -webkit-small-control;
+        text-decoration: none;
       }
 
       :host([value]) .action {
@@ -91,6 +101,12 @@ export class JoiToggleTileElement extends LitElement {
   @property({ type: Boolean, reflect: true })
   accessor disabled = false;
 
+  @property({ type: String })
+  accessor href = '';
+
+  @property({ type: String })
+  accessor target = '';
+
   private onClick = () => {
     if (this.disabled) return;
     if (this.type === 'check') this.value = !this.value;
@@ -125,12 +141,26 @@ export class JoiToggleTileElement extends LitElement {
   }
 
   render() {
+    const row = html`
+      <div class="row">
+        <div class="content"><slot></slot></div>
+        <div class="trailing">${this.renderTrailing()}</div>
+      </div>
+    `;
+    if (this.href && !this.disabled)
+      return html`
+        <a
+          class="action"
+          href=${this.href}
+          target=${this.target || nothing}
+          rel=${this.target === '_blank' ? 'noopener' : nothing}
+          @click=${this.onClick}
+          >${row}</a
+        >
+      `;
     return html`
       <button class="action" type="button" @click=${this.onClick}>
-        <div class="row">
-          <div class="content"><slot></slot></div>
-          <div class="trailing">${this.renderTrailing()}</div>
-        </div>
+        ${row}
       </button>
     `;
   }
