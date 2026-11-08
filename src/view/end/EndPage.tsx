@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { WaButton } from '@awesome.me/webawesome/dist/react';
 import { ContentSection } from '../common';
@@ -7,7 +8,7 @@ import Clock from '../../game/classic/clock';
 import Rand from '../../game/rand';
 import Scene from '../../game/scene';
 import { formatTime } from '../common/utils/time';
-import { ClimaxResult } from './ClimaxResult';
+import { RESULT_TAG } from '../../game/classic/dice/result';
 import { GameTimeline } from './GameTimeline';
 
 const fadeInUp = keyframes`
@@ -127,7 +128,7 @@ export const EndPage = () => {
     <StyledEndPage>
       <StyledTitle>Game Over</StyledTitle>
       <StyledCard>
-        <ClimaxResult />
+        {createElement(RESULT_TAG)}
         <StyledDivider />
         <StyledStatsRow>
           <StyledStat>

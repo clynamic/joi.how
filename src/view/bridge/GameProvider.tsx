@@ -6,6 +6,7 @@ import { Perf } from '../../engine/pipes/Perf';
 import { Piper } from '../../engine/Piper';
 import { Impulses } from '../../engine/Impulses';
 import { sdk } from '../../engine/sdk';
+import { Frames } from '../../engine/Frames';
 import { gamePipes } from '../../game';
 import { ModuleManager } from '../../engine/modules/ModuleManager';
 import Debug from '../../game/debug/overlay';
@@ -103,7 +104,9 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
       }
 
       if (ticked) {
-        setFrame(engineRef.current.getFrame());
+        const frame = engineRef.current.getFrame();
+        Frames.publish(frame);
+        setFrame(frame);
       }
 
       frameId = requestAnimationFrame(loop);
@@ -115,6 +118,7 @@ export function GameEngineProvider({ children, pipes = [] }: Props) {
       cancelAnimationFrame(frameId);
       sdk.inject = () => undefined;
       sdk.frame = () => null;
+      Frames.reset();
       engineRef.current = null;
       impulses.clear();
     };

@@ -1,4 +1,5 @@
 import { Composer } from './Composer';
+import { Frames } from './Frames';
 import { Effects } from './pipes/Effects';
 import { Events } from './pipes/Events';
 import { Requests } from './pipes/Requests';
@@ -31,6 +32,7 @@ export interface SDK extends PluginSDK {
   debug: boolean;
   Composer: typeof Composer;
   Effects: typeof Effects;
+  Frames: typeof Frames;
   Events: typeof Events;
   Requests: typeof Requests;
   Scheduler: typeof Scheduler;
@@ -97,6 +99,7 @@ export const sdk: SDK = Object.assign(registry, {
   debug: false,
   Composer,
   Effects,
+  Frames,
   Events,
   Requests,
   Scheduler,
