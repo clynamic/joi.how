@@ -15,7 +15,7 @@ export const SOURCE = PLUGIN_ID;
 export const localImageService = new LocalImageService(bytes.for(PLUGIN_ID));
 
 export type LocalState = {
-  importing: { total: number; done: number } | null;
+  importing: { total: number; done: number; error?: 'quota' | 'failed' } | null;
 };
 
 const paths = pluginPaths<LocalState>(PLUGIN_ID);
