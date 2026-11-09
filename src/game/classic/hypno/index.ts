@@ -37,7 +37,7 @@ export const HypnoPhrases: Record<GameHypnoType, string[]> = {
   off: [],
   joi: [
     '$part',
-    'stroke',
+    '$stroke',
     'precum',
     'horny',
     'need',
@@ -50,7 +50,6 @@ export const HypnoPhrases: Record<GameHypnoType, string[]> = {
     '$stroke',
     'jack off',
     'give in',
-    'obey',
     'pre',
     'must',
     'masturbate',
