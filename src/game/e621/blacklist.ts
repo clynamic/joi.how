@@ -132,21 +132,19 @@ export class Blacklist {
 
     const score_test = rangeComparator(
       entry.score_comparison,
-      post.score.total
+      post.stats.score.total
     );
-    const tags = Object.keys(post.tags)
-      .map(cat => post.tags[cat])
-      .flat();
+    const tags = [...post.tags];
     tags.push(
       `id:${post.id}`,
       `rating:${post.rating}`,
       `userid:${post.uploader_id}`,
       `user:!${post.uploader_id}`,
       // `user:${post.user}`,
-      `height:${post.file.height}`,
-      `width:${post.file.width}`
+      `height:${post.files.original.height}`,
+      `width:${post.files.original.width}`
     );
-    if (post.is_favorited) {
+    if (post.stats.is_favorited) {
       tags.push('fav:me');
     }
 

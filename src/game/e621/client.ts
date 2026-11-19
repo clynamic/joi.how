@@ -33,34 +33,37 @@ export const e621SortOrderTags: Record<E621SortOrder, string> = {
 
 export interface E621Post {
   id: number;
-  preview: {
-    url: string | null;
+  files: {
+    meta: {
+      ext: string;
+      has_sample: boolean;
+    };
+    original: {
+      url: string | null;
+      height: number;
+      width: number;
+    };
+    preview: {
+      jpg: string | null;
+    };
+    sample: {
+      jpg: string | null;
+    };
   };
-  sample: {
-    url: string | null;
-  };
-  file: {
-    url?: string;
-    ext: string;
-    height: number;
-    width: number;
-  };
-  tags: Record<string, string[]>;
-  score: {
-    total: number;
+  tags: string[];
+  stats: {
+    score: {
+      total: number;
+    };
+    is_favorited: boolean;
   };
   rating: 's' | 'q' | 'e';
   uploader_id: number;
-  is_favorited?: boolean;
 }
 
 export interface E621User {
   name: string;
   blacklisted_tags: string;
-}
-
-interface E621PostSearchResponse {
-  posts: E621Post[];
 }
 
 interface E621PostSearchRequest {
@@ -91,36 +94,36 @@ export class E621Service {
         minScore ? ` score:>=${minScore}` : '',
       ].join(' '),
     };
-    const response = await this.axiosInstance.get<E621PostSearchResponse>(
-      '/posts.json',
-      {
-        params: params,
-        auth: credentials && {
-          username: credentials.username,
-          password: credentials.apiKey,
-        },
-      }
-    );
+    const response = await this.axiosInstance.get<E621Post[]>('/posts.json', {
+      params: params,
+      auth: credentials && {
+        username: credentials.username,
+        password: credentials.apiKey,
+      },
+    });
 
     const blacklistEntries = Blacklist.entriesParse(props.blacklist || []);
 
     const isVideo = (ext: string) => ext === 'webm' || ext === 'mp4';
 
-    return response.data.posts
-      .filter(post => post.file.url) // deleted posts should not be included
-      .filter(post => post.file.ext !== 'swf') // Flash is not supported
+    return response.data
+      .filter(post => post.files.original.url) // deleted posts should not be included
+      .filter(post => post.files.meta.ext !== 'swf') // Flash is not supported
       .filter(post =>
         blacklistEntries.every(entry => !Blacklist.postMatch(post, entry))
       ) // Blacklisted posts should not be included
       .map(post => ({
-        thumbnail: post.preview.url ?? post.sample.url ?? post.file.url!,
+        thumbnail:
+          post.files.preview.jpg ??
+          post.files.sample.jpg ??
+          post.files.original.url!,
         preview:
-          post.sample.url ??
-          (isVideo(post.file.ext) ? post.preview.url : null) ??
-          post.file.url!,
-        full: post.file.url!,
+          (post.files.meta.has_sample ? post.files.sample.jpg : null) ??
+          (isVideo(post.files.meta.ext) ? post.files.preview.jpg : null) ??
+          post.files.original.url!,
+        full: post.files.original.url!,
         type: (() => {
-          switch (post.file.ext) {
+          switch (post.files.meta.ext) {
             case 'webm':
             case 'mp4':
               return ImageType.video;
